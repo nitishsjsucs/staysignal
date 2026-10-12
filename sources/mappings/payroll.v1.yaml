@@ -1,0 +1,6 @@
+# payroll@1: the original mapping. Unknown codes default to monthly, which is how an annual file slipped through.
+source: payroll
+version: 1
+codes:
+  M: { multiplier: 12, meaning: monthly amount }
+unknown_codes: monthly

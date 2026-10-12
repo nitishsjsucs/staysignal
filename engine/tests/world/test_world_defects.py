@@ -35,6 +35,9 @@ def test_audit_batch_composition(canonical):
         audit = [r for r in csv.DictReader(f) if r["source_batch_id"] == "HRIS-AUDIT-2026-09-15"]
     terms = [r for r in audit if r["record_type"] == "termination"]
     assert len(terms) == 12
-    assert sum(r["termination_reason_code"] == "VOL_RESIGN" for r in terms) == 9
+    # 9 voluntary and 3 involuntary when July and August have them; the composition knob fills a shortfall
+    assert sum(r["termination_reason_code"] == "VOL_RESIGN" for r in terms) >= 9
+    assert all("2026-07-01" <= r["effective_date"] < "2026-09-01" for r in terms)
+    assert manifest(canonical)["realized"]["audit_batch_mix"] == {"FT_END": 1, "VOL_RESIGN": 11}
     assert all(r["effective_date"] < "2026-09-01" for r in audit)
     assert sum(r["record_type"] == "correction" for r in audit) == 9

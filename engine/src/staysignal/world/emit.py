@@ -348,6 +348,15 @@ def build_files(world: World) -> tuple[dict[str, str], dict]:
         "hris_records": len(rows),
         "hris_future_records": len(future),
         "planted": {k: len(v) for k, v in sorted(planted.items())},
+        "audit_batch_mix": dict(
+            sorted(
+                Counter(
+                    r.termination_reason_code
+                    for r in world.records
+                    if r.source_batch_id == "HRIS-AUDIT-2026-09-15" and r.record_type == "termination"
+                ).items()
+            )
+        ),
         "teams_at_end": sum(1 for t in world.teams.values() if t.valid_to is None),
     }
     return files, {"realized": realized, "planted_ids": {k: sorted(v) for k, v in sorted(planted.items())}}

@@ -1,0 +1,28 @@
+# StaySignal data-quality check registry (SPEC 13.1). Format follows DataTrust's registry (MIT): id, name, category,
+# kind (generic | singular | engine), node, columns, severity (error | warn), sources, phase. Phase 1 checks run in
+# M1 and M2; phase 2 arrives in M5. Freshness is evaluated against the synthetic clock.
+checks:
+  - { id: F01, name: "HRIS extract newer than 36 hours", category: freshness, kind: engine, node: stg_hris__records, columns: [recorded_at], severity: error, sources: [hris], phase: 1 }
+  - { id: F02, name: "Payroll extract for the previous month present by business day 5", category: freshness, kind: engine, node: stg_payroll__lines, columns: [pay_period], severity: warn, sources: [payroll], phase: 2 }
+  - { id: F03, name: "ATS extract newer than 36 hours", category: freshness, kind: engine, node: stg_ats__requisitions, columns: [recorded_at], severity: warn, sources: [ats], phase: 2 }
+  - { id: U01, name: "HRIS records unique by content hash (new duplicates counted)", category: uniqueness, kind: engine, node: stg_hris__records, columns: [record_id], severity: warn, sources: [hris], phase: 1 }
+  - { id: U02, name: "Payroll lines unique by entity, employee and period", category: uniqueness, kind: singular, node: stg_payroll__lines, columns: [entity_code, employee_key, pay_period], severity: error, sources: [payroll], phase: 1 }
+  - { id: U03, name: "Exactly one current assignment per active employee", category: uniqueness, kind: singular, node: int_hris__assignment_timeline, columns: [employee_key], severity: error, sources: [hris], phase: 2 }
+  - { id: R01, name: "Every payroll employee exists in HRIS for that period", category: referential, kind: singular, node: stg_payroll__lines, columns: [employee_key], severity: error, sources: [payroll, hris], phase: 1 }
+  - { id: R02, name: "Manager references an employee active on the effective date", category: referential, kind: singular, node: int_hris__manager_timeline, columns: [manager_key], severity: error, sources: [hris], phase: 2 }
+  - { id: R03, name: "Team exists in the organization tree on the effective date", category: referential, kind: singular, node: int_hris__assignment_timeline, columns: [team_id], severity: error, sources: [hris, org], phase: 2 }
+  - { id: H01, name: "Assignment intervals do not overlap (SCD2)", category: interval, kind: singular, node: int_hris__assignment_timeline, columns: [valid_from, valid_to], severity: error, sources: [hris], phase: 1 }
+  - { id: H02, name: "Every correction references an existing record", category: interval, kind: singular, node: stg_hris__records, columns: [corrects_record_id], severity: error, sources: [hris], phase: 1 }
+  - { id: H03, name: "Termination after hire within a spell", category: interval, kind: singular, node: int_hris__spells, columns: [start_date, end_date], severity: error, sources: [hris], phase: 2 }
+  - { id: C01, name: "Compa-ratio within 0.5 to 2.0", category: compensation, kind: singular, node: fct_comp_position, columns: [compa_ratio], severity: error, sources: [payroll], phase: 1 }
+  - { id: C02, name: "Period-over-period pay change at most 3x without a compensation event", category: compensation, kind: singular, node: int_comp__annualized, columns: [annual_base], severity: error, sources: [payroll], phase: 1 }
+  - { id: C03, name: "Annualized pay distribution by entity: PSI against the previous period under 0.25", category: compensation, kind: engine, node: int_comp__annualized, columns: [annual_base], severity: error, sources: [payroll], phase: 1 }
+  - { id: C04, name: "Every pay-basis code mapped explicitly (no default used)", category: compensation, kind: singular, node: stg_map__pay_basis, columns: [pay_basis_code], severity: warn, sources: [payroll], phase: 1 }
+  - { id: C05, name: "Annualized pay within 0.8 x band_min and 1.2 x band_max", category: compensation, kind: singular, node: int_comp__annualized, columns: [annual_base], severity: error, sources: [payroll], phase: 2 }
+  - { id: X01, name: "Payroll paid headcount equals HRIS employees active in the pay period, per entity", category: reconciliation, kind: singular, node: stg_payroll__lines, columns: [employee_key], severity: error, sources: [payroll, hris], phase: 1 }
+  - { id: X02, name: "Headcount metric reconciles to the SCD2 snapshot", category: reconciliation, kind: singular, node: rpt_workforce_monthly, columns: [headcount], severity: error, sources: [hris], phase: 2 }
+  - { id: X03, name: "Departures metric reconciles to departure events by cause", category: reconciliation, kind: singular, node: rpt_flows_monthly, columns: [departures], severity: error, sources: [hris], phase: 2 }
+  - { id: M01, name: "Feature null rate at most 1%", category: model, kind: engine, node: feature_snapshot, columns: [compa_ratio], severity: error, sources: [hris, payroll], phase: 2 }
+  - { id: M02, name: "Feature drift PSI against the training snapshot under 0.25", category: model, kind: engine, node: feature_snapshot, columns: [comp_below_mid], severity: error, sources: [hris, payroll], phase: 2 }
+  - { id: M03, name: "Forecast population equals the headcount metric under the run's definition", category: model, kind: engine, node: forecast_run, columns: [population], severity: error, sources: [hris], phase: 2 }
+  - { id: M04, name: "Expected departures between 0.5x and 2x the trailing-rate expectation", category: model, kind: engine, node: forecast_run, columns: [expected], severity: warn, sources: [hris], phase: 2 }

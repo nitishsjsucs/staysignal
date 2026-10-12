@@ -1,0 +1,499 @@
+{
+ "edges": [
+  {
+   "columns": [
+    [
+     "pay_basis_code",
+     "pay_basis_code"
+    ],
+    [
+     "base_amount",
+     "base_amount"
+    ]
+   ],
+   "from": "src_payroll",
+   "to": "stg_payroll__lines"
+  },
+  {
+   "columns": [
+    [
+     "pay_basis_code",
+     "pay_basis_code"
+    ]
+   ],
+   "from": "stg_payroll__lines",
+   "to": "stg_map__pay_basis"
+  },
+  {
+   "columns": [
+    [
+     "base_amount",
+     "annual_base"
+    ]
+   ],
+   "from": "stg_payroll__lines",
+   "to": "int_comp__annualized"
+  },
+  {
+   "columns": [
+    [
+     "multiplier",
+     "annual_base"
+    ]
+   ],
+   "from": "stg_map__pay_basis",
+   "to": "int_comp__annualized"
+  },
+  {
+   "columns": [
+    [
+     "record_id",
+     "record_id"
+    ]
+   ],
+   "from": "src_hris",
+   "to": "stg_hris__records"
+  },
+  {
+   "columns": [
+    [
+     "record_id",
+     "team_id"
+    ]
+   ],
+   "from": "stg_hris__records",
+   "to": "int_hris__assignment_timeline"
+  },
+  {
+   "columns": [
+    [
+     "level",
+     "compa_ratio"
+    ]
+   ],
+   "from": "int_hris__assignment_timeline",
+   "to": "fct_comp_position"
+  },
+  {
+   "columns": [
+    [
+     "band_mid",
+     "compa_ratio"
+    ]
+   ],
+   "from": "src_ref_bands",
+   "to": "fct_comp_position"
+  },
+  {
+   "columns": [
+    [
+     "annual_base",
+     "compa_ratio"
+    ]
+   ],
+   "from": "int_comp__annualized",
+   "to": "fct_comp_position"
+  },
+  {
+   "columns": [
+    [
+     "compa_ratio",
+     "comp_below_mid"
+    ],
+    [
+     "compa_ratio",
+     "comp_above_mid"
+    ]
+   ],
+   "from": "fct_comp_position",
+   "to": "feature_snapshot"
+  },
+  {
+   "columns": [
+    [
+     "valid_from",
+     "tenure"
+    ],
+    [
+     "team_id",
+     "manager_changes_180d"
+    ]
+   ],
+   "from": "int_hris__assignment_timeline",
+   "to": "feature_snapshot"
+  },
+  {
+   "columns": [
+    [
+     "comp_below_mid",
+     "expected"
+    ],
+    [
+     "comp_above_mid",
+     "expected"
+    ],
+    [
+     "tenure",
+     "expected"
+    ]
+   ],
+   "from": "feature_snapshot",
+   "to": "forecast_run"
+  }
+ ],
+ "failing": {
+  "C01": {
+   "path": [
+    "stg_payroll__lines",
+    "int_comp__annualized",
+    "fct_comp_position",
+    "feature_snapshot",
+    "forecast_run"
+   ],
+   "ranking": [
+    {
+     "node": "stg_map__pay_basis",
+     "parts": {
+      "changed": 1.0,
+      "coverage": 1.0,
+      "own_anomaly": 1.0
+     },
+     "score": 1.0
+    },
+    {
+     "node": "stg_payroll__lines",
+     "parts": {
+      "changed": 1.0,
+      "coverage": 1.0,
+      "own_anomaly": 1.0
+     },
+     "score": 1.0
+    },
+    {
+     "node": "int_comp__annualized",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 1.0,
+      "own_anomaly": 0.0
+     },
+     "score": 0.5
+    },
+    {
+     "node": "src_payroll",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 1.0,
+      "own_anomaly": 0.0
+     },
+     "score": 0.5
+    },
+    {
+     "node": "fct_comp_position",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "int_hris__assignment_timeline",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "src_hris",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "src_ref_bands",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    }
+   ]
+  },
+  "C02": {
+   "path": [
+    "stg_payroll__lines",
+    "int_comp__annualized",
+    "fct_comp_position",
+    "feature_snapshot",
+    "forecast_run"
+   ],
+   "ranking": [
+    {
+     "node": "stg_map__pay_basis",
+     "parts": {
+      "changed": 1.0,
+      "coverage": 1.0,
+      "own_anomaly": 1.0
+     },
+     "score": 1.0
+    },
+    {
+     "node": "stg_payroll__lines",
+     "parts": {
+      "changed": 1.0,
+      "coverage": 1.0,
+      "own_anomaly": 1.0
+     },
+     "score": 1.0
+    },
+    {
+     "node": "int_comp__annualized",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 1.0,
+      "own_anomaly": 0.0
+     },
+     "score": 0.5
+    },
+    {
+     "node": "src_payroll",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 1.0,
+      "own_anomaly": 0.0
+     },
+     "score": 0.5
+    },
+    {
+     "node": "fct_comp_position",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "int_hris__assignment_timeline",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "src_hris",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "src_ref_bands",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    }
+   ]
+  },
+  "C03": {
+   "path": [
+    "stg_payroll__lines",
+    "int_comp__annualized",
+    "fct_comp_position",
+    "feature_snapshot",
+    "forecast_run"
+   ],
+   "ranking": [
+    {
+     "node": "stg_map__pay_basis",
+     "parts": {
+      "changed": 1.0,
+      "coverage": 1.0,
+      "own_anomaly": 1.0
+     },
+     "score": 1.0
+    },
+    {
+     "node": "stg_payroll__lines",
+     "parts": {
+      "changed": 1.0,
+      "coverage": 1.0,
+      "own_anomaly": 1.0
+     },
+     "score": 1.0
+    },
+    {
+     "node": "int_comp__annualized",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 1.0,
+      "own_anomaly": 0.0
+     },
+     "score": 0.5
+    },
+    {
+     "node": "src_payroll",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 1.0,
+      "own_anomaly": 0.0
+     },
+     "score": 0.5
+    },
+    {
+     "node": "fct_comp_position",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "int_hris__assignment_timeline",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "src_hris",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    },
+    {
+     "node": "src_ref_bands",
+     "parts": {
+      "changed": 0.0,
+      "coverage": 0.5,
+      "own_anomaly": 0.0
+     },
+     "score": 0.25
+    }
+   ]
+  }
+ },
+ "label": "synthetic",
+ "nodes": [
+  {
+   "columns": [
+    "pay_basis_code",
+    "base_amount"
+   ],
+   "id": "src_payroll",
+   "kind": "source",
+   "label": "payroll vendor files"
+  },
+  {
+   "columns": [
+    "record_id",
+    "effective_date",
+    "recorded_at"
+   ],
+   "id": "src_hris",
+   "kind": "source",
+   "label": "HRIS records"
+  },
+  {
+   "columns": [
+    "band_mid"
+   ],
+   "id": "src_ref_bands",
+   "kind": "source",
+   "label": "pay bands"
+  },
+  {
+   "columns": [
+    "pay_basis_code",
+    "base_amount",
+    "employee_key"
+   ],
+   "id": "stg_payroll__lines",
+   "kind": "staging",
+   "label": "stg_payroll__lines"
+  },
+  {
+   "columns": [
+    "pay_basis_code",
+    "multiplier"
+   ],
+   "id": "stg_map__pay_basis",
+   "kind": "staging",
+   "label": "stg_map__pay_basis (active mapping)"
+  },
+  {
+   "columns": [
+    "record_id",
+    "corrects_record_id"
+   ],
+   "id": "stg_hris__records",
+   "kind": "staging",
+   "label": "stg_hris__records"
+  },
+  {
+   "columns": [
+    "team_id",
+    "level",
+    "valid_from",
+    "valid_to"
+   ],
+   "id": "int_hris__assignment_timeline",
+   "kind": "intermediate",
+   "label": "int_hris__assignment_timeline"
+  },
+  {
+   "columns": [
+    "annual_base"
+   ],
+   "id": "int_comp__annualized",
+   "kind": "intermediate",
+   "label": "int_comp__annualized"
+  },
+  {
+   "columns": [
+    "compa_ratio"
+   ],
+   "id": "fct_comp_position",
+   "kind": "restricted",
+   "label": "fct_comp_position"
+  },
+  {
+   "columns": [
+    "comp_below_mid",
+    "comp_above_mid",
+    "tenure",
+    "manager_changes_180d"
+   ],
+   "id": "feature_snapshot",
+   "kind": "feature",
+   "label": "feature snapshot (in memory)"
+  },
+  {
+   "columns": [
+    "expected"
+   ],
+   "id": "forecast_run",
+   "kind": "forecast",
+   "label": "forecast run (cohort aggregates)"
+  }
+ ]
+}

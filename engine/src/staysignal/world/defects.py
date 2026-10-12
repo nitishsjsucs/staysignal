@@ -15,7 +15,7 @@ from staysignal.prng import stream
 from staysignal.world.simulate import Record, World
 
 AUDIT_BATCH_AT = datetime(2026, 9, 15, 6, 0, tzinfo=UTC)
-AUDIT_WINDOW = (date(2026, 5, 1), date(2026, 9, 1))
+AUDIT_WINDOW = (date(2026, 7, 1), date(2026, 9, 1))
 
 
 class Planter:
@@ -94,8 +94,10 @@ class Planter:
         window = [t for t in terms if lo <= t.effective_date < hi and t.team_id in eng_teams]
         vol = [t for t in window if t.termination_reason_code == "VOL_RESIGN"]
         inv = [t for t in window if t.termination_reason_code not in ("VOL_RESIGN", "RETIRE")]
-        n_vol = min(p.audit_batch_terminations_voluntary, len(vol))
+        # Composition knob (SPEC 6.5): 9 voluntary and 3 involuntary when the window has them; otherwise the shortfall in
+        # one cause is filled from the other so the batch keeps its 12 terminations. The realized mix is in the manifest.
         n_inv = min(p.audit_batch_terminations - p.audit_batch_terminations_voluntary, len(inv))
+        n_vol = min(p.audit_batch_terminations - n_inv, len(vol))
         for t in self.pick(vol, n_vol, "audit voluntary terminations") + self.pick(
             inv, n_inv, "audit involuntary terminations"
         ):

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "payroll vendor file line (synthetic)",
+  "type": "object",
+  "required": ["entity_code", "employee_number", "pay_period", "base_amount", "currency", "pay_basis_code", "vendor_file_id", "recorded_at"],
+  "properties": {
+    "entity_code": { "enum": ["US-ENT", "CA-ENT", "UK-ENT"] },
+    "employee_number": { "type": "string", "pattern": "^E[0-9]{6}$" },
+    "pay_period": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}$" },
+    "base_amount": { "type": "string", "pattern": "^[0-9]+\\.[0-9]{2}$" },
+    "currency": { "enum": ["USD", "CAD", "GBP"] },
+    "pay_basis_code": { "type": "string" },
+    "vendor_file_id": { "type": "string" },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  },
+  "x-pay-basis-codes": {
+    "M": { "meaning": "monthly amount", "annual_multiplier": 12 },
+    "ANN": { "meaning": "annual amount", "annual_multiplier": 1 }
+  }
+}

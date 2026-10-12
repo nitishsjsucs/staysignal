@@ -1,0 +1,7 @@
+# payroll@2: generated from the vendor code dictionary and the rca_probe evidence (quality/mapping_proposal.py).
+source: payroll
+version: 2
+codes:
+  M: { multiplier: 12, meaning: monthly amount }
+  ANN: { multiplier: 1, meaning: annual amount }
+unknown_codes: reject

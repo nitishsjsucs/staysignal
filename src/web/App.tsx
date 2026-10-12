@@ -12,6 +12,7 @@ import { MemoryPage } from "./pages/Memory";
 import { QualityPage } from "./pages/Quality";
 import { ResultPage } from "./pages/ResultDetail";
 import { ReviewsPage } from "./pages/Reviews";
+import { TracesPage } from "./pages/Traces";
 import { TrustPage } from "./pages/Trust";
 import { WorkforcePage } from "./pages/Workforce";
 import { parseRoute, useLocation } from "./router";
@@ -56,6 +57,7 @@ export function App() {
         {route.page === "trust" ? <TrustPage me={me} /> : null}
         {route.page === "workforce" ? <WorkforcePage me={me} /> : null}
         {route.page === "memory" ? <MemoryPage me={me} /> : null}
+        {route.page === "traces" ? <TracesPage me={me} /> : null}
         {route.page === "ask" ? <AskPage me={me} /> : null}
         {route.page === "result" ? <ResultPage id={route.id} /> : null}
         {route.page === "not_found" ? <p>Page not found.</p> : null}

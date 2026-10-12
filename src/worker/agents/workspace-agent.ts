@@ -247,9 +247,18 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     this.sql`INSERT OR REPLACE INTO traces (trace_id, owner, payload_json, created_at) VALUES (${traceId}, ${owner}, ${JSON.stringify(payload)}, ${this.now()})`;
   }
 
-  getTrace(traceId: string): unknown {
-    const r = this.sql<{ payload_json: string }>`SELECT payload_json FROM traces WHERE trace_id = ${traceId}`[0];
-    return r ? JSON.parse(r.payload_json) : null;
+  getTrace(traceId: string): { owner: string; created_at: string; payload_json: string } | null {
+    const r = this.sql<{ owner: string; created_at: string; payload_json: string }>`SELECT owner, created_at, payload_json FROM traces WHERE trace_id = ${traceId}`[0];
+    return r ? { owner: r.owner, created_at: r.created_at, payload_json: r.payload_json } : null;
+  }
+
+  /** The most recent traces, of one owner or of everyone (the caller checks the scope, SPEC 14.12). */
+  listTraces(owner: string | null, limit: number): { trace_id: string; owner: string; created_at: string; payload_json: string }[] {
+    const n = Math.max(1, Math.min(200, Math.floor(limit)));
+    const rows = owner
+      ? this.sql<{ trace_id: string; owner: string; created_at: string; payload_json: string }>`SELECT trace_id, owner, created_at, payload_json FROM traces WHERE owner = ${owner} ORDER BY created_at DESC, trace_id LIMIT ${n}`
+      : this.sql<{ trace_id: string; owner: string; created_at: string; payload_json: string }>`SELECT trace_id, owner, created_at, payload_json FROM traces ORDER BY created_at DESC, trace_id LIMIT ${n}`;
+    return rows.map((r) => ({ trace_id: r.trace_id, owner: r.owner, created_at: r.created_at, payload_json: r.payload_json }));
   }
 
   // ---------- runs ----------

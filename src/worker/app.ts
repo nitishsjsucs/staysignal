@@ -52,6 +52,38 @@ async function resultDenied(env: Env, p: Principal, r: ToolResult<unknown>): Pro
   return authorizeCohort(p, prov.tool, cohortMeta(co, fx.cohorts));
 }
 
+interface TraceSpan {
+  kind: string;
+  name: string;
+  start_ms: number;
+  dur_ms: number;
+  tokens?: unknown;
+  outcome?: string;
+  result_ids?: string[];
+}
+
+/** A trace as a principal may see it (SPEC 14.12): analysts their own, leads every trace in full (locally), the
+ * auditor every trace as metadata only (no question text, no tool arguments, no violation text). */
+function traceView(p: Principal, row: { trace_id: string; owner: string; created_at: string; payload_json: string }) {
+  const t = JSON.parse(row.payload_json) as { question?: string; provider?: string; recorded?: boolean; grounding?: string; spans?: TraceSpan[]; tool_calls?: { tool: string; args?: unknown; result_id?: string | null }[]; violations?: string[] };
+  const full = hasScope(p, "forecast:read:all");
+  const spans = (t.spans ?? []).map((s) => ({ kind: s.kind, name: s.name, start_ms: s.start_ms, dur_ms: s.dur_ms, ...(s.tokens ? { tokens: s.tokens } : {}), ...(s.outcome ? { outcome: s.outcome } : {}), ...(s.result_ids ? { result_ids: s.result_ids } : {}) }));
+  return {
+    trace_id: row.trace_id,
+    owner: row.owner,
+    created_at: row.created_at,
+    provider: t.provider ?? null,
+    recorded: Boolean(t.recorded),
+    grounding: t.grounding ?? null,
+    question: full ? (t.question ?? null) : null,
+    tool_calls: (t.tool_calls ?? []).map((tc) => ({ tool: tc.tool, result_id: tc.result_id ?? null, ...(full ? { args: tc.args ?? {} } : {}) })),
+    violations: full ? (t.violations ?? []) : [],
+    spans,
+    metadata_only: !full,
+    label: "synthetic" as const,
+  };
+}
+
 /** People Partners read their own organizations' group notes; decisions, investigations and the timeline are
  * company-wide records (SPEC 14.1 `memory:read:assigned`). */
 function memoryVisible(p: Principal, path: string): boolean {
@@ -228,12 +260,20 @@ export function buildApp() {
     return c.json(envelope(r));
   });
 
+  app.get("/api/traces", async (c) => {
+    const p = c.var.principal;
+    if (!hasScope(p, "trace:read:all") && !hasScope(p, "trace:read:own")) return c.json(refuse("NOT_PERMITTED"));
+    const rows = await (await workspace(c.env)).listTraces(hasScope(p, "trace:read:all") ? null : p.id, Number(c.req.query("limit") ?? 50));
+    return c.json({ label: "synthetic", traces: rows.map((r) => traceView(p, r)) });
+  });
   app.get("/api/traces/:id", async (c) => {
+    const p = c.var.principal;
     const t = await (await workspace(c.env)).getTrace(c.req.param("id"));
-    return t ? c.json(t) : c.json({ error: "not found" }, 404);
+    if (!t) return c.json({ error: "not found" }, 404);
+    if (!hasScope(p, "trace:read:all") && !(hasScope(p, "trace:read:own") && t.owner === p.id)) return c.json(refuse("NOT_PERMITTED"));
+    return c.json(traceView(p, { trace_id: c.req.param("id"), ...t }));
   });
 
-  // ---------- reviews, approvals, audit ----------
   app.post("/api/reviews/draft", async (c) => {
     const body = (await c.req.json().catch(() => ({}))) as { cohort?: string; horizon?: number };
     return respond(c, "prepare_review", { cohort: body.cohort ?? "Platform Engineering", horizon_months: body.horizon });

@@ -11,7 +11,7 @@ Builder log for the commit plan in SPEC.md section 24. Updated in every commit.
 
 ## Position
 
-M0 done except a clean 27B measurement (commit 7 of 7, `eval: 27B measurement on agent-shaped prompts`, recorded as partial). Next: M1, the walking skeleton.
+M1 walking skeleton, commit 1 of 6 (`feat(world)`). M0 done except a clean 27B measurement (recorded as partial).
 
 ## Done
 
@@ -22,6 +22,10 @@ M0 done except a clean 27B measurement (commit 7 of 7, `eval: 27B measurement on
 5. `chore: engine uv project and lock`: `engine/pyproject.toml` (hatchling, Python 3.12, the SPEC 25 engine pins, extra `challenger` with hazardous 0.2.0, dev group pytest, ruff, hypothesis, statsmodels), `uv.lock` resolved to 157 packages, venv 820 MB, CLI skeleton `staysignal`.
 6. `test: prose and public hygiene checks, ...`: `scripts/lib/prose.ts` and `scripts/check-prose.ts` (copied from PeopleLake, banned phrasing added), `scripts/lib/hygiene.ts` and `scripts/check-hygiene.ts` (public tier; `--staged`; `--private` fails closed unless `SS_PRIVATE_DENYLIST` names a non-empty file outside the repo), `scripts/hooks/pre-commit` and `npm run hooks:install`, `test/node/hygiene.test.ts` (C46, C68 planted hits), `.github/workflows/ci.yml` with jobs `node` and `engine`. The private deny-list was created at `~/Developer/projects/_staysignal-notes/hygiene-denylist.txt` (outside the repo, mode 600) for Nitish to review and extend.
 7. `eval: 27B measurement on agent-shaped prompts`: `scripts/llm.ts` (guarded lifecycle: one server at a time, no heavy work alongside, memory budget, an available-memory pre-flight, a detached guard sampling swap and disk every 0.5 s), `scripts/lib/{pids,guards,memory-budget,results}.ts`, `scripts/llm-measure.ts`, `scripts/results-to-readme.ts`, `src/shared/tools/schemas.ts` (the 13 tool input schemas), tests `memory-budget.test.ts` (C65) and `results-readme.test.ts`. Recorded `results/llm-measure-2026-10-12.json` (27B, partial) and `results/llm-measure-1.7b-2026-10-12.json` (complete). W set to 15.7 GB (wired-memory delta after load); the Lab profile drops to 3 sequences.
+
+## M1 log
+
+1. `feat(world)`: `engine/src/staysignal/{prng,canonical,clock}.py` (PRNG and canonical JSON copied from PeopleLake), `world/{spec,hazards,simulate,defects,emit}.py`, CLI `world generate`. Both profiles generate in about 1 second. Canonical realized: voluntary 12.97, involuntary 3.53, retirement 0.72 per 100 a year; cycle promotions 11.6% to 14.0% of eligible employees; 15 Engineering fixed-term employees at 2026-10-01; every SPEC 6.5 count exact (the audit batch draws its 12 terminations from May to August 2026 Engineering exits, the composition knob). Calibration: voluntary intercept -5.50 (start -5.20) and promotion intercept -3.60 (start -3.90), within the allowed bounds; not frozen until C5 (oracle coverage) runs in M3. Tests: `engine/tests/world/` C1 (determinism), C2, C3, C4.
 
 ## Next
 

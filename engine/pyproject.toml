@@ -68,4 +68,4 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
-ignore = ["E501"]
+ignore = ["E501", "E741"]  # E741: statistical notation (O, E, V, l) is clearer here

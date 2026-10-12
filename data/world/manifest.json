@@ -1,0 +1,796 @@
+{
+  "calendar": {
+    "demo_clock": "2026-10-05T14:00:00Z",
+    "months": 42,
+    "start": "2023-04-01"
+  },
+  "entities": {
+    "CA-ENT": "CAD",
+    "UK-ENT": "GBP",
+    "US-ENT": "USD"
+  },
+  "files": {
+    "audit/audit_attributes.csv": {
+      "rows": 3116,
+      "sha256": "dd5b67406043efa27ba485f417a2a9d164bb0f95312a4339f607403c2a7d84c2"
+    },
+    "future/hris_future.csv": {
+      "rows": 8,
+      "sha256": "95d6ee3cd6f74ac8cb12de7bcd4413a4762191b18ba2bf26cc8d05729274aea2"
+    },
+    "held/payroll_CA-ENT_2026-09.csv": {
+      "rows": 353,
+      "sha256": "dcdb85cfd21942cdf6581ce61fa629fb8ec84834cab7b5e47608f791fc567bc3"
+    },
+    "held/payroll_UK-ENT_2026-09.csv": {
+      "rows": 319,
+      "sha256": "daa72a0a61f5f93a4433807a459b0d14a52a5a1f1f02a6ff39b3a859e0024381"
+    },
+    "held/payroll_US-ENT_2026-09.csv": {
+      "rows": 1371,
+      "sha256": "d63c15c80521d2424b95c65b24f77cf3fe7a651c31ee1deee81e40b963af0334"
+    },
+    "sources/ats_offers.csv": {
+      "rows": 1514,
+      "sha256": "5835f541bbf9cfd6275eb555b49a2af3e2b5936549875a17085f75388c05a6c7"
+    },
+    "sources/ats_requisitions.csv": {
+      "rows": 2805,
+      "sha256": "d326407346d3386ab8d7284679b48c9255422698f6ac9d6520d92cb378b1d65d"
+    },
+    "sources/hris_delta_2026-09-02.csv": {
+      "rows": 36,
+      "sha256": "3b8a3dcb087584bae42e2cffbfa1aa7e83d03906968aef9e4d944b14d2731563"
+    },
+    "sources/hris_delta_2026-09-03.csv": {
+      "rows": 24,
+      "sha256": "a6ffd7a3128a2b0cd1ce41f69d154f5dc0dd94953c3e72dddc068324d5099480"
+    },
+    "sources/hris_delta_2026-09-04.csv": {
+      "rows": 42,
+      "sha256": "df537d621aa5f6c93cba557acf940ad867beb1193923bbdb195b4563a5c41828"
+    },
+    "sources/hris_delta_2026-09-05.csv": {
+      "rows": 30,
+      "sha256": "bc3002241566dc2d4e749e38784ef43387d204aea4cc9374f3fcce2480deb014"
+    },
+    "sources/hris_delta_2026-09-06.csv": {
+      "rows": 24,
+      "sha256": "9912e095b7da78c2fbdd11a5dbeacf1161976147471c3ae945a2d02616de923d"
+    },
+    "sources/hris_delta_2026-09-07.csv": {
+      "rows": 35,
+      "sha256": "2441434f7f31c8407c578664b460240ab5a16b74e1b2a7829c3802519319637b"
+    },
+    "sources/hris_delta_2026-09-08.csv": {
+      "rows": 37,
+      "sha256": "f3925d36ca47efc853bf357342b680eeaabe7187e0bce714aca5779abf173326"
+    },
+    "sources/hris_delta_2026-09-09.csv": {
+      "rows": 2,
+      "sha256": "3ca29ff507bd80298aec9d187d86e190fba6f8ce8d9f56fe20972bd33ce3f726"
+    },
+    "sources/hris_delta_2026-09-10.csv": {
+      "rows": 3,
+      "sha256": "3e3e3377e504479b990ce96c215d87fd6b1b41646604173615e4b99e32b57601"
+    },
+    "sources/hris_delta_2026-09-11.csv": {
+      "rows": 5,
+      "sha256": "8a240d91bd41aa7e1c6572922fdba094f2ecfe60e93aef44f6d6b377870bc136"
+    },
+    "sources/hris_delta_2026-09-12.csv": {
+      "rows": 2,
+      "sha256": "0ebcf5465acd4852cdb57392374af393129f8e3ebfdfeedb350a2c9307845750"
+    },
+    "sources/hris_delta_2026-09-13.csv": {
+      "rows": 1,
+      "sha256": "f5bf40e8384743d46b1ea21a12c4c32a5e632fe22e684d9f8608cbff78926b97"
+    },
+    "sources/hris_delta_2026-09-14.csv": {
+      "rows": 3,
+      "sha256": "88ea7ed6b04ef05150d466067a80724c4412c059a763d0869bdb1e2d9a66c602"
+    },
+    "sources/hris_delta_2026-09-15.csv": {
+      "rows": 23,
+      "sha256": "bffabe347651bd159441437c69e39498c7c024519205b90493af4bf7081d2dad"
+    },
+    "sources/hris_delta_2026-09-16.csv": {
+      "rows": 2,
+      "sha256": "7c5303e99db36201d58c0a9c78ccf251ef2e2acf3688310122216a1ba39c1db1"
+    },
+    "sources/hris_delta_2026-09-17.csv": {
+      "rows": 0,
+      "sha256": "7941346e2d263c9e40a1495fad5405aa4d99d5c9e373d2453b46b5102404c55f"
+    },
+    "sources/hris_delta_2026-09-18.csv": {
+      "rows": 0,
+      "sha256": "7941346e2d263c9e40a1495fad5405aa4d99d5c9e373d2453b46b5102404c55f"
+    },
+    "sources/hris_delta_2026-09-19.csv": {
+      "rows": 5,
+      "sha256": "6cc0145750077b9b02156779aecccf132b4f2a9d5241665742032c0f7e889d3f"
+    },
+    "sources/hris_delta_2026-09-20.csv": {
+      "rows": 2,
+      "sha256": "2eae1386b77533e7efac0e3bf95bff2bb7fb3203ae1c9db44d410ed7e427b3d1"
+    },
+    "sources/hris_delta_2026-09-21.csv": {
+      "rows": 2,
+      "sha256": "01f650e872559b7fdde6cf75c720ac7616d57cc943d57977140bc06b38c7e1aa"
+    },
+    "sources/hris_delta_2026-09-22.csv": {
+      "rows": 3,
+      "sha256": "1f0c6b71cbb10beb552648c88deb9feaa09a3b7845713f76a8dca357cd3a0a95"
+    },
+    "sources/hris_delta_2026-09-23.csv": {
+      "rows": 2,
+      "sha256": "8cf4ae36db72518f09e11bd32b7e04bf9c7b97bbd1a103dfc45e988a8e16ae1e"
+    },
+    "sources/hris_delta_2026-09-24.csv": {
+      "rows": 1,
+      "sha256": "008a37160b9479bd663eefd6668a1909cc83f78ad99c688fea4752d2dfdcde10"
+    },
+    "sources/hris_delta_2026-09-25.csv": {
+      "rows": 2,
+      "sha256": "ff7be23840158beb1963053d5c361331afc6fd5dc0b19b4e174d49006337cddb"
+    },
+    "sources/hris_delta_2026-09-26.csv": {
+      "rows": 1,
+      "sha256": "86f4df7b28f839729f57ce1c1668dc45e2bf1af25d584fa7ee61f60d1f3475fa"
+    },
+    "sources/hris_delta_2026-09-27.csv": {
+      "rows": 0,
+      "sha256": "7941346e2d263c9e40a1495fad5405aa4d99d5c9e373d2453b46b5102404c55f"
+    },
+    "sources/hris_delta_2026-09-28.csv": {
+      "rows": 0,
+      "sha256": "7941346e2d263c9e40a1495fad5405aa4d99d5c9e373d2453b46b5102404c55f"
+    },
+    "sources/hris_delta_2026-09-29.csv": {
+      "rows": 3,
+      "sha256": "41976d466c22d3bf5ce0024178bd470a0f43e7e90b7a9a55218168aa2b3123e4"
+    },
+    "sources/hris_delta_2026-09-30.csv": {
+      "rows": 3,
+      "sha256": "e3cbfad89ef31b9cfb6ec75a097b14c30256f14160131ffb81cd314cc8ef93ee"
+    },
+    "sources/hris_delta_2026-10-01.csv": {
+      "rows": 0,
+      "sha256": "7941346e2d263c9e40a1495fad5405aa4d99d5c9e373d2453b46b5102404c55f"
+    },
+    "sources/hris_delta_2026-10-02.csv": {
+      "rows": 1,
+      "sha256": "0db90b873076d5c8823bb6f45926f4934bcb07355419553d0bd5ff3ad24bf2fd"
+    },
+    "sources/hris_delta_2026-10-03.csv": {
+      "rows": 0,
+      "sha256": "7941346e2d263c9e40a1495fad5405aa4d99d5c9e373d2453b46b5102404c55f"
+    },
+    "sources/hris_delta_2026-10-04.csv": {
+      "rows": 1,
+      "sha256": "147f42bd23b00255240d2d0c1071c18d3ee43e322ff4496bc1bced457a571e40"
+    },
+    "sources/hris_delta_2026-10-05.csv": {
+      "rows": 0,
+      "sha256": "7941346e2d263c9e40a1495fad5405aa4d99d5c9e373d2453b46b5102404c55f"
+    },
+    "sources/hris_records.csv": {
+      "rows": 7639,
+      "sha256": "292bd759280cd46eafc461a1731699177928a89d603fa35aae9f96d10e0d6d53"
+    },
+    "sources/org_events.csv": {
+      "rows": 15,
+      "sha256": "c495e8af8d52c2a22bbf8b7811045e0212db4dafc94bed74c6d70b128ee8884c"
+    },
+    "sources/org_teams.csv": {
+      "rows": 120,
+      "sha256": "353e5d2bdbcb9f5a8a39b6db96a5d7bb0db33362d06c767a667814b59a5725ab"
+    },
+    "sources/payroll_CA-ENT_2023-04.csv": {
+      "rows": 337,
+      "sha256": "d1708c79140ce6b817e3a7b1fcf98421cdfdf571ca086647b73818516c4b0ff5"
+    },
+    "sources/payroll_CA-ENT_2023-05.csv": {
+      "rows": 339,
+      "sha256": "e6fad0e89611f1fec03a40467ee01d723444d36abdc0d4c597bc2bb6c06a6831"
+    },
+    "sources/payroll_CA-ENT_2023-06.csv": {
+      "rows": 339,
+      "sha256": "3d101daf10c078592fb79e674d7734a747e2440de0a8198c393dfa31a83e75fb"
+    },
+    "sources/payroll_CA-ENT_2023-07.csv": {
+      "rows": 340,
+      "sha256": "0dc2db85cbb0cff36d112a7161b0b35c77c0a31029b603dd0d5bb1ad35d5574b"
+    },
+    "sources/payroll_CA-ENT_2023-08.csv": {
+      "rows": 343,
+      "sha256": "02a4b9f91b04f2cc39884c9564f91dd35b649ba6887569bf71bcde2c7a4f4134"
+    },
+    "sources/payroll_CA-ENT_2023-09.csv": {
+      "rows": 340,
+      "sha256": "b763bde93d3e7c75921d0cf1a145f001dbb6b0f1adc4523057475479ea06cc48"
+    },
+    "sources/payroll_CA-ENT_2023-10.csv": {
+      "rows": 342,
+      "sha256": "1599dc00bd57b3bb7b58e33c7fe56f9fc27f6a8ad4bc8b3c493989e6d4129574"
+    },
+    "sources/payroll_CA-ENT_2023-11.csv": {
+      "rows": 346,
+      "sha256": "2c0888a4e567eac141e7deb43c2733b85a3a19c1a4c5feadeddcda9b6ac23867"
+    },
+    "sources/payroll_CA-ENT_2023-12.csv": {
+      "rows": 350,
+      "sha256": "6210d01108ce2cbc7705851586ca92b398ab74a6d59f646b338214f162adf8ae"
+    },
+    "sources/payroll_CA-ENT_2024-01.csv": {
+      "rows": 351,
+      "sha256": "4ac27bb7aa93cd89ea0360ef3ae7805147d3902247a1028eb9f4250eb1db5884"
+    },
+    "sources/payroll_CA-ENT_2024-02.csv": {
+      "rows": 358,
+      "sha256": "fa4efaeeacb8d3c91b2fde6211dd215fdb6ddca3353b28945c9eecb28025d597"
+    },
+    "sources/payroll_CA-ENT_2024-03.csv": {
+      "rows": 361,
+      "sha256": "f831ee203c6a1c52e68c83b8acca6c392e22f06a0869715479dbdde64f3285d1"
+    },
+    "sources/payroll_CA-ENT_2024-04.csv": {
+      "rows": 354,
+      "sha256": "cbf229600965630dc2342d3a26490ee8e81a7442675f84eef8060b561b7dcb6a"
+    },
+    "sources/payroll_CA-ENT_2024-05.csv": {
+      "rows": 354,
+      "sha256": "85c66abf4ce37a2497b3655130b5ba41b9abfa171a2063ea8d5c1af2bc19d349"
+    },
+    "sources/payroll_CA-ENT_2024-06.csv": {
+      "rows": 353,
+      "sha256": "14d2ff0a2792ecbafa2bcc127c83749cf86ce3cd93c79288989d45273b60432e"
+    },
+    "sources/payroll_CA-ENT_2024-07.csv": {
+      "rows": 350,
+      "sha256": "f847c6a9f4f3daf8818e2c8693571443298efb82f4510bd2e1f5d0b61b28c49d"
+    },
+    "sources/payroll_CA-ENT_2024-08.csv": {
+      "rows": 346,
+      "sha256": "574a7d605f044fecd063bda74aaa99d222ad9c9f02c5c7c98dbb8aa3cf9a01e5"
+    },
+    "sources/payroll_CA-ENT_2024-09.csv": {
+      "rows": 349,
+      "sha256": "eed374a91dbf9d6aadf36135165fbfc28fd569d2cdae578c60b2d564ffe7d30f"
+    },
+    "sources/payroll_CA-ENT_2024-10.csv": {
+      "rows": 351,
+      "sha256": "5a99a4348f8eea7ed18f36cc8094e44db7a315f6d550d99ad52aaf348e413c5d"
+    },
+    "sources/payroll_CA-ENT_2024-11.csv": {
+      "rows": 350,
+      "sha256": "bc5a2fc7e7ee5a2da1029d2ae32fbf646f60d8df1160ef81a07c09cc7272d2ad"
+    },
+    "sources/payroll_CA-ENT_2024-12.csv": {
+      "rows": 353,
+      "sha256": "949f2190816d95a95b04bdada3008e9f6bf68c07ccbf647de07e5ae2d30ab641"
+    },
+    "sources/payroll_CA-ENT_2025-01.csv": {
+      "rows": 353,
+      "sha256": "0c312ba7fd0a8518026a4e2271ced4594e685d9afb3f8d4ac85d646313810d98"
+    },
+    "sources/payroll_CA-ENT_2025-02.csv": {
+      "rows": 351,
+      "sha256": "7e7ad927a317241a84bc07d927dfc295c485b8cdaae9f6041d415a72a4c1bbce"
+    },
+    "sources/payroll_CA-ENT_2025-03.csv": {
+      "rows": 352,
+      "sha256": "3553fb1e82d8c46c9f0690acfe6f3fc74de444b39ebb2a5bedf55e3b90f2943b"
+    },
+    "sources/payroll_CA-ENT_2025-04.csv": {
+      "rows": 353,
+      "sha256": "08a158f9319e32c26817d37869275fc593d94d6be42a605796aa6865c13b33f2"
+    },
+    "sources/payroll_CA-ENT_2025-05.csv": {
+      "rows": 351,
+      "sha256": "76baa02fe40264b4eda23eb2c5377614df14afddee09b79a9e762984f56e211b"
+    },
+    "sources/payroll_CA-ENT_2025-06.csv": {
+      "rows": 353,
+      "sha256": "835ce4593d3af56918808a77e300000b6a5f050f96563e7c3fd30f249cd11036"
+    },
+    "sources/payroll_CA-ENT_2025-07.csv": {
+      "rows": 348,
+      "sha256": "ae95925755ef56a333c986b56bf84256c2d614d8c022b9e96983b7d4f8652937"
+    },
+    "sources/payroll_CA-ENT_2025-08.csv": {
+      "rows": 350,
+      "sha256": "fa3633e040816636542308b9db224b4eb7e69679f91287bf4bac7da8bee8a7e9"
+    },
+    "sources/payroll_CA-ENT_2025-09.csv": {
+      "rows": 352,
+      "sha256": "a1467820611f7842157aff4d88e946117ebaefc6a2665561a491c2f8dfe78409"
+    },
+    "sources/payroll_CA-ENT_2025-10.csv": {
+      "rows": 358,
+      "sha256": "2932031f4461c1851cfc331d721403fd8b2796c758b2b96fb6d4fce82100d1d8"
+    },
+    "sources/payroll_CA-ENT_2025-11.csv": {
+      "rows": 355,
+      "sha256": "db7d223df4d868f2faa9b7bffd2f9f3a1d29b022f2f6a1267a390de4dad89718"
+    },
+    "sources/payroll_CA-ENT_2025-12.csv": {
+      "rows": 352,
+      "sha256": "045dd8207a8ad93bae932964570b919616bb523004fbb87a4ff8972051f53b7b"
+    },
+    "sources/payroll_CA-ENT_2026-01.csv": {
+      "rows": 352,
+      "sha256": "dcdb9b9410ecd44afd59d635123ab53e68f7c7b53829bdf48a7b71de984f87e2"
+    },
+    "sources/payroll_CA-ENT_2026-02.csv": {
+      "rows": 353,
+      "sha256": "4085434f4edfe5cb6e03e3afa5c0f85dfd5659a56cc0f6feccd3df1cbd6da34b"
+    },
+    "sources/payroll_CA-ENT_2026-03.csv": {
+      "rows": 350,
+      "sha256": "9563282cbc9786201d2d2a89927281cdc8e9503d05bb1aa33109234cc70ea501"
+    },
+    "sources/payroll_CA-ENT_2026-04.csv": {
+      "rows": 348,
+      "sha256": "ae64511ed9276056fe0260cf718671f4b8d5eaaadf6fa58aac565c1485f7317b"
+    },
+    "sources/payroll_CA-ENT_2026-05.csv": {
+      "rows": 352,
+      "sha256": "dee03131b995217d8ab51c2852cd2e1f214c45e47da84633387c8428a397a284"
+    },
+    "sources/payroll_CA-ENT_2026-06.csv": {
+      "rows": 351,
+      "sha256": "97f44a90e4374efff5cee4e875426ccf72dec60b8f4fe86888015b2ad421da4c"
+    },
+    "sources/payroll_CA-ENT_2026-07.csv": {
+      "rows": 351,
+      "sha256": "0033b02e63a474a2e3df63da9e262dd579a7afb0df4b7e5cacb496297cfdd713"
+    },
+    "sources/payroll_CA-ENT_2026-08.csv": {
+      "rows": 350,
+      "sha256": "cea3e47e672be2ea296dc9db407679347cdbf09c046d211425526cd54717881d"
+    },
+    "sources/payroll_UK-ENT_2023-04.csv": {
+      "rows": 224,
+      "sha256": "7eef7f94bf782ea66c782ea80fe6a5aaf392a533f09dcee4a732a678b154e009"
+    },
+    "sources/payroll_UK-ENT_2023-05.csv": {
+      "rows": 232,
+      "sha256": "68e32d76eb3ad9dc3719a6e735e370da1d01310a48812e84fff12a20fe997425"
+    },
+    "sources/payroll_UK-ENT_2023-06.csv": {
+      "rows": 234,
+      "sha256": "cf0c69cf826396683408a25b9d94fa2e446d1be1aeb11fa4885907d0f03e99ab"
+    },
+    "sources/payroll_UK-ENT_2023-07.csv": {
+      "rows": 236,
+      "sha256": "e15f4ed3be20e0ef470c6a0437f39d75c053766a2c7e27f280d54adb575b96ca"
+    },
+    "sources/payroll_UK-ENT_2023-08.csv": {
+      "rows": 237,
+      "sha256": "0b24e0819088860bc911ecf0b11a3a8bf76dcaf0aa73c8ce5e9d32b6c946a2fe"
+    },
+    "sources/payroll_UK-ENT_2023-09.csv": {
+      "rows": 238,
+      "sha256": "d684e7b3b686f0fea5b33287f798296cb8ee4286d007f9b848137b1baecf95c9"
+    },
+    "sources/payroll_UK-ENT_2023-10.csv": {
+      "rows": 242,
+      "sha256": "fb636bb1ae627d1d1e2409ce910269e6ea08aeef753788e63506b8ccc2dc368a"
+    },
+    "sources/payroll_UK-ENT_2023-11.csv": {
+      "rows": 243,
+      "sha256": "70b2a84016189163fce225b9bd6cd1f4cc4d213e57f927e4355f287c83c2c2db"
+    },
+    "sources/payroll_UK-ENT_2023-12.csv": {
+      "rows": 247,
+      "sha256": "cae2ce7a7d0630b90f3a57f27a15b6ca6eed6be591038e529ae830b62a1cfa10"
+    },
+    "sources/payroll_UK-ENT_2024-01.csv": {
+      "rows": 249,
+      "sha256": "8eef931ebd042c2c676a8425d4200b1ae186469a3ed8457f7a28c739256d1876"
+    },
+    "sources/payroll_UK-ENT_2024-02.csv": {
+      "rows": 250,
+      "sha256": "86dda3bc005d46ac960228b07d884da8d9680ee83618adbb71858359485ef8e7"
+    },
+    "sources/payroll_UK-ENT_2024-03.csv": {
+      "rows": 254,
+      "sha256": "e5785f205ea8e0700a128c9f190df757e8048a59f1b1a9dab207d9294c04b4c6"
+    },
+    "sources/payroll_UK-ENT_2024-04.csv": {
+      "rows": 250,
+      "sha256": "d7ec760c080a445fc297c066fee8b783f646e7d3997584e610726440fa3b1f41"
+    },
+    "sources/payroll_UK-ENT_2024-05.csv": {
+      "rows": 250,
+      "sha256": "8459f0ac5c31b5d38d7c93c47d220cd5050935fd1f0a872007274c3266c839ea"
+    },
+    "sources/payroll_UK-ENT_2024-06.csv": {
+      "rows": 251,
+      "sha256": "78121efc907ffa8ef3cea33dd3c1e98f87cfa839339cbf037c7d63edd1f8adbc"
+    },
+    "sources/payroll_UK-ENT_2024-07.csv": {
+      "rows": 252,
+      "sha256": "7b6e779890a2ed3ae6058777a8e428a11fb21526c553f64ab02ee89507af9cad"
+    },
+    "sources/payroll_UK-ENT_2024-08.csv": {
+      "rows": 252,
+      "sha256": "befc48d731617ce10308057d6e7e48b6f7cb2409daea6ad2ae3c13ce894b0293"
+    },
+    "sources/payroll_UK-ENT_2024-09.csv": {
+      "rows": 256,
+      "sha256": "9d1be84cc1af463ae587071f72a7bc59c999ff56edcc654e400c828b750a50d6"
+    },
+    "sources/payroll_UK-ENT_2024-10.csv": {
+      "rows": 257,
+      "sha256": "66f599a20449658c430f76b29cbb1fe8e627d7879293e0561d67cb9579b4286d"
+    },
+    "sources/payroll_UK-ENT_2024-11.csv": {
+      "rows": 261,
+      "sha256": "5234f113c553df4bdbfb3a51bff66e08cbbdd7df1e7bb4919aedce7ead8c9843"
+    },
+    "sources/payroll_UK-ENT_2024-12.csv": {
+      "rows": 266,
+      "sha256": "b9d407f54ab7f645a11cee7aecc565c88debc276050761e635b29f8adca851f1"
+    },
+    "sources/payroll_UK-ENT_2025-01.csv": {
+      "rows": 273,
+      "sha256": "b2863442f7ed6d2fcc231c0bc98ffd43dfd53c9c03b4ddff2b21d8591ee4124d"
+    },
+    "sources/payroll_UK-ENT_2025-02.csv": {
+      "rows": 273,
+      "sha256": "fadbe3ae2515cffcb6e4d31dcd18dde08554e03d6a56737b9fb501425db87e64"
+    },
+    "sources/payroll_UK-ENT_2025-03.csv": {
+      "rows": 271,
+      "sha256": "96be5d63c950d2211dc8249c6b84715cd26617a3951b456f8e97fe65e72ab6d3"
+    },
+    "sources/payroll_UK-ENT_2025-04.csv": {
+      "rows": 273,
+      "sha256": "dd6eb841254665ea4ca3538c87fda004c6f1b20a23bbf7fd2ebb729f3010a48e"
+    },
+    "sources/payroll_UK-ENT_2025-05.csv": {
+      "rows": 278,
+      "sha256": "512ed4bbf6714e6d2345af086a78db902ce62f613f1c44dbabd5e84e59af2879"
+    },
+    "sources/payroll_UK-ENT_2025-06.csv": {
+      "rows": 279,
+      "sha256": "f06169ecc7926c7fd8066c1d08f4a4b333991f2077b63b488a9212e9921a70f7"
+    },
+    "sources/payroll_UK-ENT_2025-07.csv": {
+      "rows": 277,
+      "sha256": "c829b3ce03b174bee03c2e55af74720f0d5533903caec8ccae98b2afb265371d"
+    },
+    "sources/payroll_UK-ENT_2025-08.csv": {
+      "rows": 285,
+      "sha256": "c3adb697a383b3019cd6b125ec1e8cc7c23639d611b8af8603f572cc4ccffa5d"
+    },
+    "sources/payroll_UK-ENT_2025-09.csv": {
+      "rows": 290,
+      "sha256": "240a05fbeb61b7c85e4b12fc720d8697f9d2618c96040c796f1fc9f07a1e0d9e"
+    },
+    "sources/payroll_UK-ENT_2025-10.csv": {
+      "rows": 291,
+      "sha256": "087b165939d24052366c24a643bafef0f59371e2fc9e8755254521aa1380e99f"
+    },
+    "sources/payroll_UK-ENT_2025-11.csv": {
+      "rows": 293,
+      "sha256": "e4652144e007f4bc21b13da2a15d9f5570c2eea7424f2667f4c7c68a6b4c8b14"
+    },
+    "sources/payroll_UK-ENT_2025-12.csv": {
+      "rows": 293,
+      "sha256": "3001ff4dd4b97faa8a70947008d13421ed9482cb3d6a00006d0afb692dfb0b50"
+    },
+    "sources/payroll_UK-ENT_2026-01.csv": {
+      "rows": 298,
+      "sha256": "f3e4e23a862a919bb4208ed712afd5e8966d72efdd5f2b9a939b68da5eb09c88"
+    },
+    "sources/payroll_UK-ENT_2026-02.csv": {
+      "rows": 297,
+      "sha256": "90a2c9f5e30ff123a06feaf0c90336bb503d0d4caf042f43c4eea05cc7358937"
+    },
+    "sources/payroll_UK-ENT_2026-03.csv": {
+      "rows": 306,
+      "sha256": "9c787ebb6c6dc71416dba3074ef57cd6d71d3945d58a9d21771700574c5b6c9f"
+    },
+    "sources/payroll_UK-ENT_2026-04.csv": {
+      "rows": 310,
+      "sha256": "75e211e101cbc7441e26dbc4997c3002419a0ef4141ae6e84df6a54f3ddeaba5"
+    },
+    "sources/payroll_UK-ENT_2026-05.csv": {
+      "rows": 309,
+      "sha256": "afc073721ddb363d13773e004a68d3c482d30e5dcb7e6540bee0d2a83a45b7b7"
+    },
+    "sources/payroll_UK-ENT_2026-06.csv": {
+      "rows": 313,
+      "sha256": "971c687a082d0ec548f6b164388358e9372b975aa16e5bc03b04d9496e6c69f1"
+    },
+    "sources/payroll_UK-ENT_2026-07.csv": {
+      "rows": 314,
+      "sha256": "420e0c739d7daeca915eeb9256edccdbe3cd236ae253c9db656ec0a2b2516013"
+    },
+    "sources/payroll_UK-ENT_2026-08.csv": {
+      "rows": 318,
+      "sha256": "97fa4810aed4be665ff276c9662d3e4cc41426d1038ca7507356a3fee7eeba7f"
+    },
+    "sources/payroll_US-ENT_2023-04.csv": {
+      "rows": 1291,
+      "sha256": "e48c86ddf2c908b9b41c8c17ff8e251b5d520f209ad4516fb99400796074fbc7"
+    },
+    "sources/payroll_US-ENT_2023-05.csv": {
+      "rows": 1289,
+      "sha256": "7b276cbe22320b14a36e8dfa0760b97a993f44d00d47248dd0fa9d786760edd6"
+    },
+    "sources/payroll_US-ENT_2023-06.csv": {
+      "rows": 1288,
+      "sha256": "e900938bd434b6ff3662fd6e3d4c8c68d62d17e61e1b5e789bd4dd5ddc65d482"
+    },
+    "sources/payroll_US-ENT_2023-07.csv": {
+      "rows": 1291,
+      "sha256": "ff0a481514d06bf1eb029777322526309492c6b97ef9ae1aae76524d4a2af190"
+    },
+    "sources/payroll_US-ENT_2023-08.csv": {
+      "rows": 1292,
+      "sha256": "029a715f4c3016f04377e416b51cec5c5752e5e96a13007bb85c225fd0de6d63"
+    },
+    "sources/payroll_US-ENT_2023-09.csv": {
+      "rows": 1302,
+      "sha256": "e712272578d36db748c3528aef6cc84bb582e35b960f7d67bf999e7005c0f6c9"
+    },
+    "sources/payroll_US-ENT_2023-10.csv": {
+      "rows": 1303,
+      "sha256": "e49eac9f0d03225756bd2be7e6b2e8577a7fadc73236d1881fdb0e2cbc49f65b"
+    },
+    "sources/payroll_US-ENT_2023-11.csv": {
+      "rows": 1307,
+      "sha256": "ff83e525b800742e814b6b8c003f024fa48d8ba708ddceaa61e2ebe89d5d0ffd"
+    },
+    "sources/payroll_US-ENT_2023-12.csv": {
+      "rows": 1311,
+      "sha256": "fac50eab2b745e7f0079a15e230c2e48f8481bb25c7de5efbdc4e63433871f6b"
+    },
+    "sources/payroll_US-ENT_2024-01.csv": {
+      "rows": 1320,
+      "sha256": "83b41d7663106fe3288377b6be77bb5594e2f2855fd2652579defc6effd2d49e"
+    },
+    "sources/payroll_US-ENT_2024-02.csv": {
+      "rows": 1317,
+      "sha256": "299a072049d67e087169143bb93da73a14e382af1250a1aee14e81becfb1b142"
+    },
+    "sources/payroll_US-ENT_2024-03.csv": {
+      "rows": 1309,
+      "sha256": "904e16f4514ba5d5cddafedb978ac3039ee7ce5ebfa160caae36d5b877c4be37"
+    },
+    "sources/payroll_US-ENT_2024-04.csv": {
+      "rows": 1298,
+      "sha256": "16aa14dabde2362b5a767f7c3e02361530fa7c63056fd99a4cccedb0796fca89"
+    },
+    "sources/payroll_US-ENT_2024-05.csv": {
+      "rows": 1296,
+      "sha256": "f5571cc689e220ec8d449a29f6e3c21f830cd1452019b714c8c252a30e0e8b9b"
+    },
+    "sources/payroll_US-ENT_2024-06.csv": {
+      "rows": 1296,
+      "sha256": "05e4bd30cf738d1d244effe06b1aab9fa390a80667059cbb94dec53dd5b6fab5"
+    },
+    "sources/payroll_US-ENT_2024-07.csv": {
+      "rows": 1295,
+      "sha256": "c028a2c3520d73f8a51867f00756b13d4bccb67479cdcd7c4f8635b9767522ca"
+    },
+    "sources/payroll_US-ENT_2024-08.csv": {
+      "rows": 1295,
+      "sha256": "88ce53f143e5f57d1c8c80f56691a0f45ce39e2a6d5d67c1dbb0ef9573d27e5c"
+    },
+    "sources/payroll_US-ENT_2024-09.csv": {
+      "rows": 1292,
+      "sha256": "746640cddfde4725a1f0ec9089bd559bb2f3d37b346718749fc7aa43388be704"
+    },
+    "sources/payroll_US-ENT_2024-10.csv": {
+      "rows": 1288,
+      "sha256": "3bb7e39b49b5a501c386da747e3ccf98761a04f067428496267acb2042604b0a"
+    },
+    "sources/payroll_US-ENT_2024-11.csv": {
+      "rows": 1295,
+      "sha256": "3fa6f77fa50e25498053f12835ff6343310d2d2bfeb3244a9b841836743f440f"
+    },
+    "sources/payroll_US-ENT_2024-12.csv": {
+      "rows": 1293,
+      "sha256": "f0563664b2a2af5c06ff9639aec2d0534968ab773f0c86dd4a272ce08b5b3407"
+    },
+    "sources/payroll_US-ENT_2025-01.csv": {
+      "rows": 1292,
+      "sha256": "5b667a69cf2a5c6b3cbaa62ee7d32771ed2fd0cc38c5a42b82be4a51f8e0d56d"
+    },
+    "sources/payroll_US-ENT_2025-02.csv": {
+      "rows": 1297,
+      "sha256": "a8a2858883021acbf075a62de77311f9f1bc209160423d7dd4525015a0ca3c4e"
+    },
+    "sources/payroll_US-ENT_2025-03.csv": {
+      "rows": 1286,
+      "sha256": "338d3f9eef9be5ef09da949dd36c3b295548ec6efa967f1886a34dc3026525c6"
+    },
+    "sources/payroll_US-ENT_2025-04.csv": {
+      "rows": 1286,
+      "sha256": "996c34cbcf5a8dca64c796fe981966083421cdd4b46d8b855032b28d2fff30f5"
+    },
+    "sources/payroll_US-ENT_2025-05.csv": {
+      "rows": 1289,
+      "sha256": "65417ac8390876ff5a0bac4214a11c163f23169c185a2e8556b3d8ae29c1e73a"
+    },
+    "sources/payroll_US-ENT_2025-06.csv": {
+      "rows": 1299,
+      "sha256": "f839b0ca628ee146ce5fc0551372eb667abaf3180ed9f4e7a984dec1c4c651dd"
+    },
+    "sources/payroll_US-ENT_2025-07.csv": {
+      "rows": 1309,
+      "sha256": "e7ba7038eab04cf717ff1a8174f0ac25aafef4f7170301215c06506a693066af"
+    },
+    "sources/payroll_US-ENT_2025-08.csv": {
+      "rows": 1313,
+      "sha256": "b1bccfffe6007485037ec84bfbd71d796083dd9eace13fa913f698ba707a4299"
+    },
+    "sources/payroll_US-ENT_2025-09.csv": {
+      "rows": 1316,
+      "sha256": "775e0d170094ae767b34d1eabad8d5d4cc1bd1aa38fad59a1b1d8001058c4bc5"
+    },
+    "sources/payroll_US-ENT_2025-10.csv": {
+      "rows": 1326,
+      "sha256": "a0b15af191ec598ae4d1361ab06d00ce5641f9248abb7eb4995d0d7c76478fa3"
+    },
+    "sources/payroll_US-ENT_2025-11.csv": {
+      "rows": 1336,
+      "sha256": "6365659fb64168e930f2750b470d6950532f417ec920de0e5cd5942a9a977f94"
+    },
+    "sources/payroll_US-ENT_2025-12.csv": {
+      "rows": 1345,
+      "sha256": "984f1b330e975c9ea5d274da7534fe1b70aee0d9c870317fb7a2a45cba8ce199"
+    },
+    "sources/payroll_US-ENT_2026-01.csv": {
+      "rows": 1351,
+      "sha256": "f205485b4e4fbd4e1ba27870365191bbadee6d6d7d486719c9e89a87838c7cfc"
+    },
+    "sources/payroll_US-ENT_2026-02.csv": {
+      "rows": 1360,
+      "sha256": "e5afd056b5becead4cccd9922876adb2dc2a1de98df25abe401cb5a3d87d8041"
+    },
+    "sources/payroll_US-ENT_2026-03.csv": {
+      "rows": 1353,
+      "sha256": "b185683a5a4cd5ce7f7cedbd29aa30455a4845b0290dedb80108d8426308b493"
+    },
+    "sources/payroll_US-ENT_2026-04.csv": {
+      "rows": 1355,
+      "sha256": "95bb21a879f73e82551e438b24f9f4cf8c4c6420d8f5472266992e54c47cccf5"
+    },
+    "sources/payroll_US-ENT_2026-05.csv": {
+      "rows": 1355,
+      "sha256": "a620116d2b398e0c3607a5289ef449a3ae0fcacbb1e26a5aa0a692b9af326c1c"
+    },
+    "sources/payroll_US-ENT_2026-06.csv": {
+      "rows": 1353,
+      "sha256": "e547f7aea0e3fff0599e019b435c2285a389df38fc318e761337b67e7fd410a8"
+    },
+    "sources/payroll_US-ENT_2026-07.csv": {
+      "rows": 1355,
+      "sha256": "0b601ad34fd5fd7e113eb03c5def3a3f69311924a252c988e38128368e38a82f"
+    },
+    "sources/payroll_US-ENT_2026-08.csv": {
+      "rows": 1366,
+      "sha256": "b16d336637405ac63de8e95d56a550fc30de7bb807e189bbf2147c92562309a3"
+    },
+    "sources/ref_bands.csv": {
+      "rows": 680,
+      "sha256": "44c0a6ed609b7011f4f984e3d3e734e44b4d917c750b3aa60fbe9fd2502f429d"
+    },
+    "truth/outcomes.csv": {
+      "rows": 1146,
+      "sha256": "9d70a228dc2ea1eded351b61e176439ee68c52fd7557d32a5f80bf1de78edf7f"
+    }
+  },
+  "generator_version": "1",
+  "hazard_intercepts": {
+    "inv": -6.4,
+    "promo": -3.6,
+    "ret": -8.2,
+    "vol": -5.5
+  },
+  "hazard_intercepts_start": {
+    "inv": -6.4,
+    "promo": -3.9,
+    "ret": -8.2,
+    "vol": -5.2
+  },
+  "knobs": {
+    "contagion": true,
+    "drift": true,
+    "engineering_fixed_term_share": 0.8,
+    "interaction": true,
+    "latent_sd": 0.7,
+    "promo_effect": "smooth",
+    "sigma_org": 0.2,
+    "sigma_team": 0.45
+  },
+  "label": "synthetic",
+  "profile": "canonical",
+  "realized": {
+    "annual_rates_per_100": {
+      "involuntary": 3.53,
+      "retirement": 0.72,
+      "voluntary": 12.97
+    },
+    "audit_batch_mix": {
+      "FT_END": 1,
+      "VOL_RESIGN": 11
+    },
+    "average_headcount": 1901.7,
+    "baseline_headcount": 1820,
+    "closing_headcount": 2018,
+    "cycle_promotion_rates": {
+      "2023-09-01": 0.1395,
+      "2024-03-01": 0.1361,
+      "2024-09-01": 0.117,
+      "2025-03-01": 0.1286,
+      "2025-09-01": 0.1239,
+      "2026-03-01": 0.1163,
+      "2026-09-01": 0.1359
+    },
+    "departures": {
+      "involuntary": 235,
+      "retirement": 48,
+      "voluntary": 863
+    },
+    "distinct_people": 3116,
+    "engineering_fixed_term_at_end": 15,
+    "ft_end_exits": 67,
+    "hires": 1344,
+    "hires_by_month_min_max": [
+      32,
+      32
+    ],
+    "hris_future_records": 8,
+    "hris_records": 7942,
+    "new_hires": 1296,
+    "offers": {
+      "accepted": 1344,
+      "declined": 170
+    },
+    "payroll_defect_lines": 353,
+    "payroll_files": 126,
+    "planted": {
+      "audit_batch_manager_correction": 9,
+      "audit_batch_termination": 12,
+      "duplicate": 60,
+      "late_termination": 75,
+      "manager_change_to_other": 20,
+      "manager_revert": 20,
+      "reclassified_reason": 25,
+      "rescinded_termination": 12,
+      "value_correction": 140
+    },
+    "promotions": {
+      "promotions_cycle": 1565,
+      "promotions_offcycle": 149
+    },
+    "rehires": 48,
+    "reorganizations": {
+      "merge": 3,
+      "move": 3,
+      "restructure": 1,
+      "split": 2
+    },
+    "requisitions": {
+      "cancelled": 46,
+      "filled": 1344,
+      "open": 34
+    },
+    "requisitions_by_type": {
+      "backfill": 795,
+      "growth": 629
+    },
+    "successions": 47,
+    "teams_at_end": 109,
+    "transfers": 341
+  },
+  "seed": 20261011,
+  "world_sha256": "ff27c141906c4303195270900d84411c019599d980ea1cd1ca5d4bb3990fe8ed"
+}

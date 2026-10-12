@@ -31,8 +31,25 @@ export interface LlmMeasureReport {
   machine?: { stopped_by: string | null; before: { swapUsedBytes: number } | null; after: { swapUsedBytes: number } | null };
 }
 
-export type Report = LlmMeasureReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure"];
+export interface OracleCoverageReport {
+  kind: "oracle-coverage";
+  command: string;
+  date: string;
+  profile: string;
+  seed: number;
+  level: number;
+  band: [number, number];
+  n_futures: number;
+  origins: string[];
+  cells: number;
+  coverage: number;
+  within_band: boolean;
+  by_cause_horizon: Record<string, { cells: number; coverage: number }>;
+  seconds: number;
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -66,12 +83,36 @@ export function renderLlmMeasure(file: string, r: LlmMeasureReport): string {
   return lines.join("\n");
 }
 
+const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+
+export function renderOracleCoverage(file: string, r: OracleCoverageReport): string {
+  const lines: string[] = [];
+  const first = r.origins[0] ?? "";
+  const last = r.origins[r.origins.length - 1] ?? "";
+  lines.push(
+    `**Oracle coverage (C5)** (\`${r.command}\`, ${r.date}, [${file}](${file})). Synthetic world (\`${r.profile}\`, seed ${r.seed}). The forward-simulation oracle's ${Math.round(r.level * 100)}% intervals (${r.n_futures.toLocaleString("en-US")} futures each) against the realized counts at ${r.origins.length} quarterly origins from ${first} to ${last}, for the company and each organization, by cause and horizon: ${pct(r.coverage)} of ${r.cells} cells (target ${pct(r.band[0])} to ${pct(r.band[1])}; ${r.within_band ? "met" : "not met"}).`,
+  );
+  lines.push("");
+  lines.push("| Cause | 1 month | 3 months | 6 months |");
+  lines.push("|---|---|---|---|");
+  for (const cause of ["voluntary", "involuntary", "retirement"]) {
+    const cell = (h: number) => {
+      const c = r.by_cause_horizon[`${cause}|${h}`];
+      return c ? `${pct(c.coverage)} of ${c.cells}` : "n/a";
+    };
+    lines.push(`| ${cause} | ${cell(1)} | ${cell(3)} | ${cell(6)} |`);
+  }
+  lines.push("");
+  lines.push("Both the oracle and the realized counts come from the generator, so this checks that the oracle reproduces the world's own process; it says nothing about real-world accuracy. For small causes the counts are discrete, so an equal-tailed interval can cover more than its nominal level.");
+  return lines.join("\n");
+}
+
 export function renderResults(reports: { file: string; report: Report }[]): string {
   if (reports.length === 0) return "No recorded results yet.";
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

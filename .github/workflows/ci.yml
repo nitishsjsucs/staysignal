@@ -37,3 +37,6 @@ jobs:
       - run: uv run --locked --project engine ruff check engine/src engine/tests
       - run: uv run --locked --project engine ruff format --check engine/src engine/tests
       - run: uv run --locked --project engine pytest engine/tests -q
+      # C1 across platforms: regenerate the canonical world on Linux and compare every macOS-made pin
+      - run: uv run --locked --project engine staysignal world generate --profile canonical --out var/world
+      - run: uv run --locked --project engine staysignal world verify --manifest data/world/manifest.json --dir var/world

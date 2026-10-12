@@ -38,6 +38,38 @@ def cmd_world_generate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_world_verify(args: argparse.Namespace) -> int:
+    """Compares a generated world's manifest with the committed pins (SPEC 6: macOS-made pins checked on Linux)."""
+    from staysignal.world.pins import compare
+
+    problems = compare(
+        json.loads(Path(args.manifest).read_text()), json.loads((Path(args.dir) / "manifest.json").read_text())
+    )
+    for p in problems:
+        print(p)
+    print(f"world verify: {'ok' if not problems else f'{len(problems)} difference(s)'} against {args.manifest}")
+    return 0 if not problems else 1
+
+
+def cmd_eval_oracle_coverage(args: argparse.Namespace) -> int:
+    import datetime as dt
+
+    from staysignal.evaluate.oracle_coverage import coverage
+    from staysignal.world.spec import PROFILES
+
+    report = coverage(PROFILES[args.profile], n_futures=args.futures, workers=args.workers)
+    report = {
+        "command": f"uv run --project engine staysignal eval oracle-coverage --futures {args.futures}",
+        "date": dt.date.today().isoformat(),
+        **report,
+    }
+    out = Path(args.out or f"results/oracle-coverage-{report['date']}.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, indent=1, sort_keys=False) + "\n")
+    print(json.dumps({k: v for k, v in report.items() if k != "detail"}, indent=2))
+    return 0 if report["within_band"] else 1
+
+
 def cmd_demo_build(args: argparse.Namespace) -> int:
     from staysignal.service.demo import build
 
@@ -56,6 +88,18 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--seed", type=int, default=None)
     gen.add_argument("--out", default="var/world")
     gen.set_defaults(func=cmd_world_generate)
+    ver = wsub.add_parser("verify", help="compare a generated world with the committed pins")
+    ver.add_argument("--manifest", default="data/world/manifest.json")
+    ver.add_argument("--dir", default="var/world")
+    ver.set_defaults(func=cmd_world_verify)
+    ev = sub.add_parser("eval", help="recorded evaluations (synthetic world)")
+    esub = ev.add_subparsers(dest="eval_command", required=True)
+    oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")
+    oc.add_argument("--profile", default="canonical", choices=["canonical", "small"])
+    oc.add_argument("--futures", type=int, default=2000)
+    oc.add_argument("--workers", type=int, default=None)
+    oc.add_argument("--out", default=None)
+    oc.set_defaults(func=cmd_eval_oracle_coverage)
     demo = sub.add_parser("demo", help="demo state")
     dsub = demo.add_subparsers(dest="demo_command", required=True)
     db = dsub.add_parser("build", help="train or load models, score the published runs, export API fixtures")

@@ -199,6 +199,10 @@ class Simulator:
         self.team_rows: list[dict] = []
         self.month_hc: dict[str, int] = {}
         self.cycle_rates: dict[str, float] = {}
+        self.write_payroll = True
+        self.shock_salt = ""  # the oracle's futures draw fresh shocks for quarters not yet realized
+        self.rehire_months: dict[int, int] = {}
+        self.next_month = 0
         s = profile.seed
         self.r_org = stream(s, "org")
         self.r_people = stream(s, "people")
@@ -502,13 +506,17 @@ class Simulator:
 
     def shock_org(self, q: str) -> float:
         if q not in self.shocks["org"]:
-            self.shocks["org"][q] = stream(self.p.seed, f"shock:org:{q}").lognormal_mean_one(self.p.sigma_org)
+            self.shocks["org"][q] = stream(self.p.seed, f"shock:org:{q}{self.shock_salt}").lognormal_mean_one(
+                self.p.sigma_org
+            )
         return self.shocks["org"][q]
 
     def shock_team(self, tid: str, q: str) -> float:
         key = f"{tid}:{q}"
         if key not in self.shocks["team"]:
-            self.shocks["team"][key] = stream(self.p.seed, f"shock:team:{key}").lognormal_mean_one(self.p.sigma_team)
+            self.shocks["team"][key] = stream(self.p.seed, f"shock:team:{key}{self.shock_salt}").lognormal_mean_one(
+                self.p.sigma_team
+            )
         return self.shocks["team"][key]
 
     def hazard_inputs(self, person: Person, m: int, c: date) -> hazards.HazardInputs:
@@ -539,66 +547,79 @@ class Simulator:
         )
 
     # ---------- monthly loop ----------
-    def run(self) -> World:
+    def setup(self) -> None:
+        """Builds the organization and the migration baseline; month 0 is next."""
         self.build_org()
         self.build_baseline()
+        self.rehire_months = self._rehire_schedule()
+        self.next_month = 0
+
+    def step(self) -> list[tuple[Person, date, str, str]]:
+        """Simulates one calendar month from the state at its first day and returns the month's exits."""
         p = self.p
-        rehire_months = self._rehire_schedule()
-        for m in range(p.months):
-            c = add_months(p.start, m)
-            nxt = add_months(c, 1)
-            self.headcount_snap[m] = defaultdict(int)
-            self.org_snap[m] = defaultdict(int)
-            for person in self.active_people():
-                self.headcount_snap[m][person.team] += 1
-                self.org_snap[m][self.teams[person.team].org] += 1
-            self.month_hc = dict(self.headcount_snap[m])
-            start_active = self.active_people()
-            # 1. hazards from the state at the start of the month
-            exits: list[tuple[Person, date, str, str]] = []
-            for person in start_active:
-                x = self.hazard_inputs(person, m, c)
-                pv, pi, pr = hazards.cause_probabilities(
-                    hazards.eta_voluntary(x, self.knobs), hazards.eta_involuntary(x), hazards.eta_retirement(x)
-                )
-                u = self.r_hazard.uniform()
-                day = 1 + self.r_days.below(days_in_month(c))
-                end = c + timedelta(days=day)
-                if u < pv:
-                    exits.append((person, end, "voluntary", "VOL_RESIGN"))
-                elif u < pv + pi:
-                    reason = "INVOL_POSITION" if self.r_hazard.uniform() < 0.4 else "INVOL_PERFORMANCE"
-                    exits.append((person, end, "involuntary", reason))
-                elif u < pv + pi + pr:
-                    exits.append((person, end, "retirement", "RETIRE"))
-            exiting = {e[0].en for e in exits}
-            # fixed-term contract ends in this month
-            for person in start_active:
-                if person.en in exiting or person.emp_type != "fixed_term" or person.ft_end is None:
-                    continue
-                if c <= person.ft_end < nxt:
-                    self.contract_end(person, exits, exiting)
-            # 2. scheduled day-one events
-            for r in p.reorgs:
-                if c <= r.effective < nxt:
-                    self.apply_reorg(r)
-            if c in p.promotion_cycles:
-                self.promotion_cycle(c, exiting, cycle=True)
-            if c in p.merit_cycles:
-                self.merit_cycle(c)
-            # 3. off-cycle promotions and transfers
-            self.promotion_cycle(c, exiting, cycle=False)
-            self.transfers(c, exiting)
-            # 4. exits, in date order, with manager succession
-            for person, end, cause, reason in sorted(exits, key=lambda e: (e[1], e[0].en)):
-                self.exit(person, end, cause, reason)
-            # 5. hires
-            self.hires(c, m, rehire_months.get(m, 0))
-            # 6. payroll lines for the month
-            self.payroll_month(c, nxt)
-            self.monthly.append(
-                {"month": c, "headcount_start": len(start_active), "exits": len(exits), "hires": self.p.hires_per_month}
+        m = self.next_month
+        c = add_months(p.start, m)
+        nxt = add_months(c, 1)
+        self.headcount_snap[m] = defaultdict(int)
+        self.org_snap[m] = defaultdict(int)
+        for person in self.active_people():
+            self.headcount_snap[m][person.team] += 1
+            self.org_snap[m][self.teams[person.team].org] += 1
+        self.month_hc = dict(self.headcount_snap[m])
+        start_active = self.active_people()
+        # 1. hazards from the state at the start of the month
+        exits: list[tuple[Person, date, str, str]] = []
+        for person in start_active:
+            x = self.hazard_inputs(person, m, c)
+            pv, pi, pr = hazards.cause_probabilities(
+                hazards.eta_voluntary(x, self.knobs), hazards.eta_involuntary(x), hazards.eta_retirement(x)
             )
+            u = self.r_hazard.uniform()
+            day = 1 + self.r_days.below(days_in_month(c))
+            end = c + timedelta(days=day)
+            if u < pv:
+                exits.append((person, end, "voluntary", "VOL_RESIGN"))
+            elif u < pv + pi:
+                reason = "INVOL_POSITION" if self.r_hazard.uniform() < 0.4 else "INVOL_PERFORMANCE"
+                exits.append((person, end, "involuntary", reason))
+            elif u < pv + pi + pr:
+                exits.append((person, end, "retirement", "RETIRE"))
+        exiting = {e[0].en for e in exits}
+        # fixed-term contract ends in this month
+        for person in start_active:
+            if person.en in exiting or person.emp_type != "fixed_term" or person.ft_end is None:
+                continue
+            if c <= person.ft_end < nxt:
+                self.contract_end(person, exits, exiting)
+        # 2. scheduled day-one events
+        for r in p.reorgs:
+            if c <= r.effective < nxt:
+                self.apply_reorg(r)
+        if c in p.promotion_cycles:
+            self.promotion_cycle(c, exiting, cycle=True)
+        if c in p.merit_cycles:
+            self.merit_cycle(c)
+        # 3. off-cycle promotions and transfers
+        self.promotion_cycle(c, exiting, cycle=False)
+        self.transfers(c, exiting)
+        # 4. exits, in date order, with manager succession
+        for person, end, cause, reason in sorted(exits, key=lambda e: (e[1], e[0].en)):
+            self.exit(person, end, cause, reason)
+        # 5. hires
+        self.hires(c, m, self.rehire_months.get(m, 0))
+        # 6. payroll lines for the month
+        if self.write_payroll:
+            self.payroll_month(c, nxt)
+        self.monthly.append(
+            {"month": c, "headcount_start": len(start_active), "exits": len(exits), "hires": self.p.hires_per_month}
+        )
+        self.next_month = m + 1
+        return exits
+
+    def run(self) -> World:
+        self.setup()
+        for _ in range(self.p.months):
+            self.step()
         self.finish_requisitions()
         self.counts_extra = {"cycle_promotion_rates": self.cycle_rates}
         world = World(

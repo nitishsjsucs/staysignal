@@ -212,6 +212,15 @@ def cmd_eval_backtest(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_eval_effects(args: argparse.Namespace) -> int:
+    from staysignal.evaluate.report import run_effects
+
+    repo, var = _repo_var()
+    p = run_effects(var / "world", repo / "models", repo / "results")
+    print(json.dumps({"written": str(p.relative_to(repo))}))
+    return 0
+
+
 def cmd_eval_export(args: argparse.Namespace) -> int:
     """Writes the Trust page's data from the latest recorded results (the API fixture and the engine's copy)."""
     from staysignal.evaluate.report import evaluation_fixture
@@ -346,6 +355,10 @@ def build_parser() -> argparse.ArgumentParser:
     bt.add_argument("--futures", type=int, default=2000)
     bt.add_argument("--workers", type=int, default=None)
     bt.set_defaults(func=cmd_eval_backtest)
+    ef = esub.add_parser(
+        "effects", help="feature effects (partial dependence) for the published model, recorded in results/"
+    )
+    ef.set_defaults(func=cmd_eval_effects)
     ex = esub.add_parser("export", help="the Trust page's data from the latest recorded results")
     ex.set_defaults(func=cmd_eval_export)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")

@@ -219,6 +219,7 @@ export interface EvaluationFixture {
   backtest: { design: string; levels: Record<string, EvaluationLevel>; provisional_windows_excluded: number; entries: EvaluationEntry[] };
   calibration: { design: string; n: number; ici: number; e50: number; e90: number; reliability: { bin: number; n: number; predicted: number; observed: number; observed_i80: [number, number] }[] } | null;
   comparison: { design: string; origins: string[]; models: string[]; summary: Record<string, { level: string; horizon_months: number; windows: number } & Record<string, ComparisonMetrics | string | number>> };
+  effects?: { design: string; population: number; effects: Record<string, { label: string; points: { x: number; cif: number; lo: number; hi: number }[] }> } | null;
 }
 
 export type ChangeFactor = "calendar" | "composition" | "input_data" | "model" | "definition";

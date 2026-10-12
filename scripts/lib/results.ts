@@ -116,8 +116,16 @@ export interface AgentEvalReport {
   };
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval"];
+export interface EffectsReport {
+  kind: "effects";
+  command: string;
+  date: string;
+  population: number;
+  effects: Record<string, { label: string; points: { x: number; cif: number; lo: number; hi: number }[] }>;
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -224,12 +232,24 @@ export function renderAgentEval(file: string, r: AgentEvalReport): string {
   ].join("\n");
 }
 
+export function renderEffects(file: string, r: EffectsReport): string {
+  const lines = [`**Feature effects** (\`${r.command}\`, ${r.date}, [${file}](${file})): the mean predicted 3-month voluntary probability over the ${r.population.toLocaleString("en-US")} people of the 2026-10-01 population when one feature is set to each value; associational, not causal. ${SYNTHETIC}`, ""];
+  lines.push("| Feature | Lowest value | Highest value |");
+  lines.push("|---|---|---|");
+  for (const f of Object.values(r.effects)) {
+    const a = f.points[0]!;
+    const b = f.points[f.points.length - 1]!;
+    lines.push(`| ${f.label} | ${a.x}: ${(a.cif * 100).toFixed(1)}% | ${b.x}: ${(b.cif * 100).toFixed(1)}% |`);
+  }
+  return lines.join("\n");
+}
+
 export function renderResults(reports: { file: string; report: Report }[]): string {
   if (reports.length === 0) return "No recorded results yet.";
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

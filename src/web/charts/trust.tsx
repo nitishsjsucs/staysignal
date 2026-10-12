@@ -293,3 +293,64 @@ export function PitHistogram({ bins, height = 160 }: { bins: number[]; height?: 
     </div>
   );
 }
+
+/** Question: which conditions are associated with higher predicted risk (not causes)? One feature per panel. */
+export function EffectLine({ label, points, binary = false, height = 170 }: { label: string; points: { x: number; cif: number; lo: number; hi: number }[]; binary?: boolean; height?: number }) {
+  const [ref, width] = useWidth<HTMLDivElement>();
+  const { tip, show, hide } = useTooltip();
+  const m = { top: 22, right: 12, bottom: 24, left: 44 };
+  const iw = Math.max(80, width - m.left - m.right);
+  const ih = height - m.top - m.bottom;
+  const xs = points.map((p) => p.x);
+  const x = binary ? scaleBand<number>().domain(xs).range([0, iw]).padding(0.5) : null;
+  const xl = scaleLinear().domain([Math.min(...xs), Math.max(...xs)]).range([0, iw]);
+  const px = (v: number) => (x ? (x(v) ?? 0) + x.bandwidth() / 2 : xl(v));
+  const top = Math.max(...points.map((p) => p.hi)) * 1.15;
+  const y = scaleLinear().domain([0, top]).range([ih, 0]).nice();
+  const bandPath = area<{ x: number; lo: number; hi: number }>().x((p) => px(p.x)).y0((p) => y(p.lo)).y1((p) => y(p.hi)).curve(curveMonotoneX)(points) ?? "";
+  const linePath = line<{ x: number; cif: number }>().x((p) => px(p.x)).y((p) => y(p.cif)).curve(curveMonotoneX)(points) ?? "";
+  const fmtX = (v: number) => (binary ? (v ? "Yes" : "No") : Number.isInteger(v) ? String(v) : v.toFixed(2));
+  return (
+    <div ref={ref}>
+      <svg className="chart" width={width} height={height} role="img" aria-label={`${label}: predicted 3-month departure probability from ${pct(points[0]!.cif, 1)} to ${pct(points[points.length - 1]!.cif, 1)}`}>
+        <text x={0} y={12} style={{ fill: "var(--ink)", fontWeight: 600 }}>{label}</text>
+        <g transform={`translate(${m.left},${m.top})`}>
+          {y.ticks(3).map((t) => (
+            <g key={t}>
+              <line className="grid-line" x1={0} x2={iw} y1={y(t)} y2={y(t)} />
+              <text x={-6} y={y(t)} dy="0.32em" textAnchor="end">{pct(t, 1)}</text>
+            </g>
+          ))}
+          {binary ? (
+            points.map((p) => (
+              <g key={p.x}>
+                <line x1={px(p.x)} x2={px(p.x)} y1={y(p.lo)} y2={y(p.hi)} stroke="var(--series-vol)" strokeWidth={6} strokeOpacity={0.35} strokeLinecap="round" />
+                <circle cx={px(p.x)} cy={y(p.cif)} r={5} fill="var(--series-vol)" stroke="var(--surface)" strokeWidth={2} />
+              </g>
+            ))
+          ) : (
+            <>
+              <path d={bandPath} fill="var(--series-vol-band80)" />
+              <path d={linePath} fill="none" stroke="var(--series-vol)" strokeWidth={2} />
+            </>
+          )}
+          {points.map((p) => (
+            <g key={`t${p.x}`} onPointerMove={(e) => show(e, (
+              <>
+                <div className="tt-title">{label}: {fmtX(p.x)}</div>
+                <TipRow name="Mean predicted 3-month probability" value={pct(p.cif, 2)} line="var(--series-vol)" />
+                <TipRow name="80% band (parameters)" value={`${pct(p.lo, 2)} to ${pct(p.hi, 2)}`} />
+              </>
+            ))} onPointerLeave={hide}>
+              <rect x={px(p.x) - 10} y={0} width={20} height={ih} fill="transparent" />
+              <text x={px(p.x)} y={ih + 16} textAnchor="middle">{fmtX(p.x)}</text>
+            </g>
+          ))}
+          <line className="axis-line" x1={0} x2={iw} y1={ih} y2={ih} />
+        </g>
+      </svg>
+      <Tooltip tip={tip} />
+    </div>
+  );
+}
+

@@ -3,7 +3,7 @@
 // model comparison on the same six quarterly origins, and the count PIT histogram. Everything is a cohort aggregate.
 import type { ComparisonMetrics, EvaluationFixture, EvaluationLevel } from "../../shared/contracts";
 import { useQuery, type Me } from "../api";
-import { BacktestTimeline, type CoverageRow, CoverageDots, MetricDots, MODEL_COLORS, MODEL_LABELS, PitHistogram, ReliabilityDiagram } from "../charts/trust";
+import { BacktestTimeline, type CoverageRow, CoverageDots, EffectLine, MetricDots, MODEL_COLORS, MODEL_LABELS, PitHistogram, ReliabilityDiagram } from "../charts/trust";
 import { ChartCard } from "../components/ChartCard";
 import { EmptyState, ErrorState, Skeleton, StatusPill, SyntheticChip } from "../components/ui";
 import { useView } from "../router";
@@ -191,6 +191,33 @@ export function TrustPage(_: { me: Me }) {
         >
           {lvl ? <PitHistogram bins={lvl.pit_histogram} /> : null}
         </ChartCard>
+        {ev.effects && cmp ? (
+          <ChartCard
+            id="effects"
+            className="span-12"
+            title="Which conditions are associated with higher predicted risk?"
+            subtitle={`Associational, not causal: the mean predicted 3-month probability over the ${ev.effects.population.toLocaleString("en-US")} people in the current population when one feature is set to each value, everything else as observed; bands from the model's parameter uncertainty`}
+            height={200}
+            table={
+              <table className="table">
+                <thead><tr><th>Feature</th><th>Value</th><th className="num">Mean predicted</th><th className="num">80% band</th></tr></thead>
+                <tbody>
+                  {Object.values(ev.effects.effects).flatMap((f) =>
+                    f.points.map((p) => (
+                      <tr key={`${f.label}${p.x}`}><td>{f.label}</td><td>{String(p.x)}</td><td className="num">{pct(p.cif, 2)}</td><td className="num">{pct(p.lo, 2)} to {pct(p.hi, 2)}</td></tr>
+                    )),
+                  )}
+                </tbody>
+              </table>
+            }
+          >
+            <div className="multiples">
+              {Object.entries(ev.effects.effects).map(([key, f]) => (
+                <EffectLine key={key} label={f.label} points={f.points} binary={f.points.length === 2} />
+              ))}
+            </div>
+          </ChartCard>
+        ) : null}
       </div>
       <p style={{ fontSize: 12, color: "var(--ink-3)", margin: "12px 0" }}>
         <SyntheticChip /> Recorded {ev.date} by {ev.commands.join(" and ")}. {ev.backtest.provisional_windows_excluded} provisional windows were left out of every number.

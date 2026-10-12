@@ -108,6 +108,7 @@ export function buildApp() {
   app.get("/api/forecast", (c) => respond(c, "forecast_departures", { cohort: c.req.query("cohort") ?? "Larkspur", horizon_months: num(c.req.query("horizon")), horizon_days: num(c.req.query("horizon_days")), cause: c.req.query("cause") || undefined, run: c.req.query("run") || undefined }));
   app.get("/api/forecast/breakdown", (c) => respond(c, "forecast_breakdown", { cohort: c.req.query("cohort") ?? "Larkspur", by: c.req.query("by") ?? "group", horizon_months: num(c.req.query("horizon")) }));
   app.get("/api/forecast/history", (c) => respond(c, "forecast_history", { cohort: c.req.query("cohort") ?? "Larkspur", horizon_months: num(c.req.query("horizon")) }));
+  app.get("/api/backtest/summary", (c) => respond(c, "backtest_summary", { level: c.req.query("level") || undefined, horizon_months: num(c.req.query("horizon")), model: c.req.query("model") || undefined }));
   app.get("/api/changes", (c) => respond(c, "explain_change", { cohort: c.req.query("cohort") ?? "Larkspur", horizon_months: num(c.req.query("horizon")), from_run: c.req.query("from") || undefined, to_run: c.req.query("to") || undefined }));
   app.get("/api/profile", (c) => respond(c, "cohort_profile", { cohort: c.req.query("cohort") ?? "Larkspur" }));
   app.get("/api/lineage", (c) => respond(c, "trace_lineage", { check_id: c.req.query("check") || undefined, node: c.req.query("node") || undefined }));
@@ -144,7 +145,7 @@ export function buildApp() {
     const entries = ev.backtest.entries.filter((e) => allowed(e.cohort));
     const levels = Object.fromEntries(Object.entries(ev.backtest.levels).filter(([, v]) => company && (v.level === "company" || hasScope(p, "forecast:read:all"))));
     const comparison = company ? { ...ev.comparison, summary: Object.fromEntries(Object.entries(ev.comparison.summary).filter(([, v]) => v.level === "company" || hasScope(p, "forecast:read:all"))) } : null;
-    return c.json({ ...ev, backtest: { ...ev.backtest, levels, entries }, calibration: company ? ev.calibration : null, comparison });
+    return c.json({ ...ev, backtest: { ...ev.backtest, levels, entries }, calibration: company ? ev.calibration : null, comparison, effects: company ? (ev.effects ?? null) : null });
   });
 
   app.get("/api/trust", async (c) => {

@@ -22,6 +22,7 @@ describe("GET /api/evaluation", () => {
     expect(ev.backtest.levels).toEqual({});
     expect(ev.calibration).toBeNull();
     expect(ev.comparison).toBeNull();
+    expect(ev.effects ?? null).toBeNull();
   });
 
   it("gives aggregate roles the company only", async () => {

@@ -35,6 +35,10 @@ export function stubPlan(question: string): { tool: string; args: Record<string,
   if (/\b(prepare|draft)\b.*\breview\b/.test(q)) return { tool: "prepare_review", args: { cohort, ...horizon } };
   if (/\b(where did|trace|lineage|come from|root cause)\b/.test(q)) return { tool: "trace_lineage", args: {} };
   if (/\b(check|checks|quality|failed|failing|fresh)\b/.test(q)) return { tool: "data_quality_status", args: { source: /payroll/.test(q) ? "payroll" : "all" } };
+  if (/\b(coverage|calibrat\w*|accuracy|skill)\b/.test(q)) {
+    const level = /\borgani[sz]ations?\b/.test(q) ? "organization" : "company";
+    return { tool: "backtest_summary", args: { level, ...horizon } };
+  }
   if (/\b(backtest|history|track record|how accurate|past forecasts)\b/.test(q)) return { tool: "forecast_history", args: { cohort, ...horizon } };
   if (/\b(by group|breakdown|break down|by team|by level|by tenure)\b/.test(q)) {
     const by = /team/.test(q) ? "team" : /level/.test(q) ? "level_band" : /tenure/.test(q) ? "tenure_band" : "group";

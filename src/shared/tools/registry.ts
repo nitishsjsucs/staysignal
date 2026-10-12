@@ -4,6 +4,7 @@
 import type { z } from "zod";
 import type {
   Audience,
+  ComparisonMetrics,
   EvaluationFixture,
   BreakdownData,
   BreakdownRow,
@@ -735,7 +736,121 @@ const prepareReview: ToolDef<typeof toolInputs.prepare_review, ReviewDraft> = {
   },
 };
 
-export const TOOLS: ToolDef[] = [forecastDepartures, forecastBreakdown, forecastHistory, explainChange, dataQualityStatus, traceLineage, cohortProfile, prepareReview] as unknown as ToolDef[];
+export interface BacktestSummaryData {
+  level: "company" | "organization";
+  horizon: Horizon;
+  model: string;
+  basis: "monthly origins" | "the six quarterly comparison origins";
+  windows: number;
+  effective_windows: number | null;
+  observed_over_expected: number;
+  coverage80: number;
+  coverage95: number;
+  mae: number;
+  skill_vs_hist: number | null;
+  recorded: string;
+  label: "synthetic";
+  note: string;
+}
+
+const r2 = (v: number) => Math.round(v * 100) / 100;
+
+const backtestSummary: ToolDef<typeof toolInputs.backtest_summary, BacktestSummaryData> = {
+  name: "backtest_summary",
+  description: toolDescriptions.backtest_summary,
+  input: toolInputs.backtest_summary,
+  scopes: ["forecast:read:*"],
+  kind: "read",
+  available: true,
+  async run(ctx, args) {
+    const ev = await ctx.warehouse.evaluation();
+    if (!ev) return refuse("OUT_OF_SCOPE", "No recorded evaluation yet.");
+    const level = args.level ?? "company";
+    if (level === "group") return refuse("OUT_OF_SCOPE", "Backtest summaries are recorded for the company and for organizations pooled.");
+    // both summaries pool beyond any one organization, so they need the company view
+    const fx = await loadRun(ctx, undefined);
+    if (isRefusal(fx)) return fx;
+    const company = fx.cohorts.find((c) => c.kind === "company");
+    if (!company) return refuse("OUT_OF_SCOPE");
+    const denied = authorizeCohort(ctx.principal, "forecast_history", cohortMeta(company, fx.cohorts));
+    if (denied) return denied;
+    if (level === "organization" && !hasScope(ctx.principal, "forecast:read:all")) return refuse("NOT_PERMITTED", "The pooled organization summary is for analysts and leads.");
+    const h = horizonOf(args);
+    const model = args.model ?? "dtcr-mnl";
+    let values: BacktestSummaryData;
+    if (model === "dtcr-mnl") {
+      const l = ev.backtest.levels[`${level}|${h}`];
+      if (!l) return refuse("OUT_OF_SCOPE", "No mature windows at that horizon.");
+      values = {
+        level,
+        horizon: h,
+        model,
+        basis: "monthly origins",
+        windows: l.windows,
+        effective_windows: l.effective_windows,
+        observed_over_expected: r2(l.observed_over_expected),
+        coverage80: r2(l.coverage80),
+        coverage95: r2(l.coverage95),
+        mae: Math.round(l.mae * 10) / 10,
+        skill_vs_hist: r2(l.skill_vs_hist),
+        recorded: ev.date,
+        label: "synthetic",
+        note: "Pseudo-real-time backtests: model and data as known at each cutoff, not forecasts that were published. Overlapping windows are not independent.",
+      };
+    } else {
+      const s = ev.comparison?.summary[`${level}|${h}`];
+      const m = s?.[model] as ComparisonMetrics | undefined;
+      if (!s || !m || typeof m !== "object") return refuse("OUT_OF_SCOPE", "That model was not compared at that horizon.");
+      values = {
+        level,
+        horizon: h,
+        model,
+        basis: "the six quarterly comparison origins",
+        windows: Number(s.windows),
+        effective_windows: null,
+        observed_over_expected: r2(m.observed_over_expected),
+        coverage80: r2(m.coverage80),
+        coverage95: r2(m.coverage95),
+        mae: Math.round(m.mae * 10) / 10,
+        skill_vs_hist: null,
+        recorded: ev.date,
+        label: "synthetic",
+        note: model === "oracle" ? "The oracle knows the latent propensities and the generator; no model can." : "The same origins for every model.",
+      };
+    }
+    const fargs = { level, horizon_months: h, model };
+    return finish(ctx, "backtest_summary", fargs, "evaluation", `${ev.date}:${ev.world_sha256}`, {
+      computed_by: "warehouse",
+      provenance: { catalog_entry: "sem_backtest.summary", computed_by: "warehouse", tool: "backtest_summary", args: fargs },
+      suppressed_cells: 0,
+      rounding: null,
+      values,
+    });
+  },
+  digest(r, alias) {
+    const v = r.values;
+    return {
+      alias,
+      tool: r.tool,
+      label: "synthetic",
+      level: v.level,
+      horizon_months: v.horizon,
+      model: v.model,
+      basis: v.basis,
+      windows: v.windows,
+      effective_windows: v.effective_windows,
+      observed_over_expected: v.observed_over_expected,
+      coverage80: v.coverage80,
+      coverage95: v.coverage95,
+      mae: v.mae,
+      skill_vs_hist: v.skill_vs_hist,
+      cite: [`{{${alias}.coverage80|pct}}`, `{{${alias}.observed_over_expected}}`, `{{${alias}.effective_windows|int}}`],
+      note: v.note,
+    };
+  },
+};
+
+export const TOOLS: ToolDef[] = [forecastDepartures, forecastBreakdown, forecastHistory, explainChange, backtestSummary, dataQualityStatus, traceLineage, cohortProfile, prepareReview] as unknown as ToolDef[];
 
 export function toolsFor(p: Principal): ToolDef[] {
   return TOOLS.filter((t) => t.available && canUseTool(p, t));

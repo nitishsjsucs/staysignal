@@ -117,6 +117,46 @@ def run_all(world: Path, cache: Path, out_dir: Path, n_futures: int, workers: in
     return paths
 
 
+def run_effects(world: Path, models: Path, out_dir: Path, log=print) -> Path:
+    """Partial dependence for the current published run's population (R-2026-10-01#1 inputs), recorded in results/."""
+    from datetime import UTC, date, datetime
+
+    from staysignal.evaluate.effects import partial_dependence
+    from staysignal.features.reference import MAPPINGS, Vintage, features_at
+    from staysignal.model import artifact as artifact_io
+
+    t0 = time.perf_counter()
+    manifest = json.loads((world / "manifest.json").read_text())
+    src = load_world_sources(world)
+    c = date(2026, 10, 1)
+    rows = features_at(
+        Vintage(src, datetime(2026, 10, 1, 6, tzinfo=UTC)), c, MAPPINGS["payroll@1"], "voluntary_departures@2"
+    )
+    model = artifact_io.load(models / "m2026.09" / "model.json")
+    effects = partial_dependence(model, rows, c)
+    day = dt.date.today().isoformat()
+    p = out_dir / f"effects-{day}.json"
+    p.write_text(
+        json.dumps(
+            {
+                "kind": "effects",
+                "command": "uv run --project engine staysignal eval effects",
+                "date": day,
+                "world_sha256": manifest["world_sha256"],
+                "label": LABEL,
+                "design": "partial dependence of the mean 3-month voluntary cumulative incidence over the population at 2026-10-01 (model m2026.09, voluntary_departures@2), one feature set to each grid value at a time; 80% bands from 20 parameter draws; associational, not causal",
+                "population": len(rows),
+                "effects": effects,
+                "seconds": round(time.perf_counter() - t0, 1),
+            },
+            indent=1,
+        )
+        + "\n"
+    )
+    log(f"effects: {len(effects)} features, {time.perf_counter() - t0:.1f} s")
+    return p
+
+
 def latest(results: Path, kind: str) -> dict | None:
     files = sorted(results.glob(f"{kind}-*.json"))
     return json.loads(files[-1].read_text()) if files else None
@@ -125,6 +165,7 @@ def latest(results: Path, kind: str) -> dict | None:
 def evaluation_fixture(results: Path) -> dict | None:
     """The Trust page's data (the API's `evaluation.json`), assembled from the latest recorded results."""
     bt, cal, cmp = latest(results, "backtest"), latest(results, "calibration"), latest(results, "model-comparison")
+    eff = latest(results, "effects")
     if bt is None or cmp is None:
         return None
     keep = (
@@ -143,7 +184,11 @@ def evaluation_fixture(results: Path) -> dict | None:
     return {
         "label": LABEL,
         "date": bt["date"],
-        "commands": sorted({bt["command"], cmp["command"]} | ({cal["command"]} if cal else set())),
+        "commands": sorted(
+            {bt["command"], cmp["command"]}
+            | ({cal["command"]} if cal else set())
+            | ({eff["command"]} if eff else set())
+        ),
         "world_sha256": bt["world_sha256"],
         "backtest": {
             "design": bt["design"],
@@ -155,7 +200,8 @@ def evaluation_fixture(results: Path) -> dict | None:
         if cal is None
         else {k: cal[k] for k in ("design", "n", "ici", "e50", "e90", "reliability")},
         "comparison": {k: cmp[k] for k in ("design", "origins", "models", "summary")},
+        "effects": None if eff is None else {k: eff[k] for k in ("design", "population", "effects")},
     }
 
 
-__all__ = ["comparison_summary", "evaluation_fixture", "latest", "run_all"]
+__all__ = ["comparison_summary", "evaluation_fixture", "latest", "run_all", "run_effects"]

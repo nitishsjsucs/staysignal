@@ -55,6 +55,12 @@ function historyText(a: string, v: V): string {
     : `No mature backtest windows are available for ${String(c.name)} yet.`;
 }
 
+function backtestText(a: string, v: V): string {
+  const lead = v.model === "dtcr-mnl" ? "The forecast model's" : `The ${String(v.model)} baseline's`;
+  const eff = v.effective_windows !== null && v.effective_windows !== undefined ? ` (about {{${a}.effective_windows|int}} independent windows)` : "";
+  return `${lead} ${String(v.horizon)}-month backtest at ${String(v.level)} level, over ${String(v.basis)}: the 80% range held {{${a}.coverage80|pct}} of the time${eff}, the 95% range {{${a}.coverage95|pct}}, and observed over expected was {{${a}.observed_over_expected}}. Synthetic world, model and data as known at each cutoff.`;
+}
+
 function profileText(a: string, v: V): string {
   return `In ${String(v.name)}, {{${a}.share_below_midpoint|pct}} are paid below their band midpoint, the median time since promotion is {{${a}.median_months_since_promotion|int}} months, and {{${a}.open_backfill_reqs|int}} backfill requisitions are open (synthetic data).`;
 }
@@ -71,6 +77,7 @@ const TEMPLATES: Record<string, (a: string, v: V) => string> = {
   trace_lineage: lineageText,
   forecast_breakdown: breakdownText,
   forecast_history: historyText,
+  backtest_summary: backtestText,
   cohort_profile: profileText,
   prepare_review: reviewText,
 };

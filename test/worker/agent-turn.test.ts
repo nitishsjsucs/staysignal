@@ -28,6 +28,14 @@ describe("analyst turn (stub provider)", () => {
     expect(r.grounding).toBe("passed");
   });
 
+  it("answers an accuracy question from the recorded backtest with grounded numbers", async () => {
+    const t = await json<Turn>("/api/dev/agent/turn", { as: P.lead, body: { question: "How often did the 80% range hold in backtests at company level over 90 days (coverage)?" } });
+    expect(t.tool_calls[0]?.tool).toBe("backtest_summary");
+    expect(t.grounding).toBe("passed");
+    expect(t.text).toMatch(/\{\{r1\.coverage80\|pct\}\}/);
+    expect(t.rendered).toMatch(/\d+(\.\d)?%/);
+  });
+
   it("accepts the earlier turns as history", async () => {
     const first = await json<Turn>("/api/dev/agent/turn", { as: P.analyst, body: { question: "Forecast voluntary departures in Sales over the next 90 days." } });
     const t = await json<Turn>("/api/dev/agent/turn", {
@@ -38,3 +46,4 @@ describe("analyst turn (stub provider)", () => {
     expect(t.grounding).toBe("passed");
   });
 });
+

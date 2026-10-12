@@ -3,5 +3,5 @@ select distinct
     cast(effective_date as date) as effective_date,
     kind,
     team_id,
-    cast(recorded_at as timestamptz) as recorded_at
+    {{ cast_as('recorded_at', 'ts') }} as recorded_at
 from {{ source('raw', 'raw_org_events') }}

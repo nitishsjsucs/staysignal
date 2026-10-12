@@ -5,7 +5,7 @@
 with lines as (
     select
         entity_code, employee_key, pay_period, period_start, vendor_file_id, recorded_at, pay_basis_code,
-        unknown_code, annual_base, mapping_version, cast(period_start + interval 1 month as date) as period_end
+        unknown_code, annual_base, mapping_version, {{ add_months('period_start', 1) }} as period_end
     from {{ ref('int_comp__annualized') }}
 ),
 
@@ -16,6 +16,7 @@ positioned as (
     from lines as l
     left join {{ ref('int_hris__assignment_timeline') }} as a
         on a.employee_key = l.employee_key and a.valid_from < l.period_end
+    where true
     qualify row_number() over (
         partition by l.entity_code, l.employee_key, l.pay_period, l.vendor_file_id, l.recorded_at
         order by a.valid_from desc, a.seq desc

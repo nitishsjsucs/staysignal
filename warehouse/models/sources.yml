@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: raw
-    schema: raw
+    schema: "{{ 'staysignal_raw' if target.type == 'bigquery' else 'raw' }}"
     description: Landed extracts as text, appended once per distinct file (engine/src/staysignal/ingest). Runner only.
     tables:
       - name: raw_hris
@@ -19,12 +19,12 @@ sources:
       - name: _employee_keys
         description: employee number to er_ key (HMAC, privacy/pseudo.py); staging replaces employee numbers with it
   - name: audit
-    schema: audit
+    schema: "{{ 'staysignal_audit' if target.type == 'bigquery' else 'audit' }}"
     description: the audit-only attribute (ADR 0013); nothing outside the audit models may reference it
     tables:
       - name: raw_audit_attributes
   - name: engine_published
-    schema: published
+    schema: "{{ 'staysignal_published' if target.type == 'bigquery' else 'published' }}"
     description: forecast runs and their cohort aggregates, written by the engine (forecast/published_tables.py)
     tables:
       - name: forecast_runs

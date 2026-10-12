@@ -8,9 +8,9 @@ with typed as (
         k.er as employee_key,
         r.record_type,
         cast(r.effective_date as date) as effective_date,
-        cast(r.recorded_at as timestamptz) as recorded_at,
+        {{ cast_as('r.recorded_at', 'ts') }} as recorded_at,
         r.job_code,
-        regexp_extract(r.job_code, '^(.*)-[^-]+$', 1) as job_family,
+        {{ regex_group1('r.job_code', '^(.*)-[^-]+$') }} as job_family,
         r.level,
         r.team_id,
         km.er as manager_key,
@@ -32,13 +32,15 @@ with typed as (
 hashed as (
     select
         *,
-        sha256(concat_ws('|',
-            employee_key, record_type, cast(effective_date as varchar), job_code, level, team_id,
-            coalesce(manager_key, ''), location_code, employment_type, coalesce(cast(contract_end_date as varchar), ''),
-            coalesce(termination_reason_code, ''), coalesce(corrects_record_id, ''),
-            coalesce(cast(legacy_hire_date as varchar), ''), coalesce(cast(legacy_first_promotion_date as varchar), ''),
-            coalesce(cast(legacy_last_promotion_date as varchar), '')
-        )) as content_hash
+        {{ content_hash([
+            'employee_key', 'record_type', cast_as('effective_date', 'string'), 'job_code', 'level', 'team_id',
+            "coalesce(manager_key, '')", 'location_code', 'employment_type',
+            "coalesce(" ~ cast_as('contract_end_date', 'string') ~ ", '')",
+            "coalesce(termination_reason_code, '')", "coalesce(corrects_record_id, '')",
+            "coalesce(" ~ cast_as('legacy_hire_date', 'string') ~ ", '')",
+            "coalesce(" ~ cast_as('legacy_first_promotion_date', 'string') ~ ", '')",
+            "coalesce(" ~ cast_as('legacy_last_promotion_date', 'string') ~ ", '')",
+        ]) }} as content_hash
     from typed
 )
 

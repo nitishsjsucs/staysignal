@@ -1,0 +1,360 @@
+{
+ "header": {
+  "dialect": "duckdb",
+  "label": "synthetic",
+  "entries": 6,
+  "metricflow": "0.213.0",
+  "dbt_metricflow": "0.15.0",
+  "dbt_core": "1.12.5",
+  "semantic_sources_sha256": "19fa230cdbb0a37fa294391b0bd23d75fae2b27be5c5095677c3bead08fe5b66",
+  "project_placeholder": null
+ },
+ "entries": {
+  "workforce_flows|company|none": {
+   "key": "workforce_flows|company|none",
+   "bundle": "workforce_flows",
+   "level": "company",
+   "grain": "none",
+   "metrics": [
+    "headcount",
+    "hires",
+    "transfers_in",
+    "restructured_in",
+    "transfers_out",
+    "restructured_out",
+    "voluntary_departures",
+    "involuntary_departures",
+    "retirements"
+   ],
+   "columns": {
+    "dimensions": {},
+    "time": null,
+    "values": [
+     "headcount",
+     "hires",
+     "transfers_in",
+     "restructured_in",
+     "transfers_out",
+     "restructured_out",
+     "voluntary_departures",
+     "involuntary_departures",
+     "retirements"
+    ]
+   },
+   "params": [
+    {
+     "name": "start_month",
+     "type": "DATE"
+    },
+    {
+     "name": "end_month",
+     "type": "DATE"
+    },
+    {
+     "name": "f_organization",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "f_group_name",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "scope_organizations",
+     "type": "VARCHAR[]"
+    }
+   ],
+   "sql": "WITH sma_10001_cte AS (\n  SELECT\n    DATE_TRUNC('month', month_start) AS month_start__month\n    , DATE_TRUNC('month', month_start) AS metric_time__month\n    , organization AS group_month__organization\n    , group_name AS group_month__group_name\n    , headcount AS __headcount\n    , hires AS __hires\n    , transfers_in AS __transfers_in\n    , restructured_in AS __restructured_in\n    , transfers_out AS __transfers_out\n    , restructured_out AS __restructured_out\n    , voluntary_departures AS __voluntary_departures\n    , involuntary_departures AS __involuntary_departures\n    , retirements AS __retirements\n  FROM \"published\".\"rpt_flows_monthly\" workforce_flows_src_10000\n)\nSELECT\n  MAX(subq_9.headcount) AS headcount\n  , MAX(subq_15.hires) AS hires\n  , MAX(subq_15.transfers_in) AS transfers_in\n  , MAX(subq_15.restructured_in) AS restructured_in\n  , MAX(subq_15.transfers_out) AS transfers_out\n  , MAX(subq_15.restructured_out) AS restructured_out\n  , MAX(subq_15.voluntary_departures) AS voluntary_departures\n  , MAX(subq_15.involuntary_departures) AS involuntary_departures\n  , MAX(subq_15.retirements) AS retirements\nFROM (\n  SELECT\n    SUM(subq_3.__headcount) AS headcount\n  FROM (\n    SELECT\n      headcount AS __headcount\n      , month_start__month\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n        , __headcount AS headcount\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_3\n  INNER JOIN (\n    SELECT\n      MIN(month_start__month) AS month_start__month__complete\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_5\n  ON\n    subq_3.month_start__month = subq_5.month_start__month__complete\n) subq_9\nCROSS JOIN (\n  SELECT\n    SUM(hires) AS hires\n    , SUM(transfers_in) AS transfers_in\n    , SUM(restructured_in) AS restructured_in\n    , SUM(transfers_out) AS transfers_out\n    , SUM(restructured_out) AS restructured_out\n    , SUM(voluntary_departures) AS voluntary_departures\n    , SUM(involuntary_departures) AS involuntary_departures\n    , SUM(retirements) AS retirements\n  FROM (\n    SELECT\n      metric_time__month\n      , group_month__organization\n      , group_month__group_name\n      , __hires AS hires\n      , __transfers_in AS transfers_in\n      , __restructured_in AS restructured_in\n      , __transfers_out AS transfers_out\n      , __restructured_out AS restructured_out\n      , __voluntary_departures AS voluntary_departures\n      , __involuntary_departures AS involuntary_departures\n      , __retirements AS retirements\n    FROM sma_10001_cte\n  ) subq_11\n  WHERE (\n    (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n  ) AND (\n    (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n  ) AND (\n    (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n  ) AND (\n    metric_time__month BETWEEN $start_month AND $end_month\n  )\n) subq_15\n",
+   "sha256": "44b881d13d298d007ad4633fbd38848dbc3a5c8abc6a141379b266c1a0bc1100"
+  },
+  "workforce_flows|company|month": {
+   "key": "workforce_flows|company|month",
+   "bundle": "workforce_flows",
+   "level": "company",
+   "grain": "month",
+   "metrics": [
+    "headcount",
+    "hires",
+    "transfers_in",
+    "restructured_in",
+    "transfers_out",
+    "restructured_out",
+    "voluntary_departures",
+    "involuntary_departures",
+    "retirements"
+   ],
+   "columns": {
+    "dimensions": {},
+    "time": "metric_time__month",
+    "values": [
+     "headcount",
+     "hires",
+     "transfers_in",
+     "restructured_in",
+     "transfers_out",
+     "restructured_out",
+     "voluntary_departures",
+     "involuntary_departures",
+     "retirements"
+    ]
+   },
+   "params": [
+    {
+     "name": "start_month",
+     "type": "DATE"
+    },
+    {
+     "name": "end_month",
+     "type": "DATE"
+    },
+    {
+     "name": "f_organization",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "f_group_name",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "scope_organizations",
+     "type": "VARCHAR[]"
+    }
+   ],
+   "sql": "WITH sma_10001_cte AS (\n  SELECT\n    DATE_TRUNC('month', month_start) AS month_start__month\n    , DATE_TRUNC('month', month_start) AS metric_time__month\n    , organization AS group_month__organization\n    , group_name AS group_month__group_name\n    , headcount AS __headcount\n    , hires AS __hires\n    , transfers_in AS __transfers_in\n    , restructured_in AS __restructured_in\n    , transfers_out AS __transfers_out\n    , restructured_out AS __restructured_out\n    , voluntary_departures AS __voluntary_departures\n    , involuntary_departures AS __involuntary_departures\n    , retirements AS __retirements\n  FROM \"published\".\"rpt_flows_monthly\" workforce_flows_src_10000\n)\nSELECT\n  COALESCE(subq_9.metric_time__month, subq_15.metric_time__month) AS metric_time__month\n  , MAX(subq_9.headcount) AS headcount\n  , MAX(subq_15.hires) AS hires\n  , MAX(subq_15.transfers_in) AS transfers_in\n  , MAX(subq_15.restructured_in) AS restructured_in\n  , MAX(subq_15.transfers_out) AS transfers_out\n  , MAX(subq_15.restructured_out) AS restructured_out\n  , MAX(subq_15.voluntary_departures) AS voluntary_departures\n  , MAX(subq_15.involuntary_departures) AS involuntary_departures\n  , MAX(subq_15.retirements) AS retirements\nFROM (\n  SELECT\n    subq_3.metric_time__month AS metric_time__month\n    , SUM(subq_3.__headcount) AS headcount\n  FROM (\n    SELECT\n      headcount AS __headcount\n      , month_start__month\n      , metric_time__month\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n        , __headcount AS headcount\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_3\n  INNER JOIN (\n    SELECT\n      metric_time__month\n      , MIN(month_start__month) AS month_start__month__complete\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n    GROUP BY\n      metric_time__month\n  ) subq_5\n  ON\n    subq_3.month_start__month = subq_5.month_start__month__complete\n  GROUP BY\n    subq_3.metric_time__month\n) subq_9\nFULL OUTER JOIN (\n  SELECT\n    metric_time__month\n    , SUM(hires) AS hires\n    , SUM(transfers_in) AS transfers_in\n    , SUM(restructured_in) AS restructured_in\n    , SUM(transfers_out) AS transfers_out\n    , SUM(restructured_out) AS restructured_out\n    , SUM(voluntary_departures) AS voluntary_departures\n    , SUM(involuntary_departures) AS involuntary_departures\n    , SUM(retirements) AS retirements\n  FROM (\n    SELECT\n      metric_time__month\n      , group_month__organization\n      , group_month__group_name\n      , __hires AS hires\n      , __transfers_in AS transfers_in\n      , __restructured_in AS restructured_in\n      , __transfers_out AS transfers_out\n      , __restructured_out AS restructured_out\n      , __voluntary_departures AS voluntary_departures\n      , __involuntary_departures AS involuntary_departures\n      , __retirements AS retirements\n    FROM sma_10001_cte\n  ) subq_11\n  WHERE (\n    (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n  ) AND (\n    (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n  ) AND (\n    (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n  ) AND (\n    metric_time__month BETWEEN $start_month AND $end_month\n  )\n  GROUP BY\n    metric_time__month\n) subq_15\nON\n  subq_9.metric_time__month = subq_15.metric_time__month\nGROUP BY\n  COALESCE(subq_9.metric_time__month, subq_15.metric_time__month)\nORDER BY metric_time__month\n",
+   "sha256": "622faa7be54151e3e13d9774ed740ba78158aea7f5d5b32449eefb59371764c1"
+  },
+  "workforce_flows|organization|none": {
+   "key": "workforce_flows|organization|none",
+   "bundle": "workforce_flows",
+   "level": "organization",
+   "grain": "none",
+   "metrics": [
+    "headcount",
+    "hires",
+    "transfers_in",
+    "restructured_in",
+    "transfers_out",
+    "restructured_out",
+    "voluntary_departures",
+    "involuntary_departures",
+    "retirements"
+   ],
+   "columns": {
+    "dimensions": {
+     "organization": "group_month__organization"
+    },
+    "time": null,
+    "values": [
+     "headcount",
+     "hires",
+     "transfers_in",
+     "restructured_in",
+     "transfers_out",
+     "restructured_out",
+     "voluntary_departures",
+     "involuntary_departures",
+     "retirements"
+    ]
+   },
+   "params": [
+    {
+     "name": "start_month",
+     "type": "DATE"
+    },
+    {
+     "name": "end_month",
+     "type": "DATE"
+    },
+    {
+     "name": "f_organization",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "f_group_name",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "scope_organizations",
+     "type": "VARCHAR[]"
+    }
+   ],
+   "sql": "WITH sma_10001_cte AS (\n  SELECT\n    DATE_TRUNC('month', month_start) AS month_start__month\n    , DATE_TRUNC('month', month_start) AS metric_time__month\n    , organization AS group_month__organization\n    , group_name AS group_month__group_name\n    , headcount AS __headcount\n    , hires AS __hires\n    , transfers_in AS __transfers_in\n    , restructured_in AS __restructured_in\n    , transfers_out AS __transfers_out\n    , restructured_out AS __restructured_out\n    , voluntary_departures AS __voluntary_departures\n    , involuntary_departures AS __involuntary_departures\n    , retirements AS __retirements\n  FROM \"published\".\"rpt_flows_monthly\" workforce_flows_src_10000\n)\nSELECT\n  COALESCE(subq_9.group_month__organization, subq_15.group_month__organization) AS group_month__organization\n  , MAX(subq_9.headcount) AS headcount\n  , MAX(subq_15.hires) AS hires\n  , MAX(subq_15.transfers_in) AS transfers_in\n  , MAX(subq_15.restructured_in) AS restructured_in\n  , MAX(subq_15.transfers_out) AS transfers_out\n  , MAX(subq_15.restructured_out) AS restructured_out\n  , MAX(subq_15.voluntary_departures) AS voluntary_departures\n  , MAX(subq_15.involuntary_departures) AS involuntary_departures\n  , MAX(subq_15.retirements) AS retirements\nFROM (\n  SELECT\n    subq_3.group_month__organization AS group_month__organization\n    , SUM(subq_3.__headcount) AS headcount\n  FROM (\n    SELECT\n      headcount AS __headcount\n      , group_month__organization\n      , month_start__month\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n        , __headcount AS headcount\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_3\n  INNER JOIN (\n    SELECT\n      MIN(month_start__month) AS month_start__month__complete\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_5\n  ON\n    subq_3.month_start__month = subq_5.month_start__month__complete\n  GROUP BY\n    subq_3.group_month__organization\n) subq_9\nFULL OUTER JOIN (\n  SELECT\n    group_month__organization\n    , SUM(hires) AS hires\n    , SUM(transfers_in) AS transfers_in\n    , SUM(restructured_in) AS restructured_in\n    , SUM(transfers_out) AS transfers_out\n    , SUM(restructured_out) AS restructured_out\n    , SUM(voluntary_departures) AS voluntary_departures\n    , SUM(involuntary_departures) AS involuntary_departures\n    , SUM(retirements) AS retirements\n  FROM (\n    SELECT\n      metric_time__month\n      , group_month__organization\n      , group_month__group_name\n      , __hires AS hires\n      , __transfers_in AS transfers_in\n      , __restructured_in AS restructured_in\n      , __transfers_out AS transfers_out\n      , __restructured_out AS restructured_out\n      , __voluntary_departures AS voluntary_departures\n      , __involuntary_departures AS involuntary_departures\n      , __retirements AS retirements\n    FROM sma_10001_cte\n  ) subq_11\n  WHERE (\n    (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n  ) AND (\n    (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n  ) AND (\n    (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n  ) AND (\n    metric_time__month BETWEEN $start_month AND $end_month\n  )\n  GROUP BY\n    group_month__organization\n) subq_15\nON\n  subq_9.group_month__organization = subq_15.group_month__organization\nGROUP BY\n  COALESCE(subq_9.group_month__organization, subq_15.group_month__organization)\nORDER BY group_month__organization\n",
+   "sha256": "3235a794fd9e9bacf0093b64b61e78f8f2530ea42421dfa39ddd3faaf6d2be99"
+  },
+  "workforce_flows|organization|month": {
+   "key": "workforce_flows|organization|month",
+   "bundle": "workforce_flows",
+   "level": "organization",
+   "grain": "month",
+   "metrics": [
+    "headcount",
+    "hires",
+    "transfers_in",
+    "restructured_in",
+    "transfers_out",
+    "restructured_out",
+    "voluntary_departures",
+    "involuntary_departures",
+    "retirements"
+   ],
+   "columns": {
+    "dimensions": {
+     "organization": "group_month__organization"
+    },
+    "time": "metric_time__month",
+    "values": [
+     "headcount",
+     "hires",
+     "transfers_in",
+     "restructured_in",
+     "transfers_out",
+     "restructured_out",
+     "voluntary_departures",
+     "involuntary_departures",
+     "retirements"
+    ]
+   },
+   "params": [
+    {
+     "name": "start_month",
+     "type": "DATE"
+    },
+    {
+     "name": "end_month",
+     "type": "DATE"
+    },
+    {
+     "name": "f_organization",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "f_group_name",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "scope_organizations",
+     "type": "VARCHAR[]"
+    }
+   ],
+   "sql": "WITH sma_10001_cte AS (\n  SELECT\n    DATE_TRUNC('month', month_start) AS month_start__month\n    , DATE_TRUNC('month', month_start) AS metric_time__month\n    , organization AS group_month__organization\n    , group_name AS group_month__group_name\n    , headcount AS __headcount\n    , hires AS __hires\n    , transfers_in AS __transfers_in\n    , restructured_in AS __restructured_in\n    , transfers_out AS __transfers_out\n    , restructured_out AS __restructured_out\n    , voluntary_departures AS __voluntary_departures\n    , involuntary_departures AS __involuntary_departures\n    , retirements AS __retirements\n  FROM \"published\".\"rpt_flows_monthly\" workforce_flows_src_10000\n)\nSELECT\n  COALESCE(subq_9.metric_time__month, subq_15.metric_time__month) AS metric_time__month\n  , COALESCE(subq_9.group_month__organization, subq_15.group_month__organization) AS group_month__organization\n  , MAX(subq_9.headcount) AS headcount\n  , MAX(subq_15.hires) AS hires\n  , MAX(subq_15.transfers_in) AS transfers_in\n  , MAX(subq_15.restructured_in) AS restructured_in\n  , MAX(subq_15.transfers_out) AS transfers_out\n  , MAX(subq_15.restructured_out) AS restructured_out\n  , MAX(subq_15.voluntary_departures) AS voluntary_departures\n  , MAX(subq_15.involuntary_departures) AS involuntary_departures\n  , MAX(subq_15.retirements) AS retirements\nFROM (\n  SELECT\n    subq_3.metric_time__month AS metric_time__month\n    , subq_3.group_month__organization AS group_month__organization\n    , SUM(subq_3.__headcount) AS headcount\n  FROM (\n    SELECT\n      headcount AS __headcount\n      , group_month__organization\n      , month_start__month\n      , metric_time__month\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n        , __headcount AS headcount\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_3\n  INNER JOIN (\n    SELECT\n      metric_time__month\n      , MIN(month_start__month) AS month_start__month__complete\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n    GROUP BY\n      metric_time__month\n  ) subq_5\n  ON\n    subq_3.month_start__month = subq_5.month_start__month__complete\n  GROUP BY\n    subq_3.metric_time__month\n    , subq_3.group_month__organization\n) subq_9\nFULL OUTER JOIN (\n  SELECT\n    metric_time__month\n    , group_month__organization\n    , SUM(hires) AS hires\n    , SUM(transfers_in) AS transfers_in\n    , SUM(restructured_in) AS restructured_in\n    , SUM(transfers_out) AS transfers_out\n    , SUM(restructured_out) AS restructured_out\n    , SUM(voluntary_departures) AS voluntary_departures\n    , SUM(involuntary_departures) AS involuntary_departures\n    , SUM(retirements) AS retirements\n  FROM (\n    SELECT\n      metric_time__month\n      , group_month__organization\n      , group_month__group_name\n      , __hires AS hires\n      , __transfers_in AS transfers_in\n      , __restructured_in AS restructured_in\n      , __transfers_out AS transfers_out\n      , __restructured_out AS restructured_out\n      , __voluntary_departures AS voluntary_departures\n      , __involuntary_departures AS involuntary_departures\n      , __retirements AS retirements\n    FROM sma_10001_cte\n  ) subq_11\n  WHERE (\n    (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n  ) AND (\n    (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n  ) AND (\n    (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n  ) AND (\n    metric_time__month BETWEEN $start_month AND $end_month\n  )\n  GROUP BY\n    metric_time__month\n    , group_month__organization\n) subq_15\nON\n  (\n    subq_9.group_month__organization = subq_15.group_month__organization\n  ) AND (\n    subq_9.metric_time__month = subq_15.metric_time__month\n  )\nGROUP BY\n  COALESCE(subq_9.metric_time__month, subq_15.metric_time__month)\n  , COALESCE(subq_9.group_month__organization, subq_15.group_month__organization)\nORDER BY group_month__organization, metric_time__month\n",
+   "sha256": "6ab16f587ccdbd4fe405e411a006ab2e2af31f1b78a2dda7043a949c83c8f98a"
+  },
+  "workforce_flows|group|none": {
+   "key": "workforce_flows|group|none",
+   "bundle": "workforce_flows",
+   "level": "group",
+   "grain": "none",
+   "metrics": [
+    "headcount",
+    "hires",
+    "transfers_in",
+    "restructured_in",
+    "transfers_out",
+    "restructured_out",
+    "voluntary_departures",
+    "involuntary_departures",
+    "retirements"
+   ],
+   "columns": {
+    "dimensions": {
+     "organization": "group_month__organization",
+     "group_name": "group_month__group_name"
+    },
+    "time": null,
+    "values": [
+     "headcount",
+     "hires",
+     "transfers_in",
+     "restructured_in",
+     "transfers_out",
+     "restructured_out",
+     "voluntary_departures",
+     "involuntary_departures",
+     "retirements"
+    ]
+   },
+   "params": [
+    {
+     "name": "start_month",
+     "type": "DATE"
+    },
+    {
+     "name": "end_month",
+     "type": "DATE"
+    },
+    {
+     "name": "f_organization",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "f_group_name",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "scope_organizations",
+     "type": "VARCHAR[]"
+    }
+   ],
+   "sql": "WITH sma_10001_cte AS (\n  SELECT\n    DATE_TRUNC('month', month_start) AS month_start__month\n    , DATE_TRUNC('month', month_start) AS metric_time__month\n    , organization AS group_month__organization\n    , group_name AS group_month__group_name\n    , headcount AS __headcount\n    , hires AS __hires\n    , transfers_in AS __transfers_in\n    , restructured_in AS __restructured_in\n    , transfers_out AS __transfers_out\n    , restructured_out AS __restructured_out\n    , voluntary_departures AS __voluntary_departures\n    , involuntary_departures AS __involuntary_departures\n    , retirements AS __retirements\n  FROM \"published\".\"rpt_flows_monthly\" workforce_flows_src_10000\n)\nSELECT\n  COALESCE(subq_9.group_month__organization, subq_15.group_month__organization) AS group_month__organization\n  , COALESCE(subq_9.group_month__group_name, subq_15.group_month__group_name) AS group_month__group_name\n  , MAX(subq_9.headcount) AS headcount\n  , MAX(subq_15.hires) AS hires\n  , MAX(subq_15.transfers_in) AS transfers_in\n  , MAX(subq_15.restructured_in) AS restructured_in\n  , MAX(subq_15.transfers_out) AS transfers_out\n  , MAX(subq_15.restructured_out) AS restructured_out\n  , MAX(subq_15.voluntary_departures) AS voluntary_departures\n  , MAX(subq_15.involuntary_departures) AS involuntary_departures\n  , MAX(subq_15.retirements) AS retirements\nFROM (\n  SELECT\n    subq_3.group_month__organization AS group_month__organization\n    , subq_3.group_month__group_name AS group_month__group_name\n    , SUM(subq_3.__headcount) AS headcount\n  FROM (\n    SELECT\n      headcount AS __headcount\n      , group_month__organization\n      , group_month__group_name\n      , month_start__month\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n        , __headcount AS headcount\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_3\n  INNER JOIN (\n    SELECT\n      MIN(month_start__month) AS month_start__month__complete\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_5\n  ON\n    subq_3.month_start__month = subq_5.month_start__month__complete\n  GROUP BY\n    subq_3.group_month__organization\n    , subq_3.group_month__group_name\n) subq_9\nFULL OUTER JOIN (\n  SELECT\n    group_month__organization\n    , group_month__group_name\n    , SUM(hires) AS hires\n    , SUM(transfers_in) AS transfers_in\n    , SUM(restructured_in) AS restructured_in\n    , SUM(transfers_out) AS transfers_out\n    , SUM(restructured_out) AS restructured_out\n    , SUM(voluntary_departures) AS voluntary_departures\n    , SUM(involuntary_departures) AS involuntary_departures\n    , SUM(retirements) AS retirements\n  FROM (\n    SELECT\n      metric_time__month\n      , group_month__organization\n      , group_month__group_name\n      , __hires AS hires\n      , __transfers_in AS transfers_in\n      , __restructured_in AS restructured_in\n      , __transfers_out AS transfers_out\n      , __restructured_out AS restructured_out\n      , __voluntary_departures AS voluntary_departures\n      , __involuntary_departures AS involuntary_departures\n      , __retirements AS retirements\n    FROM sma_10001_cte\n  ) subq_11\n  WHERE (\n    (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n  ) AND (\n    (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n  ) AND (\n    (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n  ) AND (\n    metric_time__month BETWEEN $start_month AND $end_month\n  )\n  GROUP BY\n    group_month__organization\n    , group_month__group_name\n) subq_15\nON\n  (\n    subq_9.group_month__organization = subq_15.group_month__organization\n  ) AND (\n    subq_9.group_month__group_name = subq_15.group_month__group_name\n  )\nGROUP BY\n  COALESCE(subq_9.group_month__organization, subq_15.group_month__organization)\n  , COALESCE(subq_9.group_month__group_name, subq_15.group_month__group_name)\nORDER BY group_month__organization, group_month__group_name\n",
+   "sha256": "49ffb46b6e890dffb952fc5ef00a7d120e84aac01264f4d17d24b1471a53ff2f"
+  },
+  "workforce_flows|group|month": {
+   "key": "workforce_flows|group|month",
+   "bundle": "workforce_flows",
+   "level": "group",
+   "grain": "month",
+   "metrics": [
+    "headcount",
+    "hires",
+    "transfers_in",
+    "restructured_in",
+    "transfers_out",
+    "restructured_out",
+    "voluntary_departures",
+    "involuntary_departures",
+    "retirements"
+   ],
+   "columns": {
+    "dimensions": {
+     "organization": "group_month__organization",
+     "group_name": "group_month__group_name"
+    },
+    "time": "metric_time__month",
+    "values": [
+     "headcount",
+     "hires",
+     "transfers_in",
+     "restructured_in",
+     "transfers_out",
+     "restructured_out",
+     "voluntary_departures",
+     "involuntary_departures",
+     "retirements"
+    ]
+   },
+   "params": [
+    {
+     "name": "start_month",
+     "type": "DATE"
+    },
+    {
+     "name": "end_month",
+     "type": "DATE"
+    },
+    {
+     "name": "f_organization",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "f_group_name",
+     "type": "VARCHAR[]"
+    },
+    {
+     "name": "scope_organizations",
+     "type": "VARCHAR[]"
+    }
+   ],
+   "sql": "WITH sma_10001_cte AS (\n  SELECT\n    DATE_TRUNC('month', month_start) AS month_start__month\n    , DATE_TRUNC('month', month_start) AS metric_time__month\n    , organization AS group_month__organization\n    , group_name AS group_month__group_name\n    , headcount AS __headcount\n    , hires AS __hires\n    , transfers_in AS __transfers_in\n    , restructured_in AS __restructured_in\n    , transfers_out AS __transfers_out\n    , restructured_out AS __restructured_out\n    , voluntary_departures AS __voluntary_departures\n    , involuntary_departures AS __involuntary_departures\n    , retirements AS __retirements\n  FROM \"published\".\"rpt_flows_monthly\" workforce_flows_src_10000\n)\nSELECT\n  COALESCE(subq_9.metric_time__month, subq_15.metric_time__month) AS metric_time__month\n  , COALESCE(subq_9.group_month__organization, subq_15.group_month__organization) AS group_month__organization\n  , COALESCE(subq_9.group_month__group_name, subq_15.group_month__group_name) AS group_month__group_name\n  , MAX(subq_9.headcount) AS headcount\n  , MAX(subq_15.hires) AS hires\n  , MAX(subq_15.transfers_in) AS transfers_in\n  , MAX(subq_15.restructured_in) AS restructured_in\n  , MAX(subq_15.transfers_out) AS transfers_out\n  , MAX(subq_15.restructured_out) AS restructured_out\n  , MAX(subq_15.voluntary_departures) AS voluntary_departures\n  , MAX(subq_15.involuntary_departures) AS involuntary_departures\n  , MAX(subq_15.retirements) AS retirements\nFROM (\n  SELECT\n    subq_3.metric_time__month AS metric_time__month\n    , subq_3.group_month__organization AS group_month__organization\n    , subq_3.group_month__group_name AS group_month__group_name\n    , SUM(subq_3.__headcount) AS headcount\n  FROM (\n    SELECT\n      headcount AS __headcount\n      , group_month__organization\n      , group_month__group_name\n      , month_start__month\n      , metric_time__month\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n        , __headcount AS headcount\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n  ) subq_3\n  INNER JOIN (\n    SELECT\n      metric_time__month\n      , MIN(month_start__month) AS month_start__month__complete\n    FROM (\n      SELECT\n        month_start__month\n        , metric_time__month\n        , group_month__organization\n        , group_month__group_name\n      FROM sma_10001_cte\n    ) subq_2\n    WHERE (\n      (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n    ) AND (\n      (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n    ) AND (\n      (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n    ) AND (\n      metric_time__month BETWEEN $start_month AND $end_month\n    )\n    GROUP BY\n      metric_time__month\n  ) subq_5\n  ON\n    subq_3.month_start__month = subq_5.month_start__month__complete\n  GROUP BY\n    subq_3.metric_time__month\n    , subq_3.group_month__organization\n    , subq_3.group_month__group_name\n) subq_9\nFULL OUTER JOIN (\n  SELECT\n    metric_time__month\n    , group_month__organization\n    , group_month__group_name\n    , SUM(hires) AS hires\n    , SUM(transfers_in) AS transfers_in\n    , SUM(restructured_in) AS restructured_in\n    , SUM(transfers_out) AS transfers_out\n    , SUM(restructured_out) AS restructured_out\n    , SUM(voluntary_departures) AS voluntary_departures\n    , SUM(involuntary_departures) AS involuntary_departures\n    , SUM(retirements) AS retirements\n  FROM (\n    SELECT\n      metric_time__month\n      , group_month__organization\n      , group_month__group_name\n      , __hires AS hires\n      , __transfers_in AS transfers_in\n      , __restructured_in AS restructured_in\n      , __transfers_out AS transfers_out\n      , __restructured_out AS restructured_out\n      , __voluntary_departures AS voluntary_departures\n      , __involuntary_departures AS involuntary_departures\n      , __retirements AS retirements\n    FROM sma_10001_cte\n  ) subq_11\n  WHERE (\n    (list_contains($f_organization, '__all__') OR list_contains($f_organization, group_month__organization))\n  ) AND (\n    (list_contains($f_group_name, '__all__') OR list_contains($f_group_name, group_month__group_name))\n  ) AND (\n    (list_contains($scope_organizations, '__all__') OR list_contains($scope_organizations, group_month__organization))\n  ) AND (\n    metric_time__month BETWEEN $start_month AND $end_month\n  )\n  GROUP BY\n    metric_time__month\n    , group_month__organization\n    , group_month__group_name\n) subq_15\nON\n  (\n    subq_9.group_month__organization = subq_15.group_month__organization\n  ) AND (\n    subq_9.group_month__group_name = subq_15.group_month__group_name\n  ) AND (\n    subq_9.metric_time__month = subq_15.metric_time__month\n  )\nGROUP BY\n  COALESCE(subq_9.metric_time__month, subq_15.metric_time__month)\n  , COALESCE(subq_9.group_month__organization, subq_15.group_month__organization)\n  , COALESCE(subq_9.group_month__group_name, subq_15.group_month__group_name)\nORDER BY group_month__organization, group_month__group_name, metric_time__month\n",
+   "sha256": "b1ad5ed30463e8465f699a2aa9648c54ff41f5a53a1bcd05d021328961fe0e7e"
+  }
+ }
+}

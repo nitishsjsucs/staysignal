@@ -13,5 +13,5 @@ counts as (
     from (select entity_code, count(*) as n from active group by 1) as a
     full outer join (select entity_code, count(*) as n from paid group by 1) as p using (entity_code)
 )
-select c.entity_code from counts as c, generate_series(1, abs(c.paid_n - c.active_n)) as g(i)
+select c.entity_code from counts as c, {{ int_series('abs(c.paid_n - c.active_n)') }}
 where c.paid_n <> c.active_n

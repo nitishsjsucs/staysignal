@@ -2,7 +2,7 @@
 {#- C01: compa-ratio within [0.5, 2.0] for the latest period's lines, against the band of the employee's assignment
     in the spell that covers the period end. -#}
 with periods as ({{ latest_periods() }}),
-bounds as (select latest, cast(cast(latest || '-01' as date) + interval 1 month as date) as p1 from periods),
+bounds as (select latest, {{ add_months("cast(latest || '-01' as date)", 1) }} as p1 from periods),
 lines as (
     select a.* from {{ ref('int_comp__annualized') }} as a, bounds as b
     where a.pay_period = b.latest and a.annual_base is not null

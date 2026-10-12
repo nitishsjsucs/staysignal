@@ -1,0 +1,51 @@
+version: 2
+
+# Governed metrics (SPEC 7.3, 7.4). Versions and frozen definitions live in semantic/metric_definitions.yaml
+# (workforce_flows@1 describes these). Synthetic company.
+
+metrics:
+  - name: headcount
+    label: Headcount at the start of the window
+    type: simple
+    type_params:
+      measure: headcount
+  - name: hires
+    label: Hires
+    type: simple
+    type_params:
+      measure: hires
+  - name: transfers_in
+    label: Transfers in
+    type: simple
+    type_params:
+      measure: transfers_in
+  - name: restructured_in
+    label: Moved in by a restructure
+    type: simple
+    type_params:
+      measure: restructured_in
+  - name: transfers_out
+    label: Transfers out
+    type: simple
+    type_params:
+      measure: transfers_out
+  - name: restructured_out
+    label: Moved out by a restructure
+    type: simple
+    type_params:
+      measure: restructured_out
+  - name: voluntary_departures
+    label: Voluntary departures
+    type: simple
+    type_params:
+      measure: voluntary_departures
+  - name: involuntary_departures
+    label: Involuntary departures
+    type: simple
+    type_params:
+      measure: involuntary_departures
+  - name: retirements
+    label: Retirements
+    type: simple
+    type_params:
+      measure: retirements

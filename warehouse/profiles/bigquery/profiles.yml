@@ -1,0 +1,20 @@
+# Production BigQuery profile (SPEC 7.2, 17.2, 23): used only by the runner on the operator's Mac, never by builders
+# and never in CI. Application Default Credentials impersonate the `staysignal-runner` service account, which holds
+# dataset-scoped grants on the staysignal_* datasets and roles/bigquery.jobUser as its only project-level role. Every
+# job is capped by maximum_bytes_billed (1 GiB, SPEC 17.2). Datasets get the staysignal_ prefix
+# (macros/generate_schema_name.sql). The project ID comes from the environment, never from a committed file.
+staysignal:
+  target: bigquery
+  outputs:
+    bigquery:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('SS_GCP_PROJECT') }}"
+      impersonate_service_account: "{{ env_var('SS_GCP_RUNNER_SA') }}"
+      dataset: staysignal
+      location: US
+      threads: 4
+      priority: interactive
+      maximum_bytes_billed: 1073741824
+      job_execution_timeout_seconds: 300
+      job_retries: 1

@@ -2,7 +2,7 @@
 {#- H02: every correction and rescission visible at the vintage references a record visible at the vintage. -#}
 with visible as (
     select record_id, record_type, corrects_record_id from {{ source('raw', 'raw_hris') }}
-    where cast(recorded_at as timestamptz) <= {{ vintage_ts() }}
+    where {{ cast_as('recorded_at', 'ts') }} <= {{ vintage_ts() }}
 )
 select v.record_id from visible as v
 where v.record_type in ('correction', 'rescission')

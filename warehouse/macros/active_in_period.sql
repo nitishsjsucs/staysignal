@@ -3,7 +3,7 @@
 {% macro active_in_latest_period() -%}
   with periods as ({{ latest_periods() }}),
   bounds as (
-      select cast(latest || '-01' as date) as p0, cast(cast(latest || '-01' as date) + interval 1 month as date) as p1
+      select cast(latest || '-01' as date) as p0, {{ add_months("cast(latest || '-01' as date)", 1) }} as p1
       from periods
   ),
   spells as (

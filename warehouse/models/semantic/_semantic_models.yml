@@ -1,0 +1,60 @@
+version: 2
+
+# MetricFlow semantic models over the published layer (SPEC 7.3). Synthetic company. The catalog compiler
+# (engine/src/staysignal/semantic/catalog.py) renders every governed query shape of these metrics into parameterized
+# SQL for DuckDB and BigQuery ahead of time; tools bind parameters to catalog entries and never write SQL.
+
+models:
+  - name: metricflow_time_spine
+    description: Day-grain time spine for MetricFlow.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+        data_tests: [unique, not_null]
+
+semantic_models:
+  - name: workforce_flows
+    description: >-
+      Monthly workforce flows per group (rpt_flows_monthly): headcount at the start of the month, hires, moves between
+      groups (transfers and restructures) and departures by cause. Every row describes 10 or more people.
+    model: ref('rpt_flows_monthly')
+    defaults:
+      agg_time_dimension: month_start
+    entities:
+      - name: group_month
+        type: primary
+        expr: row_key
+    dimensions:
+      - name: month_start
+        type: time
+        type_params:
+          time_granularity: month
+      - name: organization
+        type: categorical
+      - name: group_name
+        type: categorical
+    measures:
+      - name: headcount
+        description: Employees at the start of the first month of the window (a stock, not summed over months).
+        agg: sum
+        non_additive_dimension:
+          name: month_start
+          window_choice: min
+      - name: hires
+        agg: sum
+      - name: transfers_in
+        agg: sum
+      - name: restructured_in
+        agg: sum
+      - name: transfers_out
+        agg: sum
+      - name: restructured_out
+        agg: sum
+      - name: voluntary_departures
+        agg: sum
+      - name: involuntary_departures
+        agg: sum
+      - name: retirements
+        agg: sum

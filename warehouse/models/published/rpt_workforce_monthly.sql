@@ -5,11 +5,11 @@ with cells as (
         month_start,
         coalesce(org_name, 'Unknown') as org_name,
         count(*) as headcount,
-        count(*) filter (where departure_cause = 'voluntary') as voluntary_departures,
-        count(*) filter (where departure_cause = 'involuntary') as involuntary_departures,
-        count(*) filter (where departure_cause = 'retirement') as retirements
+        {{ count_if("departure_cause = 'voluntary'") }} as voluntary_departures,
+        {{ count_if("departure_cause = 'involuntary'") }} as involuntary_departures,
+        {{ count_if("departure_cause = 'retirement'") }} as retirements
     from {{ ref('fct_employee_month') }}
-    group by all
+    group by 1, 2
 )
 
 select

@@ -8,7 +8,7 @@ with visible as (
 ),
 
 corrections as (
-    select * exclude (rn)
+    select {{ star_except(['rn']) }}
     from (
         select *, row_number() over (partition by corrects_record_id order by recorded_at desc, record_id desc) as rn
         from visible

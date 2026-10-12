@@ -5,5 +5,5 @@ select distinct
     decision,
     cast(decision_date as date) as decision_date,
     cast(start_date as date) as start_date,
-    cast(recorded_at as timestamptz) as recorded_at
+    {{ cast_as('recorded_at', 'ts') }} as recorded_at
 from {{ source('raw', 'raw_ats_offers') }}

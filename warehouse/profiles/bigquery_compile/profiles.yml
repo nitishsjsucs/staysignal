@@ -1,0 +1,15 @@
+# Offline BigQuery compile (SPEC 21): `staysignal warehouse compile-bigquery` and CI render every model and test in
+# the BigQuery dialect with no credentials and no network. `oauth-secrets` with a placeholder token builds a client
+# object without contacting Google, and `dbt compile --no-populate-cache` runs no query, so nothing is ever sent.
+# The project ID is a placeholder; production SQL is compiled by the runner with the real profile.
+staysignal:
+  target: bigquery_compile
+  outputs:
+    bigquery_compile:
+      type: bigquery
+      method: oauth-secrets
+      token: offline-compile-placeholder-not-a-credential
+      project: staysignal-project-id
+      dataset: staysignal
+      location: US
+      threads: 1

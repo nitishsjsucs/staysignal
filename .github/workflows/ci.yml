@@ -37,6 +37,10 @@ jobs:
       - run: uv run --locked --project engine ruff check engine/src engine/tests
       - run: uv run --locked --project engine ruff format --check engine/src engine/tests
       - run: uv run --locked --project engine pytest engine/tests -q
+      # the BigQuery dialect offline: every model and test compiled with no credentials, scanned and parsed
+      - run: uv run --locked --project engine staysignal warehouse compile-bigquery
+      # the semantic catalog (MetricFlow SQL for DuckDB and BigQuery) is current with the semantic layer
+      - run: uv run --locked --project engine staysignal semantic catalog --check
       # C1 across platforms: regenerate the canonical world on Linux and compare every macOS-made pin
       - run: uv run --locked --project engine staysignal world generate --profile canonical --out var/world
       - run: uv run --locked --project engine staysignal world verify --manifest data/world/manifest.json --dir var/world

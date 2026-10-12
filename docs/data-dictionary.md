@@ -49,13 +49,17 @@ Corrections and rescissions are resolved at each vintage from the records visibl
 
 Mappings (`sources/mappings/payroll.v1.yaml`, `payroll.v2.yaml`) turn codes into annual multipliers and are applied downstream of staging, so every snapshot replays under any mapping version. `payroll@1` maps `M` and treats unknown codes as monthly; `payroll@2` adds `ANN` and rejects unknown codes.
 
-## Warehouse layers (`warehouse/`, dbt on DuckDB)
+## Warehouse layers (`warehouse/`, dbt on DuckDB; the same models compile for BigQuery)
 
 | Layer | Schema | Models |
 |---|---|---|
 | staging | `staging` | `stg_hris__records` (typed, `er_` keys, content hash, `copy_no`), `stg_payroll__lines`, `stg_map__pay_basis` (the run's mapping), `stg_org__teams`, `stg_org__events`, `stg_ref__bands`, `stg_ats__requisitions`, `stg_ats__offers` |
 | intermediate | `staging` | `int_hris__records_current` (as of the vintage), `int_hris__spell_records`, `int_hris__spells`, `int_hris__assignment_timeline` (SCD2), `int_hris__manager_timeline`, `int_hris__departures`, `int_comp__annualized`, `int_org__teams`, `int_org__team_events` |
 | restricted | `restricted` | `fct_employee_month`, `fct_comp_position` (runner only; no predictions, ADR 0014) |
-| published | `published` | `rpt_workforce_monthly` (cells under 10 suppressed), and the engine-written `forecast_runs` and `forecast_cohort` (cohorts of 10 or more only) |
+| staging (seed) | `staging` | `ref_locations` (location to payroll entity) |
+| published | `published` | `rpt_workforce_monthly` (cells under 10 suppressed), `rpt_flows_monthly` (per group and month: headcount at the start of the month, hires, transfers and restructures in and out, departures by cause; every row balances and holds 10 or more people), and the engine-written `forecast_runs` and `forecast_cohort` (cohorts of 10 or more only) |
+| semantic | `semantic` | `metricflow_time_spine`; the MetricFlow semantic model `workforce_flows` over `rpt_flows_monthly` and its nine metrics (`warehouse/models/semantic/`), compiled ahead of time into `src/worker/generated/catalog.{duckdb,bigquery}.json` |
 
 The vintage and the payroll mapping are dbt variables (`vintage`, `pay_basis_mapping`) and part of every run manifest.
+
+On BigQuery every dataset carries the `staysignal_` prefix (`staysignal_raw`, `staysignal_staging`, `staysignal_restricted`, `staysignal_published`, `staysignal_semantic`, `staysignal_audit`). Dialect differences go through the macros in `warehouse/macros/dialect/` (types, date arithmetic, month and day series, the content hash, conditional counts); `staysignal warehouse compile-bigquery` compiles every model and test offline and scans the result for constructs BigQuery rejects. Metric versions are in `semantic/metric_definitions.yaml`.

@@ -81,6 +81,23 @@ def cmd_warehouse_build(args: argparse.Namespace) -> int:
     return 0 if res.success else 1
 
 
+def cmd_warehouse_compile_bigquery(args: argparse.Namespace) -> int:
+    """Offline BigQuery compile of every model and test (no credentials, no network), the banned-construct scan and
+    a sqlglot parse of the compiled SQL (SPEC 21). Exits non-zero on any finding."""
+    from staysignal.prod.dialect import compile_bigquery
+
+    res = compile_bigquery(Path(args.target))
+    print(json.dumps({k: v for k, v in res.items() if k != "compiled_dir"}, indent=1))
+    return 0 if res["ok"] and not res["banned"] and not res["unparsed"] else 1
+
+
+def cmd_semantic_catalog(args: argparse.Namespace) -> int:
+    """Compile the semantic catalog for DuckDB and BigQuery with MetricFlow (SPEC 7.3); --check diffs."""
+    from staysignal.semantic.catalog import build as build_catalog
+
+    return build_catalog(check=args.check)
+
+
 def _repo_var() -> tuple[Path, Path]:
     from staysignal.paths import REPO_ROOT, VAR
 
@@ -339,6 +356,16 @@ def build_parser() -> argparse.ArgumentParser:
     whb.add_argument("--db", default="var/warehouse.duckdb")
     whb.add_argument("--target", default="var/dbt/target")
     whb.set_defaults(func=cmd_warehouse_build)
+    whc = whsub.add_parser(
+        "compile-bigquery", help="offline BigQuery compile with the banned-construct scan (no credentials)"
+    )
+    whc.add_argument("--target", default="var/dbt/bigquery-target")
+    whc.set_defaults(func=cmd_warehouse_compile_bigquery)
+    sem = sub.add_parser("semantic", help="the governed semantic layer")
+    semsub = sem.add_subparsers(dest="semantic_command", required=True)
+    cat = semsub.add_parser("catalog", help="compile every governed query shape for DuckDB and BigQuery")
+    cat.add_argument("--check", action="store_true", help="fail if the committed catalogs are stale")
+    cat.set_defaults(func=cmd_semantic_catalog)
     eng = sub.add_parser("engine", help="the local engine's state")
     esub0 = eng.add_subparsers(dest="engine_command", required=True)
     prep = esub0.add_parser("prepare", help="land the world, build the warehouse, publish the two published runs")

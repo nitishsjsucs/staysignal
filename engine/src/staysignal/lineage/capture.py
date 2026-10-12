@@ -61,6 +61,7 @@ def invoke(
     project_dir: Path = PROJECT_DIR,
     profiles_dir: Path = PROFILES_DIR,
     dbt_vars: dict[str, Any] | None = None,
+    callbacks: list[Any] | None = None,
 ) -> tuple[bool, Path]:
     from dbt.cli.main import dbtRunner
 
@@ -83,7 +84,7 @@ def invoke(
     if dbt_vars:
         full += ["--vars", json.dumps(dbt_vars, sort_keys=True)]
     with BUILD_LOCK:
-        res = dbtRunner().invoke(full)
+        res = dbtRunner(callbacks=callbacks or []).invoke(full)
     if res.exception is not None:
         raise RuntimeError(f"dbt {' '.join(args)} failed to run: {res.exception}")
     return bool(res.success), target_path

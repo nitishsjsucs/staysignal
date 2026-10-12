@@ -32,6 +32,13 @@ models:
       +schema: restricted
     published:
       +schema: published
+    semantic:
+      +schema: semantic
+
+seeds:
+  staysignal:
+    # reference data beside the staging models (staysignal_staging on BigQuery), never the default dataset
+    +schema: staging
 
 data_tests:
   staysignal:

@@ -3,7 +3,7 @@ select distinct
     level,
     location_code,
     currency,
-    cast(band_min as decimal(18, 2)) as band_min,
-    cast(band_mid as decimal(18, 2)) as band_mid,
-    cast(band_max as decimal(18, 2)) as band_max
+    {{ cast_as('band_min', 'money') }} as band_min,
+    {{ cast_as('band_mid', 'money') }} as band_mid,
+    {{ cast_as('band_max', 'money') }} as band_max
 from {{ source('raw', 'raw_ref_bands') }}

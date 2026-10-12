@@ -3,12 +3,8 @@
     the previous day, and whether the spell ended within the month by cause (end date in (month, next month]).
     No prediction is ever stored here (ADR 0014). -#}
 with months as (
-    select cast(m as date) as month_start, cast(m + interval 1 month as date) as next_month
-    from generate_series(
-        timestamp '2023-04-01',
-        cast(date_trunc('month', {{ vintage_ts() }}) as timestamp),
-        interval 1 month
-    ) as t(m)
+    select month_start, {{ add_months('month_start', 1) }} as next_month
+    from {{ month_series("date '2023-04-01'", month_start(utc_date(vintage_ts()))) }} as series
 ),
 
 employed as (
@@ -23,6 +19,7 @@ assigned as (
     from employed as e
     join {{ ref('int_hris__assignment_timeline') }} as a
         on a.employee_key = e.employee_key and a.spell_no = e.spell_no and a.valid_from < e.month_start
+    where true
     qualify row_number() over (partition by e.month_start, e.employee_key order by a.seq desc) = 1
 )
 
@@ -38,9 +35,9 @@ select
     a.location_code,
     a.employment_type,
     a.start_date as spell_start,
-    date_diff('day', a.start_date, a.month_start) as tenure_days,
+    {{ days_between('a.start_date', 'a.month_start') }} as tenure_days,
     a.end_date is not null and a.end_date <= a.next_month as departed_in_month,
     case when a.end_date is not null and a.end_date <= a.next_month then a.cause end as departure_cause
 from assigned as a
 left join {{ ref('int_org__teams') }} as t
-    on {{ team_on('t', 'a.team_id', "a.month_start - interval 1 day") }}
+    on {{ team_on('t', 'a.team_id', add_days('a.month_start', -1)) }}

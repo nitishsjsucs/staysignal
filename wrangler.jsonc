@@ -1,0 +1,22 @@
+{
+  // Local and test configuration. Production and fixtures deployments render their own configs from
+  // infra/cloudflare/*.template.jsonc. No `ai` binding here: Workers AI always runs remotely and is billed
+  // even under wrangler dev (SPEC 14.11).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "staysignal",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/agents/*", "/internal/*", "/dev/*", "/mcp"]
+  },
+  "dev": { "ip": "127.0.0.1", "port": 8795, "inspector_port": 9245 },
+  "vars": {
+    "SS_AUTH_MODE": "dev",
+    "SS_DATA_MODE": "fixtures",
+    "SS_LLM": "stub",
+    "SS_DEMO": "0",
+    "SS_ENGINE_URL": "http://127.0.0.1:8196"
+  }
+}

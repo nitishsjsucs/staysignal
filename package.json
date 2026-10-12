@@ -1,0 +1,59 @@
+{
+  "name": "staysignal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cohort-level voluntary departure forecasting with trust tooling and accountable reviews, on a synthetic company",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev:web": "vite dev --port 5175 --strictPort",
+    "build": "vite build",
+    "typegen": "wrangler types -c wrangler.jsonc --strict-vars=false worker-configuration.d.ts",
+    "typegen:check": "wrangler types -c wrangler.jsonc --strict-vars=false worker-configuration.d.ts --check",
+    "typecheck": "tsc -p tsconfig.worker.json && tsc -p tsconfig.web.json && tsc -p tsconfig.node.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "3.0.57",
+    "@ai-sdk/react": "4.0.119",
+    "@cloudflare/ai-chat": "0.12.0",
+    "@dagrejs/dagre": "3.1.1",
+    "@fontsource-variable/inter": "5.3.0",
+    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "@xyflow/react": "12.12.0",
+    "agents": "0.24.0",
+    "ai": "7.0.116",
+    "d3-scale": "4.0.2",
+    "d3-shape": "3.2.0",
+    "echarts": "6.1.0",
+    "hono": "4.13.13",
+    "jose": "6.2.12",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "workers-ai-provider": "4.0.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.63.1",
+    "@cloudflare/vitest-plugin": "1.4.0",
+    "@playwright/test": "1.63.0",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/react": "16.3.3",
+    "@types/d3-scale": "4.0.9",
+    "@types/d3-shape": "3.2.0",
+    "@types/node": "24.19.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "happy-dom": "20.14.6",
+    "typescript": "6.0.3",
+    "vite": "8.3.4",
+    "vitest": "4.1.11",
+    "wrangler": "4.149.0"
+  }
+}

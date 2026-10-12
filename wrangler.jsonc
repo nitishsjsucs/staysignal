@@ -9,9 +9,17 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*", "/agents/*", "/internal/*", "/dev/*", "/mcp"]
+    "run_worker_first": ["/api/*", "/agents/*", "/agents-ws/*", "/internal/*", "/dev/*", "/mcp"]
   },
   "dev": { "ip": "127.0.0.1", "port": 8795, "inspector_port": 9245 },
+  "durable_objects": {
+    "bindings": [
+      { "name": "ANALYST_AGENT", "class_name": "AnalystAgent" },
+      { "name": "WORKSPACE_AGENT", "class_name": "WorkspaceAgent" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AnalystAgent", "WorkspaceAgent"] }],
+  "workflows": [{ "name": "staysignal-routine", "binding": "ROUTINE_WORKFLOW", "class_name": "RoutineWorkflow" }],
   "vars": {
     "SS_AUTH_MODE": "dev",
     "SS_DATA_MODE": "fixtures",

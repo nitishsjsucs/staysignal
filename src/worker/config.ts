@@ -1,0 +1,45 @@
+// Fail-closed configuration from the Worker environment.
+export interface AppConfig {
+  authMode: "dev" | "access";
+  dataMode: "fixtures" | "engine" | "bigquery";
+  llm: "stub" | "recorded" | "llama" | "mlx" | "workers-ai";
+  demo: boolean;
+  engineUrl: string;
+  devJwks: string | null;
+  devSigningJwk: string | null;
+  access: { teamDomain: string; aud: string };
+  hmacKey: string;
+  runnerToken: string | null;
+  roleBindings: string | null;
+}
+
+export const DEV_ISSUER = "http://localhost/dev-access";
+export const DEV_AUDIENCE = "staysignal-dev";
+// Fixed CI and local key (base64 of bytes 0..31), the same as the engine's TEST_MASTER_KEY. Production sets
+// SS_HMAC_MASTER_KEY as a Worker secret.
+export const TEST_HMAC_KEY = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=";
+
+export function parseConfig(env: Env): AppConfig {
+  const e = env as unknown as Record<string, string | undefined>;
+  const authMode = e.SS_AUTH_MODE === "access" ? "access" : "dev";
+  const dataMode = (e.SS_DATA_MODE ?? "fixtures") as AppConfig["dataMode"];
+  const llm = (e.SS_LLM ?? "stub") as AppConfig["llm"];
+  if (authMode === "access" && (!e.SS_ACCESS_TEAM_DOMAIN || !e.SS_ACCESS_AUD)) throw new Error("access mode needs SS_ACCESS_TEAM_DOMAIN and SS_ACCESS_AUD");
+  return {
+    authMode,
+    dataMode,
+    llm,
+    demo: e.SS_DEMO === "1",
+    engineUrl: e.SS_ENGINE_URL ?? "http://127.0.0.1:8196",
+    devJwks: e.SS_DEV_JWKS ?? null,
+    devSigningJwk: e.SS_DEV_SIGNING_JWK ?? null,
+    access: authMode === "dev" ? { teamDomain: DEV_ISSUER, aud: DEV_AUDIENCE } : { teamDomain: e.SS_ACCESS_TEAM_DOMAIN as string, aud: e.SS_ACCESS_AUD as string },
+    hmacKey: e.SS_HMAC_MASTER_KEY ?? (authMode === "dev" ? TEST_HMAC_KEY : ""),
+    runnerToken: e.SS_RUNNER_TOKEN ?? null,
+    roleBindings: e.SS_ROLE_BINDINGS ?? null,
+  };
+}
+
+export function isLocalHost(url: URL): boolean {
+  return url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "[::1]";
+}

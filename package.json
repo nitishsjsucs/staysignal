@@ -22,7 +22,11 @@
     "llm": "node scripts/llm.ts",
     "llm:measure": "node scripts/llm-measure.ts",
     "results:readme": "node scripts/results-to-readme.ts",
-    "results:check": "node scripts/results-to-readme.ts --check"
+    "results:check": "node scripts/results-to-readme.ts --check",
+    "fixtures:index": "node scripts/gen-fixtures.ts",
+    "fixtures:check": "node scripts/gen-fixtures.ts --check",
+    "dev:keys": "node scripts/dev-keys.ts",
+    "fixture-runner": "node scripts/fixture-runner.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "3.0.57",

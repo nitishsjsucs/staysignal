@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "roles": {
+    "people_analyst": {
+      "label": "People Analyst",
+      "scopes": ["forecast:read:all", "forecast:read:team", "model:read", "quality:read", "lineage:read", "investigate:run", "review:propose", "replay:run", "lab:read", "memory:read", "trace:read:own"],
+      "notes": "primary analyst; the only role that sees team-level values"
+    },
+    "people_partner": {
+      "label": "People Partner",
+      "scopes": ["forecast:read:assigned", "review:propose:assigned", "lab:run", "lab:read", "memory:read:assigned"],
+      "notes": "cohort-level results for assigned organizations only (group level and above, n of at least 50); voluntary departures only"
+    },
+    "pa_lead": {
+      "label": "People Analytics Lead",
+      "scopes": ["forecast:read:all", "model:read", "quality:read", "review:propose", "review:approve", "publish:approve", "rollback", "audit:read", "lab:read", "trace:read:all"],
+      "notes": "proposer and approver, never of the same subject"
+    },
+    "data_engineer": {
+      "label": "Data Engineer",
+      "scopes": ["quality:read", "lineage:read", "mapping:approve", "replay:run", "break_glass", "forecast:read:aggregate", "audit:read"],
+      "notes": "repair approver"
+    },
+    "auditor": {
+      "label": "Auditor",
+      "scopes": ["audit:read", "audit:attributes", "trace:read:all", "forecast:read:aggregate"],
+      "notes": "read-only"
+    },
+    "agent": {
+      "label": "StaySignal agent",
+      "scopes": ["review:draft", "mapping:propose", "memory:write"],
+      "notes": "proposes only; never approves"
+    }
+  }
+}

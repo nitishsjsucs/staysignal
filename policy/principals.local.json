@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "label": "local development principals (synthetic role mailboxes; production binds Access identities through SS_ROLE_BINDINGS)",
+  "principals": [
+    { "id": "pa-analyst@larkspur.example", "role": "people_analyst", "display": "People Analyst" },
+    { "id": "hrbp-engineering@larkspur.example", "role": "people_partner", "assigned_orgs": ["Engineering", "Product & Design"], "display": "People Partner, Engineering" },
+    { "id": "hrbp-gtm@larkspur.example", "role": "people_partner", "assigned_orgs": ["Sales", "Customer Success & Support", "Marketing"], "display": "People Partner, Go-to-market" },
+    { "id": "pa-lead@larkspur.example", "role": "pa_lead", "display": "People Analytics Lead" },
+    { "id": "people-ops-director@larkspur.example", "role": "pa_lead", "display": "People Operations Director" },
+    { "id": "data-eng@larkspur.example", "role": "data_engineer", "display": "Data Engineer" },
+    { "id": "audit@larkspur.example", "role": "auditor", "display": "Auditor" }
+  ]
+}

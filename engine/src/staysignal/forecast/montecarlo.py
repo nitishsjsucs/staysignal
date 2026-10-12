@@ -46,10 +46,27 @@ class McResult:
     vol_counts: np.ndarray | None = None  # (sims, C, 6) simulated counts, kept only for evaluation (never persisted)
 
 
+NUGGET = 1e-10  # relative to the largest variance
+
+
+def cov_root(cov: np.ndarray) -> np.ndarray:
+    """The lower Cholesky factor of the symmetrized covariance plus a nugget of 1e-10 times its largest variance.
+
+    The cluster-robust sandwich is singular where cluster scores are collinear (rank 117 of 119 for `m2026.09`), so
+    the nugget makes it positive definite while adding a standard deviation of about 1e-5 in those directions only.
+    The factor is unique, so draws agree across LAPACK builds to rounding. An eigendecomposition does not: macOS
+    (Accelerate) and Linux (OpenBLAS) return different eigenvectors for this matrix, which gave different parameter
+    draws, intervals and business-result hashes on CI than on the machine that made the fixtures."""
+    sym = (cov + cov.T) / 2.0
+    top = float(np.max(np.diag(sym))) if sym.size else 0.0
+    if top <= 0.0:  # no parameter uncertainty (point draws)
+        return np.zeros_like(sym)
+    return np.linalg.cholesky(sym + NUGGET * top * np.eye(len(sym)))
+
+
 def mvn_draws(rng: np.random.Generator, mean: np.ndarray, cov: np.ndarray, n: int) -> np.ndarray:
-    vals, vecs = np.linalg.eigh((cov + cov.T) / 2.0)
-    root = vecs * np.sqrt(np.clip(vals, 0.0, None))
-    return mean + rng.standard_normal((n, len(mean))) @ root.T
+    """n draws from N(mean, cov) as mean + z L', with z standard normal from `rng` and L from `cov_root`."""
+    return mean + rng.standard_normal((n, len(mean))) @ cov_root(cov).T
 
 
 def _agg(a: np.ndarray, Mt: np.ndarray) -> np.ndarray:

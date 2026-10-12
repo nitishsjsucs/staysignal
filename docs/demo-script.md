@@ -22,7 +22,7 @@ Say: "Cohort-level planning support for People Partners. No individual scores an
 ## Beat 1, forecast (0:10 to 0:50)
 
 1. Click **Ask** (top right) and send: *Forecast voluntary departures in Engineering over the next 90 days.*
-2. The dock shows the `forecast departures` tool card and an answer whose numbers link to the computed result. The page follows to Engineering at 3 months: **13.1** expected voluntary departures, 80% range **9 to 20**, 95% range **7 to 23**, next to the trailing-rate status quo.
+2. The dock shows the `forecast departures` tool card and an answer whose numbers link to the computed result. The page follows to Engineering at 3 months: **13.1** expected voluntary departures, 80% range **8 to 18**, 95% range **6 to 22**, next to the trailing-rate status quo.
 3. Point at the trust strip (backtest observed over expected, how often the 80% range held, data freshness, checks passing), the fan chart (6 months, 80% and 95% bands, Other exits as a grey line) and the backtest strip (quarterly pseudo-real-time backtests: model and data as known at each cutoff, not forecasts that were published).
 
 Key point: "In non-overlapping quarterly backtests our 80% range held N of M times." Read N and M from the trust strip; they are synthetic-world results.

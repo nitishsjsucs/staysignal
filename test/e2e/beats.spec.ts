@@ -40,7 +40,7 @@ test("beats 1 to 5 click through", async ({ page }) => {
     await expect(page).toHaveURL(/cohort=org%3AEngineering/);
     await expect(page).toHaveURL(/h=3/);
     await expect(page.getByTestId("hero-figure")).toHaveText("13.1");
-    await expect(page.getByTestId("hero")).toContainText("80% range 9 to 20");
+    await expect(page.getByTestId("hero")).toContainText("80% range 8 to 18");
     await expect(page.getByTestId("hero")).toContainText("Trailing-rate status quo");
     await expect(page.getByTestId("trust-strip")).toBeVisible();
     await expect(page.getByTestId("fan").locator("svg.chart")).toBeVisible();

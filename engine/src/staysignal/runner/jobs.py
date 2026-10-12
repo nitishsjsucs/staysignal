@@ -203,23 +203,36 @@ def propose_mapping(st: EngineState, params: dict) -> dict:
     }
 
 
-def what_changed(st: EngineState, params: dict) -> dict:
-    a = compute_run(st, st.published_doc(params["from_run"])["run"])
-    b = compute_run(st, st.published_doc(params["to_run"])["run"])
-    ta = {r["cohort_id"]: r for r in a["cohorts"]}
-    tb = {r["cohort_id"]: r for r in b["cohorts"]}
+def change_summary(ta: dict[str, dict], tb: dict[str, dict]) -> dict:
+    """3-month expected voluntary departures of two runs for the company and each organization, rounded to 1e-6 (the
+    business-result precision, SPEC 9.6) so the output is the same on every platform; the routine compares the change
+    with its publication tolerance (SPEC 13.4)."""
+
+    def r6(x: float) -> float:
+        return round(float(x), 6)
+
     return {
         "company": {
-            "from": ta["company"]["horizons"]["3"]["expected"],
-            "to": tb["company"]["horizons"]["3"]["expected"],
+            "from": r6(ta["company"]["horizons"]["3"]["expected"]),
+            "to": r6(tb["company"]["horizons"]["3"]["expected"]),
         },
         "organizations": [
-            {"cohort_id": cid, "from": ta[cid]["horizons"]["3"]["expected"], "to": tb[cid]["horizons"]["3"]["expected"]}
+            {
+                "cohort_id": cid,
+                "from": r6(ta[cid]["horizons"]["3"]["expected"]),
+                "to": r6(tb[cid]["horizons"]["3"]["expected"]),
+            }
             for cid in sorted(ta)
             if cid.startswith("org:") and cid in tb
         ],
         "label": "synthetic",
     }
+
+
+def what_changed(st: EngineState, params: dict) -> dict:
+    a = compute_run(st, st.published_doc(params["from_run"])["run"])
+    b = compute_run(st, st.published_doc(params["to_run"])["run"])
+    return change_summary({r["cohort_id"]: r for r in a["cohorts"]}, {r["cohort_id"]: r for r in b["cohorts"]})
 
 
 def _replay_hash(st: EngineState, brief: dict, mapping: str, files: list[tuple[str, str]]) -> str:

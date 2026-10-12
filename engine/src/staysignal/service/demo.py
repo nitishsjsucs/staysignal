@@ -34,6 +34,7 @@ from staysignal.model.train import train
 from staysignal.quality.mapping_proposal import load_mapping, propose
 from staysignal.quality.probes import rca_probe
 from staysignal.quality.run_checks import registry, run_checks, summarize
+from staysignal.runner.jobs import change_summary
 
 START = date(2023, 4, 1)
 MODELS = {
@@ -250,18 +251,7 @@ def build(
         run_checks(held, CANDIDATE_VINTAGE, "payroll@2")
     )
     tq, t3 = table(run_q), table(repaired)
-    jobs[job_key("what_changed", {"from_run": Q.run_id, "to_run": "R-2026-10-01#3"})] = {
-        "company": {
-            "from": tq["company"]["horizons"]["3"]["expected"],
-            "to": t3["company"]["horizons"]["3"]["expected"],
-        },
-        "organizations": [
-            {"cohort_id": cid, "from": tq[cid]["horizons"]["3"]["expected"], "to": t3[cid]["horizons"]["3"]["expected"]}
-            for cid in sorted(tq)
-            if cid.startswith("org:") and cid in t3
-        ],
-        "label": "synthetic",
-    }
+    jobs[job_key("what_changed", {"from_run": Q.run_id, "to_run": "R-2026-10-01#3"})] = change_summary(tq, t3)
     landed = sorted((world_dir / "sources").glob("*.csv")) + held_files
     rp = replay(brief3, landed, models_dir)
     neg = replay(brief3, landed, models_dir, force_mapping="payroll@1")

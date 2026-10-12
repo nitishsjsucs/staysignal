@@ -1,17 +1,23 @@
-"""Typed source records and loading of landed extracts (SPEC 6.4, 7.1).
+"""Landing and typed source records (SPEC 6.4, 7.1).
 
-A `Sources` object holds every landed record with its knowledge time (`recorded_at`). Nothing here filters by
-vintage; the point-in-time layer does that. Files are read in sorted order so loading is deterministic.
+`land` copies an arrived extract into immutable, content-addressed storage (`var/landing/<source>/<period>/
+<sha256>.csv`) after validating it against its schema; landing the same bytes again is a no-op. A `Sources` object
+holds every landed record with its knowledge time (`recorded_at`). Nothing here filters by vintage; the point-in-time
+layer does that. Files are read in sorted order so loading is deterministic.
 """
 
 from __future__ import annotations
 
 import csv
+import hashlib
+import io
+import os
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
 
 from staysignal.clock import parse_ts
+from staysignal.ingest.schemas import FileKind, kind_of, validate_rows
 
 
 def _d(s: str) -> date | None:
@@ -297,3 +303,53 @@ def load_world_sources(world_dir: Path, include_held: bool = False, extra: list[
 
 def max_recorded_at(src: Sources) -> datetime:
     return max(r.recorded_at for r in src.hris)
+
+
+class LandingRejected(ValueError):
+    """An extract that does not match its schema; nothing was landed."""
+
+    def __init__(self, name: str, problems: list[str]):
+        super().__init__(f"{name}: {len(problems)} problem(s): " + "; ".join(problems[:5]))
+        self.name = name
+        self.problems = problems
+
+
+@dataclass(frozen=True)
+class Landed:
+    kind: FileKind
+    period: str
+    name: str  # the delivered file name, kept as provenance
+    sha256: str
+    path: Path  # the content-addressed copy
+    rows: int
+    arrived_at: datetime | None  # the newest recorded_at in the file (its delivery time on the synthetic clock)
+    new: bool  # false when the same bytes had already landed
+
+
+def land(path: Path, root: Path) -> Landed:
+    """Validates an extract and stores it at <root>/<source>/<period>/<sha256>.csv (read-only, written once)."""
+    found = kind_of(path.name)
+    if found is None:
+        raise LandingRejected(path.name, ["unknown extract name"])
+    kind, period = found
+    data = path.read_bytes()
+    sha = hashlib.sha256(data).hexdigest()
+    reader = csv.DictReader(io.StringIO(data.decode("utf-8")))
+    rows = list(reader)
+    problems = validate_rows(kind, list(reader.fieldnames or []), rows)
+    if problems:
+        raise LandingRejected(path.name, problems)
+    dest = root / kind.source / period / f"{sha}.csv"
+    new = not dest.exists()
+    if new:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_suffix(".tmp")
+        tmp.write_bytes(data)
+        os.chmod(tmp, 0o444)
+        tmp.replace(dest)
+    stamps = [r["recorded_at"] for r in rows if r.get("recorded_at")]
+    arrived = parse_ts(max(stamps)) if stamps else None
+    if arrived is None and len(period) == 10:  # an empty daily delta arrives at its batch time
+        day = date.fromisoformat(period)
+        arrived = datetime(day.year, day.month, day.day, 6, tzinfo=UTC)
+    return Landed(kind, period, path.name, sha, dest, len(rows), arrived, new)

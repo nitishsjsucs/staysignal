@@ -70,6 +70,40 @@ def cmd_eval_oracle_coverage(args: argparse.Namespace) -> int:
     return 0 if report["within_band"] else 1
 
 
+def cmd_ingest_land(args: argparse.Namespace) -> int:
+    """Lands and loads a world's extracts into the local warehouse (idempotent by file hash)."""
+    from datetime import UTC, datetime
+
+    from staysignal.duck import open_duckdb
+    from staysignal.ingest import mappings
+    from staysignal.ingest.load_duckdb import ingest, refresh_employee_keys
+
+    world = Path(args.world)
+    paths = sorted((world / "sources").glob("*.csv")) + sorted((world / "audit").glob("*.csv"))
+    if args.held:
+        paths += sorted((world / "held").glob("*.csv"))
+    con = open_duckdb(args.db)
+    out = ingest(con, paths, Path(args.landing), datetime(2023, 4, 1, 6, tzinfo=UTC))
+    n_maps = mappings.write_raw(con)
+    refresh_employee_keys(con)
+    con.close()
+    new = sum(1 for o in out if o["loaded"])
+    print(json.dumps({"files": len(out), "loaded": new, "already_loaded": len(out) - new, "mapping_rows": n_maps}))
+    return 0
+
+
+def cmd_snapshot_conformed(args: argparse.Namespace) -> int:
+    from staysignal.clock import parse_ts
+    from staysignal.duck import open_duckdb
+    from staysignal.ingest.conformed import snapshot
+
+    con = open_duckdb(args.db)
+    manifest = snapshot(con, parse_ts(args.as_of), Path(args.out))
+    con.close()
+    print(json.dumps(manifest, indent=2))
+    return 0
+
+
 def cmd_demo_build(args: argparse.Namespace) -> int:
     from staysignal.service.demo import build
 
@@ -92,6 +126,21 @@ def build_parser() -> argparse.ArgumentParser:
     ver.add_argument("--manifest", default="data/world/manifest.json")
     ver.add_argument("--dir", default="var/world")
     ver.set_defaults(func=cmd_world_verify)
+    ing = sub.add_parser("ingest", help="landing and raw loads")
+    isub = ing.add_subparsers(dest="ingest_command", required=True)
+    land = isub.add_parser("land", help="land and load a world's extracts (idempotent by file hash)")
+    land.add_argument("--world", default="var/world")
+    land.add_argument("--held", action="store_true", help="include the held-back September payroll files")
+    land.add_argument("--db", default="var/warehouse.duckdb")
+    land.add_argument("--landing", default="var/landing")
+    land.set_defaults(func=cmd_ingest_land)
+    snap = sub.add_parser("snapshot", help="conformed snapshots")
+    ssub = snap.add_subparsers(dest="snapshot_command", required=True)
+    conf = ssub.add_parser("conformed", help="typed, deduplicated, pseudonymized records known at a vintage")
+    conf.add_argument("--as-of", required=True, help="vintage, for example 2026-10-01T06:00:00Z")
+    conf.add_argument("--db", default="var/warehouse.duckdb")
+    conf.add_argument("--out", default="var/conformed")
+    conf.set_defaults(func=cmd_snapshot_conformed)
     ev = sub.add_parser("eval", help="recorded evaluations (synthetic world)")
     esub = ev.add_subparsers(dest="eval_command", required=True)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")

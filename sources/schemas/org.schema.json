@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Organization tree, reorganization events and pay bands (synthetic)",
+  "$defs": {
+    "teams": {
+      "type": "object",
+      "required": ["team_id", "team_name", "group_id", "group_name", "org_id", "org_name", "valid_from", "recorded_at"],
+      "properties": {
+        "team_id": { "type": "string", "pattern": "^T[0-9]{3}$" },
+        "team_name": { "type": "string" },
+        "group_id": { "type": "string", "pattern": "^G[0-9]{2}$" },
+        "group_name": { "type": "string" },
+        "org_id": { "type": "string", "pattern": "^[A-Z]{2,4}$" },
+        "org_name": { "type": "string" },
+        "valid_from": { "type": "string", "format": "date" },
+        "valid_to": { "type": "string", "format": "date" },
+        "recorded_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "events": {
+      "type": "object",
+      "required": ["event_id", "effective_date", "kind", "team_id", "recorded_at"],
+      "properties": {
+        "event_id": { "type": "string", "pattern": "^OE[0-9]{4}$" },
+        "effective_date": { "type": "string", "format": "date" },
+        "kind": { "enum": ["merge", "split", "move", "restructure"] },
+        "team_id": { "type": "string", "pattern": "^T[0-9]{3}$" },
+        "recorded_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "bands": {
+      "type": "object",
+      "required": ["job_family", "level", "location_code", "currency", "band_min", "band_mid", "band_max"],
+      "properties": {
+        "job_family": { "type": "string", "pattern": "^[A-Z]{2,3}$" },
+        "level": { "enum": ["IC1", "IC2", "IC3", "IC4", "IC5", "IC6", "M1", "M2", "M3", "M4"] },
+        "location_code": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "currency": { "enum": ["USD", "CAD", "GBP"] },
+        "band_min": { "type": "string", "pattern": "^[0-9]+\\.[0-9]{2}$" },
+        "band_mid": { "type": "string", "pattern": "^[0-9]+\\.[0-9]{2}$" },
+        "band_max": { "type": "string", "pattern": "^[0-9]+\\.[0-9]{2}$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit-only attribute (synthetic; ADR 0013): loaded only into the audit schema, never a feature or a dimension",
+  "type": "object",
+  "required": ["employee_number"],
+  "properties": {
+    "employee_number": { "type": "string", "pattern": "^E[0-9]{6}$" },
+    "age40_from": { "type": "string", "format": "date" }
+  }
+}

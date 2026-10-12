@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HRIS record (synthetic): bitemporal, one assignment snapshot after each change",
+  "type": "object",
+  "required": ["record_id", "employee_number", "record_type", "effective_date", "recorded_at", "job_code", "level", "team_id", "location_code", "employment_type", "source_batch_id"],
+  "properties": {
+    "record_id": { "type": "string", "pattern": "^H[0-9]{8}$" },
+    "employee_number": { "type": "string", "pattern": "^E[0-9]{6}$" },
+    "record_type": { "enum": ["migration_baseline", "hire", "rehire", "promotion", "transfer", "team_change", "manager_change", "employment_type_change", "termination", "correction", "rescission"] },
+    "effective_date": { "type": "string", "format": "date" },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "job_code": { "type": "string", "pattern": "^[A-Z]{2,3}-(IC[1-6]|M[1-4])$" },
+    "level": { "enum": ["IC1", "IC2", "IC3", "IC4", "IC5", "IC6", "M1", "M2", "M3", "M4"] },
+    "team_id": { "type": "string", "pattern": "^T[0-9]{3}$" },
+    "manager_employee_number": { "type": "string", "pattern": "^E[0-9]{6}$" },
+    "location_code": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "employment_type": { "enum": ["regular", "fixed_term"] },
+    "contract_end_date": { "type": "string", "format": "date" },
+    "termination_reason_code": { "enum": ["VOL_RESIGN", "INVOL_POSITION", "INVOL_PERFORMANCE", "RETIRE", "FT_END"] },
+    "corrects_record_id": { "type": "string", "pattern": "^H[0-9]{8}$" },
+    "source_batch_id": { "type": "string" },
+    "legacy_hire_date": { "type": "string", "format": "date" },
+    "legacy_first_promotion_date": { "type": "string", "format": "date" },
+    "legacy_last_promotion_date": { "type": "string", "format": "date" }
+  }
+}

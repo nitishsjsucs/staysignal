@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ATS extracts (synthetic): requisition events and offers",
+  "$defs": {
+    "requisitions": {
+      "type": "object",
+      "required": ["requisition_id", "team_id", "job_code", "req_type", "status", "event_date", "recorded_at"],
+      "properties": {
+        "requisition_id": { "type": "string", "pattern": "^REQ[0-9]{5}$" },
+        "team_id": { "type": "string", "pattern": "^T[0-9]{3}$" },
+        "job_code": { "type": "string", "pattern": "^[A-Z]{2,3}-(IC[1-6]|M[1-4])$" },
+        "req_type": { "enum": ["backfill", "growth"] },
+        "status": { "enum": ["open", "filled", "cancelled"] },
+        "event_date": { "type": "string", "format": "date" },
+        "recorded_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "offers": {
+      "type": "object",
+      "required": ["offer_id", "requisition_id", "extended_date", "decision", "decision_date", "recorded_at"],
+      "properties": {
+        "offer_id": { "type": "string", "pattern": "^OF[0-9]{5}$" },
+        "requisition_id": { "type": "string", "pattern": "^REQ[0-9]{5}$" },
+        "extended_date": { "type": "string", "format": "date" },
+        "decision": { "enum": ["accepted", "declined"] },
+        "decision_date": { "type": "string", "format": "date" },
+        "start_date": { "type": "string", "format": "date" },
+        "recorded_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

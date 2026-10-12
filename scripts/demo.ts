@@ -5,7 +5,7 @@
 //   npm run demo:reset [-- --beat N]  stops everything, restores the snapshot for the start of beat N (default 1),
 //                                     restarts the demo profile and records the time it took with --record
 // A snapshot holds the local Workers persistence (Durable Objects and Workflows), the warehouse file, the landing
-// store and the engine's published documents. Beats 1 to 3 start from the same data state (beats 1 and 2 only ask
+// store, the engine's published documents and the memory repository. Beats 1 to 3 start from the same data state (beats 1 and 2 only ask
 // questions; beat 3 starts the arrival), beat 4 starts with the run held and the mapping proposal waiting for a data
 // engineer, and beat 5 starts after the repair, the publication of version 3 and its replay.
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
@@ -23,7 +23,7 @@ const LEAD = "pa-lead@larkspur.example";
 const DATA_ENG = "data-eng@larkspur.example";
 
 /** What a snapshot holds, relative to the repository root. */
-export const STATE_PATHS = ["dist/staysignal/.wrangler/state", "var/warehouse.duckdb", "var/landing", "var/engine/published"] as const;
+export const STATE_PATHS = ["dist/staysignal/.wrangler/state", "var/warehouse.duckdb", "var/landing", "var/engine/published", "var/memory"] as const;
 /** The snapshot each beat starts from. */
 export const BEAT_SNAPSHOT: Record<number, string> = { 1: "beat-1", 2: "beat-1", 3: "beat-1", 4: "beat-4", 5: "beat-5" };
 

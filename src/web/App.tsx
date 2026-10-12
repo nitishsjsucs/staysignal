@@ -8,6 +8,7 @@ import { WorkspaceProvider } from "./live";
 import { AskPage } from "./pages/Ask";
 import { ChangesPage } from "./pages/Changes";
 import { ForecastPage } from "./pages/Forecast";
+import { MemoryPage } from "./pages/Memory";
 import { QualityPage } from "./pages/Quality";
 import { ResultPage } from "./pages/ResultDetail";
 import { ReviewsPage } from "./pages/Reviews";
@@ -54,6 +55,7 @@ export function App() {
         {route.page === "reviews" ? <ReviewsPage me={me} /> : null}
         {route.page === "trust" ? <TrustPage me={me} /> : null}
         {route.page === "workforce" ? <WorkforcePage me={me} /> : null}
+        {route.page === "memory" ? <MemoryPage me={me} /> : null}
         {route.page === "ask" ? <AskPage me={me} /> : null}
         {route.page === "result" ? <ResultPage id={route.id} /> : null}
         {route.page === "not_found" ? <p>Page not found.</p> : null}

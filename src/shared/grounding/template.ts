@@ -75,6 +75,13 @@ function flowsText(a: string, v: V): string {
   return `From {{${a}.from}} to {{${a}.to}}, ${String(c.name)} had {{${a}.headcount_start|int}} people at the start${end}.${moves} Small links are merged to protect individuals (synthetic data).`;
 }
 
+function memoryText(a: string, v: V): string {
+  const hits = (v.hits as V[]) ?? [];
+  if (!hits.length) return "I found nothing in StaySignal's memory about that.";
+  const more = hits.length > 1 ? ` Other notes: ${hits.slice(1).map((_, i) => `{{${a}.hits.${i + 1}.path}}`).join(", ")}.` : "";
+  return `From StaySignal's memory (synthetic records): {{${a}.hits.0.snippet}} (in {{${a}.hits.0.path}}).${more}`;
+}
+
 function reviewText(_a: string, v: V): string {
   const checks = (v.checks as V[]) ?? [];
   return `I drafted a People Partner review for ${String(v.cohort)} with three group-level checks: ${checks.map((c) => String(c.title).toLowerCase()).join("; ")}. It is a draft: you submit it, and a different lead approves it. Pay-equity review by Compensation is a blocking item before any cohort pay change.`;
@@ -90,6 +97,7 @@ const TEMPLATES: Record<string, (a: string, v: V) => string> = {
   backtest_summary: backtestText,
   cohort_profile: profileText,
   workforce_flows: flowsText,
+  search_memory: memoryText,
   prepare_review: reviewText,
 };
 

@@ -15,20 +15,21 @@ import f11 from "../../../test/fixtures/api/forecast/R-2026-10-01-2.json";
 import f12 from "../../../test/fixtures/api/forecast/R-2026-10-01-3.json";
 import f13 from "../../../test/fixtures/api/history.json";
 import f14 from "../../../test/fixtures/api/lineage.json";
-import f15 from "../../../test/fixtures/api/profiles/R-2026-09-01-1.json";
-import f16 from "../../../test/fixtures/api/profiles/R-2026-10-01-1.json";
-import f17 from "../../../test/fixtures/api/profiles/R-2026-10-01-3.json";
-import f18 from "../../../test/fixtures/api/quality.json";
-import f19 from "../../../test/fixtures/api/runs.json";
-import f20 from "../../../test/fixtures/jobs/03e6b23af2b89c8d7242c3997bb0cb39f73650209358e478d92f7eeaaeeb0694.json";
-import f21 from "../../../test/fixtures/jobs/03fd6348630ab225cd6c58abd348a4344bf0eee1609c4f47a442fab5fa33c565.json";
-import f22 from "../../../test/fixtures/jobs/13b5ccc6a30dcff7d7784e4f4daa7b70d3ea8d1f6a0758c346eca3df7e7c0aed.json";
-import f23 from "../../../test/fixtures/jobs/3f12700824b25957260bc3c04d816ee3c33556afd2f0b8498314a01bd5fa125a.json";
-import f24 from "../../../test/fixtures/jobs/71c79b7bcaddf59d96df44dd47edb2f582b726134e173c433283d75f81cc2d60.json";
-import f25 from "../../../test/fixtures/jobs/98bc78917ad8325e3117d0d4f0a5f98d38f565c3d542de03ea43e4a6cd04a16c.json";
-import f26 from "../../../test/fixtures/jobs/cd96228421c819aa6b25b942ee9b235dc008ca95f5f48ed1e32cc72364076acc.json";
-import f27 from "../../../test/fixtures/jobs/ed70049692733147af57f53575106b147c2c840fc1bda7c66255196b80cf83c7.json";
-import f28 from "../../../test/fixtures/jobs/ee5cf71e20a99667095bd0cc70d6101e603b4f3abbea22a1ed6cf5bc916278df.json";
+import f15 from "../../../test/fixtures/api/memory.json";
+import f16 from "../../../test/fixtures/api/profiles/R-2026-09-01-1.json";
+import f17 from "../../../test/fixtures/api/profiles/R-2026-10-01-1.json";
+import f18 from "../../../test/fixtures/api/profiles/R-2026-10-01-3.json";
+import f19 from "../../../test/fixtures/api/quality.json";
+import f20 from "../../../test/fixtures/api/runs.json";
+import f21 from "../../../test/fixtures/jobs/03e6b23af2b89c8d7242c3997bb0cb39f73650209358e478d92f7eeaaeeb0694.json";
+import f22 from "../../../test/fixtures/jobs/03fd6348630ab225cd6c58abd348a4344bf0eee1609c4f47a442fab5fa33c565.json";
+import f23 from "../../../test/fixtures/jobs/13b5ccc6a30dcff7d7784e4f4daa7b70d3ea8d1f6a0758c346eca3df7e7c0aed.json";
+import f24 from "../../../test/fixtures/jobs/3f12700824b25957260bc3c04d816ee3c33556afd2f0b8498314a01bd5fa125a.json";
+import f25 from "../../../test/fixtures/jobs/71c79b7bcaddf59d96df44dd47edb2f582b726134e173c433283d75f81cc2d60.json";
+import f26 from "../../../test/fixtures/jobs/98bc78917ad8325e3117d0d4f0a5f98d38f565c3d542de03ea43e4a6cd04a16c.json";
+import f27 from "../../../test/fixtures/jobs/cd96228421c819aa6b25b942ee9b235dc008ca95f5f48ed1e32cc72364076acc.json";
+import f28 from "../../../test/fixtures/jobs/ed70049692733147af57f53575106b147c2c840fc1bda7c66255196b80cf83c7.json";
+import f29 from "../../../test/fixtures/jobs/ee5cf71e20a99667095bd0cc70d6101e603b4f3abbea22a1ed6cf5bc916278df.json";
 
 export const FIXTURES: Record<string, unknown> = {
   "catalog/1374e764dd94bec7.json": f0,
@@ -46,18 +47,19 @@ export const FIXTURES: Record<string, unknown> = {
   "forecast/R-2026-10-01-3.json": f12,
   "history.json": f13,
   "lineage.json": f14,
-  "profiles/R-2026-09-01-1.json": f15,
-  "profiles/R-2026-10-01-1.json": f16,
-  "profiles/R-2026-10-01-3.json": f17,
-  "quality.json": f18,
-  "runs.json": f19,
-  "jobs/03e6b23af2b89c8d7242c3997bb0cb39f73650209358e478d92f7eeaaeeb0694.json": f20,
-  "jobs/03fd6348630ab225cd6c58abd348a4344bf0eee1609c4f47a442fab5fa33c565.json": f21,
-  "jobs/13b5ccc6a30dcff7d7784e4f4daa7b70d3ea8d1f6a0758c346eca3df7e7c0aed.json": f22,
-  "jobs/3f12700824b25957260bc3c04d816ee3c33556afd2f0b8498314a01bd5fa125a.json": f23,
-  "jobs/71c79b7bcaddf59d96df44dd47edb2f582b726134e173c433283d75f81cc2d60.json": f24,
-  "jobs/98bc78917ad8325e3117d0d4f0a5f98d38f565c3d542de03ea43e4a6cd04a16c.json": f25,
-  "jobs/cd96228421c819aa6b25b942ee9b235dc008ca95f5f48ed1e32cc72364076acc.json": f26,
-  "jobs/ed70049692733147af57f53575106b147c2c840fc1bda7c66255196b80cf83c7.json": f27,
-  "jobs/ee5cf71e20a99667095bd0cc70d6101e603b4f3abbea22a1ed6cf5bc916278df.json": f28,
+  "memory.json": f15,
+  "profiles/R-2026-09-01-1.json": f16,
+  "profiles/R-2026-10-01-1.json": f17,
+  "profiles/R-2026-10-01-3.json": f18,
+  "quality.json": f19,
+  "runs.json": f20,
+  "jobs/03e6b23af2b89c8d7242c3997bb0cb39f73650209358e478d92f7eeaaeeb0694.json": f21,
+  "jobs/03fd6348630ab225cd6c58abd348a4344bf0eee1609c4f47a442fab5fa33c565.json": f22,
+  "jobs/13b5ccc6a30dcff7d7784e4f4daa7b70d3ea8d1f6a0758c346eca3df7e7c0aed.json": f23,
+  "jobs/3f12700824b25957260bc3c04d816ee3c33556afd2f0b8498314a01bd5fa125a.json": f24,
+  "jobs/71c79b7bcaddf59d96df44dd47edb2f582b726134e173c433283d75f81cc2d60.json": f25,
+  "jobs/98bc78917ad8325e3117d0d4f0a5f98d38f565c3d542de03ea43e4a6cd04a16c.json": f26,
+  "jobs/cd96228421c819aa6b25b942ee9b235dc008ca95f5f48ed1e32cc72364076acc.json": f27,
+  "jobs/ed70049692733147af57f53575106b147c2c840fc1bda7c66255196b80cf83c7.json": f28,
+  "jobs/ee5cf71e20a99667095bd0cc70d6101e603b4f3abbea22a1ed6cf5bc916278df.json": f29,
 };

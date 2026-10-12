@@ -87,7 +87,7 @@ export function Answer({ text, aliases }: { text: string; aliases: Record<string
   );
 }
 
-const PAGE_FOR: Record<string, string> = { forecast_departures: "/", forecast_breakdown: "/", forecast_history: "/", backtest_summary: "/trust", explain_change: "/changes", data_quality_status: "/quality", trace_lineage: "/quality", prepare_review: "/reviews", cohort_profile: "/", workforce_flows: "/workforce" };
+const PAGE_FOR: Record<string, string> = { forecast_departures: "/", forecast_breakdown: "/", forecast_history: "/", backtest_summary: "/trust", explain_change: "/changes", data_quality_status: "/quality", trace_lineage: "/quality", prepare_review: "/reviews", cohort_profile: "/", workforce_flows: "/workforce", search_memory: "/memory" };
 
 async function followResult(id: string, tool: string): Promise<void> {
   try {

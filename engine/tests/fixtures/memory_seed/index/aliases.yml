@@ -1,0 +1,8 @@
+# StaySignal memory aliases (synthetic company): a phrase in a question adds these search terms.
+fixed-term: [DEC-2026-09-20-01, fixed_term]
+definition change: [DEC-2026-09-20-01, voluntary_departures@2]
+metric definition: [voluntary_departures@2]
+performance ratings: [DEC-2026-03-10-01]
+team level: [DEC-2026-06-02-01]
+duplicate: [INV-2026-08-18-01, U01]
+audit batch: [audit batch]

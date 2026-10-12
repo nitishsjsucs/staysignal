@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 
 from staysignal.fixtures.export_api import slug
 from staysignal.runner.jobs import EngineState
-from staysignal.service import warehouse_shim
+from staysignal.service import memory_api, warehouse_shim
 
 
 def create_app(st: EngineState) -> FastAPI:
@@ -62,6 +62,8 @@ def create_app(st: EngineState) -> FastAPI:
     @app.get("/published/lineage")
     def lineage() -> JSONResponse:
         return doc("lineage.json")
+
+    memory_api.register(app, st.memory_dir or st.db_path.parent / "memory")
 
     @app.post("/catalog/{key}")
     def catalog(key: str, body: dict = Body(default_factory=dict)) -> JSONResponse:  # noqa: B008

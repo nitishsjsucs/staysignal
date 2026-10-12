@@ -1,6 +1,7 @@
 // Engine warehouse shim client (SPEC 7.2, ADR 0012): the local engine on 8196 answers published-layer reads from
 // compiled catalog entries on its DuckDB connection. Same contract as the fixtures client.
-import type { CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { MemoryHit } from "../../shared/memory/search";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
 
 export class EngineWarehouse implements WarehouseClient {
@@ -46,6 +47,29 @@ export class EngineWarehouse implements WarehouseClient {
   }
   evaluation() {
     return this.get<EvaluationFixture>("evaluation");
+  }
+
+  private async memoryGet<T>(path: string): Promise<T | null> {
+    const r = await fetch(`${this.base}/memory/${path}`);
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error(`engine memory ${path}: ${r.status}`);
+    return (await r.json()) as T;
+  }
+
+  async memoryFiles(): Promise<MemoryFileInfo[] | null> {
+    return (await this.memoryGet<{ files: MemoryFileInfo[] }>("files"))?.files ?? null;
+  }
+
+  async memoryFile(path: string): Promise<MemoryFileDoc | null> {
+    return this.memoryGet<MemoryFileDoc>(`file?path=${encodeURIComponent(path)}`);
+  }
+
+  async memoryLog(): Promise<MemoryCommit[] | null> {
+    return (await this.memoryGet<{ commits: MemoryCommit[] }>("log"))?.commits ?? null;
+  }
+
+  async memorySearch(query: string): Promise<MemoryHit[] | null> {
+    return (await this.memoryGet<{ hits: MemoryHit[] }>(`search?q=${encodeURIComponent(query)}`))?.hits ?? null;
   }
 
   /** POST /catalog/{key} on the engine: an entry key and parameter values, never SQL (SPEC 7.2). */

@@ -1,7 +1,8 @@
 // Fixtures warehouse: answers published-layer reads from committed API fixtures exported by the engine
 // (`staysignal demo build`). Used by CI, e2e, Playwright and the fixtures-mode deployment (no Google resource).
 import { canonicalJson } from "../../shared/canonical-json";
-import type { CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import { type MemoryFileText, type MemoryHit, parseNote, searchMemory } from "../../shared/memory/search";
 import { sha256Hex } from "../../shared/sha256";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
 import { FIXTURES } from "../generated/fixtures-index";
@@ -14,6 +15,16 @@ export function slug(runId: string): string {
  * `staysignal semantic export-fixtures`, names files the same way). */
 export function catalogFixtureId(key: string, request: CatalogRequest): string {
   return sha256Hex(canonicalJson({ key, request })).slice(0, 16);
+}
+
+/** The demo memory exported by `staysignal memory export-fixture`. */
+export interface MemoryFixture {
+  label: "synthetic";
+  aliases: Record<string, string[]>;
+  files: Record<string, MemoryFileText>;
+  index: MemoryFileInfo[];
+  log: MemoryCommit[];
+  parity: { query: string; hits: MemoryHit[] }[];
 }
 
 export class FixturesWarehouse implements WarehouseClient {
@@ -61,6 +72,30 @@ export class FixturesWarehouse implements WarehouseClient {
    * request is unavailable in fixtures mode (null), never computed here. */
   async catalog(key: string, request: CatalogRequest): Promise<CatalogResult | null> {
     return this.get<CatalogResult>(`catalog/${catalogFixtureId(key, request)}.json`);
+  }
+
+  private memory(): MemoryFixture | null {
+    return this.get<MemoryFixture>("memory.json");
+  }
+
+  async memoryFiles(): Promise<MemoryFileInfo[] | null> {
+    return this.memory()?.index ?? null;
+  }
+
+  async memoryFile(path: string): Promise<MemoryFileDoc | null> {
+    const f = this.memory()?.files[path];
+    if (!f || !path.endsWith(".md")) return null;
+    return { path, ...parseNote(f.text), commit: f.commit, date: f.date };
+  }
+
+  async memoryLog(): Promise<MemoryCommit[] | null> {
+    return this.memory()?.log ?? null;
+  }
+
+  /** The same search as the engine's `git grep` over the exported memory (shared/memory/search.ts). */
+  async memorySearch(query: string): Promise<MemoryHit[] | null> {
+    const m = this.memory();
+    return m ? searchMemory(m.files, m.aliases, query) : null;
   }
 
   /** Engine job outputs keyed by job key (the fixture runner's source; SPEC 14.7). */

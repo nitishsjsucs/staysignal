@@ -1,0 +1,402 @@
+{
+ "aliases": {
+  "audit batch": [
+   "audit batch"
+  ],
+  "definition change": [
+   "DEC-2026-09-20-01",
+   "voluntary_departures@2"
+  ],
+  "duplicate": [
+   "INV-2026-08-18-01",
+   "U01"
+  ],
+  "fixed-term": [
+   "DEC-2026-09-20-01",
+   "fixed_term"
+  ],
+  "metric definition": [
+   "voluntary_departures@2"
+  ],
+  "performance ratings": [
+   "DEC-2026-03-10-01"
+  ],
+  "team level": [
+   "DEC-2026-06-02-01"
+  ]
+ },
+ "files": {
+  "decisions/DEC-2026-03-10-01.md": {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "text": "---\naliases: [performance ratings, ratings]\nid: DEC-2026-03-10-01\nlinks: []\ntype: decision\n---\n# Performance ratings stay out of the forecast\n\n- 2026-03-10: Performance ratings are not a forecast feature or a source: rater bias, the curvilinear relation between performance and turnover, and the risk of steering decisions about individuals (ADR 0015). Recorded for the synthetic company.\n"
+  },
+  "decisions/DEC-2026-06-02-01.md": {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "text": "---\naliases: [team-level values, team forecasts, manager scorecards]\nid: DEC-2026-06-02-01\nlinks: []\ntype: decision\n---\n# Team-level values are for People Analysts only\n\n- 2026-06-02: Team-level forecasts are shown to People Analysts only, sorted by name, never ranked or colored by observed over expected, and labeled as not an evaluation of the team's manager. People Partners see groups and organizations (synthetic record).\n"
+  },
+  "decisions/DEC-2026-09-20-01.md": {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "text": "---\naliases: [fixed-term exclusion, fixed-term employees, voluntary_departures@2, definition change]\nid: DEC-2026-09-20-01\nlinks: [timeline/daily/2026-09-20]\ntype: decision\n---\n# Fixed-term employees leave the voluntary departures population\n\n- 2026-09-20: People Analytics decided that voluntary_departures@2 excludes fixed-term employees, whose planned end dates make them a separate planning question. Backtest history is recomputed under @2; voluntary_departures@1 stays computable. Approved by the People Analytics lead (synthetic record).\n- 2026-10-01: run R-2026-10-01#1 is the first published forecast under voluntary_departures@2; the change shows as the Definition bar of what changed against R-2026-09-01#1.\n"
+  },
+  "index/aliases.yml": {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "text": "# StaySignal memory aliases (synthetic company): a phrase in a question adds these search terms.\nfixed-term: [DEC-2026-09-20-01, fixed_term]\ndefinition change: [DEC-2026-09-20-01, voluntary_departures@2]\nmetric definition: [voluntary_departures@2]\nperformance ratings: [DEC-2026-03-10-01]\nteam level: [DEC-2026-06-02-01]\nduplicate: [INV-2026-08-18-01, U01]\naudit batch: [audit batch]\n"
+  },
+  "investigations/INV-2026-08-18-01.md": {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "text": "---\naliases: [duplicate records, duplicates]\nid: INV-2026-08-18-01\nlinks: [timeline/daily/2026-08-18]\ntype: investigation\n---\n# Duplicate HRIS records re-sent by the source\n\n- 2026-08-18: Check U01 warned about HRIS records re-sent with new record IDs and identical content. Staging keeps the first copy of each content hash, so manager-change counts are not inflated; no run was held because U01 is a warning (synthetic).\n"
+  },
+  "teams/engineering/platform-engineering.md": {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "text": "---\naliases: [platform, platform eng]\nid: TEAM-engineering-platform-engineering\nlinks: [decisions/DEC-2026-09-20-01]\ntype: group\n---\n# Platform Engineering (group)\n\n- 2026-07-14: Quarterly look at the group's forecast and flows with the Engineering People Partner; questions about the timing of promotion windows were noted for the next review (synthetic).\n- 2026-09-01: The group is published at the group level and above only; its teams are visible to People Analysts (DEC-2026-06-02-01).\n"
+  },
+  "teams/sales/commercial-sales.md": {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "text": "---\naliases: [commercial]\nid: TEAM-sales-commercial-sales\nlinks: []\ntype: group\n---\n# Commercial Sales (group)\n\n- 2026-07-28: The go-to-market People Partner asked how hiring coverage is computed; the answer points at backfill_coverage_ratio@1 in the metric definitions (synthetic).\n"
+  },
+  "timeline/daily/2026-10-01.md": {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "text": "---\naliases: []\nid: TL-2026-10-01\nlinks: []\ntype: timeline_daily\n---\n# Timeline 2026-10-01\n\n- 2026-10-01: Run R-2026-10-01#1 published (model m2026.09, voluntary_departures@2, payroll@1); monthly retrain approved.\n"
+  },
+  "timeline/monthly/2026-07.md": {
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "text": "---\naliases: []\nid: TL-2026-07\nlinks: []\ntype: timeline_monthly\n---\n# Timeline 2026-07\n\n- 2026-07-14: Quarterly look at Platform Engineering with the Engineering People Partner (teams/engineering/platform-engineering).\n- 2026-07-28: Question from the go-to-market People Partner about hiring coverage answered (teams/sales/commercial-sales).\n"
+  },
+  "timeline/monthly/2026-08.md": {
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "text": "---\naliases: []\nid: TL-2026-08\nlinks: []\ntype: timeline_monthly\n---\n# Timeline 2026-08\n\n- 2026-08-18: INV-2026-08-18-01: duplicate HRIS records re-sent by the source; U01 warning, nothing held.\n"
+  },
+  "timeline/weekly/2026-W36.md": {
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "text": "---\naliases: []\nid: TL-2026-W36\nlinks: []\ntype: timeline_weekly\n---\n# Timeline 2026-W36\n\n- 2026-09-01: Run R-2026-09-01#1 published (model m2026.08, voluntary_departures@1, payroll@1).\n"
+  },
+  "timeline/weekly/2026-W38.md": {
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "text": "---\naliases: []\nid: TL-2026-W38\nlinks: []\ntype: timeline_weekly\n---\n# Timeline 2026-W38\n\n- 2026-09-15: HRIS audit batch recorded, restating records effective before 2026-09-01 (late data about the past).\n- 2026-09-20: Decision DEC-2026-09-20-01: voluntary_departures@2 excludes fixed-term employees.\n"
+  }
+ },
+ "index": [
+  {
+   "bullets": 1,
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "id": "DEC-2026-03-10-01",
+   "path": "decisions/DEC-2026-03-10-01.md",
+   "title": "Performance ratings stay out of the forecast",
+   "type": "decision"
+  },
+  {
+   "bullets": 1,
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "id": "DEC-2026-06-02-01",
+   "path": "decisions/DEC-2026-06-02-01.md",
+   "title": "Team-level values are for People Analysts only",
+   "type": "decision"
+  },
+  {
+   "bullets": 2,
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "id": "DEC-2026-09-20-01",
+   "path": "decisions/DEC-2026-09-20-01.md",
+   "title": "Fixed-term employees leave the voluntary departures population",
+   "type": "decision"
+  },
+  {
+   "bullets": 1,
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "id": "INV-2026-08-18-01",
+   "path": "investigations/INV-2026-08-18-01.md",
+   "title": "Duplicate HRIS records re-sent by the source",
+   "type": "investigation"
+  },
+  {
+   "bullets": 2,
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "id": "TEAM-engineering-platform-engineering",
+   "path": "teams/engineering/platform-engineering.md",
+   "title": "Platform Engineering (group)",
+   "type": "group"
+  },
+  {
+   "bullets": 1,
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "id": "TEAM-sales-commercial-sales",
+   "path": "teams/sales/commercial-sales.md",
+   "title": "Commercial Sales (group)",
+   "type": "group"
+  },
+  {
+   "bullets": 1,
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "id": "TL-2026-10-01",
+   "path": "timeline/daily/2026-10-01.md",
+   "title": "Timeline 2026-10-01",
+   "type": "timeline_daily"
+  },
+  {
+   "bullets": 2,
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "id": "TL-2026-07",
+   "path": "timeline/monthly/2026-07.md",
+   "title": "Timeline 2026-07",
+   "type": "timeline_monthly"
+  },
+  {
+   "bullets": 1,
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "id": "TL-2026-08",
+   "path": "timeline/monthly/2026-08.md",
+   "title": "Timeline 2026-08",
+   "type": "timeline_monthly"
+  },
+  {
+   "bullets": 1,
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "id": "TL-2026-W36",
+   "path": "timeline/weekly/2026-W36.md",
+   "title": "Timeline 2026-W36",
+   "type": "timeline_weekly"
+  },
+  {
+   "bullets": 2,
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "id": "TL-2026-W38",
+   "path": "timeline/weekly/2026-W38.md",
+   "title": "Timeline 2026-W38",
+   "type": "timeline_weekly"
+  }
+ ],
+ "label": "synthetic",
+ "log": [
+  {
+   "commit": "c01751fa00e04649",
+   "date": "2026-10-05T07:00:00Z",
+   "files": [
+    "timeline/daily/2026-07-14.md",
+    "timeline/daily/2026-07-28.md",
+    "timeline/daily/2026-08-18.md",
+    "timeline/daily/2026-09-01.md",
+    "timeline/daily/2026-09-15.md",
+    "timeline/daily/2026-09-20.md",
+    "timeline/monthly/2026-07.md",
+    "timeline/monthly/2026-08.md",
+    "timeline/weekly/2026-W36.md",
+    "timeline/weekly/2026-W38.md"
+   ],
+   "message": "memory: coarsen the timeline as of 2026-10-05"
+  },
+  {
+   "commit": "c1b77e7035b70478",
+   "date": "2026-10-01T07:00:00Z",
+   "files": [
+    "decisions/DEC-2026-03-10-01.md",
+    "decisions/DEC-2026-06-02-01.md",
+    "decisions/DEC-2026-09-20-01.md",
+    "index/aliases.yml",
+    "investigations/INV-2026-08-18-01.md",
+    "teams/engineering/platform-engineering.md",
+    "teams/sales/commercial-sales.md",
+    "timeline/daily/2026-07-14.md",
+    "timeline/daily/2026-07-28.md",
+    "timeline/daily/2026-08-18.md",
+    "timeline/daily/2026-09-01.md",
+    "timeline/daily/2026-09-15.md",
+    "timeline/daily/2026-09-20.md",
+    "timeline/daily/2026-10-01.md"
+   ],
+   "message": "memory: seed"
+  }
+ ],
+ "note": "The demo memory (seed plus the 2026-10-05 digest) exported for the fixtures mode.",
+ "parity": [
+  {
+   "hits": [
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 8,
+     "line": 9,
+     "path": "decisions/DEC-2026-09-20-01.md",
+     "snippet": "- 2026-09-20: People Analytics decided that voluntary_departures@2 excludes fixed-term employees, whose planned end dates make them a separate planning question. Backtest history is recomputed under @2; voluntary_departures@1 stays computable. Approved by the People Analytics lead (synthetic record)."
+    },
+    {
+     "commit": "c01751fa00e04649",
+     "date": "2026-10-05T07:00:00Z",
+     "hits": 3,
+     "line": 10,
+     "path": "timeline/weekly/2026-W38.md",
+     "snippet": "- 2026-09-20: Decision DEC-2026-09-20-01: voluntary_departures@2 excludes fixed-term employees."
+    },
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 1,
+     "line": 7,
+     "path": "teams/engineering/platform-engineering.md",
+     "snippet": "# Platform Engineering (group)"
+    }
+   ],
+   "query": "What did we decide last time about fixed-term employees?"
+  },
+  {
+   "hits": [
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 9,
+     "line": 9,
+     "path": "decisions/DEC-2026-03-10-01.md",
+     "snippet": "- 2026-03-10: Performance ratings are not a forecast feature or a source: rater bias, the curvilinear relation between performance and turnover, and the risk of steering decisions about individuals (ADR 0015). Recorded for the synthetic company."
+    }
+   ],
+   "query": "Do we use performance ratings?"
+  },
+  {
+   "hits": [
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 12,
+     "line": 9,
+     "path": "decisions/DEC-2026-06-02-01.md",
+     "snippet": "- 2026-06-02: Team-level forecasts are shown to People Analysts only, sorted by name, never ranked or colored by observed over expected, and labeled as not an evaluation of the team's manager. People Partners see groups and organizations (synthetic record)."
+    },
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 4,
+     "line": 10,
+     "path": "teams/engineering/platform-engineering.md",
+     "snippet": "- 2026-09-01: The group is published at the group level and above only; its teams are visible to People Analysts (DEC-2026-06-02-01)."
+    },
+    {
+     "commit": "c01751fa00e04649",
+     "date": "2026-10-05T07:00:00Z",
+     "hits": 2,
+     "line": 9,
+     "path": "timeline/monthly/2026-07.md",
+     "snippet": "- 2026-07-14: Quarterly look at Platform Engineering with the Engineering People Partner (teams/engineering/platform-engineering)."
+    },
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 1,
+     "line": 7,
+     "path": "teams/sales/commercial-sales.md",
+     "snippet": "# Commercial Sales (group)"
+    }
+   ],
+   "query": "why are team level values hidden from partners"
+  },
+  {
+   "hits": [
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 11,
+     "line": 9,
+     "path": "investigations/INV-2026-08-18-01.md",
+     "snippet": "- 2026-08-18: Check U01 warned about HRIS records re-sent with new record IDs and identical content. Staging keeps the first copy of each content hash, so manager-change counts are not inflated; no run was held because U01 is a warning (synthetic)."
+    },
+    {
+     "commit": "c01751fa00e04649",
+     "date": "2026-10-05T07:00:00Z",
+     "hits": 5,
+     "line": 9,
+     "path": "timeline/monthly/2026-08.md",
+     "snippet": "- 2026-08-18: INV-2026-08-18-01: duplicate HRIS records re-sent by the source; U01 warning, nothing held."
+    },
+    {
+     "commit": "c01751fa00e04649",
+     "date": "2026-10-05T07:00:00Z",
+     "hits": 2,
+     "line": 9,
+     "path": "timeline/weekly/2026-W38.md",
+     "snippet": "- 2026-09-15: HRIS audit batch recorded, restating records effective before 2026-09-01 (late data about the past)."
+    }
+   ],
+   "query": "duplicate HRIS records"
+  },
+  {
+   "hits": [
+    {
+     "commit": "c01751fa00e04649",
+     "date": "2026-10-05T07:00:00Z",
+     "hits": 3,
+     "line": 9,
+     "path": "timeline/weekly/2026-W38.md",
+     "snippet": "- 2026-09-15: HRIS audit batch recorded, restating records effective before 2026-09-01 (late data about the past)."
+    }
+   ],
+   "query": "What happened with the audit batch in September?"
+  },
+  {
+   "hits": [
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 11,
+     "line": 9,
+     "path": "teams/engineering/platform-engineering.md",
+     "snippet": "- 2026-07-14: Quarterly look at the group's forecast and flows with the Engineering People Partner; questions about the timing of promotion windows were noted for the next review (synthetic)."
+    },
+    {
+     "commit": "c01751fa00e04649",
+     "date": "2026-10-05T07:00:00Z",
+     "hits": 6,
+     "line": 9,
+     "path": "timeline/monthly/2026-07.md",
+     "snippet": "- 2026-07-14: Quarterly look at Platform Engineering with the Engineering People Partner (teams/engineering/platform-engineering)."
+    }
+   ],
+   "query": "Platform Engineering promotion windows"
+  },
+  {
+   "hits": [
+    {
+     "commit": "c1b77e7035b70478",
+     "date": "2026-10-01T07:00:00Z",
+     "hits": 3,
+     "line": 9,
+     "path": "teams/sales/commercial-sales.md",
+     "snippet": "- 2026-07-28: The go-to-market People Partner asked how hiring coverage is computed; the answer points at backfill_coverage_ratio@1 in the metric definitions (synthetic)."
+    },
+    {
+     "commit": "c01751fa00e04649",
+     "date": "2026-10-05T07:00:00Z",
+     "hits": 2,
+     "line": 10,
+     "path": "timeline/monthly/2026-07.md",
+     "snippet": "- 2026-07-28: Question from the go-to-market People Partner about hiring coverage answered (teams/sales/commercial-sales)."
+    }
+   ],
+   "query": "hiring coverage"
+  },
+  {
+   "hits": [],
+   "query": "zebra quantum"
+  }
+ ]
+}

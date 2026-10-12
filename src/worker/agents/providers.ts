@@ -31,6 +31,7 @@ export function stubPlan(question: string): { tool: string; args: Record<string,
   const days = /(\d+)\s*days?/.exec(q);
   const months = /(\d+)\s*months?/.exec(q);
   const horizon: Record<string, number> = days ? { horizon_days: Number(days[1]) } : months ? { horizon_months: Number(months[1]) } : { horizon_months: 3 };
+  if (/\b(what did we decide|did we decide|last time|remember|memory|decided)\b/.test(q)) return { tool: "search_memory", args: { query: question } };
   if (/\b(what changed|change since|why .*(differ|change)|compared with the previous|previous forecast)\b/.test(q)) return { tool: "explain_change", args: { cohort, ...horizon } };
   if (/\b(prepare|draft)\b.*\breview\b/.test(q)) return { tool: "prepare_review", args: { cohort, ...horizon } };
   if (/\b(hires|hired|joiners|joined|transfers?|transferred|flows?|headcount|moved (in|out))\b/.test(q) && !/\b(value|column|check)\b/.test(q)) {

@@ -1010,3 +1010,79 @@
   fill: var(--ink);
   font-weight: 600;
 }
+
+/* Memory page */
+.memory-form {
+  display: flex;
+  gap: var(--s2);
+}
+
+.memory-form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.memory-hits {
+  margin: var(--s3) 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: var(--s3);
+  font-size: 13px;
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.memory-group .link-btn,
+.memory-hits .link-btn {
+  white-space: normal;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.memory-group h3 {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin: var(--s3) 0 var(--s1);
+  font-weight: 600;
+}
+
+.memory-group ul,
+.memory-bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.memory-bullets li {
+  color: var(--ink-2);
+}
+
+.memory-date {
+  color: var(--ink-3);
+  margin-right: 6px;
+}
+
+@media (max-width: 760px) {
+  .memory-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mobile-nav {
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+}

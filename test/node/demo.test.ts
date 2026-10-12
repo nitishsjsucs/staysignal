@@ -14,6 +14,7 @@ describe("demo snapshots", () => {
   it("holds the local Workers persistence and the engine's state, nothing outside the repository", () => {
     expect(STATE_PATHS).toContain("dist/staysignal/.wrangler/state");
     expect(STATE_PATHS).toContain("var/warehouse.duckdb");
+    expect(STATE_PATHS).toContain("var/memory");
     for (const p of STATE_PATHS) expect(p.startsWith("/") || p.includes("..")).toBe(false);
   });
 

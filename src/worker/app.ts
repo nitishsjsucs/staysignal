@@ -9,7 +9,7 @@ import { authorizeCohort, canUseTool } from "../shared/policy/authorize";
 import { DEMO } from "../shared/routines/definitions";
 import { isRefusal, type Refusal, refuse } from "../shared/policy/refusals";
 import { hasScope, LOCAL_PRINCIPALS, type Principal } from "../shared/policy/roles";
-import { audienceOf, cohortMeta, getTool, resolveCohort, runTool, type ToolContext, type ToolResult } from "../shared/tools/registry";
+import { audienceOf, cohortMeta, getTool, orgSlug, resolveCohort, runTool, type ToolContext, type ToolResult } from "../shared/tools/registry";
 import type { AnalystAgent } from "./agents/analyst-agent";
 import { workspace, workspaceStub } from "./agents/workspace-port";
 import { AuthError } from "./auth/access";
@@ -50,6 +50,14 @@ async function resultDenied(env: Env, p: Principal, r: ToolResult<unknown>): Pro
   const co = fx ? resolveCohort(cohort, fx.cohorts) : null;
   if (!fx || !co) return refuse("NOT_PERMITTED");
   return authorizeCohort(p, prov.tool, cohortMeta(co, fx.cohorts));
+}
+
+/** People Partners read their own organizations' group notes; decisions, investigations and the timeline are
+ * company-wide records (SPEC 14.1 `memory:read:assigned`). */
+function memoryVisible(p: Principal, path: string): boolean {
+  if (hasScope(p, "memory:read")) return true;
+  if (!path.startsWith("teams/")) return true;
+  return p.assignedOrgs.map(orgSlug).includes(path.split("/")[1] ?? "");
 }
 
 export function buildApp() {
@@ -111,6 +119,22 @@ export function buildApp() {
   app.get("/api/backtest/summary", (c) => respond(c, "backtest_summary", { level: c.req.query("level") || undefined, horizon_months: num(c.req.query("horizon")), model: c.req.query("model") || undefined }));
   app.get("/api/changes", (c) => respond(c, "explain_change", { cohort: c.req.query("cohort") ?? "Larkspur", horizon_months: num(c.req.query("horizon")), from_run: c.req.query("from") || undefined, to_run: c.req.query("to") || undefined }));
   app.get("/api/profile", (c) => respond(c, "cohort_profile", { cohort: c.req.query("cohort") ?? "Larkspur" }));
+  app.get("/api/memory/search", (c) => respond(c, "search_memory", { query: c.req.query("q") ?? "" }));
+  app.get("/api/memory/files", async (c) => {
+    if (!canUseTool(c.var.principal, getTool("search_memory")!)) return c.json(refuse("NOT_PERMITTED"));
+    const files = (await warehouseFor(c.env).memoryFiles()) ?? [];
+    return c.json({ label: "synthetic", files: files.filter((f) => memoryVisible(c.var.principal, f.path)) });
+  });
+  app.get("/api/memory/file", async (c) => {
+    const path = c.req.query("path") ?? "";
+    if (!canUseTool(c.var.principal, getTool("search_memory")!) || !memoryVisible(c.var.principal, path)) return c.json(refuse("NOT_PERMITTED"));
+    const doc = await warehouseFor(c.env).memoryFile(path);
+    return doc ? c.json({ label: "synthetic", ...doc }) : c.json({ error: "not found" }, 404);
+  });
+  app.get("/api/memory/log", async (c) => {
+    if (!canUseTool(c.var.principal, getTool("search_memory")!)) return c.json(refuse("NOT_PERMITTED"));
+    return c.json({ label: "synthetic", commits: (await warehouseFor(c.env).memoryLog()) ?? [] });
+  });
   app.get("/api/workforce/flows", (c) => respond(c, "workforce_flows", { cohort: c.req.query("cohort") ?? "Larkspur", from: c.req.query("from") || undefined, to: c.req.query("to") || undefined }));
   app.get("/api/lineage", (c) => respond(c, "trace_lineage", { check_id: c.req.query("check") || undefined, node: c.req.query("node") || undefined }));
 

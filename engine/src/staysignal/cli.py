@@ -98,6 +98,15 @@ def cmd_semantic_catalog(args: argparse.Namespace) -> int:
     return build_catalog(check=args.check)
 
 
+def cmd_memory_export_fixture(args: argparse.Namespace) -> int:
+    """The demo memory as an API fixture for the fixtures mode, with the parity search results."""
+    from staysignal.memory.store import FIXTURE, export_fixture
+
+    doc = export_fixture()
+    print(json.dumps({"written": str(FIXTURE.relative_to(FIXTURE.parents[3])), "files": len(doc["files"])}))
+    return 0
+
+
 def cmd_semantic_export_fixtures(args: argparse.Namespace) -> int:
     """Export the default semantic-catalog results from a fresh canonical warehouse as API fixtures."""
     from staysignal.semantic.fixtures import OUT, export
@@ -170,6 +179,9 @@ def cmd_engine_prepare(args: argparse.Namespace) -> int:
     for doc in sorted((published / "forecast").glob("*.json")):
         write_run(con, json.loads(doc.read_text()))
     con.close()
+    from staysignal.memory.store import prepare as prepare_memory
+
+    prepare_memory(var / "memory")  # the seed and the demo day's digest (SPEC 22.4)
     print(
         json.dumps(
             {
@@ -379,6 +391,10 @@ def build_parser() -> argparse.ArgumentParser:
     exf.add_argument("--world", default="var/world")
     exf.add_argument("--out", default=None)
     exf.set_defaults(func=cmd_semantic_export_fixtures)
+    mem = sub.add_parser("memory", help="the git-backed Markdown memory")
+    memsub = mem.add_subparsers(dest="memory_command", required=True)
+    mex = memsub.add_parser("export-fixture", help="the demo memory as an API fixture (fixtures mode)")
+    mex.set_defaults(func=cmd_memory_export_fixture)
     eng = sub.add_parser("engine", help="the local engine's state")
     esub0 = eng.add_subparsers(dest="engine_command", required=True)
     prep = esub0.add_parser("prepare", help="land the world, build the warehouse, publish the two published runs")

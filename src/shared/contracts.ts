@@ -329,3 +329,37 @@ export interface WorkforceFlowsData {
   sql_sha256: string;
   note: string;
 }
+
+/** A memory file in a listing (SPEC 14.10). `commit` is the first 16 hex characters of the memory repository's commit
+ * that last touched the file (never a SHA of this code repository). */
+export interface MemoryFileInfo {
+  path: string;
+  id: string | null;
+  type: string | null;
+  title: string;
+  bullets: number;
+  commit: string;
+  date: string;
+}
+
+export interface MemoryCommit {
+  commit: string;
+  date: string;
+  message: string;
+  files: string[];
+}
+
+export interface MemoryFileDoc {
+  path: string;
+  meta: Record<string, unknown>;
+  title: string;
+  bullets: { date: string; text: string }[];
+  commit: string;
+  date: string;
+}
+
+export interface MemorySearchData {
+  query: string;
+  hits: { path: string; line: number; snippet: string; commit: string; date: string }[];
+  note: string;
+}

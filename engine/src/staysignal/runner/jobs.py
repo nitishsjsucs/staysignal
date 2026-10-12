@@ -58,6 +58,7 @@ class EngineState:
     checks: dict[tuple[str, str], list[dict]] = field(default_factory=dict)
     runs: dict[str, dict] = field(default_factory=dict)
     lineage_events: list[dict] = field(default_factory=list)
+    memory_dir: Path | None = None
 
     @classmethod
     def open(cls, repo: Path, var: Path) -> EngineState:
@@ -70,6 +71,7 @@ class EngineState:
             models_dir=repo / "models",
             published_dir=var / "engine" / "published",
             work_dir=var / "engine" / "work",
+            memory_dir=var / "memory",
         )
 
     def sources(self, until: datetime | None = None) -> Sources:

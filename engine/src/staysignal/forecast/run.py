@@ -83,7 +83,10 @@ def membership(rows: list[FeatureRow]) -> dict[str, set[str]]:
     return out
 
 
-def make_run(src: Sources, inp: RunInputs, prev_rows: list[FeatureRow] | None = None) -> dict:
+def make_run(src: Sources, inp: RunInputs, prev_rows: list[FeatureRow] | None = None, keep_draws: bool = False) -> dict:
+    """Scores a run. `keep_draws` adds, in memory only, the simulated voluntary counts of the company and each
+    organization (`_draws`) and each person's predicted 3-month voluntary cumulative incidence (`_individual`) for
+    evaluation; neither is ever exported, persisted or hashed (ADR 0014)."""
     vin = Vintage(src, inp.vintage)
     rows = features_at(vin, inp.cutoff, MAPPINGS[inp.mapping], inp.metric_def)
     scored = score(inp.model, rows, inp.cutoff)
@@ -93,7 +96,9 @@ def make_run(src: Sources, inp: RunInputs, prev_rows: list[FeatureRow] | None = 
     for ci, c in enumerate(ids):
         members[ci, cohorts[c]] = 1.0
     key = run_key(inp, src)
-    mc = run_mc(inp.model, scored.X, [r.team for r in rows], inp.cutoff, members, seed_of(key), inp.mc)
+    mc = run_mc(
+        inp.model, scored.X, [r.team for r in rows], inp.cutoff, members, seed_of(key), inp.mc, keep_counts=keep_draws
+    )
     rates = trailing_rates(vin, inp.cutoff, inp.metric_def)
     prev = membership(prev_rows) if prev_rows is not None else None
     cur = {c.id: {rows[i].employee_number for i in cohorts[c]} for c in ids}
@@ -190,7 +195,7 @@ def make_run(src: Sources, inp: RunInputs, prev_rows: list[FeatureRow] | None = 
             row["n_previous"] = len(before)
         table.append(row)
     business.sort(key=lambda b: (b["cohort"], b["horizon"], b["cause"]))
-    return {
+    out = {
         "run_id": inp.run_id,
         "run_key": key,
         "label": "synthetic",
@@ -209,6 +214,18 @@ def make_run(src: Sources, inp: RunInputs, prev_rows: list[FeatureRow] | None = 
         "cohorts": table,
         "business_result": business,
     }
+    if keep_draws and mc.vol_counts is not None:
+        out["_draws"] = {
+            c.id: {h: mc.vol_counts[:, ci, h - 1].copy() for h in HORIZONS}
+            for ci, c in enumerate(ids)
+            if c.kind in ("company", "organization")
+        }
+        out["_individual"] = {
+            "p3": scored.F[:, 2, 0].copy(),
+            "employee": [r.employee_number for r in rows],
+            "team": [r.team for r in rows],
+        }
+    return out
 
 
 __all__ = ["Cohort", "HORIZONS", "RunInputs", "canonical_json", "make_run", "population", "run_key"]

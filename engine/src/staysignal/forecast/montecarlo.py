@@ -43,6 +43,7 @@ class McResult:
     vol_mean: np.ndarray  # (C, 6) Monte Carlo mean count
     variance: np.ndarray  # (C, 6, 4) parameter, org shock, team shock, process (voluntary)
     sims: int
+    vol_counts: np.ndarray | None = None  # (sims, C, 6) simulated counts, kept only for evaluation (never persisted)
 
 
 def mvn_draws(rng: np.random.Generator, mean: np.ndarray, cov: np.ndarray, n: int) -> np.ndarray:
@@ -64,8 +65,10 @@ def run_mc(
     members: np.ndarray,
     seed: int,
     cfg: McConfig | None = None,
+    keep_counts: bool = False,
 ) -> McResult:
-    """X: (n, 6, p) standardized design; members: (C, n) 0/1 cohort membership matrix."""
+    """X: (n, 6, p) standardized design; members: (C, n) 0/1 cohort membership matrix. `keep_counts` returns the
+    simulated cohort counts for evaluation (PIT and RPS); they are never written anywhere."""
     cfg = cfg or McConfig()
     rng = np.random.default_rng(seed)
     n = X.shape[0]
@@ -128,4 +131,11 @@ def run_mc(
     var_org = m_cond.mean(axis=2).var(axis=1).mean(axis=0)
     var_param = m_cond.mean(axis=(1, 2)).var(axis=0)
     variance = np.stack([var_param, var_org, var_team, var_process], axis=-1)
-    return McResult(vol_q=vol_q, other_q=other_q, vol_mean=vol_counts.mean(axis=0), variance=variance, sims=sims)
+    return McResult(
+        vol_q=vol_q,
+        other_q=other_q,
+        vol_mean=vol_counts.mean(axis=0),
+        variance=variance,
+        sims=sims,
+        vol_counts=vol_counts if keep_counts else None,
+    )

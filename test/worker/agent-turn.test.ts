@@ -27,4 +27,14 @@ describe("analyst turn (stub provider)", () => {
     expect(r.tool_calls[0]?.tool).toBe("prepare_review");
     expect(r.grounding).toBe("passed");
   });
+
+  it("accepts the earlier turns as history", async () => {
+    const first = await json<Turn>("/api/dev/agent/turn", { as: P.analyst, body: { question: "Forecast voluntary departures in Sales over the next 90 days." } });
+    const t = await json<Turn>("/api/dev/agent/turn", {
+      as: P.analyst,
+      body: { question: "What changed in Sales since the previous forecast?", history: [{ role: "user", content: "Forecast voluntary departures in Sales over the next 90 days." }, { role: "assistant", content: first.rendered }] },
+    });
+    expect(t.tool_calls[0]?.tool).toBe("explain_change");
+    expect(t.grounding).toBe("passed");
+  });
 });

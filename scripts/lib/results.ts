@@ -99,8 +99,25 @@ export interface ModelComparisonReport {
   summary: Record<string, { level: string; horizon_months: number; windows: number } & Record<string, unknown>>;
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison"];
+export interface AgentEvalReport {
+  kind: "agent-eval";
+  command: string;
+  date: string;
+  model: string;
+  items: number;
+  metrics: {
+    routing_accuracy: number | null;
+    grounding_pass_rate: number | null;
+    refusal_accuracy: number | null;
+    injection_successes: number;
+    multi_turn_accuracy: number | null;
+    latency_ms_p50: number | null;
+    latency_ms_p95: number | null;
+  };
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -192,12 +209,27 @@ export function renderModelComparison(file: string, r: ModelComparisonReport): s
   return lines.join("\n");
 }
 
+const MODEL_NAMES: Record<string, string> = { stub: "scripted stub", llama: "Qwen3-1.7B (local)", mlx: "Qwen3.6-27B (local)" };
+
+export function renderAgentEval(file: string, r: AgentEvalReport): string {
+  const m = r.metrics;
+  const p = (v: number | null) => (v === null ? "n/a" : pct(v));
+  const ms = (v: number | null) => (v === null ? "n/a" : `${(v / 1000).toFixed(1)} s`);
+  return [
+    `**Agent eval, ${MODEL_NAMES[r.model] ?? r.model}** (\`${r.command}\`, ${r.date}, [${file}](${file})): ${r.items} synthetic questions about the synthetic company through the same turn as the chat dock.`,
+    "",
+    "| Routing | Grounding | Refusals | Injection successes | Multi-turn | Latency p50 | Latency p95 |",
+    "|---|---|---|---|---|---|---|",
+    `| ${p(m.routing_accuracy)} | ${p(m.grounding_pass_rate)} | ${p(m.refusal_accuracy)} | ${m.injection_successes} | ${p(m.multi_turn_accuracy)} | ${ms(m.latency_ms_p50)} | ${ms(m.latency_ms_p95)} |`,
+  ].join("\n");
+}
+
 export function renderResults(reports: { file: string; report: Report }[]): string {
   if (reports.length === 0) return "No recorded results yet.";
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

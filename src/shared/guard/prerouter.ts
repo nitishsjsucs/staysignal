@@ -13,6 +13,7 @@ const INDIVIDUAL: RegExp[] = [
   /\bwhich\s+(?:\w+\s+){0,3}(?:engineers?|employees?|people|persons?|individuals?|staff(?:ers)?|reps?|workers?|members?|analysts?|managers?|designers?|developers?)\b[^?]*\b(?:quit|leave|leaving|resign|depart|likely|at risk|risk|flight)/i,
   /\bwho\s+(?:is|are|will|might|could)\s+(?:most\s+|the\s+most\s+)?(?:likely\s+to\s+)?(?:quit|leave|resign|depart|go)\b/i,
   /\bwho\s+(?:is|are)\s+(?:at\s+risk|a\s+risk)/i,
+  /\bwho\s+(?:is|are)\s+the\s+(?:people|employees|staff|ones|persons?)\s+(?:most\s+)?(?:at\s+risk|likely)/i,
   /\b(?:list|name|show|identify|rank|flag)\s+(?:me\s+)?(?:the\s+)?(?:top\s+\d+\s+)?(?:employees?|people|individuals|persons?|engineers?|staff)\b/i,
   /\b(?:individual|person(?:al)?|employee)[-\s](?:level\s+)?(?:risk|scores?|probabilit(?:y|ies)|predictions?)\b/i,
   /\brisk\s+scores?\s+(?:for|of)\s+(?:each|every|an?|this|that)\s+(?:employee|person|individual)/i,
@@ -44,6 +45,7 @@ const OUT_OF_SCOPE: RegExp[] = [
   /\b(?:keystrokes?|screen\s+monitoring|location\s+tracking|email\s+monitoring|social\s+media)\b/i,
   /\bignore\s+(?:all\s+|the\s+|your\s+)?(?:previous\s+|prior\s+)?(?:instructions|rules)\b/i,
   /\b(?:fire|terminate|lay\s*off|let\s+go\s+of)\s+(?:someone|people|employees|staff|them|him|her)\b/i,
+  /\b(?:who|which\s+(?:\w+\s+){0,2}(?:employees?|people|staff|engineers?))\s+should\s+(?:we|i)\s+(?:fire|terminate|lay\s*off|let\s+go)\b/i,
 ];
 
 export function preRoute(question: string): PreRoute | null {

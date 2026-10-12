@@ -260,10 +260,11 @@ export function buildApp() {
   // ---------- the agent turn over HTTP (dev and evals, localhost only) ----------
   app.post("/api/dev/agent/turn", async (c) => {
     if (c.var.config.authMode !== "dev" || !isLocalHost(new URL(c.req.url))) return c.json({ error: "not found" }, 404);
-    const body = (await c.req.json()) as { question: string; provider?: string };
+    const body = (await c.req.json()) as { question: string; provider?: string; history?: { role: "user" | "assistant"; content: string }[] };
     const name = await agentInstanceName(c.var.config.hmacKey, c.var.principal.id);
     const agent = await getAgentByName<Env, AnalystAgent>(c.env.ANALYST_AGENT, name);
-    return c.json(await agent.turn(c.var.principal, body.question, body.provider as never));
+    const history = (body.history ?? []).filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-12);
+    return c.json(await agent.turn(c.var.principal, body.question, body.provider as never, history));
   });
 
   // ---------- runner protocol (ADR 0002) ----------

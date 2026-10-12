@@ -34,3 +34,4 @@ __pycache__/
 # misc
 *.log
 .DS_Store
+evals/results/.checkpoint-*

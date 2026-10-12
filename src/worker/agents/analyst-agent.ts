@@ -57,9 +57,9 @@ export class AnalystAgent extends AIChatAgent<Env, AnalystState> {
   }
 
   /** The same turn over RPC: used by /api/dev/agent/turn and the eval harness. */
-  async turn(p: Principal, question: string, provider?: ProviderName): Promise<TurnOutput> {
+  async turn(p: Principal, question: string, provider?: ProviderName, history: { role: "user" | "assistant"; content: string }[] = []): Promise<TurnOutput> {
     const cfg = parseConfig(this.env);
-    const out = await runTurn(this.toolContext(p), provider ?? (cfg.llm as ProviderName), question);
+    const out = await runTurn(this.toolContext(p), provider ?? (cfg.llm as ProviderName), question, history as ModelMessage[]);
     await this.recordTrace(p, out);
     return out;
   }

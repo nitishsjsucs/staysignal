@@ -40,3 +40,21 @@ jobs:
       # C1 across platforms: regenerate the canonical world on Linux and compare every macOS-made pin
       - run: uv run --locked --project engine staysignal world generate --profile canonical --out var/world
       - run: uv run --locked --project engine staysignal world verify --manifest data/world/manifest.json --dir var/world
+  agent-eval-stub:
+    # the 200-item agent eval with the scripted stub model against the built app under wrangler dev: proves the
+    # harness, the pre-router and the refusal codes, and that no injected request gets through (SPEC 14.12)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run dev:keys
+      - run: npm run build
+      - run: node scripts/serve.ts --no-build
+      - run: npm run eval:agent -- --model stub --assert
+      - if: always()
+        run: npm run stop

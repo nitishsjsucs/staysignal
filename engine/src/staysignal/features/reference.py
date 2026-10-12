@@ -15,6 +15,7 @@ from dataclasses import dataclass, replace
 from datetime import date, datetime, timedelta
 
 from staysignal.ingest.landing import HrisRecord, Sources
+from staysignal.semantic.definitions import excludes
 from staysignal.world.spec import LEVELS, level_band, tenure_band
 
 DAYS_PER_MONTH = 30.4375
@@ -272,7 +273,7 @@ def features_at(
         a = vin.assignment(sp, c)
         if a is None:
             continue
-        if metric_def.endswith("@2") and a.employment_type == "fixed_term":
+        if excludes(metric_def, a.employment_type):
             continue
         recs = [r for r in sp.records if r.effective_date < c and r.record_type != "termination"]
         role_start = sp.start

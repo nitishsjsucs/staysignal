@@ -1,0 +1,84 @@
+# Versioned metric definitions (SPEC 7.4). Synthetic company (Larkspur Systems). Both versions of a metric stay
+# computable; a version is frozen once a published run references it (semantic/metric_definitions.lock.json pins the
+# SHA-256 of every frozen version, and engine/tests/semantic/test_metric_definitions.py fails if one is edited).
+# `population` is machine-read: the engine's population rule comes from here (engine/src/staysignal/semantic).
+metrics:
+  voluntary_departures:
+    - version: 1
+      valid_from: "2023-04-01"
+      valid_to: "2026-09-20"
+      population:
+        employed_on_cutoff: true
+        exclude_employment_types: []
+      definition: >-
+        Departures with cause voluntary among employees employed on the cutoff date (regular and fixed-term), with
+        the departure date in (cutoff, cutoff + h months]. A transfer is not a departure. A rehire starts a new spell.
+      changelog: first version.
+    - version: 2
+      valid_from: "2026-09-20"
+      valid_to: null
+      population:
+        employed_on_cutoff: true
+        exclude_employment_types: [fixed_term]
+      definition: >-
+        As version 1, but the population excludes fixed-term employees, whose planned end dates make them a separate
+        planning question.
+      changelog: decision DEC-2026-09-20-01 (fixed-term employees excluded); backtest history is recomputed under @2.
+  expected_voluntary_departures:
+    - version: 1
+      valid_from: "2023-04-01"
+      valid_to: "2026-09-20"
+      population: {follows: voluntary_departures@1}
+      definition: >-
+        Sum over the population of each employee's predicted voluntary cumulative incidence at h, from a named
+        forecast run; served disclosure-rounded (SPEC 17.5).
+      changelog: first version.
+    - version: 2
+      valid_from: "2026-09-20"
+      valid_to: null
+      population: {follows: voluntary_departures@2}
+      definition: As version 1, over the voluntary_departures@2 population.
+      changelog: follows voluntary_departures@2.
+  voluntary_departure_rate:
+    - version: 2
+      valid_from: "2026-09-20"
+      valid_to: null
+      population: {follows: voluntary_departures@2}
+      definition: Voluntary departures over average headcount, annualized.
+      changelog: first version.
+  headcount:
+    - version: 1
+      valid_from: "2023-04-01"
+      valid_to: null
+      definition: Employees employed on the date (employed at the start of the day).
+      changelog: first version.
+  backfill_coverage_ratio:
+    - version: 1
+      valid_from: "2023-04-01"
+      valid_to: null
+      definition: >-
+        (Open backfill requisitions + accepted backfill offers not yet started) divided by expected voluntary
+        departures over h; growth requisitions are excluded and shown separately.
+      changelog: first version.
+  share_below_midpoint:
+    - version: 1
+      valid_from: "2023-04-01"
+      valid_to: null
+      definition: Share of the cohort with compa-ratio under 1.0 at the cutoff.
+      changelog: first version.
+  median_months_since_promotion:
+    - version: 1
+      valid_from: "2023-04-01"
+      valid_to: null
+      definition: Median of months since last promotion (or since spell start if never promoted) at the cutoff.
+      changelog: first version.
+  workforce_flows:
+    - version: 1
+      valid_from: "2023-04-01"
+      valid_to: null
+      definition: >-
+        Per group and calendar month: headcount at the start of the month; hires (spells starting in the month);
+        transfers in and out (employees in a different group at the start of the next month than at the start of
+        this one); departures by cause (spell end in the month). A hire who leaves within the same month appears in
+        neither count. Served for cohorts of 10 or more; links under 10 people are merged.
+      changelog: first version (semantic model sem_workforce_flows).

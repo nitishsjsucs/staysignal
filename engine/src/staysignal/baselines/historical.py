@@ -12,6 +12,7 @@ from scipy.stats import binom
 from staysignal.clock import add_months
 from staysignal.features.reference import DAYS_PER_MONTH, FeatureRow, Vintage
 from staysignal.forecast.cohorts import COMPANY
+from staysignal.semantic.definitions import excludes
 from staysignal.world.spec import level_band, tenure_band
 
 
@@ -38,7 +39,7 @@ def trailing_rates(vin: Vintage, c: date, metric_def: str = "voluntary_departure
             if not recs:
                 continue
             a = recs[-1]
-            if metric_def.endswith("@2") and a.employment_type == "fixed_term":
+            if excludes(metric_def, a.employment_type):
                 continue
             group, org = vin.team_info(a.team_id, sp.end)
             tb = tenure_band((sp.end - sp.start).days / DAYS_PER_MONTH)
@@ -48,7 +49,7 @@ def trailing_rates(vin: Vintage, c: date, metric_def: str = "voluntary_departure
     for m in range(12):
         d = add_months(lo, m)
         for en, a in vin.assignments_at(d).items():
-            if metric_def.endswith("@2") and a.employment_type == "fixed_term":
+            if excludes(metric_def, a.employment_type):
                 continue
             sp = vin.spell_at(en, d)
             group, org = vin.team_info(a.team_id, d)

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from staysignal.semantic.definitions import excluded_employment_types
 from staysignal.world import oracle
 from staysignal.world.spec import Profile
 
@@ -21,7 +22,7 @@ def forecasts(
     """{cohort id: {h: {"n", "expected", "i80", "i95"}}} for the company and each organization."""
     _, state = oracle.true_state(profile, origin)
     futures = oracle.run_futures(state, n_futures=n_futures, workers=workers)
-    exclude = metric_def.endswith("@2")
+    exclude = "fixed_term" in excluded_employment_types(metric_def)
     counts = oracle.counts(state, futures, exclude_fixed_term=exclude)
     out: dict[str, dict[int, dict]] = {}
     for co in state.cohorts:

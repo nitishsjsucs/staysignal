@@ -1,0 +1,9 @@
+{
+ "note": "SHA-256 of the canonical JSON of each metric version referenced by a published run (SPEC 7.4). A frozen version is never edited; a change is a new version.",
+ "frozen": {
+  "expected_voluntary_departures@1": "713c5834151864af0b3006f1c479c1478d337006a00de7823422001d423035a6",
+  "expected_voluntary_departures@2": "5c45c9b2efae43a21897d56d7cd95b485056d2c4f47f3c0bbb53bf23d2045fe2",
+  "voluntary_departures@1": "0bb6d7cec2f2edd1445ae0bdb34bf1e17c6b7cd15c422f3bb81aadf3649b6b9a",
+  "voluntary_departures@2": "9baafba5090fc8dac8d1262647b9f86d9c59c68bdd0e966facf525a6cf68deda"
+ }
+}

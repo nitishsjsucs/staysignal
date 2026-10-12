@@ -11,6 +11,7 @@ from pathlib import Path
 import duckdb
 
 from staysignal.features.reference import FeatureRow
+from staysignal.semantic.definitions import excluded_employment_types
 
 SQL = Path(__file__).with_name("pit.sql")
 COLUMNS = [f.name for f in fields(FeatureRow) if f.name != "employee_number"]
@@ -26,7 +27,8 @@ def features_sql(
 ) -> list[FeatureRow]:
     """Feature rows at cutoff c (clocks at `clock`, default c), sorted by employee key; `employee_number` holds the
     `er_` key, because nothing downstream of staging sees an employee number."""
-    cur = con.execute(query(), {"cutoff": c, "clock": clock or c, "metric": metric_def})
+    exclude = list(excluded_employment_types(metric_def))
+    cur = con.execute(query(), {"cutoff": c, "clock": clock or c, "exclude_types": exclude})
     names = [d[0] for d in cur.description]
     out = []
     for row in cur.fetchall():

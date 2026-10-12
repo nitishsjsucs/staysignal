@@ -1,8 +1,9 @@
 -- Point-in-time features at (cutoff, vintage) (SPEC 8.1, 8.2): one parameterized DuckDB query over the intermediate
 -- models of a warehouse built at the run's vintage and payroll mapping. Parameters: $cutoff (population, assignment
 -- and pay are taken at it), $clock (clocks and look-back windows are measured from it; equal to the cutoff except
--- inside the change decomposition) and $metric (voluntary_departures@2 removes fixed-term employees from the
--- population; no feature depends on the metric definition). features/reference.py is the pure-Python reference and
+-- inside the change decomposition) and $exclude_types (the employment types the run's metric definition leaves out of
+-- the population, from semantic/metric_definitions.yaml: fixed_term under voluntary_departures@2; no feature depends
+-- on the metric definition). features/reference.py is the pure-Python reference and
 -- engine/tests/features pins both to the same values. Synthetic world only.
 with params as (
     select
@@ -11,7 +12,7 @@ with params as (
         cast(cast($clock as date) - interval 180 day as date) as lo180,
         cast(cast($clock as date) - interval 90 day as date) as lo90,
         strftime(cast($cutoff as date), '%Y-%m') as cutoff_period,
-        cast($metric as varchar) as metric
+        cast($exclude_types as varchar[]) as exclude_types
 ),
 
 levels as (
@@ -207,7 +208,7 @@ base as (
     from asg as a
     join pop_spells as s on s.employee_key = a.employee_key and s.spell_no = a.spell_no
     cross join params as p
-    where not (p.metric like '%@2' and a.employment_type = 'fixed_term')
+    where not coalesce(list_contains(p.exclude_types, a.employment_type), false)
 )
 
 select

@@ -4,11 +4,12 @@
 import { getAgentByName } from "agents";
 import { Hono } from "hono";
 import { canonicalJson } from "../shared/canonical-json";
-import type { QualityFixture } from "../shared/contracts";
+import type { HistoryFixture, QualityFixture } from "../shared/contracts";
+import { authorizeCohort } from "../shared/policy/authorize";
 import { DEMO } from "../shared/routines/definitions";
 import { isRefusal } from "../shared/policy/refusals";
 import { hasScope, LOCAL_PRINCIPALS, type Principal } from "../shared/policy/roles";
-import { runTool, type ToolContext, type ToolResult } from "../shared/tools/registry";
+import { cohortMeta, runTool, type ToolContext, type ToolResult } from "../shared/tools/registry";
 import type { AnalystAgent } from "./agents/analyst-agent";
 import { workspace, workspaceStub } from "./agents/workspace-port";
 import { AuthError } from "./auth/access";
@@ -90,6 +91,45 @@ export function buildApp() {
   app.get("/api/changes", (c) => respond(c, "explain_change", { cohort: c.req.query("cohort") ?? "Larkspur", horizon_months: num(c.req.query("horizon")), from_run: c.req.query("from") || undefined, to_run: c.req.query("to") || undefined }));
   app.get("/api/profile", (c) => respond(c, "cohort_profile", { cohort: c.req.query("cohort") ?? "Larkspur" }));
   app.get("/api/lineage", (c) => respond(c, "trace_lineage", { check_id: c.req.query("check") || undefined, node: c.req.query("node") || undefined }));
+
+  app.get("/api/cohorts", async (c) => {
+    const ws = await workspace(c.env);
+    const runId = (await ws.publishedRunId()) ?? (await warehouseFor(c.env).runs()).published;
+    const fx = await warehouseFor(c.env).forecast(runId);
+    const p = c.var.principal;
+    const all = fx?.cohorts ?? [];
+    const visible = all.filter((co) => {
+      if (co.kind === "org_level" || co.kind === "org_tenure") return false;
+      const meta = cohortMeta(co, all);
+      return authorizeCohort(p, "forecast_departures", meta) === null;
+    });
+    return c.json({ label: "synthetic", run_id: runId, cohorts: visible.map((co) => ({ id: co.cohort_id, name: co.kind === "company" ? "Larkspur (company)" : co.name, kind: co.kind, n: co.n, parent: co.parent })) });
+  });
+
+  app.get("/api/trust", async (c) => {
+    const cohortQ = c.req.query("cohort") ?? "company";
+    const h = c.req.query("horizon") ?? "3";
+    const wh = warehouseFor(c.env);
+    const hist = (await wh.history()) as (HistoryFixture & { trust?: Record<string, Record<string, { oe: number | null; coverage80: { held: number; windows: number }; effective_windows: number }>> }) | null;
+    const ws = await workspace(c.env);
+    const q = await wh.quality();
+    const results = q?.results ?? [];
+    const lastDay = results.reduce((m, r) => (r.date > m ? r.date : m), "");
+    const latest = results.filter((r) => r.date === lastDay);
+    const incidents = ((await ws.listIncidents()) as unknown as { status: string; failing?: string[] }[]).filter((i) => i.status === "open");
+    const failing = new Set<string>([...latest.filter((r) => r.status === "fail").map((r) => r.check_id), ...incidents.flatMap((i) => i.failing ?? [])]);
+    const f01 = latest.find((r) => r.check_id === "F01");
+    const t = hist?.trust?.[cohortQ]?.[h] ?? null;
+    return c.json({
+      label: "synthetic",
+      cohort: cohortQ,
+      horizon: Number(h),
+      backtest: t ? { oe: t.oe, coverage80: t.coverage80, effective_windows: t.effective_windows } : null,
+      freshness: { status: f01?.status ?? "pass", detail: f01 ? "HRIS batch newer than 36 hours on the synthetic clock" : "no check result", date: lastDay },
+      checks: { passing: latest.filter((r) => r.status === "pass").length - [...failing].filter((id) => latest.find((r) => r.check_id === id && r.status === "pass")).length, total: latest.length, failing: [...failing].sort() },
+      note: "Pseudo-real-time quarterly backtests on the synthetic world; coverage is claimed at organization level and above.",
+    });
+  });
 
   app.get("/api/quality/checks", async (c) => {
     if (!hasScope(c.var.principal, "quality:read")) return c.json({ refused: true, code: "NOT_PERMITTED", message: "Your role does not include data quality." });

@@ -22,7 +22,7 @@ Work follows the commit plan in SPEC.md section 24, core path first. The demo da
 | Features, model, forecast (engine) | in progress: point-in-time features (pure-Python reference with corrections, rescissions, duplicates and vintages), the landmark competing-risks multinomial logit with team-clustered sandwich covariance, the shared-shock estimator, nested Monte Carlo intervals with an exact variance decomposition, the trailing-rate baseline, run keys and business-result hashes; `staysignal demo build` trains `models/m2026.08` and `models/m2026.09` and exports the two published runs as API fixtures (provisional until the world calibration is frozen) |
 | Warehouse (dbt on DuckDB, BigQuery profile) | not started (M2) |
 | Worker, agents, workflows, approvals, audit | in progress: Hono API with Access JWT verification (dev keys generated at runtime), a governed tool registry (8 tools) with authorization by role and level, rounding by cohort size, hidden-sum suppression and content-addressed result IDs; the WorkspaceAgent with runs and the published pointer, the hash-chained action log and approval audit with anchors, `SELF_APPROVAL`, `WRONG_ROLE`, `AGENT_PRINCIPAL` and `STALE_SUBJECT` refusals, review tasks with the pay-equity blocking item, one-click rollback with a reason, and the engine job queue; the `source_arrival_refresh` RoutineWorkflow with gates (hold, deterministic mapping proposal, data-engineer approval, repair, publish within tolerance, replay); the AnalystAgent with the pre-router, stub and recorded providers, per-turn aliases, numeric grounding with one repair and a template fallback; a fixture runner. Tested end to end in workerd (`npm test`) |
-| Frontend | not started |
+| Frontend | in progress: React 19 app in fixtures mode with design tokens (light and dark, palette checked with the dataviz validator for color-vision deficiency), the app shell with cohort, horizon and role controls, the chat dock, and four pages: Forecast (hero number with ranges and the trailing-rate status quo, trust strip, fan chart, backtest strip, variance decomposition, breakdown), What changed (five-factor waterfall), Data health (check heatmap, held run, routine stepper, mapping approval) and Reviews (draft, submit, approve or refuse, tasks, audit chain, rollback). Charts are SVG with d3-scale and d3-shape, each with a hover tooltip and a table view; no page scrolls sideways at phone width. `npm run dev:wrangler` serves the built app under wrangler dev with the stub model and the fixture runner; `npm run stop` stops it |
 | Production path (setup, doctor, deploy) | not started; builders never create cloud resources |
 
 ## The demo story
@@ -110,7 +110,11 @@ Code is copied from four sibling repositories by the same author (MIT) and attri
 
 | Source | Copied | Adapted how |
 |---|---|---|
-| (none yet) | | |
+| PeopleLake | `pipeline/src/peoplelake/prng.py`, `pipeline/src/peoplelake/canonical.py`, `src/worker/ingest/canonical-json.ts`, `src/worker/auth/access.ts`, `scripts/check-prose.ts`, `scripts/lib/prose.ts`, `scripts/lib/results.ts` | SplitMix64 streams (uniform, normal and lognormal draws and named streams added), canonical JSON in Python and TypeScript, Access JWT verification, the prose check with banned phrasing added |
+| PeopleVault | `pipelines/src/peoplevault/pseudo.py`, `src/worker/pseudo/hmac.ts`, `src/worker/audit/audit-log.ts`, `scripts/lib/pids.ts`, `src/web/router.ts` | pseudonyms with StaySignal salts, the action log hash chain, process hygiene, the history router |
+| PeopleLens | `worker/src/guard/disclosure.ts`, `worker/src/guard/suppression.ts` | rounding by cohort size and hidden-sum suppression |
+| DataTrust | ADR-0001 (runner pull model); `packages/rca/src/summary/validate.ts`, `template.ts` and the grounded summary loop | the engine job protocol (ADR 0002) and numeric grounding with a template fallback (ADR 0007) |
+| onboardflow | `src/worker/workflows/gates.ts` and its ADR 0002 | workflow gates on Durable Object SQLite instead of D1 (ADR 0016) |
 
 New in StaySignal: the hazard-driven bitemporal world, the point-in-time features, the competing-risks model and its uncertainty, the evaluation, the change decomposition, the publication gate with deterministic repair and fresh-warehouse replay, the agents, workflows and approvals, and the frontend.
 

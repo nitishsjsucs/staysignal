@@ -1,0 +1,228 @@
+/* StaySignal design tokens (SPEC 16.3). Colors follow the dataviz reference palette, validated with its validator in
+   both modes (scripts/check-palette.ts re-checks them in CI). Dark mode is its own set of steps, not an inversion. */
+@import "@fontsource-variable/inter";
+
+:root {
+  color-scheme: light;
+  --font: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #ffffff;
+  --surface-sunk: #f3f2ee;
+  --border: #e6e5df;
+  --border-strong: #d3d2ca;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --ink-3: #6d6c67;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --accent: #1c5cab;
+  --accent-wash: #e9f1fc;
+  --accent-ink: #ffffff;
+  --focus: #2a78d6;
+  --series-vol: #2a78d6;
+  --series-vol-wash: rgba(42, 120, 214, 0.1);
+  --series-vol-band95: rgba(42, 120, 214, 0.1);
+  --series-vol-band80: rgba(42, 120, 214, 0.2);
+  --series-inv: #eb6834;
+  --series-ret: #0f8a73;
+  --series-other: #898781;
+  --series-other-band: rgba(137, 135, 129, 0.16);
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --good-ink: #006300;
+  --critical-ink: #a62a2a;
+  --warning-ink: #8a5a00;
+  --seq-1: #cde2fb;
+  --seq-2: #9ec5f4;
+  --seq-3: #6da7ec;
+  --seq-4: #3987e5;
+  --seq-5: #256abf;
+  --seq-6: #184f95;
+  --seq-7: #0d366b;
+  --div-neg: #2a78d6;
+  --div-mid: #f0efec;
+  --div-pos: #d03b3b;
+  --shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 4px 16px rgba(11, 11, 11, 0.04);
+  --shadow-pop: 0 8px 32px rgba(11, 11, 11, 0.14);
+  --radius: 6px;
+  --radius-card: 10px;
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s8: 32px;
+  --nav-w: 232px;
+  --dock-w: 420px;
+  --top-h: 56px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #201f1e;
+    --surface-sunk: #141413;
+    --border: #2c2c2a;
+    --border-strong: #3c3c39;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --ink-3: #a3a29a;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --accent: #86b6ef;
+    --accent-wash: #1a2a3f;
+    --accent-ink: #0b0b0b;
+    --focus: #86b6ef;
+    --series-vol: #3987e5;
+    --series-vol-wash: rgba(57, 135, 229, 0.14);
+    --series-vol-band95: rgba(57, 135, 229, 0.14);
+    --series-vol-band80: rgba(57, 135, 229, 0.28);
+    --series-inv: #d95926;
+    --series-ret: #199e70;
+    --series-other-band: rgba(137, 135, 129, 0.22);
+    --good-ink: #5fd35f;
+    --critical-ink: #f08c8c;
+    --warning-ink: #fab219;
+    --seq-1: #0d366b;
+    --seq-2: #184f95;
+    --seq-3: #1c5cab;
+    --seq-4: #2a78d6;
+    --seq-5: #5598e7;
+    --seq-6: #86b6ef;
+    --seq-7: #cde2fb;
+    --div-mid: #383835;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-pop: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #201f1e;
+  --surface-sunk: #141413;
+  --border: #2c2c2a;
+  --border-strong: #3c3c39;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --ink-3: #a3a29a;
+  --muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --accent: #86b6ef;
+  --accent-wash: #1a2a3f;
+  --accent-ink: #0b0b0b;
+  --focus: #86b6ef;
+  --series-vol: #3987e5;
+  --series-vol-wash: rgba(57, 135, 229, 0.14);
+  --series-vol-band95: rgba(57, 135, 229, 0.14);
+  --series-vol-band80: rgba(57, 135, 229, 0.28);
+  --series-inv: #d95926;
+  --series-ret: #199e70;
+  --series-other-band: rgba(137, 135, 129, 0.22);
+  --good-ink: #5fd35f;
+  --critical-ink: #f08c8c;
+  --warning-ink: #fab219;
+  --seq-1: #0d366b;
+  --seq-2: #184f95;
+  --seq-3: #1c5cab;
+  --seq-4: #2a78d6;
+  --seq-5: #5598e7;
+  --seq-6: #86b6ef;
+  --seq-7: #cde2fb;
+  --div-mid: #383835;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-pop: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 20px;
+}
+
+h2 {
+  font-size: 15px;
+}
+
+h3 {
+  font-size: 13px;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

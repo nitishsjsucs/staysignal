@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from staysignal.clock import parse_ts
@@ -151,6 +151,7 @@ class Sources:
     offers: list[Offer] = field(default_factory=list)
     files: list[str] = field(default_factory=list)
     file_hashes: dict[str, str] = field(default_factory=dict)
+    hris_batches: list[datetime] = field(default_factory=list)  # arrival times of HRIS extracts, empty deltas included
 
 
 def _cents(s: str) -> int:
@@ -193,7 +194,13 @@ def add_file(src: Sources, path: Path) -> None:
     src.file_hashes[name] = hashlib.sha256(path.read_bytes()).hexdigest()
     rows = read_csv(path)
     if name.startswith("hris_"):
-        src.hris.extend(parse_hris(r) for r in rows)
+        parsed = [parse_hris(r) for r in rows]
+        src.hris.extend(parsed)
+        if name.startswith("hris_delta_"):
+            day = date.fromisoformat(name[len("hris_delta_") : -len(".csv")])
+            src.hris_batches.append(datetime(day.year, day.month, day.day, 6, tzinfo=UTC))
+        elif parsed:
+            src.hris_batches.append(max(r.recorded_at for r in parsed))
     elif name.startswith("payroll_"):
         src.payroll.extend(
             PayLine(

@@ -75,10 +75,11 @@ def run_checks(src: Sources, v: datetime, mapping_name: str = "payroll@1") -> li
         results[cid] = (status, failing, detail)
 
     hris = [r for r in src.hris if r.recorded_at <= v]
-    newest = max((r.recorded_at for r in hris), default=v - timedelta(days=99))
+    batches = [b for b in src.hris_batches if b <= v] or [r.recorded_at for r in hris]
+    newest = max(batches, default=v - timedelta(days=99))
     put("F01", 0 if v - newest <= timedelta(hours=36) else 1, f"newest HRIS batch {newest.isoformat()}")
 
-    latest_batch = newest
+    latest_batch = max((r.recorded_at for r in hris), default=newest)
     seen: set[tuple] = set()
     new_dups = 0
     for r in sorted(hris, key=lambda r: (r.recorded_at, r.record_id)):

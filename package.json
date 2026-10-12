@@ -26,7 +26,9 @@
     "fixtures:index": "node scripts/gen-fixtures.ts",
     "fixtures:check": "node scripts/gen-fixtures.ts --check",
     "dev:keys": "node scripts/dev-keys.ts",
-    "fixture-runner": "node scripts/fixture-runner.ts"
+    "fixture-runner": "node scripts/fixture-runner.ts",
+    "dev:wrangler": "node scripts/serve.ts",
+    "stop": "node scripts/stop.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "3.0.57",

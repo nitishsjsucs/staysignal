@@ -11,7 +11,7 @@ Builder log for the commit plan in SPEC.md section 24. Updated in every commit.
 
 ## Position
 
-M1 walking skeleton, commit 4 (`feat(worker, agents)`). Next: the web app (tokens, shell, chat dock, Forecast, What changed, Data health, Reviews) and the beats 1 to 5 click-through e2e. M0 done except a clean 27B measurement (recorded as partial).
+M1 walking skeleton, commit 5 (`feat(web)`). Next: the beats 1 to 5 click-through e2e (Playwright), which closes M1; then M2 (warehouse, data dictionary, manifests and pins). M0 done except a clean 27B measurement (recorded as partial).
 
 ## Done
 
@@ -31,9 +31,13 @@ M1 walking skeleton, commit 4 (`feat(worker, agents)`). Next: the web app (token
 
 4. `feat(worker, agents)` (the spec's worker and agents commits together, since the API's dev turn endpoint needs the AnalystAgent): `src/shared/{contracts,clock,format,canonical-json,sha256}.ts`, `src/shared/policy/{roles,authorize,refusals}.ts` with `policy/{roles,principals.local}.json`, `src/shared/guard/{disclosure,population,suppression,prerouter}.ts`, `src/shared/grounding/{aliases,numerals,direction,check,template}.ts`, `src/shared/tools/{schemas,registry}.ts`, `src/shared/routines/definitions.ts`; `src/worker/{index,app,config}.ts`, `auth/{access,dev-login,principal,hmac}.ts` (copied from PeopleLake and PeopleVault), `agents/{workspace-agent,analyst-agent,turn,providers,recorded-provider,prompts,workspace-port}.ts`, `workflows/{routine-workflow,gates}.ts` (gate pattern from onboardflow), `store/{schema.sql,chain,approvals}.ts`, `warehouse/{client,fixtures,engine-shim}.ts`, generated fixture and recording indexes; `scripts/{dev-keys,gen-fixtures,fixture-runner}.ts`. Tests (vitest): worker 19 in workerd (auth C50 and C75; tools by role and C27; approvals C22 to C24; audit chain and anchors C25; stub turns C28, C29; the routine end to end with the fixture runner C19, C35, C21 in part), node 49 (pre-router, grounding, disclosure and population rules, hidden-sum suppression, SHA-256 and canonical JSON parity).
 
+5. `feat(web)`: `src/web/{main,App,router,api,live,theme}.tsx?`, `design/{tokens,motion,app}.css`, `components/{icons,ui,ChartCard,AppShell,RoleSwitcher,ChatDock,Actions}.tsx`, `charts/{kit,FanChart,HistoryStrip,bars,CheckHeatmap}.tsx`, `pages/{Forecast,Changes,Quality,Reviews,Ask,ResultDetail}.tsx`; `/api/cohorts` and `/api/trust` in `src/worker/app.ts`; `scripts/serve.ts` (`npm run dev:wrangler`: Vite build, wrangler dev on 8795 with the stub model, the fixture runner) and `scripts/stop.ts`. View state (cohort, horizon, run) lives in the URL; live state comes from the WorkspaceAgent through `useAgent` on the server-routed path. Chart colors were checked with the dataviz validator in both modes; the light-mode retirement series moved to `#0f8a73` because `#13865e` failed the color-vision check. Checked in the browser at 1024 px and at 375 px (no page scrolls sideways): beat 1 on Forecast, beat 2 on What changed, the held run and the routine on Data health after a simulated arrival, and on Reviews a draft submitted by the analyst, approved by the lead (three tasks with the pay-equity blocking item), rolled back with a reason (tasks cancelled, chain verified), and the lead's own submission refused with `SELF_APPROVAL`. Initial JavaScript 123.8 kB gzip (budget 200 kB); the chat dock loads lazily (59.4 kB gzip).
+   Engine fix in the same commit: F01 (HRIS freshness) now measures the newest extract that arrived by the vintage (daily delta files land at 06:00Z) instead of the newest record inside them, so a day with an empty delta no longer fails. With F01 passing on those days, X01 (HRIS against payroll) is evaluated and fails from 2026-09-06 to 2026-09-14 (5 or 6 people paid in payroll whose terminations HRIS recorded late), clearing when the 2026-09-15 audit batch lands: the planted late terminations, caught by the cross-source check as designed. Demo fixtures regenerated.
+
 ## Next
 
-M1 walking skeleton: small-profile world with the final hazards; minimal engine path (features at one cutoff, MNL fit, cohort Monte Carlo, fixtures export); Worker with dev auth, fixtures warehouse, WorkspaceAgent runs, approvals, action log and rollback, fixture runner; AnalystAgent with stub and recorded providers, aliases and grounding; tokens, shell, chat dock and the Forecast, What changed, Data health and Reviews pages in fixtures mode; beats 1 to 5 click-through e2e.
+1. M1 commit 6: beats 1 to 5 click-through e2e (Playwright against the built app under wrangler dev with the stub model and the fixture runner).
+2. M2 in SPEC 24 order: dbt on DuckDB with the bitemporal intermediates, the data dictionary, world manifests and cross-platform pins, the recorded-turn provider for the demo, `npm run setup`, `npm run demo` and `demo:reset` (which must warm the 27B prompt prefix, see the findings below).
 
 ## 27B measurement findings (2026-10-12)
 
@@ -43,7 +47,9 @@ M1 walking skeleton: small-profile world with the final hazards; minimal engine 
 
 ## Check status
 
-At commit 4: `npm run typecheck` clean; `npm test` 2 passed (worker health, node scaffold); `npm run build` ok (client 68.7 kB gzip); `npm run typegen:check` up to date. At commit 5: engine `pytest` 1 passed, `ruff check` and `ruff format --check` clean. At commit 6: `npm test` 11 passed (worker 1, node 10); `check:prose` 12 files clean; `check:hygiene` public tier clean; private tier clean over the whole tree; engine pytest 1 passed, ruff clean. CI has not run on GitHub yet (the publisher pushes). At commit 7: `npm test` 20 passed (worker 1, node 19); typecheck clean; check:prose and check:hygiene clean; README Results in sync.
+At commit 5 of M1 (this commit): `npm run typecheck` clean; `npm test` 68 passed in 14 files (worker 19, node 49); engine `pytest` 40 passed, `ruff check` clean; `npm run build` ok (initial JavaScript 123.8 kB gzip); `npm run typegen:check` up to date; `npm run fixtures:check` current; `check:prose` 12 Markdown files clean; `check:hygiene` public tier clean over 213 files, private tier run by the pre-commit hook. CI has not run on GitHub yet (the publisher pushes). No web unit tests yet (the `web` vitest project is empty); the browser checks above were manual and the e2e arrives in commit 6.
+
+Earlier: at M0 commit 7, `npm test` 20 passed (worker 1, node 19), typecheck, check:prose and check:hygiene clean, README Results in sync.
 
 ## Deviations from SPEC.md
 
@@ -60,3 +66,7 @@ At commit 4: `npm run typecheck` clean; `npm test` 2 passed (worker health, node
 - API fixtures and the model artifacts come from the canonical world rather than the small one (it generates in a second and trains in 14 s), labeled provisional until C5 freezes the calibration.
 
 - `origin` is set to `https://github.com/nitishsjsucs/staysignal.git` because the builder task asked for it; SPEC 22.5 says to add no remote. Nothing is ever pushed from this repository; the operator's publisher owns publishing.
+- In M1 every chart is SVG built with d3-scale and d3-shape, including the What changed waterfall, the breakdown bars and the Data health heatmap that SPEC 16.1 assigns to ECharts (loaded after first paint). ECharts 6.1.0 is installed but not used yet; the SPEC 16 ECharts views (audit timeline, trace gantt, lineage in React Flow) and the two registered ECharts themes arrive with their pages.
+- The light-mode retirement color is `#0f8a73` (SPEC 16.3's `#13865e` failed the dataviz validator's color-vision check against the light surface); C45's palette test, when written, checks `#0f8a73`.
+- Rollback is an inline control on the review card and the audit table (a reason field and a confirm button) rather than a modal.
+- F01 measures extract arrival times (see the M1 log, commit 5); as a result the 30-day check history shows X01 failing from 2026-09-06 to 2026-09-14.

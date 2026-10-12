@@ -126,6 +126,27 @@ export function buildApp() {
     return c.json({ label: "synthetic", run_id: runId, cohorts: visible.map((co) => ({ id: co.cohort_id, name: co.kind === "company" ? "Larkspur (company)" : co.name, kind: co.kind, n: co.n, parent: co.parent })) });
   });
 
+  // Recorded evaluation for the Trust page (SPEC 10, 16.1): cohort aggregates only, filtered by the same cohort rules
+  // as the forecast tools; summaries that pool organizations are shown only to roles that may read the company.
+  app.get("/api/evaluation", async (c) => {
+    const wh = warehouseFor(c.env);
+    const ev = await wh.evaluation();
+    if (!ev) return c.json({ error: "no recorded evaluation" }, 404);
+    const p = c.var.principal;
+    const ws = await workspace(c.env);
+    const runId = (await ws.publishedRunId()) ?? (await wh.runs()).published;
+    const all = (await wh.forecast(runId))?.cohorts ?? [];
+    const allowed = (cohortId: string): boolean => {
+      const co = all.find((x) => x.cohort_id === cohortId);
+      return Boolean(co && authorizeCohort(p, "forecast_history", cohortMeta(co, all)) === null);
+    };
+    const company = allowed("company");
+    const entries = ev.backtest.entries.filter((e) => allowed(e.cohort));
+    const levels = Object.fromEntries(Object.entries(ev.backtest.levels).filter(([, v]) => company && (v.level === "company" || hasScope(p, "forecast:read:all"))));
+    const comparison = company ? { ...ev.comparison, summary: Object.fromEntries(Object.entries(ev.comparison.summary).filter(([, v]) => v.level === "company" || hasScope(p, "forecast:read:all"))) } : null;
+    return c.json({ ...ev, backtest: { ...ev.backtest, levels, entries }, calibration: company ? ev.calibration : null, comparison });
+  });
+
   app.get("/api/trust", async (c) => {
     const cohortQ = c.req.query("cohort") ?? "company";
     const h = c.req.query("horizon") ?? "3";

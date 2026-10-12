@@ -1,6 +1,6 @@
 // Fixtures warehouse: answers published-layer reads from committed API fixtures exported by the engine
 // (`staysignal demo build`). Used by CI, e2e, Playwright and the fixtures-mode deployment (no Google resource).
-import type { ChangesFixture, ForecastFixture, HistoryFixture, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
 import { FIXTURES } from "../generated/fixtures-index";
 
@@ -43,6 +43,10 @@ export class FixturesWarehouse implements WarehouseClient {
 
   async profiles(runId: string): Promise<ProfilesFixture | null> {
     return this.get<ProfilesFixture>(`profiles/${slug(runId)}.json`);
+  }
+
+  async evaluation(): Promise<EvaluationFixture | null> {
+    return this.get<EvaluationFixture>("evaluation.json");
   }
 
   /** Engine job outputs keyed by job key (the fixture runner's source; SPEC 14.7). */

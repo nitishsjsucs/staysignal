@@ -167,6 +167,60 @@ export interface HistoryFixture {
   series: Record<string, Record<string, HistoryPoint[]>>; // cohort_id -> horizon -> points
 }
 
+/** Recorded evaluation on the synthetic world (results/backtest, calibration and model-comparison), SPEC 10. */
+export interface EvaluationEntry {
+  origin: string;
+  cohort: string;
+  level: "company" | "organization";
+  n: number;
+  horizon_months: number;
+  status: "mature" | "provisional" | "pending";
+  actual: number;
+  expected: number;
+  hist_expected: number;
+  i80: [number, number];
+  i95: [number, number];
+}
+
+export interface EvaluationLevel {
+  level: string;
+  horizon_months: number;
+  windows: number;
+  origins: number;
+  effective_windows: number;
+  mae: number;
+  rmse: number;
+  mae_hist: number;
+  skill_vs_hist: number;
+  observed_over_expected: number;
+  coverage80: number;
+  coverage95: number;
+  coverage80_block_i80: [number, number];
+  interval_score80: number;
+  interval_score95: number;
+  pit_histogram: number[];
+  rps: number;
+}
+
+export interface ComparisonMetrics {
+  mae: number;
+  rmse: number;
+  observed_over_expected: number;
+  coverage80: number;
+  coverage95: number;
+  interval_score80: number;
+}
+
+export interface EvaluationFixture {
+  label: string;
+  date: string;
+  commands: string[];
+  world_sha256: string;
+  backtest: { design: string; levels: Record<string, EvaluationLevel>; provisional_windows_excluded: number; entries: EvaluationEntry[] };
+  calibration: { design: string; n: number; ici: number; e50: number; e90: number; reliability: { bin: number; n: number; predicted: number; observed: number; observed_i80: [number, number] }[] } | null;
+  comparison: { design: string; origins: string[]; models: string[]; summary: Record<string, { level: string; horizon_months: number; windows: number } & Record<string, ComparisonMetrics | string | number>> };
+}
+
 export type ChangeFactor = "calendar" | "composition" | "input_data" | "model" | "definition";
 
 export interface FactorBar {

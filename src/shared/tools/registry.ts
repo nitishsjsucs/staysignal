@@ -4,6 +4,7 @@
 import type { z } from "zod";
 import type {
   Audience,
+  EvaluationFixture,
   BreakdownData,
   BreakdownRow,
   ChangesFixture,
@@ -44,6 +45,7 @@ export interface WarehouseClient {
   quality(): Promise<QualityFixture | null>;
   lineage(): Promise<LineageFixture | null>;
   profiles(runId: string): Promise<ProfilesFixture | null>;
+  evaluation(): Promise<EvaluationFixture | null>;
 }
 
 export interface ReviewDraft {

@@ -1,6 +1,6 @@
 // Engine warehouse shim client (SPEC 7.2, ADR 0012): the local engine on 8196 answers published-layer reads from
 // compiled catalog entries on its DuckDB connection. Same contract as the fixtures client.
-import type { ChangesFixture, ForecastFixture, HistoryFixture, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
 
 export class EngineWarehouse implements WarehouseClient {
@@ -43,5 +43,8 @@ export class EngineWarehouse implements WarehouseClient {
   }
   profiles(runId: string) {
     return this.get<ProfilesFixture>(`profiles/${encodeURIComponent(runId)}`);
+  }
+  evaluation() {
+    return this.get<EvaluationFixture>("evaluation");
   }
 }

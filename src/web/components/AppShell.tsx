@@ -5,7 +5,7 @@ import { type Me, useQuery } from "../api";
 import { useWorkspace } from "../live";
 import { navigate, type Route, setView, useView } from "../router";
 import { applyTheme, effectiveDark, readTheme, type Theme } from "../theme";
-import { BrandMark, IconAsk, IconChanges, IconForecast, IconMoon, IconQuality, IconReviews, IconSun } from "./icons";
+import { BrandMark, IconAsk, IconChanges, IconForecast, IconMoon, IconQuality, IconReviews, IconSun, IconTrust } from "./icons";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { Segmented, SyntheticChip } from "./ui";
 
@@ -13,6 +13,7 @@ const ChatDock = lazy(() => import("./ChatDock"));
 
 const NAV: { page: Route["page"]; href: string; label: string; icon: (p: { size?: number }) => ReactNode }[] = [
   { page: "forecast", href: "/", label: "Forecast", icon: IconForecast },
+  { page: "trust", href: "/trust", label: "Trust", icon: IconTrust },
   { page: "changes", href: "/changes", label: "What changed", icon: IconChanges },
   { page: "quality", href: "/quality", label: "Data health", icon: IconQuality },
   { page: "reviews", href: "/reviews", label: "Reviews", icon: IconReviews },

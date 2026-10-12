@@ -987,3 +987,16 @@
     display: none !important;
   }
 }
+
+/* Trust: model comparison small multiples, one metric per panel on its own axis */
+.multiples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .multiples {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

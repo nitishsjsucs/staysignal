@@ -14,6 +14,7 @@ function svg(path: ReactElement, { size = 16, title }: P, fill = "none") {
 
 export const IconForecast = (p: P) => svg(<><path d="M2 13h12" /><path d="M3 10.5 6 7l2.5 2L13 4" /><path d="M10.5 4H13v2.5" /></>, p);
 export const IconChanges = (p: P) => svg(<><path d="M2 13h12" /><path d="M3.5 13V5" /><path d="M6.5 8V5" /><path d="M9.5 8v3" /><path d="M12.5 11v2" /></>, p);
+export const IconTrust = (p: P) => svg(<><circle cx="8" cy="8" r="6.2" /><circle cx="8" cy="8" r="3.2" /><circle cx="8" cy="8" r="0.6" /></>, p);
 export const IconQuality = (p: P) => svg(<><path d="M8 1.8 13 3.6v4c0 3.1-2.1 5.4-5 6.6-2.9-1.2-5-3.5-5-6.6v-4z" /><path d="m5.6 8 1.7 1.7L10.6 6.3" /></>, p);
 export const IconReviews = (p: P) => svg(<><rect x="3" y="2.5" width="10" height="11.5" rx="1.5" /><path d="M6 2.5V2h4v.5" /><path d="m5.8 8.3 1.5 1.5 3-3" /></>, p);
 export const IconAsk = (p: P) => svg(<><path d="M2.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H7l-3 2.5v-2.5h0a2 2 0 0 1-1.5-2z" /></>, p);

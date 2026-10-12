@@ -7,6 +7,7 @@ export type Route =
   | { page: "changes" }
   | { page: "quality" }
   | { page: "reviews" }
+  | { page: "trust" }
   | { page: "ask" }
   | { page: "result"; id: string }
   | { page: "not_found" };
@@ -15,7 +16,7 @@ export function parseRoute(pathname: string): Route {
   const parts = pathname.replace(/\/+$/, "").split("/").slice(1);
   const [a, b] = parts;
   if (parts.length === 0 || a === "" || a === undefined) return { page: "forecast" };
-  if (parts.length === 1 && (a === "changes" || a === "quality" || a === "reviews" || a === "ask")) return { page: a };
+  if (parts.length === 1 && (a === "changes" || a === "quality" || a === "reviews" || a === "ask" || a === "trust")) return { page: a };
   if (a === "r" && b && /^res_[a-z2-7]{26}$/.test(b) && parts.length === 2) return { page: "result", id: b };
   return { page: "not_found" };
 }

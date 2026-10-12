@@ -6,7 +6,7 @@
   "metricflow": "0.213.0",
   "dbt_metricflow": "0.15.0",
   "dbt_core": "1.12.5",
-  "semantic_sources_sha256": "19fa230cdbb0a37fa294391b0bd23d75fae2b27be5c5095677c3bead08fe5b66",
+  "semantic_sources_sha256": "6489a16c5fb18be2cc3352d61cf228cbd4ea9fd771d0637f9bb0cf6c65baded5",
   "project_placeholder": "staysignal-project-id"
  },
  "entries": {

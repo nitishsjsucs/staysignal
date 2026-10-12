@@ -1,0 +1,292 @@
+"""Typed source records and loading of landed extracts (SPEC 6.4, 7.1).
+
+A `Sources` object holds every landed record with its knowledge time (`recorded_at`). Nothing here filters by
+vintage; the point-in-time layer does that. Files are read in sorted order so loading is deterministic.
+"""
+
+from __future__ import annotations
+
+import csv
+from dataclasses import dataclass, field
+from datetime import date, datetime
+from pathlib import Path
+
+from staysignal.clock import parse_ts
+
+
+def _d(s: str) -> date | None:
+    return date.fromisoformat(s) if s else None
+
+
+def _s(s: str) -> str | None:
+    return s if s else None
+
+
+@dataclass(frozen=True)
+class HrisRecord:
+    record_id: str
+    employee_number: str
+    record_type: str
+    effective_date: date
+    recorded_at: datetime
+    job_code: str
+    level: str
+    team_id: str
+    manager: str | None
+    location: str
+    employment_type: str
+    contract_end: date | None
+    reason: str | None
+    corrects: str | None
+    batch: str
+    legacy_hire: date | None
+    legacy_first_promo: date | None
+    legacy_last_promo: date | None
+
+    @property
+    def family(self) -> str:
+        return self.job_code.rsplit("-", 1)[0]
+
+    def content_key(self) -> tuple:
+        """Identity of the content a duplicate re-sends (everything but record_id, batch and recorded_at)."""
+        return (
+            self.employee_number,
+            self.record_type,
+            self.effective_date,
+            self.job_code,
+            self.level,
+            self.team_id,
+            self.manager,
+            self.location,
+            self.employment_type,
+            self.contract_end,
+            self.reason,
+            self.corrects,
+            self.legacy_hire,
+            self.legacy_first_promo,
+            self.legacy_last_promo,
+        )
+
+
+@dataclass(frozen=True)
+class PayLine:
+    entity: str
+    employee_number: str
+    period: str  # YYYY-MM
+    base_amount_cents: int
+    currency: str
+    pay_basis_code: str
+    vendor_file_id: str
+    recorded_at: datetime
+
+    @property
+    def period_start(self) -> date:
+        y, m = self.period.split("-")
+        return date(int(y), int(m), 1)
+
+
+@dataclass(frozen=True)
+class TeamRow:
+    team_id: str
+    team_name: str
+    group_id: str
+    group_name: str
+    org_id: str
+    org_name: str
+    valid_from: date
+    valid_to: date | None
+    recorded_at: datetime
+
+
+@dataclass(frozen=True)
+class OrgEvent:
+    event_id: str
+    effective_date: date
+    kind: str
+    team_id: str
+    recorded_at: datetime
+
+
+@dataclass(frozen=True)
+class Band:
+    job_family: str
+    level: str
+    location: str
+    currency: str
+    band_min: float
+    band_mid: float
+    band_max: float
+
+
+@dataclass(frozen=True)
+class ReqEvent:
+    requisition_id: str
+    team_id: str
+    job_code: str
+    req_type: str
+    status: str
+    event_date: date
+    recorded_at: datetime
+
+
+@dataclass(frozen=True)
+class Offer:
+    offer_id: str
+    requisition_id: str
+    extended_date: date
+    decision: str
+    decision_date: date
+    start_date: date | None
+    recorded_at: datetime
+
+
+@dataclass
+class Sources:
+    hris: list[HrisRecord] = field(default_factory=list)
+    payroll: list[PayLine] = field(default_factory=list)
+    teams: list[TeamRow] = field(default_factory=list)
+    org_events: list[OrgEvent] = field(default_factory=list)
+    bands: dict[tuple[str, str, str], Band] = field(default_factory=dict)
+    reqs: list[ReqEvent] = field(default_factory=list)
+    offers: list[Offer] = field(default_factory=list)
+    files: list[str] = field(default_factory=list)
+    file_hashes: dict[str, str] = field(default_factory=dict)
+
+
+def _cents(s: str) -> int:
+    whole, _, frac = s.partition(".")
+    return int(whole) * 100 + int((frac + "00")[:2])
+
+
+def read_csv(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def parse_hris(row: dict[str, str]) -> HrisRecord:
+    return HrisRecord(
+        record_id=row["record_id"],
+        employee_number=row["employee_number"],
+        record_type=row["record_type"],
+        effective_date=date.fromisoformat(row["effective_date"]),
+        recorded_at=parse_ts(row["recorded_at"]),
+        job_code=row["job_code"],
+        level=row["level"],
+        team_id=row["team_id"],
+        manager=_s(row["manager_employee_number"]),
+        location=row["location_code"],
+        employment_type=row["employment_type"],
+        contract_end=_d(row.get("contract_end_date", "")),
+        reason=_s(row["termination_reason_code"]),
+        corrects=_s(row["corrects_record_id"]),
+        batch=row["source_batch_id"],
+        legacy_hire=_d(row["legacy_hire_date"]),
+        legacy_first_promo=_d(row["legacy_first_promotion_date"]),
+        legacy_last_promo=_d(row["legacy_last_promotion_date"]),
+    )
+
+
+def add_file(src: Sources, path: Path) -> None:
+    import hashlib
+
+    name = path.name
+    src.file_hashes[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    rows = read_csv(path)
+    if name.startswith("hris_"):
+        src.hris.extend(parse_hris(r) for r in rows)
+    elif name.startswith("payroll_"):
+        src.payroll.extend(
+            PayLine(
+                r["entity_code"],
+                r["employee_number"],
+                r["pay_period"],
+                _cents(r["base_amount"]),
+                r["currency"],
+                r["pay_basis_code"],
+                r["vendor_file_id"],
+                parse_ts(r["recorded_at"]),
+            )
+            for r in rows
+        )
+    elif name == "org_teams.csv":
+        src.teams.extend(
+            TeamRow(
+                r["team_id"],
+                r["team_name"],
+                r["group_id"],
+                r["group_name"],
+                r["org_id"],
+                r["org_name"],
+                date.fromisoformat(r["valid_from"]),
+                _d(r["valid_to"]),
+                parse_ts(r["recorded_at"]),
+            )
+            for r in rows
+        )
+    elif name == "org_events.csv":
+        src.org_events.extend(
+            OrgEvent(
+                r["event_id"],
+                date.fromisoformat(r["effective_date"]),
+                r["kind"],
+                r["team_id"],
+                parse_ts(r["recorded_at"]),
+            )
+            for r in rows
+        )
+    elif name == "ref_bands.csv":
+        for r in rows:
+            b = Band(
+                r["job_family"],
+                r["level"],
+                r["location_code"],
+                r["currency"],
+                _cents(r["band_min"]) / 100,
+                _cents(r["band_mid"]) / 100,
+                _cents(r["band_max"]) / 100,
+            )
+            src.bands[(b.job_family, b.level, b.location)] = b
+    elif name == "ats_requisitions.csv":
+        src.reqs.extend(
+            ReqEvent(
+                r["requisition_id"],
+                r["team_id"],
+                r["job_code"],
+                r["req_type"],
+                r["status"],
+                date.fromisoformat(r["event_date"]),
+                parse_ts(r["recorded_at"]),
+            )
+            for r in rows
+        )
+    elif name == "ats_offers.csv":
+        src.offers.extend(
+            Offer(
+                r["offer_id"],
+                r["requisition_id"],
+                date.fromisoformat(r["extended_date"]),
+                r["decision"],
+                date.fromisoformat(r["decision_date"]),
+                _d(r["start_date"]),
+                parse_ts(r["recorded_at"]),
+            )
+            for r in rows
+        )
+    else:
+        return
+    src.files.append(name)
+
+
+def load_world_sources(world_dir: Path, include_held: bool = False, extra: list[Path] | None = None) -> Sources:
+    """Loads every extract under `sources/` (and `held/` when it has landed)."""
+    src = Sources()
+    paths = sorted((world_dir / "sources").glob("*.csv"))
+    if include_held:
+        paths += sorted((world_dir / "held").glob("*.csv"))
+    for p in paths + list(extra or []):
+        add_file(src, p)
+    return src
+
+
+def max_recorded_at(src: Sources) -> datetime:
+    return max(r.recorded_at for r in src.hris)

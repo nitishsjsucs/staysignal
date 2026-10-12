@@ -11,7 +11,7 @@ Builder log for the commit plan in SPEC.md section 24. Updated in every commit.
 
 ## Position
 
-M1 walking skeleton, commit 1 of 6 (`feat(world)`). M0 done except a clean 27B measurement (recorded as partial).
+M1 walking skeleton, commit 2 of 6 (`feat(engine)`). M0 done except a clean 27B measurement (recorded as partial).
 
 ## Done
 
@@ -26,6 +26,7 @@ M1 walking skeleton, commit 1 of 6 (`feat(world)`). M0 done except a clean 27B m
 ## M1 log
 
 1. `feat(world)`: `engine/src/staysignal/{prng,canonical,clock}.py` (PRNG and canonical JSON copied from PeopleLake), `world/{spec,hazards,simulate,defects,emit}.py`, CLI `world generate`. Both profiles generate in about 1 second. Canonical realized: voluntary 12.97, involuntary 3.53, retirement 0.72 per 100 a year; cycle promotions 11.6% to 14.0% of eligible employees; 15 Engineering fixed-term employees at 2026-10-01; every SPEC 6.5 count exact (the audit batch draws its 12 terminations from May to August 2026 Engineering exits, the composition knob). Calibration: voluntary intercept -5.50 (start -5.20) and promotion intercept -3.60 (start -3.90), within the allowed bounds; not frozen until C5 (oracle coverage) runs in M3. Tests: `engine/tests/world/` C1 (determinism), C2, C3, C4.
+2. `feat(engine)`: `ingest/landing.py` (typed extracts), `features/{reference,spec}.py`, `model/{design,mnl,shocks,train,artifact}.py`, `forecast/{score,cohorts,montecarlo,run}.py`, `baselines/historical.py`, `privacy/{pseudo,suppression}.py` (pseudonyms copied from PeopleVault), `fixtures/export_api.py`, `service/demo.py`, CLI `demo build`, `policy/disclosure.json`. Measured on the canonical world: a training set of about 335,000 person-period rows fits in about 14 s (L-BFGS-B then one Newton step, gradient max norm under 1e-10); sigma_team estimated 0.49 (generator 0.45 plus contagion) and sigma_org 0.13 (generator 0.20, 11 quarterly windows); a run with 4,000 nested simulations takes about 4 s. Committed `models/m2026.08/model.json` and `models/m2026.09/model.json`, and `test/fixtures/api/` with the two published runs. Tests: 14 named feature tests on micro-worlds (part of C7, C8), MNL against statsmodels, sandwich, cumulative incidence by hand, C9, C10 basics.
 
 ## Next
 
@@ -44,6 +45,9 @@ At commit 4: `npm run typecheck` clean; `npm test` 2 passed (worker health, node
 ## Deviations from SPEC.md
 
 - M0 exit is not fully met: the 27B measurement is partial (prefill, first token, decode and W measured; tool calls through the AI SDK measured only on the 1.7B) because the memory guard stopped the 27B. The tool-call probe and the 8k cold probe on the 27B wait for a run with other apps closed.
-- Files not in SPEC 5's layout: `scripts/llm-measure.ts` (the M0 measurement) and `scripts/lib/results.ts` (README Results rendering).
+- Files not in SPEC 5's layout: `scripts/llm-measure.ts` (the M0 measurement), `scripts/lib/results.ts` (README Results rendering), `engine/tests/features/micro.py` (micro-world builder).
+- Model design: period intercepts are a cause intercept plus penalized period deviations (an unpenalized intercept per cause and period diverges for retirement, which has no events in some periods); the tenure spline is a natural cubic spline with knots at the 20/40/60/80% training quantiles, giving 3 basis functions plus the intercept.
+- HRIS records carry `contract_end_date` (needed for `fixed_term_days_remaining`, which 6.4's column list omitted) and a `rescission` record type for rescinded terminations; payroll lines carry `recorded_at` (the vendor file's delivery time). The data dictionary (M2) documents them.
+- API fixtures and the model artifacts come from the canonical world rather than the small one (it generates in a second and trains in 14 s), labeled provisional until C5 freezes the calibration.
 
 - `origin` is set to `https://github.com/nitishsjsucs/staysignal.git` because the builder task asked for it; SPEC 22.5 says to add no remote. Nothing is ever pushed from this repository; the operator's publisher owns publishing.

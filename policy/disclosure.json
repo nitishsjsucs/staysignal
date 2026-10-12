@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "min_cell": 10,
+  "min_comparison_cohort": 50,
+  "population_change": { "min_changed": 10, "note": "a comparison is served only if joiners plus leavers are 0 or at least 10" },
+  "expected_rounding": [
+    { "band": "n>=200", "min_n": 200, "step": 0.1 },
+    { "band": "50<=n<200", "min_n": 50, "step": 0.5 },
+    { "band": "10<=n<50", "min_n": 10, "step": 1 }
+  ],
+  "interval_bounds": "integers",
+  "variance_share_points": 5,
+  "team_level_roles": ["people_analyst"],
+  "team_label": "not an evaluation of the team's manager"
+}

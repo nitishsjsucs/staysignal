@@ -1,0 +1,52 @@
+{
+ "label": "synthetic",
+ "published": "R-2026-10-01#1",
+ "runs": [
+  {
+   "cutoff": "2026-09-01",
+   "label": "synthetic",
+   "mapping": "payroll@1",
+   "mc_config": {
+    "design": "nested",
+    "n_org": 10,
+    "n_team": 20,
+    "n_theta": 20,
+    "version": 1
+   },
+   "metric_def": "voluntary_departures@1",
+   "model": "m2026.08",
+   "model_sha256": "6bfeeaacdd530d58ad03ca3f434005c602c8f044756bd058abe618f48c469526",
+   "population": 2025,
+   "prediction_vector_sha256": "b895c04adcfbf9b33caa323c73e25f351cae8c6a1fdfee2d74f91687aec5ce5e",
+   "result_hash": "13de8ecc7310a3ba8a3e66fcbde6250e3b98f4d5c433d2b0a8c9558a1a8684a5",
+   "run_id": "R-2026-09-01#1",
+   "run_key": "b7641918c8fa269c1aef6a19482fe733541e0bc0523d85d3887e04272e801566",
+   "status": "superseded",
+   "version": 1,
+   "vintage": "2026-09-01T06:00:00Z"
+  },
+  {
+   "cutoff": "2026-10-01",
+   "label": "synthetic",
+   "mapping": "payroll@1",
+   "mc_config": {
+    "design": "nested",
+    "n_org": 10,
+    "n_team": 20,
+    "n_theta": 20,
+    "version": 1
+   },
+   "metric_def": "voluntary_departures@2",
+   "model": "m2026.09",
+   "model_sha256": "91d712e83c123cf82be29f86f55bbc2f0948d94efab09821f8e70fd3c72857cb",
+   "population": 1998,
+   "prediction_vector_sha256": "0d671bc69ce06cb0f551f2dd7dbea8b05e289942255170396669543ee5099bd3",
+   "result_hash": "3ba188dc9a98553d28907e876df72fd64168ee2e8efb1d534b3688155dd475c9",
+   "run_id": "R-2026-10-01#1",
+   "run_key": "1dee3dc21169412e5c862fc8ae517c7e2e57ef2a8baf50229a5f737c4538c2e0",
+   "status": "published",
+   "version": 1,
+   "vintage": "2026-10-01T06:00:00Z"
+  }
+ ]
+}

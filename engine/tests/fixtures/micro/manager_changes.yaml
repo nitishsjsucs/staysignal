@@ -1,0 +1,7 @@
+# One employee hired 2025-01-01 under manager A; manager changes around the 2026-01-01 cutoff.
+# record_ids are explicit so corrections can reference them.
+records:
+  - {record_id: H1, record_type: hire, effective_date: 2025-01-01, manager: EA}
+  - {record_id: H2, record_type: manager_change, effective_date: 2025-09-01, manager: EB}
+  - {record_id: H3, record_type: manager_change, effective_date: 2025-10-01, manager: EA}
+  - {record_id: H4, record_type: manager_change, effective_date: 2025-11-01, manager: EB}

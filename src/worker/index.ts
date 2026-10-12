@@ -1,5 +1,5 @@
-// StaySignal Worker entry: the Hono API, server-side routing of agent WebSockets, and the Durable Object and Workflow
-// classes. Agent connections are routed server-side: the Worker authenticates, picks the instance from the verified
+// StaySignal Worker entry: the Hono API, the MCP server at /mcp, server-side routing of agent WebSockets, and the
+// Durable Object and Workflow classes. Agent connections are routed server-side: the Worker authenticates, picks the instance from the verified
 // principal (AnalystAgent "an_" + HMAC of the principal ID; the shared WorkspaceAgent "larkspur") and forwards the
 // request with the principal in an internal header that clients cannot set.
 import { getAgentByName } from "agents";
@@ -8,6 +8,7 @@ import { AuthError } from "./auth/access";
 import { agentInstanceName } from "./auth/hmac";
 import { authenticate, stripPrincipal, withPrincipal } from "./auth/principal";
 import { parseConfig } from "./config";
+import { handleMcp, MCP_ROUTE } from "./mcp/server";
 
 export { AnalystAgent } from "./agents/analyst-agent";
 export { WorkspaceAgent } from "./agents/workspace-agent";
@@ -35,6 +36,7 @@ export default {
     if (url.pathname === "/agents-ws/analyst" || url.pathname.startsWith("/agents-ws/analyst/")) return routeAgent(request, env, "analyst");
     if (url.pathname === "/agents-ws/workspace" || url.pathname.startsWith("/agents-ws/workspace/")) return routeAgent(request, env, "workspace");
     if (url.pathname.startsWith("/agents/")) return new Response("Agents are routed through /agents-ws/* only", { status: 404 });
+    if (url.pathname === MCP_ROUTE) return handleMcp(request, env, ctx);
     return app.fetch(stripPrincipal(request), env, ctx);
   },
 } satisfies ExportedHandler<Env>;

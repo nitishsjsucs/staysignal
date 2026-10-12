@@ -28,7 +28,7 @@ export function toolContext(env: Env, p: Principal): ToolContext {
   return { principal: p, warehouse: warehouseFor(env), workspace: workspaceStub(env), sha256: async (t) => sha256HexSync(t), canonical: canonicalJson };
 }
 
-function envelope<T>(r: ToolResult<T>) {
+export function envelope<T>(r: ToolResult<T>) {
   return { result_id: r.result_id, label: "synthetic" as const, provenance: r.provenance, rounding: r.rounding, suppressed_cells: r.suppressed_cells, data: r.values };
 }
 

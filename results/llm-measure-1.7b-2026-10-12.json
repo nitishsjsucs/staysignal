@@ -1,0 +1,193 @@
+{
+  "kind": "llm-measure",
+  "label": "synthetic prompts; measurement of the local model, not a StaySignal result",
+  "command": "npm run llm:measure",
+  "date": "2026-10-12",
+  "status": "complete",
+  "error": null,
+  "started_at": "2026-10-12T09:09:09.635Z",
+  "model": "Qwen3-1.7B-Q4_0-rtn.gguf",
+  "server": {
+    "binary": "llama-server 0.5.0 (build 11146)",
+    "args": [
+      "-m",
+      "Qwen3-1.7B-Q4_0-rtn.gguf",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8187",
+      "-np",
+      "1",
+      "-c",
+      "8192",
+      "-ngl",
+      "99"
+    ]
+  },
+  "load_ms_to_health": 538,
+  "w_bytes_after_load": 1064304640,
+  "w_gb_after_load": 1.064,
+  "peak_footprint_gb": 1.076,
+  "peak_swap_used_gb": 14.048,
+  "swap_before_gb": 14.082,
+  "warmup": {
+    "promptTokens": 3578,
+    "cachedTokens": 0,
+    "completionTokens": 4,
+    "ttftMs": 1825,
+    "totalMs": 1865,
+    "decodeTokPerS": 74.65,
+    "prefillTokPerS": 1961,
+    "finishReason": "length",
+    "toolCalls": 0
+  },
+  "after_load": {
+    "footprintBytes": 1064304640,
+    "rssBytes": 2560278528,
+    "wiredDeltaBytes": 2505064448
+  },
+  "prefill_4k_cold": {
+    "promptTokens": 4169,
+    "cachedTokens": 3566,
+    "completionTokens": 1,
+    "ttftMs": 435,
+    "totalMs": 435,
+    "decodeTokPerS": null,
+    "prefillTokPerS": 1384.6,
+    "finishReason": "length",
+    "toolCalls": 0
+  },
+  "prefill_4k_cached_prefix": {
+    "promptTokens": 4162,
+    "cachedTokens": 4146,
+    "completionTokens": 1,
+    "ttftMs": 70,
+    "totalMs": 70,
+    "decodeTokPerS": null,
+    "prefillTokPerS": 229,
+    "finishReason": "length",
+    "toolCalls": 0
+  },
+  "prefill_8k_cold": {
+    "promptTokens": 7709,
+    "cachedTokens": 4146,
+    "completionTokens": 1,
+    "ttftMs": 3123,
+    "totalMs": 3124,
+    "decodeTokPerS": null,
+    "prefillTokPerS": 1140.7,
+    "finishReason": "length",
+    "toolCalls": 0
+  },
+  "decode_4k": {
+    "promptTokens": 4177,
+    "cachedTokens": 4146,
+    "completionTokens": 109,
+    "ttftMs": 73,
+    "totalMs": 1630,
+    "decodeTokPerS": 69.36,
+    "prefillTokPerS": 427,
+    "finishReason": "stop",
+    "toolCalls": 0
+  },
+  "tool_calls_sdk": [
+    {
+      "question": "Forecast voluntary departures in Engineering over the next 90 days.",
+      "tool_calls": [
+        {
+          "tool": "forecast_departures",
+          "input": {
+            "cohort": "Engineering",
+            "horizon_days": 90
+          }
+        }
+      ],
+      "finish_reason": "tool-calls",
+      "text_chars": 0,
+      "first_chunk_ms": 208,
+      "total_ms": 484,
+      "input_tokens": 3585,
+      "output_tokens": 35,
+      "cached_input_tokens": 3584
+    },
+    {
+      "question": "What changed since the previous forecast for Engineering?",
+      "tool_calls": [
+        {
+          "tool": "explain_change",
+          "input": {
+            "cohort": "Engineering",
+            "horizon_months": 1,
+            "horizon_days": 30,
+            "from_run": "R-2026-10-01#1",
+            "to_run": "R-2026-10-01#2"
+          }
+        }
+      ],
+      "finish_reason": "tool-calls",
+      "text_chars": 0,
+      "first_chunk_ms": 229,
+      "total_ms": 1148,
+      "input_tokens": 3580,
+      "output_tokens": 82,
+      "cached_input_tokens": 3566
+    },
+    {
+      "question": "Prepare a People Partner review for Platform Engineering.",
+      "tool_calls": [
+        {
+          "tool": "prepare_review",
+          "input": {
+            "cohort": "Platform Engineering",
+            "horizon_months": 1
+          }
+        }
+      ],
+      "finish_reason": "tool-calls",
+      "text_chars": 0,
+      "first_chunk_ms": 263,
+      "total_ms": 513,
+      "input_tokens": 3580,
+      "output_tokens": 34,
+      "cached_input_tokens": 3566
+    },
+    {
+      "question": "Which checks failed on the payroll data, and where did the bad value come from?",
+      "tool_calls": [
+        {
+          "tool": "trace_lineage",
+          "input": {
+            "check_id": "C01",
+            "node": "stg_payroll__lines.pay_basis_code"
+          }
+        }
+      ],
+      "finish_reason": "tool-calls",
+      "text_chars": 0,
+      "first_chunk_ms": 238,
+      "total_ms": 615,
+      "input_tokens": 3588,
+      "output_tokens": 42,
+      "cached_input_tokens": 3566
+    }
+  ],
+  "machine": {
+    "before": {
+      "at": "2026-10-12T09:09:09.643Z",
+      "swapUsedBytes": 14082050621,
+      "swapTotalBytes": 15032385536,
+      "freeDiskBytes": 29476708352,
+      "swapusage": "vm.swapusage: total = 14336.00M  used = 13429.69M  free = 906.31M  (encrypted)",
+      "dfHome": "/dev/disk3s5   460Gi   382Gi    27Gi    94%    5.3M  288M    2%   /System/Volumes/Data"
+    },
+    "after": {
+      "at": "2026-10-12T09:09:20.301Z",
+      "swapUsedBytes": 14006553149,
+      "swapTotalBytes": 15032385536,
+      "freeDiskBytes": 29476618240,
+      "swapusage": "vm.swapusage: total = 14336.00M  used = 13357.69M  free = 978.31M  (encrypted)",
+      "dfHome": "/dev/disk3s5   460Gi   382Gi    27Gi    94%    5.3M  288M    2%   /System/Volumes/Data"
+    },
+    "stopped_by": "measurement finished"
+  }
+}

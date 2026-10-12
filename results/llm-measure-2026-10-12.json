@@ -1,0 +1,122 @@
+{
+  "kind": "llm-measure",
+  "label": "synthetic prompts; measurement of the local model, not a StaySignal result",
+  "command": "npm run llm:measure",
+  "date": "2026-10-12",
+  "status": "stopped by the memory guard",
+  "error": "No output generated. Check the stream for errors.",
+  "started_at": "2026-10-12T09:05:14.445Z",
+  "model": "mlx-community/Qwen3.6-27B-4bit",
+  "server": {
+    "binary": "mlx_lm.server (mlx-lm 0.32.0, mlx 0.32.3)",
+    "args": [
+      "--model",
+      "mlx-community/Qwen3.6-27B-4bit",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8186",
+      "--decode-concurrency",
+      "1",
+      "--prompt-concurrency",
+      "1",
+      "--prompt-cache-size",
+      "2",
+      "--prompt-cache-bytes",
+      "512000000",
+      "--chat-template-args",
+      "{\"enable_thinking\":false}"
+    ],
+    "profile": {
+      "nSeq": 1,
+      "ctxTokens": 8704,
+      "promptCacheBytes": 512000000,
+      "promptCacheSize": 2
+    }
+  },
+  "load_ms_to_health": null,
+  "w_bytes_after_load": 17179869184,
+  "w_gb_after_load": 17.18,
+  "peak_footprint_gb": 19.327,
+  "peak_swap_used_gb": 15.917,
+  "swap_before_gb": 13.865,
+  "warmup": {
+    "promptTokens": 3700,
+    "cachedTokens": 0,
+    "completionTokens": 3,
+    "ttftMs": 20023,
+    "totalMs": 20278,
+    "decodeTokPerS": 7.86,
+    "prefillTokPerS": 184.8,
+    "finishReason": "stop",
+    "toolCalls": 0
+  },
+  "after_load": {
+    "footprintBytes": 17179869184,
+    "rssBytes": 3303522304,
+    "wiredDeltaBytes": 15693447168
+  },
+  "prefill_4k_cold": {
+    "promptTokens": 6475,
+    "cachedTokens": 3688,
+    "completionTokens": 1,
+    "ttftMs": 13725,
+    "totalMs": 13727,
+    "decodeTokPerS": null,
+    "prefillTokPerS": 203.1,
+    "finishReason": "length",
+    "toolCalls": 0
+  },
+  "prefill_4k_cached_prefix": {
+    "promptTokens": 6468,
+    "cachedTokens": 0,
+    "completionTokens": 1,
+    "ttftMs": 32627,
+    "totalMs": 32627,
+    "decodeTokPerS": null,
+    "prefillTokPerS": 198.2,
+    "finishReason": "length",
+    "toolCalls": 0
+  },
+  "prefill_8k_cold": {
+    "promptTokens": 10197,
+    "cachedTokens": 3688,
+    "completionTokens": 1,
+    "ttftMs": 34267,
+    "totalMs": 34270,
+    "decodeTokPerS": null,
+    "prefillTokPerS": 190,
+    "finishReason": "length",
+    "toolCalls": 0
+  },
+  "decode_4k": {
+    "promptTokens": 6483,
+    "cachedTokens": 0,
+    "completionTokens": 181,
+    "ttftMs": 36479,
+    "totalMs": 60297,
+    "decodeTokPerS": 7.56,
+    "prefillTokPerS": 177.7,
+    "finishReason": "stop",
+    "toolCalls": 0
+  },
+  "machine": {
+    "before": {
+      "at": "2026-10-12T09:05:02.075Z",
+      "swapUsedBytes": 13864796160,
+      "swapTotalBytes": 15032385536,
+      "freeDiskBytes": 29471191040,
+      "swapusage": "vm.swapusage: total = 14336.00M  used = 13222.50M  free = 1113.50M  (encrypted)",
+      "dfHome": "/dev/disk3s5   460Gi   382Gi    27Gi    94%    5.3M  288M    2%   /System/Volumes/Data"
+    },
+    "after": {
+      "at": "2026-10-12T09:08:13.532Z",
+      "swapUsedBytes": 15917058621,
+      "swapTotalBytes": 17179869184,
+      "freeDiskBytes": 27330564096,
+      "swapusage": "vm.swapusage: total = 16384.00M  used = 15179.69M  free = 1204.31M  (encrypted)",
+      "dfHome": "/dev/disk3s5   460Gi   382Gi    25Gi    94%    5.3M  267M    2%   /System/Volumes/Data"
+    },
+    "stopped_by": "guard: swap grew by 2.01 GB (limit 2 GB)"
+  }
+}

@@ -17,7 +17,7 @@ Work follows the commit plan in SPEC.md section 24, core path first. The demo da
 | Node toolchain (Worker, web, tests) | done: exact pins (SPEC 25), strict tsconfigs, Vite 8 with the `agents()` plugin, vitest projects `worker`, `node`, `web`, generated Worker types; the Worker answers `/api/health` only |
 | Engine uv project (Python 3.12) | done: `engine/pyproject.toml` with the SPEC 25 pins, committed `uv.lock` (157 packages), `staysignal` CLI skeleton, pytest and ruff |
 | Prose and hygiene gates, pre-commit hook, CI | done: `npm run check:prose` (no em or en dashes, no banned phrasing), `npm run check:hygiene` (public tier: dashes in every tracked file, secrets, no git SHA in pinned paths, monitoring and special-category terms and a personal-name heuristic over generated text), a pre-commit hook that adds the private tier from a deny-list kept outside the repository and the operator's secret scan, and CI jobs `node` and `engine` |
-| 27B measurement on agent-shaped prompts | not started |
+| 27B measurement on agent-shaped prompts | partial: `npm run llm:measure` measured prefill, time to first token and decode for Qwen3.6-27B, then the memory guard stopped it when swap grew by 2 GB with other apps open, before the tool-call probe; the same harness ran completely on Qwen3-1.7B, including tool calls through `@ai-sdk/openai-compatible` (see Results). `npm run llm` starts a server only when the memory budget, the available-memory pre-flight and the no-heavy-work rule allow it, and a guard stops it on swap growth or low disk |
 | Synthetic world, warehouse, features, model, forecast | not started |
 | Worker, agents, workflows, approvals, audit | not started |
 | Frontend | not started |
@@ -121,7 +121,29 @@ Cohort-level outputs only: no individual risk score, ranking, list or timeline a
 Only numbers produced by this repository's scripts appear here, each with its command and date, and every one is computed on the synthetic world.
 
 <!-- results:start -->
-No recorded results yet.
+**Local model measurement: Qwen3-1.7B-Q4_0-rtn.gguf** (`npm run llm:measure -- --model 1.7b`, 2026-10-12, [results/llm-measure-1.7b-2026-10-12.json](results/llm-measure-1.7b-2026-10-12.json)). Status: complete. Agent-shaped prompts: the system prompt plus the 13 tool schemas, and prior tool-result digests (synthetic placeholders).
+
+| Probe | Prompt tokens | Time to first token | Prefill rate (new tokens) | Decode rate |
+|---|---|---|---|---|
+| system prompt and 13 tools (cold) | 3,578 (0 cached) | 1.8 s | 1,961 tok/s | 74.65 tok/s |
+| prior exchanges with digests | 4,169 (3,566 cached) | 0.4 s | 1,384.6 tok/s | n/a |
+| same history, new question | 4,162 (4,146 cached) | 0.1 s | 229 tok/s | n/a |
+| longer history | 7,709 (4,146 cached) | 3.1 s | 1,140.7 tok/s | n/a |
+| history plus an answer of up to 200 tokens | 4,177 (4,146 cached) | 0.1 s | 427 tok/s | 69.36 tok/s |
+
+wired memory added by the load: 2.51 GB; swap used before and after: 14.08 GB and 14.01 GB; stopped by: measurement finished; tool calls through `@ai-sdk/openai-compatible`: forecast_departures; explain_change; prepare_review; trace_lineage.
+
+**Local model measurement: mlx-community/Qwen3.6-27B-4bit** (`npm run llm:measure`, 2026-10-12, [results/llm-measure-2026-10-12.json](results/llm-measure-2026-10-12.json)). Status: stopped by the memory guard. Agent-shaped prompts: the system prompt plus the 13 tool schemas, and prior tool-result digests (synthetic placeholders).
+
+| Probe | Prompt tokens | Time to first token | Prefill rate (new tokens) | Decode rate |
+|---|---|---|---|---|
+| system prompt and 13 tools (cold) | 3,700 (0 cached) | 20.0 s | 184.8 tok/s | 7.86 tok/s |
+| prior exchanges with digests | 6,475 (3,688 cached) | 13.7 s | 203.1 tok/s | n/a |
+| same history, new question | 6,468 (0 cached) | 32.6 s | 198.2 tok/s | n/a |
+| longer history | 10,197 (3,688 cached) | 34.3 s | 190 tok/s | n/a |
+| history plus an answer of up to 200 tokens | 6,483 (0 cached) | 36.5 s | 177.7 tok/s | 7.56 tok/s |
+
+wired memory added by the load: 15.69 GB; swap used before and after: 13.86 GB and 15.92 GB; stopped by: guard: swap grew by 2.01 GB (limit 2 GB).
 <!-- results:end -->
 
 ## License

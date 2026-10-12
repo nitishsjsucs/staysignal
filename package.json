@@ -18,7 +18,11 @@
     "test:py": "uv run --locked --project engine pytest engine/tests -q",
     "check:prose": "node scripts/check-prose.ts",
     "check:hygiene": "node scripts/check-hygiene.ts",
-    "hooks:install": "node scripts/install-hooks.ts"
+    "hooks:install": "node scripts/install-hooks.ts",
+    "llm": "node scripts/llm.ts",
+    "llm:measure": "node scripts/llm-measure.ts",
+    "results:readme": "node scripts/results-to-readme.ts",
+    "results:check": "node scripts/results-to-readme.ts --check"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "3.0.57",

@@ -13,7 +13,7 @@ Work follows the commit plan in SPEC.md section 24, core path first. The demo da
 | Area | State |
 |---|---|
 | Scaffold, license, README, CONTEXT, PROGRESS | done |
-| ADRs 0001 to 0007 and 0012 | not started |
+| ADRs 0001 to 0007 and 0012 | done (`docs/adr/`) |
 | Node toolchain (Worker, web, tests), engine uv project | not started |
 | Prose and hygiene gates, pre-commit hook, CI | not started |
 | 27B measurement on agent-shaped prompts | not started |

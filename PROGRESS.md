@@ -11,16 +11,17 @@ Builder log for the commit plan in SPEC.md section 24. Updated in every commit.
 
 ## Position
 
-M0, commit 2 of 7 (`docs: README, CONTEXT, PROGRESS`).
+M0, commit 3 of 7 (`docs: ADRs 0001 to 0007 and 0012`).
 
 ## Done
 
 1. `chore: scaffold`: `git init -b main`, repository identity, MIT license, NOTICE, `.gitignore`, `.editorconfig`, `.nvmrc` (24), `.python-version` (3.12), a first README.
 2. `docs: README with status table, mermaid and local setup; CONTEXT.md; PROGRESS.md`.
+3. `docs: ADRs 0001 to 0007 and 0012` under `docs/adr/`.
 
 ## Next
 
-M0: ADRs 0001 to 0007 and 0012; pinned Node toolchain with generated Worker types; engine uv project and lock; prose and hygiene gates with the pre-commit hook and CI; 27B measurement on agent-shaped prompts.
+M0: pinned Node toolchain with generated Worker types; engine uv project and lock; prose and hygiene gates with the pre-commit hook and CI; 27B measurement on agent-shaped prompts.
 
 ## Check status
 

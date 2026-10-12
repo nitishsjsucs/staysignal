@@ -11,7 +11,7 @@ Builder log for the commit plan in SPEC.md section 24. Updated in every commit.
 
 ## Position
 
-M0, commit 4 of 7 (`chore: pinned package.json, tsconfigs, vite and vitest configs, wrangler.jsonc, generated types`).
+M0, commit 5 of 7 (`chore: engine uv project and lock`).
 
 ## Done
 
@@ -19,14 +19,15 @@ M0, commit 4 of 7 (`chore: pinned package.json, tsconfigs, vite and vitest confi
 2. `docs: README with status table, mermaid and local setup; CONTEXT.md; PROGRESS.md`.
 3. `docs: ADRs 0001 to 0007 and 0012` under `docs/adr/`.
 4. `chore: pinned package.json, ...`: 339 npm packages (518 MB) at the SPEC 25 pins (d3-scale 4.0.2 and d3-shape 3.2.0 confirmed with `npm view`; `@types/d3-scale` 4.0.9, `@types/d3-shape` 3.2.0, `@types/node` 24.19.1 added); `tsconfig.{worker,web,node}.json` (strict, `noUncheckedIndexedAccess`, ES2021 target for TC39 decorators); `vite.config.ts` with `agents()`, `react()`, `cloudflare()`; `vitest.config.ts` with projects `worker` (`@cloudflare/vitest-plugin`), `node`, `web` (happy-dom); `wrangler.jsonc` (vars only, ports 8795 and 9245); generated `worker-configuration.d.ts`; a health-only Worker and a placeholder page.
+5. `chore: engine uv project and lock`: `engine/pyproject.toml` (hatchling, Python 3.12, the SPEC 25 engine pins, extra `challenger` with hazardous 0.2.0, dev group pytest, ruff, hypothesis, statsmodels), `uv.lock` resolved to 157 packages, venv 820 MB, CLI skeleton `staysignal`.
 
 ## Next
 
-M0: engine uv project and lock; prose and hygiene gates with the pre-commit hook and CI; 27B measurement on agent-shaped prompts.
+M0: prose and hygiene gates with the pre-commit hook and CI; 27B measurement on agent-shaped prompts.
 
 ## Check status
 
-At commit 4: `npm run typecheck` clean; `npm test` 2 passed (worker health, node scaffold); `npm run build` ok (client 68.7 kB gzip); `npm run typegen:check` up to date. `check:prose` does not exist yet; Markdown checked by hand for em and en dashes (none).
+At commit 4: `npm run typecheck` clean; `npm test` 2 passed (worker health, node scaffold); `npm run build` ok (client 68.7 kB gzip); `npm run typegen:check` up to date. At commit 5: engine `pytest` 1 passed, `ruff check` and `ruff format --check` clean. `check:prose` does not exist yet; Markdown checked by hand for em and en dashes (none).
 
 ## Deviations from SPEC.md
 

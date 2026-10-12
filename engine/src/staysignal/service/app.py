@@ -59,6 +59,10 @@ def create_app(st: EngineState) -> FastAPI:
     def evaluation() -> JSONResponse:
         return doc("evaluation.json")
 
+    @app.get("/published/action-audit")
+    def action_audit() -> JSONResponse:
+        return doc("action-audit.json")
+
     @app.get("/published/lineage")
     def lineage() -> JSONResponse:
         return doc("lineage.json")

@@ -98,6 +98,23 @@ def cmd_semantic_catalog(args: argparse.Namespace) -> int:
     return build_catalog(check=args.check)
 
 
+def cmd_audit_actions(args: argparse.Namespace) -> int:
+    """The action audit (SPEC 17.7): recorded in results/ and exported as the API fixture and the engine's copy."""
+    from staysignal.audit.action_audit import run
+    from staysignal.fixtures.export_api import write_json
+
+    repo, var = _repo_var()
+    path, doc = run(Path(args.world), repo / "results")
+    for out in (
+        repo / "test" / "fixtures" / "api" / "action-audit.json",
+        var / "engine" / "published" / "action-audit.json",
+    ):
+        if out.parent.exists():
+            write_json(out, doc, compact=True)
+    print(json.dumps({"written": str(path.relative_to(repo)), "units": doc["units"], "reviews": doc["reviews"]}))
+    return 0
+
+
 def cmd_memory_export_fixture(args: argparse.Namespace) -> int:
     """The demo memory as an API fixture for the fixtures mode, with the parity search results."""
     from staysignal.memory.store import FIXTURE, export_fixture
@@ -176,6 +193,9 @@ def cmd_engine_prepare(args: argparse.Namespace) -> int:
     fx = evaluation_fixture(repo / "results")
     if fx is not None:
         write_json(published / "evaluation.json", fx, compact=True)
+    audits = sorted((repo / "results").glob("action-audit-*.json"))
+    if audits:  # the recorded action audit, served at /published/action-audit
+        write_json(published / "action-audit.json", json.loads(audits[-1].read_text()), compact=True)
     for doc in sorted((published / "forecast").glob("*.json")):
         write_run(con, json.loads(doc.read_text()))
     con.close()
@@ -391,6 +411,11 @@ def build_parser() -> argparse.ArgumentParser:
     exf.add_argument("--world", default="var/world")
     exf.add_argument("--out", default=None)
     exf.set_defaults(func=cmd_semantic_export_fixtures)
+    aud = sub.add_parser("audit", help="the action audit (adverse-impact screen of approved reviews)")
+    audsub = aud.add_subparsers(dest="audit_command", required=True)
+    aac = audsub.add_parser("actions", help="screen the approved reviews by tenure band, location and the age flag")
+    aac.add_argument("--world", default="var/world")
+    aac.set_defaults(func=cmd_audit_actions)
     mem = sub.add_parser("memory", help="the git-backed Markdown memory")
     memsub = mem.add_subparsers(dest="memory_command", required=True)
     mex = memsub.add_parser("export-fixture", help="the demo memory as an API fixture (fixtures mode)")

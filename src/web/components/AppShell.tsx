@@ -5,7 +5,7 @@ import { type Me, useQuery } from "../api";
 import { useWorkspace } from "../live";
 import { navigate, type Route, setView, useView } from "../router";
 import { applyTheme, effectiveDark, readTheme, type Theme } from "../theme";
-import { BrandMark, IconAsk, IconChanges, IconFlows, IconForecast, IconMemory, IconMoon, IconQuality, IconReviews, IconSun, IconTraces, IconTrust } from "./icons";
+import { BrandMark, IconAsk, IconChanges, IconFlows, IconForecast, IconGovernance, IconMemory, IconMoon, IconQuality, IconReviews, IconSun, IconTraces, IconTrust } from "./icons";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { Segmented, SyntheticChip } from "./ui";
 
@@ -20,6 +20,7 @@ const NAV: { page: Route["page"]; href: string; label: string; icon: (p: { size?
   { page: "workforce", href: "/workforce", label: "Workforce", icon: IconFlows },
   { page: "memory", href: "/memory", label: "Memory", icon: IconMemory },
   { page: "traces", href: "/traces", label: "Traces", icon: IconTraces },
+  { page: "governance", href: "/governance", label: "Governance", icon: IconGovernance },
   { page: "ask", href: "/ask", label: "Ask", icon: IconAsk },
 ];
 

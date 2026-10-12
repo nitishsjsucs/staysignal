@@ -44,7 +44,7 @@ What this means: organization-level ranges are close to their nominal coverage, 
 - Exit-reason codes are unreliable in real data, so only three causes are modeled and cause-specific results carry that caveat.
 - Coverage numbers rest on few independent windows (printed beside every number); overlapping windows are not independent.
 - Once forecasts drive reviews, later backtests are contaminated (performative prediction); reviews are logged so evaluations can hold reviewed cohorts out.
-- Proxy strength (how well tenure band and level band predict the audit-only age flag) is not reported yet; it arrives with the action audit.
+- Proxy strength (`staysignal audit actions`, 2026-10-12, [results/action-audit-2026-10-12.json](../results/action-audit-2026-10-12.json)): on the 2,023 people employed on 2026-10-01, tenure band separates the audit-only age-40-or-over flag with an AUC of 0.62 and level band with 0.57 (0.5 means no information). Both carry some age information, which is why the action audit screens by tenure band and why retirement is a cohort-level baseline with no individual score.
 
 ## Ethical considerations
 

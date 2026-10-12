@@ -1,0 +1,185 @@
+{
+ "kind": "action-audit",
+ "command": "uv run --project engine staysignal audit actions",
+ "date": "2026-10-12",
+ "label": "synthetic",
+ "world_sha256": "ff27c141906c4303195270900d84411c019599d980ea1cd1ca5d4bb3990fe8ed",
+ "reviews_sha256": "eda0321f7ae6b041f001d88d5b7d92caed8892595e9466587389a17716f8d24f",
+ "design": "unit: a person employed on an approved review's date; selected when their group then is the reviewed cohort; attributes on that date; impact ratio against the highest-rate group, four-fifths rule of thumb (29 CFR 1607.4(D)), Fisher's exact test against everyone else (approximate: people recur across reviews); groups under 10 people are too small to screen",
+ "reviews": 12,
+ "review_window": [
+  "2025-10-14",
+  "2026-09-08"
+ ],
+ "units": 23761,
+ "selected_units": 1394,
+ "screens": {
+  "tenure_band": {
+   "kind": "proxy",
+   "rows": [
+    {
+     "group": "under 1 year",
+     "selected": 269,
+     "n": 4243,
+     "people": 697,
+     "too_small": false,
+     "rate": 0.06339853876973839,
+     "ratio": 1.0,
+     "four_fifths_flag": false,
+     "fisher_p": 0.14943956703998784,
+     "warnings": [],
+     "population_share": 0.17856992550818568,
+     "attention_share": 0.19296987087517933
+    },
+    {
+     "group": "1 to 3 years",
+     "selected": 368,
+     "n": 6480,
+     "people": 874,
+     "too_small": false,
+     "rate": 0.056790123456790124,
+     "ratio": 0.8957639175730874,
+     "four_fifths_flag": false,
+     "fisher_p": 0.4571823199653464,
+     "warnings": [],
+     "population_share": 0.2727157947897816,
+     "attention_share": 0.26398852223816355
+    },
+    {
+     "group": "3 to 5 years",
+     "selected": 319,
+     "n": 5472,
+     "people": 673,
+     "too_small": false,
+     "rate": 0.05829678362573099,
+     "ratio": 0.9195288212787235,
+     "four_fifths_flag": false,
+     "fisher_p": 0.9216579507769991,
+     "warnings": [],
+     "population_share": 0.2302933378224822,
+     "attention_share": 0.22883787661406027
+    },
+    {
+     "group": "5 years or more",
+     "selected": 438,
+     "n": 7566,
+     "people": 735,
+     "too_small": false,
+     "rate": 0.05789056304520222,
+     "ratio": 0.9131214089248813,
+     "four_fifths_flag": false,
+     "fisher_p": 0.7445282038994973,
+     "warnings": [],
+     "population_share": 0.3184209418795505,
+     "attention_share": 0.31420373027259685
+    }
+   ]
+  },
+  "location": {
+   "kind": "proxy",
+   "rows": [
+    {
+     "group": "Raleigh",
+     "selected": 776,
+     "n": 12346,
+     "people": 1178,
+     "too_small": false,
+     "rate": 0.06285436578648955,
+     "ratio": 1.0,
+     "four_fifths_flag": false,
+     "fisher_p": 0.004423136046584323,
+     "warnings": [],
+     "population_share": 0.5195909263078153,
+     "attention_share": 0.5566714490674318
+    },
+    {
+     "group": "Pittsburgh",
+     "selected": 203,
+     "n": 3645,
+     "people": 353,
+     "too_small": false,
+     "rate": 0.05569272976680384,
+     "ratio": 0.8860598475527838,
+     "four_fifths_flag": false,
+     "fisher_p": 0.4213406400614462,
+     "warnings": [],
+     "population_share": 0.15340263456925213,
+     "attention_share": 0.14562410329985653
+    },
+    {
+     "group": "Vancouver",
+     "selected": 192,
+     "n": 4172,
+     "people": 408,
+     "too_small": false,
+     "rate": 0.046021093000958774,
+     "ratio": 0.7321861007600993,
+     "four_fifths_flag": true,
+     "fisher_p": 0.000101394635134874,
+     "warnings": [],
+     "population_share": 0.17558183578132233,
+     "attention_share": 0.13773314203730272
+    },
+    {
+     "group": "Manchester",
+     "selected": 223,
+     "n": 3598,
+     "people": 352,
+     "too_small": false,
+     "rate": 0.06197887715397443,
+     "ratio": 0.9860711563698046,
+     "four_fifths_flag": false,
+     "fisher_p": 0.35550912599498447,
+     "warnings": [],
+     "population_share": 0.1514246033416102,
+     "attention_share": 0.1599713055954089
+    }
+   ]
+  },
+  "age40": {
+   "kind": "audit_only",
+   "rows": [
+    {
+     "group": "under 40",
+     "selected": 766,
+     "n": 13247,
+     "people": 1339,
+     "too_small": false,
+     "rate": 0.057824413074658416,
+     "ratio": 0.9680985335461124,
+     "four_fifths_flag": false,
+     "fisher_p": 0.5410111326405089,
+     "warnings": [],
+     "population_share": 0.5575102057994192,
+     "attention_share": 0.5494978479196556
+    },
+    {
+     "group": "40 or over",
+     "selected": 628,
+     "n": 10514,
+     "people": 997,
+     "too_small": false,
+     "rate": 0.05972988396423816,
+     "ratio": 1.0,
+     "four_fifths_flag": false,
+     "fisher_p": 0.5410111326405089,
+     "warnings": [],
+     "population_share": 0.44248979420058077,
+     "attention_share": 0.45050215208034433
+    }
+   ]
+  }
+ },
+ "proxy_strength": {
+  "date": "2026-10-01",
+  "people": 2023,
+  "tenure_band_auc": 0.62,
+  "level_band_auc": 0.567,
+  "note": "AUC of each ordinal band for the audit-only age-40-or-over flag; 0.5 means the band carries no age information."
+ },
+ "notes": [
+  "A screen of actions taken, not of the forecast; a flag is a reason to look, not a finding.",
+  "The age-40-or-over flag is an audit-only synthetic attribute; it is visible to the auditor role only.",
+  "The twelve reviews are seeded synthetic records (engine/src/staysignal/audit/seeded_reviews.json)."
+ ]
+}

@@ -306,6 +306,17 @@ export function buildApp() {
     return c.json(await (await workspace(c.env)).rollback(c.var.principal, Number(c.req.param("seq")), body.reason ?? ""));
   });
   app.get("/api/audit", async (c) => c.json({ label: "synthetic", actions: await (await workspace(c.env)).auditLog(Number(c.req.query("since") ?? 0)), approvals: await (await workspace(c.env)).approvalAuditLog() }));
+  // the action audit (SPEC 17.7): proxy screens (tenure band, location) for leads and the auditor, the audit-only age
+  // screen for the auditor only (audit:attributes); everyone else is refused
+  app.get("/api/audit/actions", async (c) => {
+    const p = c.var.principal;
+    const attributes = hasScope(p, "audit:attributes");
+    if (!attributes && !hasScope(p, "review:approve")) return c.json(refuse("NOT_PERMITTED", "The action audit is for People Analytics leads and the auditor."));
+    const doc = await warehouseFor(c.env).actionAudit();
+    if (!doc) return c.json(refuse("OUT_OF_SCOPE", "No action audit has been recorded."));
+    const screens = Object.fromEntries(Object.entries(doc.screens).filter(([, s]) => s.kind === "proxy" || attributes));
+    return c.json({ ...doc, screens, proxy_strength: attributes ? doc.proxy_strength : null, audience: attributes ? "auditor" : "lead" });
+  });
   app.get("/api/audit/verify", async (c) => c.json(await (await workspace(c.env)).verifyAudit()));
 
   // ---------- routines and the demo arrival ----------

@@ -3,6 +3,7 @@
 // rounded and stored under a content-addressed result ID. The model sees a result only through its digest.
 import type { z } from "zod";
 import type {
+  ActionAuditDoc,
   Audience,
   CatalogRequest,
   CatalogResult,
@@ -63,6 +64,8 @@ export interface WarehouseClient {
   memoryFile(path: string): Promise<MemoryFileDoc | null>;
   memoryLog(): Promise<MemoryCommit[] | null>;
   memorySearch(query: string): Promise<MemoryHit[] | null>;
+  /** The recorded action audit (SPEC 17.7); the API decides which screens a principal sees. */
+  actionAudit(): Promise<ActionAuditDoc | null>;
 }
 
 export interface ReviewDraft {

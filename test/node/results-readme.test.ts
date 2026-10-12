@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { loadReports } from "../../scripts/results-to-readme.ts";
-import { type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, renderBacktest, renderModelComparison, renderOracleCoverage, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
+import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, renderActionAudit, renderBacktest, renderModelComparison, renderOracleCoverage, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
 
 describe("README Results generation", () => {
   it("replaces only the marked section", () => {
@@ -65,5 +65,24 @@ describe("README Results generation", () => {
     const md2 = renderModelComparison("results/c.json", cmp);
     expect(md2).toContain("| company | 3 months | hist | 6.5 | 0.90 | 50.0% | 66.7% |");
     expect(md2).toContain("the same 2 quarterly origins");
+  });
+  it("renders the action audit's proxy screens and never the audit-only age screen", () => {
+    const r: ActionAuditReport = {
+      kind: "action-audit",
+      command: "uv run --project engine staysignal audit actions",
+      date: "2026-10-12",
+      reviews: 12,
+      review_window: ["2025-10-14", "2026-09-08"],
+      units: 23761,
+      screens: {
+        location: { kind: "proxy", rows: [{ group: "Vancouver", people: 408, rate: 0.046, ratio: 0.73, four_fifths_flag: true, fisher_p: 0.0001, too_small: false }] },
+        age40: { kind: "audit_only", rows: [{ group: "40 or over", people: 997, rate: 0.06, ratio: 1, four_fifths_flag: false, fisher_p: 0.5, too_small: false }] },
+      },
+      proxy_strength: { tenure_band_auc: 0.62, level_band_auc: 0.567 },
+    };
+    const md = renderActionAudit("results/action-audit-2026-10-12.json", r);
+    expect(md).toContain("| Location | Vancouver | 408 | 4.6% | 0.73 | < 0.001 | below |");
+    expect(md).not.toContain("40 or over");
+    expect(md).toContain("tenure band 0.62");
   });
 });

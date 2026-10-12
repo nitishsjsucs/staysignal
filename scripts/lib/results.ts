@@ -111,6 +111,7 @@ export interface AgentEvalReport {
     refusal_accuracy: number | null;
     injection_successes: number;
     multi_turn_accuracy: number | null;
+    infrastructure_errors?: number;
     latency_ms_p50: number | null;
     latency_ms_p95: number | null;
   };
@@ -124,8 +125,19 @@ export interface EffectsReport {
   effects: Record<string, { label: string; points: { x: number; cif: number; lo: number; hi: number }[] }>;
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects"];
+export interface ActionAuditReport {
+  kind: "action-audit";
+  command: string;
+  date: string;
+  reviews: number;
+  review_window: [string, string];
+  units: number;
+  screens: Record<string, { kind: string; rows: { group: string; people: number; rate: number | null; ratio: number | null; four_fifths_flag: boolean; fisher_p: number | null; too_small: boolean }[] }>;
+  proxy_strength: { tenure_band_auc: number | null; level_band_auc: number | null } | null;
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -226,9 +238,9 @@ export function renderAgentEval(file: string, r: AgentEvalReport): string {
   return [
     `**Agent eval, ${MODEL_NAMES[r.model] ?? r.model}** (\`${r.command}\`, ${r.date}, [${file}](${file})): ${r.items} synthetic questions about the synthetic company through the same turn as the chat dock.`,
     "",
-    "| Routing | Grounding | Refusals | Injection successes | Multi-turn | Latency p50 | Latency p95 |",
-    "|---|---|---|---|---|---|---|",
-    `| ${p(m.routing_accuracy)} | ${p(m.grounding_pass_rate)} | ${p(m.refusal_accuracy)} | ${m.injection_successes} | ${p(m.multi_turn_accuracy)} | ${ms(m.latency_ms_p50)} | ${ms(m.latency_ms_p95)} |`,
+    "| Routing | Grounding | Refusals | Injection successes | Multi-turn | Infrastructure errors | Latency p50 | Latency p95 |",
+    "|---|---|---|---|---|---|---|---|",
+    `| ${p(m.routing_accuracy)} | ${p(m.grounding_pass_rate)} | ${p(m.refusal_accuracy)} | ${m.injection_successes} | ${p(m.multi_turn_accuracy)} | ${m.infrastructure_errors ?? 0} | ${ms(m.latency_ms_p50)} | ${ms(m.latency_ms_p95)} |`,
   ].join("\n");
 }
 
@@ -244,12 +256,33 @@ export function renderEffects(file: string, r: EffectsReport): string {
   return lines.join("\n");
 }
 
+const SCREEN_NAMES: Record<string, string> = { tenure_band: "Tenure band", location: "Location" };
+
+/** The action audit's proxy screens (the audit-only age screen stays in the recorded file, for the auditor). */
+export function renderActionAudit(file: string, r: ActionAuditReport): string {
+  const lines = [
+    `**Action audit** (\`${r.command}\`, ${r.date}, [${file}](${file})): ${r.reviews} seeded approved reviews (${r.review_window[0]} to ${r.review_window[1]}), ${r.units.toLocaleString("en-US")} person-review opportunities; each group's selection rate against the highest group's (the four-fifths rule of thumb) and Fisher's exact test. A screen of actions, not of the forecast. ${SYNTHETIC}`,
+    "",
+    "| Screen | Group | People | Selection rate | Impact ratio | Fisher p | Four-fifths |",
+    "|---|---|---|---|---|---|---|",
+  ];
+  for (const [name, sc] of Object.entries(r.screens)) {
+    if (sc.kind !== "proxy") continue;
+    for (const g of sc.rows) {
+      const p = g.fisher_p === null ? "n/a" : g.fisher_p < 0.001 ? "< 0.001" : g.fisher_p.toFixed(3);
+      lines.push(`| ${SCREEN_NAMES[name] ?? name} | ${g.group} | ${g.people.toLocaleString("en-US")} | ${g.too_small || g.rate === null ? "too small" : pct(g.rate)} | ${g.ratio === null ? "n/a" : g.ratio.toFixed(2)} | ${p} | ${g.four_fifths_flag ? "below" : "above"} |`);
+    }
+  }
+  if (r.proxy_strength) lines.push("", `Proxy strength for the audit-only age-40-or-over flag (AUC, 0.5 means none): tenure band ${r.proxy_strength.tenure_band_auc ?? "n/a"}, level band ${r.proxy_strength.level_band_auc ?? "n/a"}.`);
+  return lines.join("\n");
+}
+
 export function renderResults(reports: { file: string; report: Report }[]): string {
   if (reports.length === 0) return "No recorded results yet.";
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

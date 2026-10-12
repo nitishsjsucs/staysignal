@@ -363,3 +363,34 @@ export interface MemorySearchData {
   hits: { path: string; line: number; snippet: string; commit: string; date: string }[];
   note: string;
 }
+
+/** One group of an action-audit screen (SPEC 17.7): selection units, rates and the adverse-impact screen. */
+export interface AuditGroupRow {
+  group: string;
+  selected: number;
+  n: number;
+  people: number;
+  too_small: boolean;
+  rate: number | null;
+  ratio: number | null;
+  four_fifths_flag: boolean;
+  fisher_p: number | null;
+  warnings: string[];
+  population_share: number | null;
+  attention_share: number | null;
+}
+
+export interface ActionAuditDoc {
+  kind: "action-audit";
+  command: string;
+  date: string;
+  label: "synthetic";
+  design: string;
+  reviews: number;
+  review_window: [string, string];
+  units: number;
+  selected_units: number;
+  screens: Record<string, { kind: "proxy" | "audit_only"; rows: AuditGroupRow[] }>;
+  proxy_strength: { date: string; people: number; tenure_band_auc: number | null; level_band_auc: number | null; note: string } | null;
+  notes: string[];
+}

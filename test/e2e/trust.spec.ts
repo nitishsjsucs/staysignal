@@ -16,7 +16,20 @@ test("the Trust page shows backtests, calibration, coverage and the model compar
   await expect(page.getByTestId("comparison")).toContainText("Oracle (knows the truth)");
   await page.getByTestId("backtest").getByRole("button", { name: "View as table" }).click();
   await expect(page.getByTestId("backtest").locator("table tbody tr")).toHaveCount(24);
+  await expect(page.getByTestId("effects")).toContainText("Associational, not causal");
+  await expect(page.getByTestId("effects").locator("svg.chart")).toHaveCount(6);
+  await page.getByTestId("effects").getByRole("button", { name: "View as table" }).click();
+  await expect(page.getByTestId("effects").locator("table tbody tr")).toHaveCount(35);
   await expect(page.getByText("Synthetic data").first()).toBeVisible();
+});
+
+test("a People Partner sees no company-wide feature effects", async ({ page }) => {
+  await page.goto("/trust?cohort=org%3AEngineering&h=3");
+  const picker = page.getByLabel("Acting as (local role switcher)");
+  await picker.selectOption("hrbp-engineering@larkspur.example");
+  await expect(picker).toHaveValue("hrbp-engineering@larkspur.example");
+  await expect(page.getByTestId("coverage")).toBeVisible();
+  await expect(page.getByTestId("effects")).toHaveCount(0);
 });
 
 test("the Trust page fits a phone screen", async ({ page }) => {

@@ -118,8 +118,10 @@ def build(
     project_dir: Path = PROJECT_DIR,
     profiles_dir: Path = PROFILES_DIR,
     capture: bool = True,
+    command: str = "build",
 ) -> BuildResult:
-    args = ["build"]
+    """`dbt build` (or `run` for models only) with the run's vars; captures lineage unless `capture` is false."""
+    args = [command]
     if select:
         args += ["--select", *select]
     ok, tp = invoke(args, db_path, Path(target_path).resolve(), project_dir, profiles_dir, dbt_vars)

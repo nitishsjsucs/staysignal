@@ -1,18 +1,34 @@
-"""Named point-in-time feature tests (SPEC 8.4) against the reference implementation. `pit.sql` joins in M2."""
+"""Named point-in-time feature tests (SPEC 8.4). Every test runs twice: on the pure-Python reference
+(features/reference.py) and on pit.sql over a dbt build of the same micro-world, so both implementations are pinned
+to the same exact values."""
 
 from __future__ import annotations
 
 from datetime import UTC, date, datetime
 
+import pytest
+
 from staysignal.features.reference import PAYROLL_V1, PAYROLL_V2, Vintage, features_at
 from tests.features.micro import build, load
+from tests.features.sqlpath import sql_rows
 
 C = date(2026, 1, 1)
 V = datetime(2026, 1, 1, 6, tzinfo=UTC)
+IMPL = {"name": "reference"}
 
 
-def row(src, c=C, v=V, **kw):
-    rows = features_at(Vintage(src, v), c, **kw)
+@pytest.fixture(autouse=True, params=["reference", pytest.param("sql", marks=pytest.mark.dbt)])
+def implementation(request):
+    IMPL["name"] = request.param
+    yield request.param
+    IMPL["name"] = "reference"
+
+
+def row(src, c=C, v=V, mapping=PAYROLL_V1, metric_def="voluntary_departures@1", clock=None):
+    if IMPL["name"] == "sql":
+        rows = sql_rows(src, c, v, mapping.version, metric_def, clock)
+    else:
+        rows = features_at(Vintage(src, v), c, mapping, metric_def, clock)
     return {r.employee_number: r for r in rows}
 
 
@@ -215,3 +231,101 @@ def test_late_termination_is_invisible_before_it_is_recorded():
     ]
     assert "E000001" in row(build({"records": recs}))
     assert "E000001" not in row(build({"records": recs}), v=datetime(2026, 2, 1, tzinfo=UTC))
+
+
+def test_prior_team_departures_excludes_self_future_and_unknown():
+    recs = [
+        hire(employee_number="E000001", record_id="H1", effective_date="2024-01-01"),
+        {
+            "employee_number": "E000001",
+            "record_id": "H2",
+            "record_type": "termination",
+            "effective_date": "2025-08-01",
+            "reason": "VOL_RESIGN",
+        },
+        {"employee_number": "E000001", "record_id": "H3", "record_type": "rehire", "effective_date": "2025-09-01"},
+        hire(employee_number="E000002", record_id="H4", effective_date="2024-01-01"),
+        {
+            "employee_number": "E000002",
+            "record_id": "H5",
+            "record_type": "termination",
+            "effective_date": "2025-10-01",
+            "reason": "VOL_RESIGN",
+        },
+        hire(employee_number="E000003", record_id="H6", effective_date="2024-01-01"),
+        {
+            "employee_number": "E000003",
+            "record_id": "H7",
+            "record_type": "termination",
+            "effective_date": "2026-01-15",
+            "reason": "VOL_RESIGN",
+            "recorded_at": "2025-12-20T06:00:00Z",
+        },
+        hire(employee_number="E000004", record_id="H8", effective_date="2024-01-01"),
+        {
+            "employee_number": "E000004",
+            "record_id": "H9",
+            "record_type": "termination",
+            "effective_date": "2025-11-01",
+            "reason": "VOL_RESIGN",
+            "recorded_at": "2026-01-20T06:00:00Z",
+        },
+    ]
+    r = row(build({"records": recs}))["E000001"]
+    # own earlier departure excluded, E000003's is after the cutoff, E000004's is not known at the vintage
+    assert r.prior_team_departures_180d == 1
+    # org rate: 2 voluntary departures known in the window (including the subject's own) over 4 employed 180 days ago
+    assert r.prior_team_rate == round((1 + 10 * (2 / 4)) / (4 + 10), 6)
+
+
+@pytest.mark.parametrize(
+    ("effective", "recorded", "exposed"),
+    [
+        ("2025-10-03", None, True),  # C - 90 days counts
+        ("2025-10-02", None, False),  # one day earlier does not
+        ("2025-12-31", None, True),
+        ("2026-01-01", "2025-12-15T06:00:00Z", False),  # effective on the cutoff does not
+        ("2025-11-01", "2026-01-10T06:00:00Z", False),  # recorded after the vintage is unknown
+    ],
+)
+def test_reorg_exposure_window_boundaries(effective, recorded, exposed):
+    event = {"team_id": "T001", "effective_date": effective}
+    if recorded:
+        event["recorded_at"] = recorded
+    r = row(build({"records": [hire(effective_date="2024-01-01")], "org_events": [event]}))["E000001"]
+    assert r.reorg_exposure_90d is exposed
+
+
+def test_prior_team_departures_independent_of_metric_definition():
+    recs = [
+        hire(employee_number="E000001", record_id="H1", effective_date="2024-01-01"),
+        hire(
+            employee_number="E000002",
+            record_id="H2",
+            effective_date="2025-06-01",
+            employment_type="fixed_term",
+            contract_end="2026-06-01",
+        ),
+        hire(
+            employee_number="E000003",
+            record_id="H3",
+            effective_date="2024-06-01",
+            employment_type="fixed_term",
+            contract_end="2026-06-01",
+        ),
+        {
+            "employee_number": "E000003",
+            "record_id": "H4",
+            "record_type": "termination",
+            "effective_date": "2025-11-01",
+            "reason": "VOL_RESIGN",
+            "employment_type": "fixed_term",
+            "contract_end": "2026-06-01",
+        },
+    ]
+    src = build({"records": recs})
+    v1 = row(src, metric_def="voluntary_departures@1")
+    v2 = row(src, metric_def="voluntary_departures@2")
+    assert set(v1) == {"E000001", "E000002"} and set(v2) == {"E000001"}
+    assert v1["E000001"] == v2["E000001"]
+    assert v2["E000001"].prior_team_departures_180d == 1  # the fixed-term leaver still counts

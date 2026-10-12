@@ -30,7 +30,8 @@ select
     l.recorded_at,
     e.code is null as unknown_code,
     coalesce(e.annual_multiplier, f.annual_multiplier) as annual_multiplier,
-    l.base_amount_cents / 100.0 * coalesce(e.annual_multiplier, f.annual_multiplier) as annual_base,
+    cast(l.base_amount_cents as double) / 100.0 * cast(coalesce(e.annual_multiplier, f.annual_multiplier) as double)
+        as annual_base,
     '{{ var("pay_basis_mapping") }}' as mapping_version
 from lines as l
 left join explicit as e on e.code = l.pay_basis_code

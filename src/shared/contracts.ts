@@ -285,3 +285,47 @@ export interface ProfilesFixture {
   run_id: string;
   profiles: CohortProfile[];
 }
+
+/** A request to a compiled semantic-catalog entry (SPEC 7.3): the server binds every value; the model never writes
+ * SQL. Months are YYYY-MM; absent lists mean all; `scope` is the principal's organizations, set by the server. */
+export interface CatalogRequest {
+  start_month: string;
+  end_month: string;
+  organizations?: string[];
+  groups?: string[];
+  scope?: string[];
+}
+
+export interface CatalogResult {
+  key: string;
+  label: "synthetic";
+  columns: string[];
+  rows: (string | number | null)[][];
+  sql_sha256: string;
+}
+
+/** One Sankey link of workforce flows over a window (SPEC 16.2, 17.5). Links under 10 people are merged into one
+ * "Other" link per side; a merged link still under 10 is merged with the smallest shown link of its side, and a side
+ * whose total is under 10 is one link with its value withheld (null). */
+export interface FlowLink {
+  source: string;
+  target: string;
+  value: number | null;
+  merged_from?: string[];
+}
+
+export interface WorkforceFlowsData {
+  cohort: { id: string; name: string; kind: CohortKind; n: number };
+  level: "company" | "organization" | "group";
+  from: string;
+  to: string;
+  headcount_start: number;
+  /** null when a withheld side would make it reveal a count under 10 */
+  headcount_end: number | null;
+  joined: number | null;
+  left: number | null;
+  links: FlowLink[];
+  catalog_entry: string;
+  sql_sha256: string;
+  note: string;
+}

@@ -113,3 +113,42 @@ def test_the_shim_is_busy_while_a_build_holds_the_lock(built):
     key = sorted(shim.entries())[0]
     with BUILD_LOCK, pytest.raises(shim.WarehouseBusy):
         shim.run_entry(built[0], key, shim.bind(PARAM_SETS[0]))
+
+
+def test_committed_catalog_fixtures_equal_fresh_results(built):
+    """The fixtures mode answers catalog requests from committed files; each equals a fresh execution on the canonical
+    warehouse, and the set covers exactly the requests the tools make by default."""
+    import json
+
+    from staysignal.semantic import fixtures
+
+    con = built[0]
+    files = sorted(fixtures.OUT.glob("*.json"))
+    expected_ids = {fixtures.fixture_id(k, r) for k, r in fixtures.requests()}
+    assert {p.stem for p in files} == expected_ids
+    for p in files:
+        doc = json.loads(p.read_text())
+        fresh = json.loads(json.dumps(fixtures.execute(con, doc["key"], doc["request"])))
+        assert doc == fresh, p.name
+
+
+def test_the_engine_service_serves_catalog_entries_over_http(built, tmp_path):
+    """`POST /catalog/{key}` on the engine: an entry key and parameter values in, rows out; never SQL."""
+    from urllib.parse import quote
+
+    from fastapi.testclient import TestClient
+
+    from staysignal.runner.jobs import EngineState
+    from staysignal.service.app import create_app
+
+    con, db, root, _ = built
+    st = EngineState(con, db, root, root, root, tmp_path / "published", tmp_path / "work")
+    client = TestClient(create_app(st))
+    key = quote("workforce_flows|organization|none", safe="")
+    body = {"start_month": "2025-10", "end_month": "2026-09", "scope": ["Engineering", "Product & Design"]}
+    r = client.post(f"/catalog/{key}", json=body)
+    assert r.status_code == 200
+    doc = r.json()
+    assert doc["label"] == "synthetic" and {row[0] for row in doc["rows"]} == {"Engineering", "Product & Design"}
+    assert client.post(f"/catalog/{key}", json={**body, "sql": "select 1"}).status_code == 400
+    assert client.post(f"/catalog/{quote('nope|x|y', safe='')}", json=body).status_code == 404

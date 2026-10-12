@@ -36,6 +36,14 @@ describe("analyst turn (stub provider)", () => {
     expect(t.rendered).toMatch(/\d+(\.\d)?%/);
   });
 
+  it("answers a flows question from the semantic catalog with grounded numbers", async () => {
+    const t = await json<Turn>("/api/dev/agent/turn", { as: P.analyst, body: { question: "How many people were hired into or transferred out of Engineering over the last year?" } });
+    expect(t.tool_calls[0]?.tool).toBe("workforce_flows");
+    expect(t.grounding).toBe("passed");
+    expect(t.text).toMatch(/\{\{r1\.headcount_start\|int\}\}/);
+    expect(t.rendered).not.toMatch(/\{\{/);
+  });
+
   it("accepts the earlier turns as history", async () => {
     const first = await json<Turn>("/api/dev/agent/turn", { as: P.analyst, body: { question: "Forecast voluntary departures in Sales over the next 90 days." } });
     const t = await json<Turn>("/api/dev/agent/turn", {

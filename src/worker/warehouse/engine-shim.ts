@@ -1,6 +1,6 @@
 // Engine warehouse shim client (SPEC 7.2, ADR 0012): the local engine on 8196 answers published-layer reads from
 // compiled catalog entries on its DuckDB connection. Same contract as the fixtures client.
-import type { ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
 
 export class EngineWarehouse implements WarehouseClient {
@@ -46,5 +46,24 @@ export class EngineWarehouse implements WarehouseClient {
   }
   evaluation() {
     return this.get<EvaluationFixture>("evaluation");
+  }
+
+  /** POST /catalog/{key} on the engine: an entry key and parameter values, never SQL (SPEC 7.2). */
+  async catalog(key: string, request: CatalogRequest): Promise<CatalogResult | null> {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const r = await fetch(`${this.base}/catalog/${encodeURIComponent(key)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request),
+      });
+      if (r.status === 404) return null;
+      if (r.status === 503) {
+        await new Promise((res) => setTimeout(res, 250 * 2 ** attempt));
+        continue;
+      }
+      if (!r.ok) throw new Error(`engine catalog ${key}: ${r.status}`);
+      return (await r.json()) as CatalogResult;
+    }
+    throw new Error("warehouse busy");
   }
 }

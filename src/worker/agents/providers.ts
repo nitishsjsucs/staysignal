@@ -33,6 +33,10 @@ export function stubPlan(question: string): { tool: string; args: Record<string,
   const horizon: Record<string, number> = days ? { horizon_days: Number(days[1]) } : months ? { horizon_months: Number(months[1]) } : { horizon_months: 3 };
   if (/\b(what changed|change since|why .*(differ|change)|compared with the previous|previous forecast)\b/.test(q)) return { tool: "explain_change", args: { cohort, ...horizon } };
   if (/\b(prepare|draft)\b.*\breview\b/.test(q)) return { tool: "prepare_review", args: { cohort, ...horizon } };
+  if (/\b(hires|hired|joiners|joined|transfers?|transferred|flows?|headcount|moved (in|out))\b/.test(q) && !/\b(value|column|check)\b/.test(q)) {
+    const window = /\b(\d{4}-\d{2})\b.*\b(\d{4}-\d{2})\b/.exec(q);
+    return { tool: "workforce_flows", args: { cohort, ...(window ? { from: window[1], to: window[2] } : {}) } };
+  }
   if (/\b(where did|trace|lineage|come from|root cause)\b/.test(q)) return { tool: "trace_lineage", args: {} };
   if (/\b(check|checks|quality|failed|failing|fresh)\b/.test(q)) return { tool: "data_quality_status", args: { source: /payroll/.test(q) ? "payroll" : "all" } };
   if (/\b(coverage|calibrat\w*|accuracy|skill)\b/.test(q)) {

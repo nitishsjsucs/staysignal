@@ -12,6 +12,7 @@ import { QualityPage } from "./pages/Quality";
 import { ResultPage } from "./pages/ResultDetail";
 import { ReviewsPage } from "./pages/Reviews";
 import { TrustPage } from "./pages/Trust";
+import { WorkforcePage } from "./pages/Workforce";
 import { parseRoute, useLocation } from "./router";
 
 function useMe(): { me: Me | null; ready: boolean } {
@@ -52,6 +53,7 @@ export function App() {
         {route.page === "quality" ? <QualityPage me={me} /> : null}
         {route.page === "reviews" ? <ReviewsPage me={me} /> : null}
         {route.page === "trust" ? <TrustPage me={me} /> : null}
+        {route.page === "workforce" ? <WorkforcePage me={me} /> : null}
         {route.page === "ask" ? <AskPage me={me} /> : null}
         {route.page === "result" ? <ResultPage id={route.id} /> : null}
         {route.page === "not_found" ? <p>Page not found.</p> : null}

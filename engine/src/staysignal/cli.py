@@ -98,6 +98,15 @@ def cmd_semantic_catalog(args: argparse.Namespace) -> int:
     return build_catalog(check=args.check)
 
 
+def cmd_semantic_export_fixtures(args: argparse.Namespace) -> int:
+    """Export the default semantic-catalog results from a fresh canonical warehouse as API fixtures."""
+    from staysignal.semantic.fixtures import OUT, export
+
+    paths = export(Path(args.world), Path(args.out) if args.out else OUT)
+    print(json.dumps({"written": len(paths), "dir": str(Path(args.out) if args.out else OUT)}))
+    return 0
+
+
 def _repo_var() -> tuple[Path, Path]:
     from staysignal.paths import REPO_ROOT, VAR
 
@@ -366,6 +375,10 @@ def build_parser() -> argparse.ArgumentParser:
     cat = semsub.add_parser("catalog", help="compile every governed query shape for DuckDB and BigQuery")
     cat.add_argument("--check", action="store_true", help="fail if the committed catalogs are stale")
     cat.set_defaults(func=cmd_semantic_catalog)
+    exf = semsub.add_parser("export-fixtures", help="the default catalog results as API fixtures (fixtures mode)")
+    exf.add_argument("--world", default="var/world")
+    exf.add_argument("--out", default=None)
+    exf.set_defaults(func=cmd_semantic_export_fixtures)
     eng = sub.add_parser("engine", help="the local engine's state")
     esub0 = eng.add_subparsers(dest="engine_command", required=True)
     prep = esub0.add_parser("prepare", help="land the world, build the warehouse, publish the two published runs")

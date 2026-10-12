@@ -65,6 +65,16 @@ function profileText(a: string, v: V): string {
   return `In ${String(v.name)}, {{${a}.share_below_midpoint|pct}} are paid below their band midpoint, the median time since promotion is {{${a}.median_months_since_promotion|int}} months, and {{${a}.open_backfill_reqs|int}} backfill requisitions are open (synthetic data).`;
 }
 
+function flowsText(a: string, v: V): string {
+  const c = v.cohort as V;
+  const end = v.headcount_end === null ? "" : `, and {{${a}.headcount_end|int}} at the end`;
+  const moves =
+    v.joined !== null && v.left !== null
+      ? ` Over the window {{${a}.joined|int}} people arrived (hires and moves in) and {{${a}.left|int}} left or moved out.`
+      : " Some of its flows are too small to show and are withheld.";
+  return `From {{${a}.from}} to {{${a}.to}}, ${String(c.name)} had {{${a}.headcount_start|int}} people at the start${end}.${moves} Small links are merged to protect individuals (synthetic data).`;
+}
+
 function reviewText(_a: string, v: V): string {
   const checks = (v.checks as V[]) ?? [];
   return `I drafted a People Partner review for ${String(v.cohort)} with three group-level checks: ${checks.map((c) => String(c.title).toLowerCase()).join("; ")}. It is a draft: you submit it, and a different lead approves it. Pay-equity review by Compensation is a blocking item before any cohort pay change.`;
@@ -79,6 +89,7 @@ const TEMPLATES: Record<string, (a: string, v: V) => string> = {
   forecast_history: historyText,
   backtest_summary: backtestText,
   cohort_profile: profileText,
+  workforce_flows: flowsText,
   prepare_review: reviewText,
 };
 

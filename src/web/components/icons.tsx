@@ -17,6 +17,7 @@ export const IconChanges = (p: P) => svg(<><path d="M2 13h12" /><path d="M3.5 13
 export const IconTrust = (p: P) => svg(<><circle cx="8" cy="8" r="6.2" /><circle cx="8" cy="8" r="3.2" /><circle cx="8" cy="8" r="0.6" /></>, p);
 export const IconQuality = (p: P) => svg(<><path d="M8 1.8 13 3.6v4c0 3.1-2.1 5.4-5 6.6-2.9-1.2-5-3.5-5-6.6v-4z" /><path d="m5.6 8 1.7 1.7L10.6 6.3" /></>, p);
 export const IconReviews = (p: P) => svg(<><rect x="3" y="2.5" width="10" height="11.5" rx="1.5" /><path d="M6 2.5V2h4v.5" /><path d="m5.8 8.3 1.5 1.5 3-3" /></>, p);
+export const IconFlows = (p: P) => svg(<><path d="M2 4h3c3 0 3 8 6 8h3" /><path d="M2 12h3c3 0 3-8 6-8h3" /></>, p);
 export const IconAsk = (p: P) => svg(<><path d="M2.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H7l-3 2.5v-2.5h0a2 2 0 0 1-1.5-2z" /></>, p);
 export const IconSun = (p: P) => svg(<><circle cx="8" cy="8" r="3" /><path d="M8 1.5v1.3M8 13.2v1.3M1.5 8h1.3M13.2 8h1.3M3.4 3.4l.9.9M11.7 11.7l.9.9M3.4 12.6l.9-.9M11.7 4.3l.9-.9" /></>, p);
 export const IconMoon = (p: P) => svg(<path d="M13 9.6A5.5 5.5 0 0 1 6.4 3 5.5 5.5 0 1 0 13 9.6z" />, p);

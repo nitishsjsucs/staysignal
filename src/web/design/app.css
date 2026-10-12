@@ -1000,3 +1000,13 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Workforce flows (charts/FlowSankey.tsx): labels sit in gutters beside the node bars */
+.chart text.flow-label {
+  fill: var(--ink-2);
+}
+
+.chart text.flow-label .flow-value {
+  fill: var(--ink);
+  font-weight: 600;
+}

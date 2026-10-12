@@ -111,6 +111,7 @@ export function buildApp() {
   app.get("/api/backtest/summary", (c) => respond(c, "backtest_summary", { level: c.req.query("level") || undefined, horizon_months: num(c.req.query("horizon")), model: c.req.query("model") || undefined }));
   app.get("/api/changes", (c) => respond(c, "explain_change", { cohort: c.req.query("cohort") ?? "Larkspur", horizon_months: num(c.req.query("horizon")), from_run: c.req.query("from") || undefined, to_run: c.req.query("to") || undefined }));
   app.get("/api/profile", (c) => respond(c, "cohort_profile", { cohort: c.req.query("cohort") ?? "Larkspur" }));
+  app.get("/api/workforce/flows", (c) => respond(c, "workforce_flows", { cohort: c.req.query("cohort") ?? "Larkspur", from: c.req.query("from") || undefined, to: c.req.query("to") || undefined }));
   app.get("/api/lineage", (c) => respond(c, "trace_lineage", { check_id: c.req.query("check") || undefined, node: c.req.query("node") || undefined }));
 
   app.get("/api/cohorts", async (c) => {

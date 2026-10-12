@@ -4,7 +4,11 @@
 import type { z } from "zod";
 import type {
   Audience,
+  CatalogRequest,
+  CatalogResult,
   ComparisonMetrics,
+  FlowLink,
+  WorkforceFlowsData,
   EvaluationFixture,
   BreakdownData,
   BreakdownRow,
@@ -21,7 +25,7 @@ import type {
   Rounding,
   RunsIndex,
 } from "../contracts";
-import { authorizeCohort, type CohortMeta, canUseTool, MIN_COMPARISON } from "../policy/authorize";
+import { authorizeCohort, type CohortMeta, canUseTool, MIN_CELL, MIN_COMPARISON } from "../policy/authorize";
 import { isRefusal, type Refusal, refuse } from "../policy/refusals";
 import { hasScope, type Principal } from "../policy/roles";
 import { roundingFor, roundInterval, roundToStep } from "../guard/disclosure";
@@ -47,6 +51,8 @@ export interface WarehouseClient {
   lineage(): Promise<LineageFixture | null>;
   profiles(runId: string): Promise<ProfilesFixture | null>;
   evaluation(): Promise<EvaluationFixture | null>;
+  /** Executes a compiled semantic-catalog entry with server-bound values (SPEC 7.3); null when not available. */
+  catalog(key: string, request: CatalogRequest): Promise<CatalogResult | null>;
 }
 
 export interface ReviewDraft {
@@ -850,7 +856,143 @@ const backtestSummary: ToolDef<typeof toolInputs.backtest_summary, BacktestSumma
   },
 };
 
-export const TOOLS: ToolDef[] = [forecastDepartures, forecastBreakdown, forecastHistory, explainChange, backtestSummary, dataQualityStatus, traceLineage, cohortProfile, prepareReview] as unknown as ToolDef[];
+// ---------- workforce flows: the semantic catalog (SPEC 7.3) ----------
+
+const FLOW_LEVELS: Partial<Record<CohortForecast["kind"], WorkforceFlowsData["level"]>> = { company: "company", organization: "organization", group: "group" };
+const ARRIVALS: [string, string][] = [
+  ["hires", "Hires"],
+  ["transfers_in", "Transfers in"],
+  ["restructured_in", "Moved in by a restructure"],
+];
+const DEPARTURES: [string, string][] = [
+  ["voluntary_departures", "Voluntary exits"],
+  ["other_exits", "Other exits"],
+  ["transfers_out", "Transfers out"],
+  ["restructured_out", "Moved out by a restructure"],
+];
+
+/** The first month of the flows: the first month start after the HRIS migration baseline (2023-04-01). */
+const FLOWS_FROM = "2023-05";
+
+function shiftMonth(ym: string, n: number): string {
+  const total = Number(ym.slice(0, 4)) * 12 + Number(ym.slice(5, 7)) - 1 + n;
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}`;
+}
+
+/** One side of the flows (arrivals or departures) as Sankey links, merged so that no shown value is under 10 and no
+ * withheld value can be recovered by subtraction (SPEC 17.5 rule 1 and the complement rule). */
+export function flowSide(items: { label: string; value: number }[], withheld: string): { links: { label: string; value: number | null; merged_from?: string[] }[]; total: number | null } {
+  const nonzero = items.filter((i) => i.value > 0);
+  const total = nonzero.reduce((s, i) => s + i.value, 0);
+  if (total === 0) return { links: [], total: 0 };
+  if (total < MIN_CELL) return { links: [{ label: withheld, value: null }], total: null };
+  const shown = nonzero.filter((i) => i.value >= MIN_CELL).sort((a, b) => b.value - a.value);
+  let small = nonzero.filter((i) => i.value < MIN_CELL);
+  let smallTotal = small.reduce((s, i) => s + i.value, 0);
+  // complementary merge: a merged bucket under 10 takes the smallest shown link with it
+  while (small.length && smallTotal < MIN_CELL && shown.length) {
+    const next = shown.pop()!;
+    small = [...small, next];
+    smallTotal += next.value;
+  }
+  const links: { label: string; value: number | null; merged_from?: string[] }[] = shown.map((i) => ({ label: i.label, value: i.value }));
+  if (small.length) links.push({ label: "Other (merged)", value: smallTotal, merged_from: small.map((i) => i.label) });
+  return { links, total };
+}
+
+const workforceFlows: ToolDef<typeof toolInputs.workforce_flows, WorkforceFlowsData> = {
+  name: "workforce_flows",
+  description: toolDescriptions.workforce_flows,
+  input: toolInputs.workforce_flows,
+  scopes: ["forecast:read:*"],
+  kind: "read",
+  available: true,
+  async run(ctx, args) {
+    const fx = await loadRun(ctx, undefined);
+    if (isRefusal(fx)) return fx;
+    const c = resolveCohort(args.cohort, fx.cohorts);
+    if (!c) return refuse("OUT_OF_SCOPE", `No published cohort matches "${args.cohort}".`);
+    const level = FLOW_LEVELS[c.kind];
+    if (!level) return refuse("NOT_PERMITTED", "Workforce flows are served for the company, organizations and groups.");
+    const meta = cohortMeta(c, fx.cohorts);
+    const denied = authorizeCohort(ctx.principal, "workforce_flows", meta);
+    if (denied) return denied;
+    const last = shiftMonth(fx.run.cutoff.slice(0, 7), -1);
+    const to = args.to ?? last;
+    const from = args.from ?? shiftMonth(to, -11);
+    if (from > to || from < FLOWS_FROM || to > last) return refuse("OUT_OF_SCOPE", `Flows are known from ${FLOWS_FROM} to ${last}; give a window inside it.`);
+    const request: CatalogRequest = { start_month: from, end_month: to };
+    if (!hasScope(ctx.principal, "forecast:read:all") && hasScope(ctx.principal, "forecast:read:assigned")) request.scope = [...ctx.principal.assignedOrgs].sort();
+    const key = `workforce_flows|${level}|none`;
+    const res = await ctx.warehouse.catalog(key, request);
+    if (!res) return refuse("OUT_OF_SCOPE", ctx.warehouse.mode === "fixtures" ? "Only the default 12-month window is exported in fixtures mode." : "The semantic catalog has no such entry.");
+    const col = (name: string) => res.columns.indexOf(name);
+    const row = res.rows.find((r) => (level === "company" ? true : level === "organization" ? r[col("group_month__organization")] === meta.name : r[col("group_month__group_name")] === meta.name));
+    if (!row) return refuse("OUT_OF_SCOPE", `No flows are recorded for ${meta.name} in that window.`);
+    const n = (name: string) => Number(row[col(name)] ?? 0);
+    const counts: Record<string, number> = {
+      hires: n("hires"),
+      transfers_in: n("transfers_in"),
+      restructured_in: n("restructured_in"),
+      voluntary_departures: n("voluntary_departures"),
+      other_exits: n("involuntary_departures") + n("retirements"),
+      transfers_out: n("transfers_out"),
+      restructured_out: n("restructured_out"),
+    };
+    const start = n("headcount");
+    const inn = flowSide(ARRIVALS.map(([k, label]) => ({ label, value: counts[k]! })), "Arrivals (fewer than 10, withheld)");
+    const out = flowSide(DEPARTURES.map(([k, label]) => ({ label, value: counts[k]! })), "Departures and moves (fewer than 10, withheld)");
+    const name = cohortName(c);
+    const end = inn.total !== null && out.total !== null ? start + inn.total - out.total : null;
+    const links: FlowLink[] = [
+      { source: "Start of window", target: name, value: start },
+      ...inn.links.map((l) => ({ source: l.label === "Other (merged)" ? "Other arrivals (merged)" : l.label, target: name, value: l.value, ...(l.merged_from ? { merged_from: l.merged_from } : {}) })),
+      ...out.links.map((l) => ({ source: name, target: l.label === "Other (merged)" ? "Other departures and moves (merged)" : l.label, value: l.value, ...(l.merged_from ? { merged_from: l.merged_from } : {}) })),
+    ];
+    if (end !== null) links.push({ source: name, target: "End of window", value: end });
+    const values: WorkforceFlowsData = {
+      cohort: { id: c.cohort_id, name, kind: c.kind, n: c.n },
+      level,
+      from,
+      to,
+      headcount_start: start,
+      headcount_end: end,
+      joined: inn.total,
+      left: out.total,
+      links,
+      catalog_entry: key,
+      sql_sha256: res.sql_sha256,
+      note: "Hires, moves between groups and exits over the window, from the governed semantic layer. Links under 10 people are merged; exits other than voluntary are one band, never by type. Synthetic data.",
+    };
+    const fargs = { cohort: c.cohort_id, from, to };
+    const dataVersion = await ctx.sha256(ctx.canonical({ sql: res.sql_sha256, request, rows: res.rows }));
+    return finish(ctx, "workforce_flows", fargs, "catalog", dataVersion, {
+      computed_by: "warehouse",
+      provenance: { catalog_entry: key, computed_by: "warehouse", tool: "workforce_flows", args: fargs },
+      suppressed_cells: links.filter((l) => l.value === null).length,
+      rounding: null,
+      values,
+    });
+  },
+  digest(r, alias) {
+    const v = r.values;
+    return {
+      alias,
+      tool: r.tool,
+      label: "synthetic",
+      cohort: v.cohort.name,
+      window: `${v.from} to ${v.to}`,
+      headcount_start: v.headcount_start,
+      headcount_end: v.headcount_end,
+      joined: v.joined,
+      left: v.left,
+      links: v.links.map((l) => `${l.source} > ${l.target}: ${l.value === null ? "withheld (under 10)" : l.value}`),
+      cite: [`{{${alias}.headcount_start|int}}`, `{{${alias}.headcount_end|int}}`, `{{${alias}.joined|int}}`, `{{${alias}.left|int}}`],
+    };
+  },
+};
+
+export const TOOLS: ToolDef[] = [forecastDepartures, forecastBreakdown, forecastHistory, explainChange, backtestSummary, dataQualityStatus, traceLineage, cohortProfile, workforceFlows, prepareReview] as unknown as ToolDef[];
 
 export function toolsFor(p: Principal): ToolDef[] {
   return TOOLS.filter((t) => t.available && canUseTool(p, t));

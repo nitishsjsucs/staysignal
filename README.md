@@ -16,7 +16,7 @@ Work follows the commit plan in SPEC.md section 24, core path first. The demo da
 | ADRs 0001 to 0007 and 0012 | done (`docs/adr/`) |
 | Node toolchain (Worker, web, tests) | done: exact pins (SPEC 25), strict tsconfigs, Vite 8 with the `agents()` plugin, vitest projects `worker`, `node`, `web`, generated Worker types; the Worker answers `/api/health` only |
 | Engine uv project (Python 3.12) | done: `engine/pyproject.toml` with the SPEC 25 pins, committed `uv.lock` (157 packages), `staysignal` CLI skeleton, pytest and ruff |
-| Prose and hygiene gates, pre-commit hook, CI | not started |
+| Prose and hygiene gates, pre-commit hook, CI | done: `npm run check:prose` (no em or en dashes, no banned phrasing), `npm run check:hygiene` (public tier: dashes in every tracked file, secrets, no git SHA in pinned paths, monitoring and special-category terms and a personal-name heuristic over generated text), a pre-commit hook that adds the private tier from a deny-list kept outside the repository and the operator's secret scan, and CI jobs `node` and `engine` |
 | 27B measurement on agent-shaped prompts | not started |
 | Synthetic world, warehouse, features, model, forecast | not started |
 | Worker, agents, workflows, approvals, audit | not started |

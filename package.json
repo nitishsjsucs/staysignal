@@ -14,7 +14,11 @@
     "typegen": "wrangler types -c wrangler.jsonc --strict-vars=false worker-configuration.d.ts",
     "typegen:check": "wrangler types -c wrangler.jsonc --strict-vars=false worker-configuration.d.ts --check",
     "typecheck": "tsc -p tsconfig.worker.json && tsc -p tsconfig.web.json && tsc -p tsconfig.node.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:py": "uv run --locked --project engine pytest engine/tests -q",
+    "check:prose": "node scripts/check-prose.ts",
+    "check:hygiene": "node scripts/check-hygiene.ts",
+    "hooks:install": "node scripts/install-hooks.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "3.0.57",

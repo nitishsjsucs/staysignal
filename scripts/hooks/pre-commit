@@ -1,0 +1,17 @@
+#!/bin/sh
+# StaySignal pre-commit hook (SPEC 22.6), installed into .git/hooks by `npm run hooks:install`.
+# Runs the prose check, both hygiene tiers over the staged files (the private tier fails closed unless
+# SS_PRIVATE_DENYLIST names a deny-list outside the repository), and the operator's secret scan of the staged tree.
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+node scripts/check-prose.ts >/dev/null
+node scripts/check-hygiene.ts --staged --private
+scan="${SS_SECRETSCAN:-$HOME/Developer/projects/_publish/secretscan.py}"
+if [ -f "$scan" ]; then
+  tree=$(git write-tree)
+  if ! git archive "$tree" | python3 "$scan"; then
+    echo "pre-commit: secret scan found a private key or token in the staged tree" >&2
+    exit 1
+  fi
+fi

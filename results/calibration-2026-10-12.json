@@ -1,0 +1,114 @@
+{
+ "kind": "calibration",
+ "command": "uv run --project engine staysignal eval backtest",
+ "date": "2026-10-12",
+ "world_sha256": "ff27c141906c4303195270900d84411c019599d980ea1cd1ca5d4bb3990fe8ed",
+ "label": "synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy",
+ "design": "individual predicted 3-month voluntary cumulative incidence at mature monthly origins against observed departures; deciles; team-cluster bootstrap 80% intervals; bins with n >= 10 only",
+ "n": 36035,
+ "reliability": [
+  {
+   "bin": 1,
+   "n": 3604,
+   "predicted": 0.010512530680760478,
+   "observed": 0.021087680355160933,
+   "observed_i80": [
+    0.016797681552710754,
+    0.025012697139802195
+   ]
+  },
+  {
+   "bin": 2,
+   "n": 3603,
+   "predicted": 0.01685015595169557,
+   "observed": 0.022481265611990008,
+   "observed_i80": [
+    0.01869327389479157,
+    0.026561503718244762
+   ]
+  },
+  {
+   "bin": 3,
+   "n": 3604,
+   "predicted": 0.020979853776002814,
+   "observed": 0.02413984461709212,
+   "observed_i80": [
+    0.020001772480835702,
+    0.02867232827861122
+   ]
+  },
+  {
+   "bin": 4,
+   "n": 3603,
+   "predicted": 0.02470174917840533,
+   "observed": 0.020815986677768527,
+   "observed_i80": [
+    0.017350755320933418,
+    0.024352182740001387
+   ]
+  },
+  {
+   "bin": 5,
+   "n": 3603,
+   "predicted": 0.02853419286403342,
+   "observed": 0.023868998057174576,
+   "observed_i80": [
+    0.020253458164642375,
+    0.027871626078467587
+   ]
+  },
+  {
+   "bin": 6,
+   "n": 3604,
+   "predicted": 0.03285595060730725,
+   "observed": 0.02830188679245283,
+   "observed_i80": [
+    0.024834883294779085,
+    0.031861961483916554
+   ]
+  },
+  {
+   "bin": 7,
+   "n": 3603,
+   "predicted": 0.037749719831481676,
+   "observed": 0.038578961976131004,
+   "observed_i80": [
+    0.03384908345249306,
+    0.04384640818425829
+   ]
+  },
+  {
+   "bin": 8,
+   "n": 3604,
+   "predicted": 0.0441562096987766,
+   "observed": 0.037458379578246395,
+   "observed_i80": [
+    0.03207321724460454,
+    0.04232302276099972
+   ]
+  },
+  {
+   "bin": 9,
+   "n": 3603,
+   "predicted": 0.05378387671601708,
+   "observed": 0.038301415487094086,
+   "observed_i80": [
+    0.03396140286890384,
+    0.042951627956532124
+   ]
+  },
+  {
+   "bin": 10,
+   "n": 3604,
+   "predicted": 0.07958618056809437,
+   "observed": 0.055216426193118756,
+   "observed_i80": [
+    0.04730634622127307,
+    0.06404665587811527
+   ]
+  }
+ ],
+ "ici": 0.007281455487872132,
+ "e50": 0.004407967652453302,
+ "e90": 0.016888024413903708
+}

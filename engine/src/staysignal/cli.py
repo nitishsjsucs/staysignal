@@ -135,6 +135,12 @@ def cmd_engine_prepare(args: argparse.Namespace) -> int:
             if doc.stem not in keep:
                 doc.unlink()
     shutil.rmtree(precomputed, ignore_errors=True)
+    from staysignal.evaluate.report import evaluation_fixture
+    from staysignal.fixtures.export_api import write_json
+
+    fx = evaluation_fixture(repo / "results")
+    if fx is not None:
+        write_json(published / "evaluation.json", fx, compact=True)
     for doc in sorted((published / "forecast").glob("*.json")):
         write_run(con, json.loads(doc.read_text()))
     con.close()
@@ -194,6 +200,35 @@ def cmd_serve(args: argparse.Namespace) -> int:
     finally:
         stop.set()
         st.con.close()
+    return 0
+
+
+def cmd_eval_backtest(args: argparse.Namespace) -> int:
+    from staysignal.evaluate.report import run_all
+
+    repo, var = _repo_var()
+    paths = run_all(var / "world", var / "cache", repo / "results", args.futures, args.workers)
+    print(json.dumps({"written": [str(p.relative_to(repo)) for p in paths]}))
+    return 0
+
+
+def cmd_eval_export(args: argparse.Namespace) -> int:
+    """Writes the Trust page's data from the latest recorded results (the API fixture and the engine's copy)."""
+    from staysignal.evaluate.report import evaluation_fixture
+    from staysignal.fixtures.export_api import write_json
+
+    repo, var = _repo_var()
+    fx = evaluation_fixture(repo / "results")
+    if fx is None:
+        print("no recorded backtest yet: run `staysignal eval backtest`")
+        return 1
+    for out in (
+        repo / "test" / "fixtures" / "api" / "evaluation.json",
+        var / "engine" / "published" / "evaluation.json",
+    ):
+        if out.parent.exists():
+            write_json(out, fx, compact=True)
+            print(f"wrote {out.relative_to(repo)}")
     return 0
 
 
@@ -307,6 +342,12 @@ def build_parser() -> argparse.ArgumentParser:
     srv.set_defaults(func=cmd_serve)
     ev = sub.add_parser("eval", help="recorded evaluations (synthetic world)")
     esub = ev.add_subparsers(dest="eval_command", required=True)
+    bt = esub.add_parser("backtest", help="monthly backtests, calibration and the model comparison (results/)")
+    bt.add_argument("--futures", type=int, default=2000)
+    bt.add_argument("--workers", type=int, default=None)
+    bt.set_defaults(func=cmd_eval_backtest)
+    ex = esub.add_parser("export", help="the Trust page's data from the latest recorded results")
+    ex.set_defaults(func=cmd_eval_export)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")
     oc.add_argument("--profile", default="canonical", choices=["canonical", "small"])
     oc.add_argument("--futures", type=int, default=2000)

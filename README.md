@@ -143,7 +143,27 @@ Cohort-level outputs only: no individual risk score, ranking, list or timeline a
 
 Only numbers produced by this repository's scripts appear here, each with its command and date, and every one is computed on the synthetic world.
 
+Reading the evaluation honestly (the numbers are below and on the Trust page):
+
+- Organization-level 80% ranges held 76% to 88% of the time, but company-level ranges held only 38% to 58%: the company total depends on the organization-wide shock, which the model estimates from about 11 quarterly windows at 0.06 against the generator's 0.20, so its company ranges are too narrow. This is the failure SPEC.md section 9.3 warns about, reported rather than tuned away.
+- Observed over expected is between 0.77 and 0.92 for the model and both baselines, while the oracle sits near 1 (0.90 to 1.03): the generator's drift lowers departures in the last quarters, which no model trained on the past can see.
+- At company level the model does not beat the trailing rate on count error (skill -2% to -15%); at organization level it is about even. The oracle's much lower error is the unattainable floor: it knows the latent propensities.
+- Individual 3-month predictions are spread too wide (low deciles are under-predicted and high deciles over-predicted), which the latent propensity the model cannot see would produce; the calibration index stays small (ICI 0.7 percentage points).
+
 <!-- results:start -->
+**Monthly pseudo-real-time backtests** (`uv run --project engine staysignal eval backtest`, 2026-10-12, [results/backtest-2026-10-12.json](results/backtest-2026-10-12.json)). Model and data as known at each origin from 2024-10-01 to 2026-09-01, mature windows only (82 provisional windows left out), company and organizations of 50 or more, `voluntary_departures@2`. Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy.
+
+| Level | Horizon | Windows (independent) | Observed over expected | 80% range held | 95% range held | MAE | Skill against the trailing rate | Mean RPS |
+|---|---|---|---|---|---|---|---|---|
+| company | 1 month | 21 (21) | 0.92 | 52.4% | 76.2% | 5.9 | -15% | 4.72 |
+| company | 3 months | 19 (6) | 0.89 | 57.9% | 73.7% | 12.8 | -10% | 10.94 |
+| company | 6 months | 16 (2) | 0.82 | 37.5% | 56.3% | 23.9 | -2% | 20.90 |
+| organization | 1 month | 168 (21) | 0.92 | 88.1% | 97.0% | 1.3 | 1% | 0.92 |
+| organization | 3 months | 152 (6) | 0.89 | 81.6% | 93.4% | 2.7 | -1% | 1.92 |
+| organization | 6 months | 128 (2) | 0.82 | 75.8% | 87.5% | 4.4 | 4% | 3.45 |
+
+**Calibration of individual 3-month predictions** (`uv run --project engine staysignal eval backtest`, 2026-10-12, [results/calibration-2026-10-12.json](results/calibration-2026-10-12.json)): 36,035 person-windows at mature monthly origins, compared in 10 deciles of 10 or more (only deciles are ever stored): ICI 0.7%, E50 0.4%, E90 1.7%. Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy.
+
 **Demo reset** (`npm run demo:reset -- --beat 1 --record`, 2026-10-12, [results/demo-reset-2026-10-12.json](results/demo-reset-2026-10-12.json)): restoring the snapshot for the start of beat 1 and restarting the demo profile (wrangler dev and the local engine) took 3.0 s, against a target of 20 s. Synthetic demo state.
 
 **Local model measurement: Qwen3-1.7B-Q4_0-rtn.gguf** (`npm run llm:measure -- --model 1.7b`, 2026-10-12, [results/llm-measure-1.7b-2026-10-12.json](results/llm-measure-1.7b-2026-10-12.json)). Status: complete. Agent-shaped prompts: the system prompt plus the 13 tool schemas, and prior tool-result digests (synthetic placeholders).
@@ -169,6 +189,35 @@ wired memory added by the load: 2.51 GB; swap used before and after: 14.08 GB an
 | history plus an answer of up to 200 tokens | 6,483 (0 cached) | 36.5 s | 177.7 tok/s | 7.56 tok/s |
 
 wired memory added by the load: 15.69 GB; swap used before and after: 13.86 GB and 15.92 GB; stopped by: guard: swap grew by 2.01 GB (limit 2 GB).
+
+**Model comparison** (`uv run --project engine staysignal eval backtest --futures 2000`, 2026-10-12, [results/model-comparison-2026-10-12.json](results/model-comparison-2026-10-12.json)): the same 6 quarterly origins (2024-10-01 to 2026-01-01) for every model, mature windows only; the oracle knows the latent propensities and the generator, which no model can. Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy.
+
+| Level | Horizon | Model | MAE | Observed over expected | 80% range held | 95% range held |
+|---|---|---|---|---|---|---|
+| company | 1 month | dtcr-mnl | 4.8 | 0.82 | 66.7% | 83.3% |
+| company | 1 month | hist | 5.3 | 0.77 | 83.3% | 100.0% |
+| company | 1 month | aj | 4.1 | 0.81 | 100.0% | 100.0% |
+| company | 1 month | oracle | 3.2 | 0.90 | 83.3% | 100.0% |
+| company | 3 months | dtcr-mnl | 13.2 | 0.88 | 50.0% | 66.7% |
+| company | 3 months | hist | 11.4 | 0.84 | 33.3% | 66.7% |
+| company | 3 months | aj | 11.7 | 0.86 | 50.0% | 66.7% |
+| company | 3 months | oracle | 5.8 | 0.99 | 100.0% | 100.0% |
+| company | 6 months | dtcr-mnl | 23.2 | 0.83 | 33.3% | 50.0% |
+| company | 6 months | hist | 21.4 | 0.85 | 33.3% | 66.7% |
+| company | 6 months | aj | 25.6 | 0.82 | 33.3% | 50.0% |
+| company | 6 months | oracle | 5.6 | 1.03 | 83.3% | 100.0% |
+| organization | 1 month | dtcr-mnl | 1.1 | 0.82 | 90.7% | 98.1% |
+| organization | 1 month | hist | 1.1 | 0.77 | 94.4% | 98.1% |
+| organization | 1 month | aj | 1.0 | 0.81 | 94.4% | 98.1% |
+| organization | 1 month | oracle | 1.0 | 0.90 | 92.6% | 98.1% |
+| organization | 3 months | dtcr-mnl | 2.5 | 0.88 | 83.3% | 94.4% |
+| organization | 3 months | hist | 2.5 | 0.84 | 81.5% | 94.4% |
+| organization | 3 months | aj | 2.3 | 0.87 | 85.2% | 90.7% |
+| organization | 3 months | oracle | 1.8 | 0.99 | 90.7% | 98.1% |
+| organization | 6 months | dtcr-mnl | 4.2 | 0.83 | 75.9% | 88.9% |
+| organization | 6 months | hist | 4.4 | 0.84 | 66.7% | 85.2% |
+| organization | 6 months | aj | 4.3 | 0.82 | 66.7% | 87.0% |
+| organization | 6 months | oracle | 2.8 | 1.03 | 87.0% | 98.1% |
 
 **Oracle coverage (C5)** (`uv run --project engine staysignal eval oracle-coverage --futures 2000`, 2026-10-12, [results/oracle-coverage-2026-10-12.json](results/oracle-coverage-2026-10-12.json)). Synthetic world (`canonical`, seed 20261011). The forward-simulation oracle's 90% intervals (2,000 futures each) against the realized counts at 11 quarterly origins from 2023-10-01 to 2026-04-01, for the company and each organization, by cause and horizon: 97.1% of 990 cells (target 80.0% to 97.0%; not met).
 

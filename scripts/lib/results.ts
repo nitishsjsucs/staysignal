@@ -57,8 +57,50 @@ export interface DemoResetReport {
   target_seconds: number;
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset"];
+interface LevelRow {
+  level: string;
+  horizon_months: number;
+  windows: number;
+  origins: number;
+  effective_windows: number;
+  mae: number;
+  skill_vs_hist: number;
+  observed_over_expected: number;
+  coverage80: number;
+  coverage95: number;
+  rps: number;
+}
+
+export interface BacktestReport {
+  kind: "backtest";
+  command: string;
+  date: string;
+  levels: Record<string, LevelRow>;
+  provisional_windows_excluded: number;
+}
+
+export interface CalibrationReport {
+  kind: "calibration";
+  command: string;
+  date: string;
+  n: number;
+  ici: number;
+  e50: number;
+  e90: number;
+  reliability: unknown[];
+}
+
+export interface ModelComparisonReport {
+  kind: "model-comparison";
+  command: string;
+  date: string;
+  origins: string[];
+  models: string[];
+  summary: Record<string, { level: string; horizon_months: number; windows: number } & Record<string, unknown>>;
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -120,12 +162,42 @@ export function renderDemoReset(file: string, r: DemoResetReport): string {
   return `**Demo reset** (\`${r.command}\`, ${r.date}, [${file}](${file})): restoring the snapshot for the start of beat ${r.beat} and restarting the demo profile (wrangler dev and the local engine) took ${r.seconds.toFixed(1)} s, against a target of ${r.target_seconds} s. Synthetic demo state.`;
 }
 
+const SYNTHETIC = "Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy.";
+
+export function renderBacktest(file: string, r: BacktestReport): string {
+  const lines = [`**Monthly pseudo-real-time backtests** (\`${r.command}\`, ${r.date}, [${file}](${file})). Model and data as known at each origin from 2024-10-01 to 2026-09-01, mature windows only (${r.provisional_windows_excluded} provisional windows left out), company and organizations of 50 or more, \`voluntary_departures@2\`. ${SYNTHETIC}`, ""];
+  lines.push("| Level | Horizon | Windows (independent) | Observed over expected | 80% range held | 95% range held | MAE | Skill against the trailing rate | Mean RPS |");
+  lines.push("|---|---|---|---|---|---|---|---|---|");
+  for (const l of Object.values(r.levels)) {
+    lines.push(`| ${l.level} | ${l.horizon_months} month${l.horizon_months > 1 ? "s" : ""} | ${l.windows} (${l.effective_windows}) | ${l.observed_over_expected.toFixed(2)} | ${pct(l.coverage80)} | ${pct(l.coverage95)} | ${l.mae.toFixed(1)} | ${(l.skill_vs_hist * 100).toFixed(0)}% | ${l.rps.toFixed(2)} |`);
+  }
+  return lines.join("\n");
+}
+
+export function renderCalibration(file: string, r: CalibrationReport): string {
+  return `**Calibration of individual 3-month predictions** (\`${r.command}\`, ${r.date}, [${file}](${file})): ${r.n.toLocaleString("en-US")} person-windows at mature monthly origins, compared in ${r.reliability.length} deciles of 10 or more (only deciles are ever stored): ICI ${pct(r.ici)}, E50 ${pct(r.e50)}, E90 ${pct(r.e90)}. ${SYNTHETIC}`;
+}
+
+export function renderModelComparison(file: string, r: ModelComparisonReport): string {
+  const lines = [`**Model comparison** (\`${r.command}\`, ${r.date}, [${file}](${file})): the same ${r.origins.length} quarterly origins (${r.origins[0]} to ${r.origins[r.origins.length - 1]}) for every model, mature windows only; the oracle knows the latent propensities and the generator, which no model can. ${SYNTHETIC}`, ""];
+  lines.push("| Level | Horizon | Model | MAE | Observed over expected | 80% range held | 95% range held |");
+  lines.push("|---|---|---|---|---|---|---|");
+  for (const s of Object.values(r.summary)) {
+    for (const m of r.models) {
+      const v = s[m] as { mae: number; observed_over_expected: number; coverage80: number; coverage95: number } | undefined;
+      if (!v) continue;
+      lines.push(`| ${s.level} | ${s.horizon_months} month${s.horizon_months > 1 ? "s" : ""} | ${m} | ${v.mae.toFixed(1)} | ${v.observed_over_expected.toFixed(2)} | ${pct(v.coverage80)} | ${pct(v.coverage95)} |`);
+    }
+  }
+  return lines.join("\n");
+}
+
 export function renderResults(reports: { file: string; report: Report }[]): string {
   if (reports.length === 0) return "No recorded results yet.";
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

@@ -193,10 +193,9 @@ def parse_hris(row: dict[str, str]) -> HrisRecord:
     )
 
 
-def add_file(src: Sources, path: Path) -> None:
-    import hashlib
-
-    name = path.name
+def add_file(src: Sources, path: Path, name: str | None = None) -> None:
+    """Parses one extract into `src`. `name` is the delivered file name when `path` is a content-addressed copy."""
+    name = name or path.name
     src.file_hashes[name] = hashlib.sha256(path.read_bytes()).hexdigest()
     rows = read_csv(path)
     if name.startswith("hris_"):
@@ -353,3 +352,18 @@ def land(path: Path, root: Path) -> Landed:
         day = date.fromisoformat(period)
         arrived = datetime(day.year, day.month, day.day, 6, tzinfo=UTC)
     return Landed(kind, period, path.name, sha, dest, len(rows), arrived, new)
+
+
+def load_landed_sources(con, until: datetime | None = None) -> Sources:
+    """Every delivery recorded in the warehouse (optionally only those delivered by `until`), parsed from its
+    content-addressed landed copy under its delivered name: the same `Sources`, and so the same run keys, as loading
+    the delivered files themselves. The audit-only attribute never enters a run (ADR 0013)."""
+    rows = con.execute(
+        "SELECT d.file_name, l.landed_path FROM raw._deliveries AS d JOIN raw._loads AS l USING (file_sha256) "
+        "WHERE d.source <> 'audit_attributes' AND (? IS NULL OR d.delivered_at <= ?) ORDER BY d.file_name",
+        [until, until],
+    ).fetchall()
+    src = Sources()
+    for file_name, landed_path in rows:
+        add_file(src, Path(landed_path), name=file_name)
+    return src

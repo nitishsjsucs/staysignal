@@ -81,6 +81,122 @@ def cmd_warehouse_build(args: argparse.Namespace) -> int:
     return 0 if res.success else 1
 
 
+def _repo_var() -> tuple[Path, Path]:
+    from staysignal.paths import REPO_ROOT, VAR
+
+    return REPO_ROOT, VAR
+
+
+def cmd_engine_prepare(args: argparse.Namespace) -> int:
+    """The local engine's starting state (SPEC 22.4): the canonical world landed and loaded (the September payroll held
+    back), the warehouse built at the 2026-10-01 vintage, and the published documents and tables of the two published
+    runs, which `demo build` computes from the world's extracts with the committed models. --fresh starts from an
+    empty warehouse."""
+    import shutil
+    from datetime import UTC, datetime
+
+    from staysignal.duck import open_duckdb
+    from staysignal.forecast.published_tables import ensure, write_run
+    from staysignal.ingest import mappings
+    from staysignal.ingest.load_duckdb import ingest, refresh_employee_keys
+    from staysignal.lineage.capture import build
+    from staysignal.service.demo import build as demo_build
+    from staysignal.world.emit import generate
+    from staysignal.world.spec import PROFILES
+
+    repo, var = _repo_var()
+    t0 = time.perf_counter()
+    if args.fresh:
+        for p in (var / "warehouse.duckdb", var / "warehouse.duckdb.wal"):
+            p.unlink(missing_ok=True)
+        for d in (var / "landing", var / "engine", var / "replay"):
+            shutil.rmtree(d, ignore_errors=True)
+    world = var / "world"
+    if not (world / "manifest.json").exists():
+        generate(PROFILES["canonical"], world)
+    con = open_duckdb(var / "warehouse.duckdb")
+    paths = sorted((world / "sources").glob("*.csv")) + sorted((world / "audit").glob("*.csv"))
+    out = ingest(con, paths, var / "landing", datetime(2023, 4, 1, 6, tzinfo=UTC))
+    mappings.write_raw(con)
+    refresh_employee_keys(con)
+    ensure(con)
+    res = build(
+        var / "warehouse.duckdb",
+        var / "engine" / "work" / "dbt-prepare",
+        {"vintage": "2026-10-01T06:00:00Z", "pay_basis_mapping": "payroll@1"},
+    )
+    published = var / "engine" / "published"
+    precomputed = var / "engine" / "precomputed-jobs"
+    demo_build(world, repo / "models", published, jobs_dir=precomputed, cache_dir=var / "cache")
+    # keep only the published runs: the routine's candidates are computed live by the runner, never precomputed
+    keep = {b["run_id"].replace("#", "-") for b in json.loads((published / "runs.json").read_text())["runs"]}
+    for folder in ("forecast", "profiles"):
+        for doc in (published / folder).glob("*.json"):
+            if doc.stem not in keep:
+                doc.unlink()
+    shutil.rmtree(precomputed, ignore_errors=True)
+    for doc in sorted((published / "forecast").glob("*.json")):
+        write_run(con, json.loads(doc.read_text()))
+    con.close()
+    print(
+        json.dumps(
+            {
+                "files": len(out),
+                "loaded": sum(o["loaded"] for o in out),
+                "warehouse_build": res.success,
+                "seconds": round(time.perf_counter() - t0, 1),
+            }
+        )
+    )
+    return 0 if res.success else 1
+
+
+def runner_token(repo: Path) -> str | None:
+    import os
+    import re
+
+    if os.environ.get("SS_RUNNER_TOKEN"):
+        return os.environ["SS_RUNNER_TOKEN"]
+    dev = repo / ".dev.vars"
+    if dev.exists():
+        for line in dev.read_text().splitlines():
+            m = re.match(r"^SS_RUNNER_TOKEN='(.*)'$", line.strip())
+            if m:
+                return m.group(1)
+    return None
+
+
+def cmd_serve(args: argparse.Namespace) -> int:
+    """The engine process: the warehouse shim on 127.0.0.1:8196 and the runner thread leasing jobs from the Worker.
+    One process owns the warehouse connection (ADR 0012)."""
+    import threading
+
+    import uvicorn
+
+    from staysignal.runner.jobs import EngineState
+    from staysignal.runner.loop import run_forever
+    from staysignal.service.app import create_app
+
+    repo, var = _repo_var()
+    st = EngineState.open(repo, var)
+    if not (st.published_dir / "runs.json").exists():
+        print("no published state: run `staysignal engine prepare` first")
+        return 1
+    stop = threading.Event()
+    if args.worker:
+        token = runner_token(repo)
+        if not token:
+            print("SS_RUNNER_TOKEN missing (npm run dev:keys)")
+            return 1
+        threading.Thread(target=run_forever, args=(st, args.worker, token, stop), daemon=True).start()
+    try:
+        uvicorn.run(create_app(st), host=args.host, port=args.port, log_level="warning")
+    finally:
+        stop.set()
+        st.con.close()
+    return 0
+
+
 def cmd_eval_oracle_coverage(args: argparse.Namespace) -> int:
     import datetime as dt
 
@@ -179,6 +295,16 @@ def build_parser() -> argparse.ArgumentParser:
     whb.add_argument("--db", default="var/warehouse.duckdb")
     whb.add_argument("--target", default="var/dbt/target")
     whb.set_defaults(func=cmd_warehouse_build)
+    eng = sub.add_parser("engine", help="the local engine's state")
+    esub0 = eng.add_subparsers(dest="engine_command", required=True)
+    prep = esub0.add_parser("prepare", help="land the world, build the warehouse, publish the two published runs")
+    prep.add_argument("--fresh", action="store_true", help="start from an empty warehouse and landing store")
+    prep.set_defaults(func=cmd_engine_prepare)
+    srv = sub.add_parser("serve", help="the warehouse shim on 8196 and the runner thread")
+    srv.add_argument("--host", default="127.0.0.1")
+    srv.add_argument("--port", type=int, default=8196)
+    srv.add_argument("--worker", default=None, help="the Worker to lease jobs from, for example http://127.0.0.1:8795")
+    srv.set_defaults(func=cmd_serve)
     ev = sub.add_parser("eval", help="recorded evaluations (synthetic world)")
     esub = ev.add_subparsers(dest="eval_command", required=True)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")

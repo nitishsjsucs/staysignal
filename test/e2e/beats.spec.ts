@@ -1,5 +1,6 @@
-// Beats 1 to 5 click through in fixtures mode (SPEC 3, Gate A): the stub model routes each question to one governed
-// tool, the fixture runner completes engine jobs, and every assertion reads what a person would see.
+// Beats 1 to 5 click through (SPEC 3): the stub model routes each question to one governed tool and every assertion
+// reads what a person would see. In fixtures mode (Gate A) the fixture runner completes the engine jobs from committed
+// outputs; in engine mode (npm run test:e2e:engine, Gate B) the local engine computes every job live.
 import { expect, type Page, test } from "@playwright/test";
 
 const LEAD = "pa-lead@larkspur.example";
@@ -28,7 +29,7 @@ function lastAnswer(page: Page) {
 
 test.describe.configure({ mode: "serial" });
 
-test("beats 1 to 5 click through in fixtures mode", async ({ page }) => {
+test("beats 1 to 5 click through", async ({ page }) => {
   await page.goto("/?cohort=company&h=6");
   await signIn(page, LEAD);
   await expect(page.locator("h1")).toContainText("Larkspur");

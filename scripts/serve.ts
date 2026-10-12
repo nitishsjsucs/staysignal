@@ -7,15 +7,15 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readDevVars } from "./dev-keys.ts";
-import { PORTS, portOpen, startGroup, waitForHttp } from "./lib/pids.ts";
+import { PORTS, startGroup, waitForHttp, waitPortFree } from "./lib/pids.ts";
 
 export async function serve(opts: { build?: boolean; llm?: string; dataMode?: string; runner?: boolean } = {}): Promise<void> {
   if (!existsSync(".dev.vars")) execFileSync(process.execPath, ["scripts/dev-keys.ts"], { stdio: "inherit" });
-  if (await portOpen(PORTS.worker)) throw new Error(`port ${PORTS.worker} is busy; run npm run stop`);
+  if (!(await waitPortFree(PORTS.worker))) throw new Error(`port ${PORTS.worker} is busy; run npm run stop`);
   if (opts.build !== false) execFileSync("npx", ["vite", "build"], { stdio: "inherit" });
   const dataMode = opts.dataMode ?? process.env.SS_DATA_MODE ?? "fixtures";
   if (dataMode === "engine") {
-    if (await portOpen(PORTS.engine)) throw new Error(`port ${PORTS.engine} is busy; run npm run stop`);
+    if (!(await waitPortFree(PORTS.engine))) throw new Error(`port ${PORTS.engine} is busy; run npm run stop`);
     if (!existsSync("var/engine/published/runs.json")) throw new Error("no engine state: run `uv run --project engine staysignal engine prepare` first");
     const token = readDevVars().SS_RUNNER_TOKEN;
     startGroup("engine", "uv", ["run", "--project", "engine", "staysignal", "serve", "--port", String(PORTS.engine), "--worker", `http://127.0.0.1:${PORTS.worker}`], {

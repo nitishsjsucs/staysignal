@@ -31,6 +31,9 @@
     "fixture-runner": "node scripts/fixture-runner.ts",
     "dev:wrangler": "node scripts/serve.ts",
     "dev:engine": "node scripts/serve.ts --engine",
+    "demo": "node scripts/demo.ts start",
+    "demo:snapshots": "node scripts/demo.ts snapshots",
+    "demo:reset": "node scripts/demo.ts reset",
     "stop": "node scripts/stop.ts"
   },
   "dependencies": {

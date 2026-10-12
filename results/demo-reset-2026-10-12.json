@@ -1,0 +1,9 @@
+{
+  "kind": "demo-reset",
+  "label": "synthetic demo state",
+  "command": "npm run demo:reset -- --beat 1 --record",
+  "date": "2026-10-12",
+  "beat": 1,
+  "seconds": 3,
+  "target_seconds": 20
+}

@@ -111,3 +111,13 @@ export async function waitForHttp(url: string, timeoutMs = 60000): Promise<boole
   }
   return false;
 }
+
+/** Waits until nothing listens on 127.0.0.1:<port> (a process that was just stopped may hold it briefly). */
+export async function waitPortFree(port: number, timeoutMs = 10_000): Promise<boolean> {
+  const until = Date.now() + timeoutMs;
+  while (Date.now() < until) {
+    if (!(await portOpen(port))) return true;
+    await sleep(200);
+  }
+  return !(await portOpen(port));
+}

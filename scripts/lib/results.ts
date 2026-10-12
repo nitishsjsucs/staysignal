@@ -48,8 +48,17 @@ export interface OracleCoverageReport {
   seconds: number;
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage"];
+export interface DemoResetReport {
+  kind: "demo-reset";
+  command: string;
+  date: string;
+  beat: number;
+  seconds: number;
+  target_seconds: number;
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -107,12 +116,16 @@ export function renderOracleCoverage(file: string, r: OracleCoverageReport): str
   return lines.join("\n");
 }
 
+export function renderDemoReset(file: string, r: DemoResetReport): string {
+  return `**Demo reset** (\`${r.command}\`, ${r.date}, [${file}](${file})): restoring the snapshot for the start of beat ${r.beat} and restarting the demo profile (wrangler dev and the local engine) took ${r.seconds.toFixed(1)} s, against a target of ${r.target_seconds} s. Synthetic demo state.`;
+}
+
 export function renderResults(reports: { file: string; report: Report }[]): string {
   if (reports.length === 0) return "No recorded results yet.";
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

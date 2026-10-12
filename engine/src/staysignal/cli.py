@@ -51,6 +51,36 @@ def cmd_world_verify(args: argparse.Namespace) -> int:
     return 0 if not problems else 1
 
 
+def cmd_warehouse_build(args: argparse.Namespace) -> int:
+    """dbt build in process on the warehouse at a vintage under a payroll mapping (ADR 0012), with lineage capture."""
+    from staysignal.duck import open_duckdb
+    from staysignal.forecast.published_tables import ensure
+    from staysignal.lineage.capture import build, column_edges
+
+    db = Path(args.db)
+    con = open_duckdb(db)
+    ensure(con)
+    t0 = time.perf_counter()
+    res = build(db, Path(args.target), {"vintage": args.vintage, "pay_basis_mapping": args.mapping})
+    statuses: dict[str, int] = {}
+    for r in res.results_by_name().values():
+        statuses[r["status"]] = statuses.get(r["status"], 0) + 1
+    (Path(args.target) / "openlineage.json").write_text(json.dumps(res.events, indent=1, default=str) + "\n")
+    con.close()
+    print(
+        json.dumps(
+            {
+                "success": res.success,
+                "seconds": round(time.perf_counter() - t0, 1),
+                "results": statuses,
+                "lineage_events": len(res.events),
+                "column_edges": len(column_edges(res.events)),
+            }
+        )
+    )
+    return 0 if res.success else 1
+
+
 def cmd_eval_oracle_coverage(args: argparse.Namespace) -> int:
     import datetime as dt
 
@@ -141,6 +171,14 @@ def build_parser() -> argparse.ArgumentParser:
     conf.add_argument("--db", default="var/warehouse.duckdb")
     conf.add_argument("--out", default="var/conformed")
     conf.set_defaults(func=cmd_snapshot_conformed)
+    wh = sub.add_parser("warehouse", help="dbt on the local DuckDB warehouse")
+    whsub = wh.add_subparsers(dest="warehouse_command", required=True)
+    whb = whsub.add_parser("build", help="dbt build in process at a vintage, with lineage capture")
+    whb.add_argument("--vintage", default="2026-10-01T06:00:00Z")
+    whb.add_argument("--mapping", default="payroll@1")
+    whb.add_argument("--db", default="var/warehouse.duckdb")
+    whb.add_argument("--target", default="var/dbt/target")
+    whb.set_defaults(func=cmd_warehouse_build)
     ev = sub.add_parser("eval", help="recorded evaluations (synthetic world)")
     esub = ev.add_subparsers(dest="eval_command", required=True)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")

@@ -1,0 +1,12 @@
+# Toy project for the ADR 0012 spike: in-process lineage capture against dbt-ol (synthetic values).
+name: toy
+version: "1.0"
+config-version: 2
+profile: toy
+model-paths: ["models"]
+seed-paths: ["seeds"]
+flags:
+  send_anonymous_usage_stats: false
+models:
+  toy:
+    +materialized: table

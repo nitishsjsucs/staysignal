@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: Landed extracts as text, appended once per distinct file (engine/src/staysignal/ingest). Runner only.
+    tables:
+      - name: raw_hris
+      - name: raw_payroll
+      - name: raw_ats_requisitions
+      - name: raw_ats_offers
+      - name: raw_org_teams
+      - name: raw_org_events
+      - name: raw_ref_bands
+      - name: map_pay_basis
+        description: every payroll mapping version compiled from sources/mappings (code `*` is the unknown-code rule)
+      - name: _deliveries
+        description: every extract delivery (file name, content hash, delivery time on the synthetic clock)
+      - name: _employee_keys
+        description: employee number to er_ key (HMAC, privacy/pseudo.py); staging replaces employee numbers with it
+  - name: audit
+    schema: audit
+    description: the audit-only attribute (ADR 0013); nothing outside the audit models may reference it
+    tables:
+      - name: raw_audit_attributes
+  - name: engine_published
+    schema: published
+    description: forecast runs and their cohort aggregates, written by the engine (forecast/published_tables.py)
+    tables:
+      - name: forecast_runs
+      - name: forecast_cohort

@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: rpt_workforce_monthly
+    description: Headcount and departures by cause per organization and month; cells under 10 people are suppressed.
+    columns:
+      - name: month_start
+        data_tests: [not_null]

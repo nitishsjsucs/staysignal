@@ -1,0 +1,11 @@
+# Local DuckDB profile. config_options (not settings) so dbt's connection has the same configuration as the engine's
+# own connection to the same file: DuckDB refuses a second configuration in one process (ADR 0012).
+staysignal:
+  target: duckdb
+  outputs:
+    duckdb:
+      type: duckdb
+      path: "{{ env_var('SS_WAREHOUSE', '../var/warehouse.duckdb') }}"
+      threads: 1
+      config_options:
+        TimeZone: UTC

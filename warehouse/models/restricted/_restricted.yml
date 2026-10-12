@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: fct_employee_month
+    description: Employee-month facts (runner only); no predictions are stored (ADR 0014).
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [month_start, employee_key]
+  - name: fct_comp_position
+    description: Payroll lines annualized under the active mapping against the band midpoint (runner only).

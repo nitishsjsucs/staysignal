@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_hris__records
+    description: Typed HRIS records with er_ keys; every copy kept with copy_no (copy 1 is used downstream; U01 counts the rest).
+    columns:
+      - name: record_id
+        data_tests: [unique, not_null]
+      - name: employee_key
+        data_tests: [not_null]
+      - name: record_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [migration_baseline, hire, rehire, promotion, transfer, team_change, manager_change, employment_type_change, termination, correction, rescission]
+      - name: employment_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [regular, fixed_term]
+  - name: stg_payroll__lines
+    description: Typed payroll lines with er_ keys; amounts in cents; pay-basis codes as delivered.
+    columns:
+      - name: employee_key
+        data_tests: [not_null]
+      - name: base_amount_cents
+        data_tests: [not_null]
+  - name: stg_map__pay_basis
+    description: The run's active payroll mapping (var pay_basis_mapping).
+  - name: stg_org__teams
+  - name: stg_org__events
+  - name: stg_ref__bands
+  - name: stg_ats__requisitions
+  - name: stg_ats__offers

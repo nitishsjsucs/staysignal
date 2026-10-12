@@ -1,0 +1,38 @@
+# StaySignal warehouse (SPEC 7.2). DuckDB locally, in process with the engine's connection (ADR 0012); the BigQuery
+# profile is compiled offline in CI. Every model is synthetic-world data.
+name: staysignal
+version: "1.0.0"
+config-version: 2
+profile: staysignal
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+clean-targets: ["target"]
+
+flags:
+  send_anonymous_usage_stats: false
+  use_colors: false
+
+vars:
+  # knowledge time: records with recorded_at <= vintage are visible (SPEC 8.1)
+  vintage: "2026-10-01T06:00:00Z"
+  # the run's active payroll mapping (a run parameter recorded in every run manifest)
+  pay_basis_mapping: "payroll@1"
+
+models:
+  staysignal:
+    +materialized: table
+    staging:
+      +schema: staging
+    intermediate:
+      +schema: staging
+    restricted:
+      +schema: restricted
+    published:
+      +schema: published
+
+data_tests:
+  staysignal:
+    +severity: error

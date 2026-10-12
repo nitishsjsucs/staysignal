@@ -1,6 +1,6 @@
 // Governed tools through the API: authorization by role and level, rounding by cohort size, no individual fields (C27).
 import { describe, expect, it } from "vitest";
-import { json, P } from "../helpers/api";
+import { call, json, P } from "../helpers/api";
 
 type Res = { refused?: boolean; code?: string; result_id?: string; rounding?: { step: number }; data?: Record<string, unknown> };
 
@@ -51,5 +51,34 @@ describe("forecast tools by role", () => {
     expect(d.note).toMatch(/not an evaluation of the team's manager/);
     const names = d.rows.map((x) => x.cohort);
     expect([...names].sort((a, b) => a.localeCompare(b))).toEqual(names);
+  });
+});
+
+describe("stored results by role", () => {
+  type Stored = Res & { provenance?: { audience?: string } };
+
+  it("keys results by audience, so a People Partner's view never shares an ID with the analyst's", async () => {
+    const analyst = await json<Stored>("/api/forecast?cohort=Engineering&horizon=3", { as: P.analyst });
+    const partner = await json<Stored>("/api/forecast?cohort=Engineering&horizon=3", { as: P.hrbpEng });
+    expect(analyst.provenance?.audience).toBe("all");
+    expect(partner.provenance?.audience).toBe("assigned");
+    expect(partner.result_id).not.toBe(analyst.result_id);
+    expect((analyst.data as { other: unknown }).other).not.toBeNull();
+    expect((partner.data as { other: unknown }).other).toBeNull();
+    const own = await json<Stored>(`/api/results/${partner.result_id}`, { as: P.hrbpEng });
+    expect(own.result_id).toBe(partner.result_id);
+  });
+
+  it("refuses a stored result to a principal who could not have computed it", async () => {
+    const analyst = await json<Stored>("/api/forecast?cohort=Engineering&horizon=3", { as: P.analyst });
+    const asPartner = await call(`/api/results/${analyst.result_id}`, { as: P.hrbpEng });
+    expect(asPartner.status).toBe(403);
+    expect(((await asPartner.json()) as Res).code).toBe("NOT_PERMITTED");
+    const team = await json<Stored>("/api/forecast/breakdown?cohort=Platform Engineering&by=team&horizon=3", { as: P.analyst });
+    expect((await call(`/api/results/${team.result_id}`, { as: P.analyst })).status).toBe(200);
+    expect((await call(`/api/results/${team.result_id}`, { as: P.lead })).status).toBe(403);
+    const gtm = await json<Stored>("/api/forecast?cohort=Sales&horizon=3", { as: P.hrbpGtm });
+    expect((await call(`/api/results/${gtm.result_id}`, { as: P.hrbpEng })).status).toBe(403);
+    expect((await call(`/api/results/${gtm.result_id}`, { as: P.auditor })).status).toBe(403);
   });
 });

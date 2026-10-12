@@ -101,7 +101,13 @@ export interface Provenance {
   computed_by: "warehouse" | "engine" | "workspace";
   tool: string;
   args: Record<string, unknown>;
+  /** The output class the result was computed for (see `audienceOf`); set when the result is stored. */
+  audience?: Audience;
 }
+
+/** What a role's tool outputs contain: analysts and leads see everything their tools publish, People Partners see
+ * assigned groups of 50 or more without Other exits, aggregate roles see the company only. */
+export type Audience = "all" | "assigned" | "aggregate" | "none";
 
 export interface ForecastData {
   cohort: { id: string; name: string; kind: CohortKind; n: number };

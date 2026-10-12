@@ -3,6 +3,7 @@
 // rounded and stored under a content-addressed result ID. The model sees a result only through its digest.
 import type { z } from "zod";
 import type {
+  Audience,
   BreakdownData,
   BreakdownRow,
   ChangesFixture,
@@ -228,8 +229,21 @@ async function loadRun(ctx: ToolContext, runArg: string | undefined): Promise<Fo
   return fx;
 }
 
+/** The output class a principal's tool calls produce. Outputs differ by class (Other exits, People Partner
+ * suppression), so result IDs are keyed by it and a stored result is served only to the same class (SPEC 17.1). */
+export function audienceOf(p: Principal): Audience {
+  if (hasScope(p, "forecast:read:all")) return "all";
+  if (hasScope(p, "forecast:read:assigned")) return "assigned";
+  if (hasScope(p, "forecast:read:aggregate")) return "aggregate";
+  return "none";
+}
+
 async function finish<T>(ctx: ToolContext, tool: string, args: unknown, runKey: string, dataVersion: string, partial: Omit<ToolResult<T>, "result_id" | "tool" | "label">): Promise<ToolResult<T>> {
-  const result: ToolResult<T> = { result_id: await resultId(ctx, tool, args, runKey, dataVersion), tool, label: "synthetic", ...partial };
+  // The full-view class keeps the plain key, so analyst and lead result IDs do not depend on this rule.
+  const audience = audienceOf(ctx.principal);
+  const keyed = audience === "all" ? dataVersion : `${dataVersion}|audience:${audience}`;
+  const provenance = { ...partial.provenance, audience };
+  const result: ToolResult<T> = { result_id: await resultId(ctx, tool, args, runKey, keyed), tool, label: "synthetic", ...partial, provenance };
   if (ctx.workspace) await ctx.workspace.storeResult(result as ToolResult<unknown>, ctx.principal.id);
   return result;
 }

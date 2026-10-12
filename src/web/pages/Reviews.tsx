@@ -1,11 +1,11 @@
 // Reviews and routines (SPEC 14.8, beat 5): an agent-drafted People Partner review becomes the submitter's proposal;
 // a different lead approves it, which creates owned tasks with evidence and an audit record; rollback is one click with
 // a reason. The audit timeline shows every action and whether the hash chain and its anchor verify.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReviewDraft } from "../../shared/tools/registry";
-import { hasScope, invalidate, isRefusal, type Me, postJSON, type Refusal, useQuery } from "../api";
+import { getJSON, hasScope, invalidate, isRefusal, type Me, postJSON, type Refusal, useQuery } from "../api";
 import { ApproveReject, RollbackControl } from "../components/Actions";
-import { navigate, useView } from "../router";
+import { navigate, useLocation, useView } from "../router";
 import { StatusPill, SyntheticChip } from "../components/ui";
 import { PageHead } from "./Forecast";
 
@@ -88,6 +88,25 @@ export function ReviewsPage({ me }: { me: Me }) {
   const [draft, setDraft] = useState<{ result_id: string; data: ReviewDraft } | Refusal | null>(null);
   const [submitOut, setSubmitOut] = useState<{ ok: boolean; code?: string; message?: string } | null>(null);
   const canPropose = hasScope(me, "review:propose") || hasScope(me, "review:propose:assigned");
+  // A draft prepared in the chat dock arrives as ?draft=<result ID> and opens here, ready to submit.
+  const draftParam = new URLSearchParams(useLocation().search).get("draft");
+  const shownId = draft && !isRefusal(draft) ? draft.result_id : null;
+  useEffect(() => {
+    if (!draftParam || !/^res_[a-z2-7]{26}$/.test(draftParam) || draftParam === shownId) return;
+    let alive = true;
+    getJSON<{ result_id: string; data: ReviewDraft }>(`/api/results/${draftParam}`).then(
+      (r) => {
+        if (!alive) return;
+        setSubmitOut(null);
+        setDraft({ result_id: r.result_id, data: r.data });
+        setCohort(r.data.cohort_id);
+      },
+      () => undefined,
+    );
+    return () => {
+      alive = false;
+    };
+  }, [draftParam, shownId]);
   const prepare = async () => {
     setSubmitOut(null);
     setDraft(await postJSON(`/api/reviews/draft`, { cohort, horizon: view.horizon }));

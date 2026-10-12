@@ -5,11 +5,11 @@ import { getAgentByName } from "agents";
 import { Hono } from "hono";
 import { canonicalJson } from "../shared/canonical-json";
 import type { HistoryFixture, QualityFixture } from "../shared/contracts";
-import { authorizeCohort } from "../shared/policy/authorize";
+import { authorizeCohort, canUseTool } from "../shared/policy/authorize";
 import { DEMO } from "../shared/routines/definitions";
-import { isRefusal } from "../shared/policy/refusals";
+import { isRefusal, type Refusal, refuse } from "../shared/policy/refusals";
 import { hasScope, LOCAL_PRINCIPALS, type Principal } from "../shared/policy/roles";
-import { cohortMeta, runTool, type ToolContext, type ToolResult } from "../shared/tools/registry";
+import { audienceOf, cohortMeta, getTool, resolveCohort, runTool, type ToolContext, type ToolResult } from "../shared/tools/registry";
 import type { AnalystAgent } from "./agents/analyst-agent";
 import { workspace, workspaceStub } from "./agents/workspace-port";
 import { AuthError } from "./auth/access";
@@ -30,6 +30,26 @@ export function toolContext(env: Env, p: Principal): ToolContext {
 
 function envelope<T>(r: ToolResult<T>) {
   return { result_id: r.result_id, label: "synthetic" as const, provenance: r.provenance, rounding: r.rounding, suppressed_cells: r.suppressed_cells, data: r.values };
+}
+
+/** A stored result is served only to a principal who could have computed the same output: the tool's scopes, the
+ * cohort rules for the cohort it names, and the same audience class (SPEC 17.1). Knowing a result ID grants nothing. */
+async function resultDenied(env: Env, p: Principal, r: ToolResult<unknown>): Promise<Refusal | null> {
+  const prov = r.provenance;
+  const def = getTool(prov.tool);
+  if (!def || !canUseTool(p, def)) return refuse("NOT_PERMITTED");
+  if ((prov.audience ?? "all") !== audienceOf(p)) return refuse("NOT_PERMITTED", "This result was computed for a different role.");
+  if (prov.args.by === "team" && !hasScope(p, "forecast:read:team")) return refuse("NOT_PERMITTED", "Team-level values are available to People Analysts only.");
+  const cohort = typeof prov.args.cohort === "string" ? prov.args.cohort : null;
+  if (!cohort) return null;
+  const wh = warehouseFor(env);
+  const published = (await (await workspace(env)).publishedRunId()) ?? (await wh.runs()).published;
+  const own = prov.run_id ? await wh.forecast(prov.run_id) : null;
+  if (own?.run.status === "held" && !hasScope(p, "forecast:read:all") && !hasScope(p, "quality:read")) return refuse("NOT_PERMITTED", "Held runs are visible to analysts and data engineers only.");
+  const fx = own ?? (await wh.forecast(published));
+  const co = fx ? resolveCohort(cohort, fx.cohorts) : null;
+  if (!fx || !co) return refuse("NOT_PERMITTED");
+  return authorizeCohort(p, prov.tool, cohortMeta(co, fx.cohorts));
 }
 
 export function buildApp() {
@@ -156,6 +176,8 @@ export function buildApp() {
   app.get("/api/results/:id", async (c) => {
     const r = await (await workspace(c.env)).getResult(c.req.param("id"));
     if (!r) return c.json({ error: "not found" }, 404);
+    const denied = await resultDenied(c.env, c.var.principal, r);
+    if (denied) return c.json(denied, 403);
     return c.json(envelope(r));
   });
 

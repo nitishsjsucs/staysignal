@@ -100,6 +100,12 @@ async function followResult(id: string, tool: string): Promise<void> {
     const cohort = typeof args.cohort === "string" ? args.cohort : null;
     const h = typeof args.horizon_months === "number" ? (args.horizon_months as 1 | 3 | 6) : null;
     if (cohort || h) setView({ ...(cohort ? { cohort } : {}), ...(h ? { horizon: h } : {}) });
+    if (tool === "prepare_review" && window.location.pathname === "/reviews") {
+      // the Reviews page opens the drafted review from its result ID, ready to submit
+      const q = new URLSearchParams(window.location.search);
+      q.set("draft", id);
+      navigate(`/reviews?${q.toString()}`, { replace: true });
+    }
   } catch {
     // the page keeps its state
   }

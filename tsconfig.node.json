@@ -25,6 +25,7 @@
   "include": [
     "scripts",
     "test/node",
+    "test/e2e",
     "vite.config.ts",
     "vitest.config.ts",
     "playwright.config.ts"

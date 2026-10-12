@@ -16,6 +16,7 @@
     "typecheck": "tsc -p tsconfig.worker.json && tsc -p tsconfig.web.json && tsc -p tsconfig.node.json",
     "test": "vitest run",
     "test:py": "uv run --locked --project engine pytest engine/tests -q",
+    "test:e2e": "playwright test",
     "check:prose": "node scripts/check-prose.ts",
     "check:hygiene": "node scripts/check-hygiene.ts",
     "hooks:install": "node scripts/install-hooks.ts",

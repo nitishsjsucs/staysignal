@@ -11,7 +11,7 @@ Builder log for the commit plan in SPEC.md section 24. Updated in every commit.
 
 ## Position
 
-M2 thin real slice, commit 8 (`docs: demo script with the Q&A crib`). Gate B is not complete: recorded 27B turns, the two live questions, `bench:demo` and the timed dress rehearsal need a 27B session (7.2 GB of memory was available today against the 17 GB pre-flight, so no 27B was started). Next: M3 in order (Aalen-Johansen and the oracle as baselines in evaluation first), returning to the 27B items when a session with other apps closed is possible.
+M3 trust and evals, commit 1 (`feat(baselines)`). Gate B (end of M2) is met except the 27B items: recorded 27B turns, the two live questions, `bench:demo` and the timed dress rehearsal wait for a 27B session (7.2 GB of memory was available today against the 17 GB pre-flight, so no 27B was started). Next: `feat(evaluate)` (monthly backtests, calibration, coverage with block bootstrap, PIT and RPS).
 
 ## Done
 
@@ -55,6 +55,10 @@ M2 thin real slice, commit 8 (`docs: demo script with the Q&A crib`). Gate B is 
 
 8. `docs: demo script with the Q&A crib`: `docs/demo-script.md`, the runbook for beats 1 to 5 with the commands to prepare and reset, the exact clicks and roles per beat, the numbers the canonical world shows (Engineering at 3 months: 13.1 expected, 80% range 9 to 20, 95% range 7 to 23), recovery by `demo:reset`, an honest note on the Calendar and Input data magnitudes of beat 2, and the Q&A crib with section links. It states that answers currently come from the stub model because no 27B turn has been recorded.
 
+## M3 log
+
+1. `feat(baselines)`: `baselines/aalen_johansen.py` (the monthly Aalen-Johansen estimator, `aj_curve`, fitted per organization and pooled for the company on the training landmarks with the matured rule; binomial 80% and 95% ranges), `baselines/oracle.py` (the oracle's voluntary count distribution per cohort and horizon, with fixed-term employees removed under `voluntary_departures@2`), and `evaluate/comparison.py`, which runs `dtcr-mnl`, `hist`, `aj` and `oracle` on the same cohorts at the six quarterly origins whose 6-month window is mature (2024-10-01 to 2026-01-01), with actual counts from the outcome vintage and each window's maturity status. The recorded comparison and its metrics come with `feat(evaluate)` and the M3 `eval` commit. Tests: the estimator by hand (including competing risks and a month with nobody at risk), a fit on the small world (monotone curves, plausible rates, ordered ranges), the oracle under both metric definitions, the six origins, and a comparison run on the small world.
+
 ## Next
 
 1. `feat(demo)`: the demo profile and per-beat snapshots (`demo/state/beat-*.json`, `npm run demo:reset -- --beat N`), the recorded-turn provider path for `npm run demo`, and `bench:demo`; the recorded 27B turns need a 27B session with other apps closed (see the findings below).
@@ -70,7 +74,7 @@ M2 thin real slice, commit 8 (`docs: demo script with the Q&A crib`). Gate B is 
 
 ## Check status
 
-At M2 commit 8 (this commit): documentation only; `check:prose` (14 Markdown files) and `check:hygiene` clean. At M2 commit 7: engine `pytest` 114 passed (unchanged since commit 6); `npm run typecheck` clean; `npm test` 74 passed; `npm run test:e2e` passed in fixtures mode, and the beats passed in engine mode against a restored beat-1 snapshot; all processes stopped. At M2 commit 6: engine `pytest` 114 passed, `npm test` 71 passed, e2e passed in both modes. At M2 commit 5: engine `pytest` 110 passed. At M2 commit 4: engine `pytest` 77 passed. At M2 commit 3: engine `pytest` 71 passed. At M2 commit 2: engine `pytest` 61 passed. At M2 commit 1: engine `pytest` 46 passed, `staysignal world verify` ok, the slow C5 test fails on the recorded 97.1% (see Deviations), `npm test` 71 passed.
+At M3 commit 1 (this commit): engine `pytest` 120 passed (1 slow test deselected), `ruff check` and `ruff format --check` clean; `npm test` unchanged since M2 commit 7 (74 passed). At M2 commit 8: documentation only. At M2 commit 7: engine `pytest` 114 passed (unchanged since commit 6); `npm run typecheck` clean; `npm test` 74 passed; `npm run test:e2e` passed in fixtures mode, and the beats passed in engine mode against a restored beat-1 snapshot; all processes stopped. At M2 commit 6: engine `pytest` 114 passed, `npm test` 71 passed, e2e passed in both modes. At M2 commit 5: engine `pytest` 110 passed. At M2 commit 4: engine `pytest` 77 passed. At M2 commit 3: engine `pytest` 71 passed. At M2 commit 2: engine `pytest` 61 passed. At M2 commit 1: engine `pytest` 46 passed, `staysignal world verify` ok, the slow C5 test fails on the recorded 97.1% (see Deviations), `npm test` 71 passed.
 
 At M1 commit 6: `npm run typecheck` clean; `npm test` 70 passed in 14 files (worker 21, node 49); `npm run test:e2e` 1 passed (beats 1 to 5, local Chromium 1.63); engine `pytest` 40 passed and `ruff check` clean (engine unchanged since commit 5); `npm run build` ok (initial JavaScript 123.9 kB gzip); `npm run typegen:check` up to date with and without `.dev.vars`; `npm run fixtures:check` current; `check:prose` 12 Markdown files clean; `check:hygiene` public and private tiers clean. CI has not run on GitHub yet (the publisher pushes); CI has no e2e job yet. No web unit tests yet (the `web` vitest project is empty).
 

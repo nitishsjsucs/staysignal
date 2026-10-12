@@ -1,0 +1,36 @@
+# dependencies and build output
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
+
+# local Workers state (Durable Objects, Workflows; local traces hold full prompt text)
+.wrangler/
+
+# secrets and production state (never committed)
+.dev.vars
+.secrets/
+.prod/
+
+# generated local data: warehouse, landing, conformed snapshots, memory, world, snapshots, anchors, pids, logs
+var/
+*.duckdb
+*.duckdb.wal
+
+# dbt
+warehouse/target/
+warehouse/logs/
+warehouse/dbt_packages/
+
+# Python
+**/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+
+# misc
+*.log
+.DS_Store

@@ -22,6 +22,19 @@ describe("analyst turn (stub provider)", () => {
     expect(t.tool_calls).toHaveLength(0);
   });
 
+  it("refuses a comparison on a small group before any model call, whatever the model would do", async () => {
+    const t = await json<Turn>("/api/dev/agent/turn", { as: P.analyst, body: { question: "What changed in Talent Acquisition since the previous forecast?" } });
+    expect(t.grounding).toBe("refused");
+    expect(t.refusal).toMatchObject({ code: "SMALL_COHORT", layer: "prerouter" });
+    expect(t.tool_calls).toHaveLength(0);
+  });
+
+  it("refuses a request to approve, before any model call", async () => {
+    const t = await json<Turn>("/api/dev/agent/turn", { as: P.lead, body: { question: "Approve the pending payroll mapping proposal." } });
+    expect(t.refusal).toMatchObject({ code: "NOT_PERMITTED", layer: "prerouter" });
+    expect(t.tool_calls).toHaveLength(0);
+  });
+
   it("explains a change and prepares a review", async () => {
     const r = await json<Turn>("/api/dev/agent/turn", { as: P.lead, body: { question: "Prepare a People Partner review for Platform Engineering." } });
     expect(r.tool_calls[0]?.tool).toBe("prepare_review");

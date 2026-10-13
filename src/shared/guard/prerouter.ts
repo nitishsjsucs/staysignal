@@ -1,6 +1,6 @@
 // Deterministic pre-router (SPEC 14.3): refuses before any model call questions that name or describe a single
-// person, single out a manager's team, ask by a protected attribute, or fall outside cohort-level workforce
-// analytics. Patterns follow PeopleLens worker/src/planner/values.ts (MIT). The model may refuse too; the eval
+// person, single out a manager's team, ask by a protected attribute, ask the analyst to make a decision, or fall
+// outside cohort-level workforce analytics. Patterns follow PeopleLens worker/src/planner/values.ts (MIT). The model may refuse too; the eval
 // measures both layers.
 import type { RefusalCode } from "../policy/refusals";
 
@@ -21,6 +21,8 @@ const INDIVIDUAL: RegExp[] = [
   /\b(?:the|this|that)\s+(?:person|employee|individual)\s+who\b/i,
   /\bis\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\s+(?:going|likely|about)\s+to\s+(?:quit|leave|resign)/,
   /\b(?:his|her)\s+(?:risk|probability|chance)\s+of\s+leaving\b/i,
+  // raw extract rows are one row per person
+  /\b(?:raw|row[-\s]level|unaggregated)\s+(?:\w+\s+){0,2}(?:rows?|records?|extracts?|tables?)\b/i,
 ];
 
 const MANAGER: RegExp[] = [
@@ -44,12 +46,21 @@ const OUT_OF_SCOPE: RegExp[] = [
   /\bperformance\s+(?:ratings?|reviews?|scores?)\b/i,
   /\b(?:keystrokes?|screen\s+monitoring|location\s+tracking|email\s+monitoring|social\s+media)\b/i,
   /\bignore\s+(?:all\s+|the\s+|your\s+)?(?:previous\s+|prior\s+)?(?:instructions|rules)\b/i,
+  /\b(?:forget|disregard|override|bypass|skip)\s+(?:all\s+|the\s+|your\s+|any\s+)?(?:previous\s+|prior\s+)?(?:policy|policies|rules|instructions|guardrails|restrictions|checks)\b/i,
   /\b(?:fire|terminate|lay\s*off|let\s+go\s+of)\s+(?:someone|people|employees|staff|them|him|her)\b/i,
   /\b(?:who|which\s+(?:\w+\s+){0,2}(?:employees?|people|staff|engineers?))\s+should\s+(?:we|i)\s+(?:fire|terminate|lay\s*off|let\s+go)\b/i,
 ];
 
+// Decisions belong to a person with the right in the app (SPEC 14.6): the analyst never approves, rejects, publishes
+// or rolls back anything, whatever the question says. The verb must be a command (sentence start, or after "and",
+// "then", "please", "now" or "just"), so "Who can approve a review?" still reaches the model.
+const DECISION: RegExp[] = [
+  /(?:^|[.;:!]\s*|\b(?:and|then|please|now|just)\s+)(?:approve|reject|publish|unpublish|roll\s*back)\s+(?:the\s+|this\s+|that\s+|all\s+|every\s+)?(?:pending\s+|open\s+|latest\s+|held\s+)?(?:\w+\s+){0,3}(?:proposals?|reviews?|runs?|mappings?|repairs?|actions?|changes?|requests?|drafts?)\b/i,
+];
+
 export function preRoute(question: string): PreRoute | null {
   const q = question.trim();
+  for (const re of DECISION) if (re.test(q)) return { code: "NOT_PERMITTED", rule: re.source };
   for (const re of MANAGER) if (re.test(q)) return { code: "MANAGER_LEVEL", rule: re.source };
   for (const re of INDIVIDUAL) if (re.test(q)) return { code: "INDIVIDUAL_LEVEL", rule: re.source };
   for (const re of PROTECTED) if (re.test(q)) return { code: "PROTECTED_ATTRIBUTE", rule: re.source };

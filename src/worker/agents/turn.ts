@@ -6,9 +6,10 @@ import type { AliasMap } from "../../shared/grounding/aliases";
 import { renderPlaceholders } from "../../shared/grounding/aliases";
 import { checkGrounding } from "../../shared/grounding/check";
 import { templateAnswer } from "../../shared/grounding/template";
+import { cohortGuard } from "../../shared/guard/cohort-guard";
 import { preRoute } from "../../shared/guard/prerouter";
 import { isRefusal, REFUSAL_MESSAGES, type RefusalCode } from "../../shared/policy/refusals";
-import { getTool, runTool, type ToolContext, toolsFor } from "../../shared/tools/registry";
+import { getTool, publishedCohorts, runTool, type ToolContext, toolsFor } from "../../shared/tools/registry";
 import { REPAIR_PROMPT, SYSTEM_PROMPT } from "./prompts";
 import { findRecording } from "./recorded-provider";
 import { openAiCompatible, type ProviderName, recordedModel, stubModel, LOCAL_URLS } from "./providers";
@@ -84,6 +85,14 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   if (routed) {
     const msg = REFUSAL_MESSAGES[routed.code];
     return { ...base, aliases: {}, tool_calls: [], violations: [], text: msg, rendered: msg, grounding: "refused", refusal: { code: routed.code, message: msg, layer: "prerouter" }, recorded: false, label: null };
+  }
+  // the cohort guard: a named cohort below the size floors is refused here, whatever the model would have done
+  const cohorts = await publishedCohorts(ctx);
+  const sized = cohorts ? cohortGuard(ctx.principal, question, cohorts) : null;
+  spans.push({ kind: "prerouter", name: "cohortGuard", start_ms: at(), dur_ms: 0, outcome: sized ? sized.refusal.code : "pass" });
+  if (sized) {
+    const msg = sized.refusal.message;
+    return { ...base, aliases: {}, tool_calls: [], violations: [], text: msg, rendered: msg, grounding: "refused", refusal: { code: sized.refusal.code, message: msg, layer: "prerouter" }, recorded: false, label: null };
   }
   const aliases: AliasMap = new Map();
   const calls: ToolCallRecord[] = [];

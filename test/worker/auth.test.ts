@@ -2,7 +2,7 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 import { mintDevToken } from "../../src/worker/auth/dev-login";
-import { principalId } from "../../src/worker/auth/principal";
+import { bindRole, principalId } from "../../src/worker/auth/principal";
 import { parseConfig } from "../../src/worker/config";
 import { call, P } from "../helpers/api";
 
@@ -28,6 +28,18 @@ describe("authentication", () => {
     expect(principalId({ sub: "", common_name: "staysignal-runner" })).toBe("svc:staysignal-runner");
     expect(principalId({ sub: P.analyst })).toBe(P.analyst);
     expect(() => principalId({ sub: "" })).toThrow();
+  });
+
+  it("binds production service tokens by their client ID, the common_name Access puts in their JWT", () => {
+    const prod = { ...parseConfig(env), authMode: "access" as const, roleBindings: "{}", serviceTokens: { runner: "abc123.access", mcp: "def456.access" } };
+    expect(bindRole(prod, "svc:abc123.access")?.role).toBe("data_engineer");
+    expect(bindRole(prod, "svc:def456.access")?.role).toBe("people_analyst");
+    // the token's display name is not its common_name in production
+    expect(bindRole(prod, "svc:staysignal-runner")).toBeNull();
+    // without the secrets nothing is bound, not even a token whose common_name is the literal "unset"
+    const bare = { ...prod, serviceTokens: { runner: null, mcp: null } };
+    expect(bindRole(bare, "svc:abc123.access")).toBeNull();
+    expect(bindRole(bare, "svc:unset")).toBeNull();
   });
 
   it("lets the runner service token use the internal protocol and nobody else", async () => {

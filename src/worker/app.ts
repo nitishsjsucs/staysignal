@@ -15,7 +15,7 @@ import { workspace, workspaceStub } from "./agents/workspace-port";
 import { AuthError } from "./auth/access";
 import { mintDevToken } from "./auth/dev-login";
 import { agentInstanceName } from "./auth/hmac";
-import { authenticate, DEV_COOKIE } from "./auth/principal";
+import { authenticate, DEV_COOKIE, runnerId } from "./auth/principal";
 import { type AppConfig, isLocalHost, parseConfig } from "./config";
 import { sha256HexSync } from "./store/chain";
 import { warehouseFor } from "./warehouse/client";
@@ -398,7 +398,7 @@ export function buildApp() {
     if (cfg.runnerToken && auth === `Bearer ${cfg.runnerToken}`) return next();
     try {
       const p = await authenticate(c.req.raw, cfg);
-      if (p.id === "svc:staysignal-runner") return next();
+      if (p.id === runnerId(cfg)) return next();
     } catch {
       // fall through
     }

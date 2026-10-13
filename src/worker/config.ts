@@ -13,6 +13,7 @@ export interface AppConfig {
   access: { teamDomain: string; aud: string };
   hmacKey: string;
   runnerToken: string | null;
+  serviceTokens: { runner: string | null; mcp: string | null };
   roleBindings: string | null;
   /** The production warehouse (SS_DATA_MODE=bigquery): project, location and the service account key secret. */
   bigquery: { projectId: string; location: string; serviceAccount: { client_email: string; private_key: string; token_uri?: string } } | null;
@@ -46,6 +47,8 @@ export function parseConfig(env: Env): AppConfig {
     access: authMode === "dev" ? { teamDomain: DEV_ISSUER, aud: DEV_AUDIENCE } : { teamDomain: e.SS_ACCESS_TEAM_DOMAIN as string, aud: e.SS_ACCESS_AUD as string },
     hmacKey: e.SS_HMAC_MASTER_KEY ?? (authMode === "dev" ? TEST_HMAC_KEY : ""),
     runnerToken: e.SS_RUNNER_TOKEN ?? null,
+    // Access service tokens: the JWT's common_name is the token's client ID, so production binds svc:<client ID>
+    serviceTokens: { runner: e.SS_RUNNER_TOKEN_ID ?? null, mcp: e.SS_MCP_TOKEN_ID ?? null },
     roleBindings: e.SS_ROLE_BINDINGS ?? null,
     bigquery: dataMode === "bigquery" ? { projectId: e.SS_GCP_PROJECT_ID as string, location: e.SS_BQ_LOCATION ?? "US", serviceAccount: JSON.parse(e.SS_GCP_SA_KEY as string) as { client_email: string; private_key: string; token_uri?: string } } : null,
     workersAi:

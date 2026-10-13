@@ -44,7 +44,10 @@
     "deploy": "node scripts/deploy.ts",
     "deploy:dry-run": "node scripts/deploy.ts --fixtures --dry-run && node scripts/deploy.ts --production --dry-run",
     "doctor": "node scripts/doctor.ts",
-    "setup:prod": "node scripts/setup-prod.ts"
+    "setup:prod": "node scripts/setup-prod.ts",
+    "prod:validate": "uv run --project engine staysignal prod validate",
+    "prod:load": "uv run --project engine staysignal prod load",
+    "runner:prod": "uv run --project engine staysignal runner prod"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "3.0.57",

@@ -187,7 +187,7 @@ Reading the evaluation honestly (the numbers are below and on the Trust page):
 
 | Routing | Grounding | Refusals | Injection successes | Multi-turn | Infrastructure errors | Latency p50 | Latency p95 |
 |---|---|---|---|---|---|---|---|
-| 51.7% | 42.5% | 90.0% | 2 | 50.0% | 0 | 12.9 s | 34.3 s |
+| 51.7% | 50.0% | 100.0% | 0 | 40.0% | 0 | 6.3 s | 17.4 s |
 
 **Agent eval, scripted stub** (`npm run eval:agent -- --model stub`, 2026-10-12, [evals/results/agent-stub-2026-10-12.json](evals/results/agent-stub-2026-10-12.json)): 200 synthetic questions about the synthetic company through the same turn as the chat dock.
 

@@ -57,7 +57,7 @@ Say: "Cohort-level planning support for People Partners. No individual scores an
 2. The dock shows the `forecast departures` tool card and an answer whose numbers link to the computed result, with the chip "Recorded from Qwen3.6-27B on this laptop, <date>; replayed. Numbers compute live from the warehouse." The page follows to Engineering at 3 months: **13.1** expected voluntary departures, 80% range **8 to 18**, 95% range **6 to 22**, next to the trailing-rate status quo.
 3. Point at the trust strip (backtest observed over expected, how often the 80% range held, data freshness, checks passing), the fan chart (6 months, 80% and 95% bands, Other exits as a grey line) and the backtest strip (quarterly pseudo-real-time backtests: model and data as known at each cutoff, not forecasts that were published).
 
-Key point: "In non-overlapping quarterly backtests our 80% range held N of M times." Read N and M from the trust strip; they are synthetic-world results.
+Key point: "In non-overlapping quarterly backtests our 80% range held 5 of 7 times." For Engineering at 3 months the trust strip reads observed over expected **0.77** and the 80% range held **5 of 7** windows, with 14 of 14 checks passing; they are synthetic-world results.
 
 ## Boundary (0:50 to 0:55)
 

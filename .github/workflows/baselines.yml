@@ -1,0 +1,36 @@
+name: baselines
+# Remakes the Playwright screenshot baselines in the same amd64 image and environment as the CI e2e job, so the
+# baselines CI compares against are made where CI runs. Manual only:
+#   gh workflow run baselines.yml --ref main
+#   gh run download <run id> -n screenshot-baselines -D test/e2e/__screenshots__
+# then commit the changed PNGs; the next CI e2e run compares exactly. A failing flow step does not stop the upload.
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+env:
+  WRANGLER_SEND_METRICS: "false"
+  CI: "true"
+jobs:
+  baselines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host --init
+    env:
+      HOME: /root
+      SS_E2E_SCREENSHOTS: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - run: npm ci --no-audit --no-fund
+      - run: npm run dev:keys
+      - run: npx playwright test --update-snapshots
+        continue-on-error: true
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: screenshot-baselines
+          path: test/e2e/__screenshots__
+          if-no-files-found: error
+          retention-days: 7

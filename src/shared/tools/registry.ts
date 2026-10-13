@@ -331,7 +331,15 @@ const forecastDepartures: ToolDef<typeof toolInputs.forecast_departures, Forecas
       i80: v.i80,
       i95: v.i95,
       hist_expected: v.hist.expected,
-      cite: [`{{${alias}.expected|1dp}}`, `{{${alias}.i80|range}}`, `{{${alias}.i95|range}}`, `{{${alias}.hist.expected|1dp}}`, `{{${alias}.annual_rate|pct}}`],
+      units: "expected and the ranges are counts of people (expected voluntary departures), never percentages; annual_rate is a percentage",
+      // each citation says what its value means, so a model cannot put one value in another's place
+      cite: [
+        `{{${alias}.expected|1dp}} (expected voluntary departures, people)`,
+        `{{${alias}.i80|range}} (80% range of departures, people)`,
+        `{{${alias}.i95|range}} (95% range of departures, people)`,
+        `{{${alias}.hist.expected|1dp}} (trailing-rate status quo: departures expected at the last 12 months' rate, people)`,
+        `{{${alias}.annual_rate|pct}} (the forecast as an annualized voluntary departure rate)`,
+      ],
     };
   },
 };
@@ -542,7 +550,9 @@ const explainChange: ToolDef<typeof toolInputs.explain_change, ChangeData> = {
       interval80_width: v.interval80_width,
       factors,
       largest_factor: v.largest,
-      cite: [`{{${alias}.delta|1dp}}`, `{{${alias}.from_value|1dp}}`, `{{${alias}.to_value|1dp}}`, `{{${alias}.interval80_width|1dp}}`, ...v.factors.map((_, i) => `{{${alias}.factors.${i}.phi|1dp}} (${v.factors[i]!.label})`)],
+      units: "delta, from_value, to_value, interval80_width and every factor are counts of people (expected voluntary departures), never percentages or percentage points",
+      largest_factor_share: Math.round((Math.abs(v.factors.reduce((m, f) => (Math.abs(f.phi) > Math.abs(m) ? f.phi : m), 0)) / Math.max(1e-9, v.factors.reduce((t, f) => t + Math.abs(f.phi), 0))) * 100) / 100,
+      cite: [`{{${alias}.delta|1dp}} (change in expected voluntary departures, people; negative means fewer)`, `{{${alias}.from_value|1dp}} (previous run's expected departures, people)`, `{{${alias}.to_value|1dp}} (current run's expected departures, people)`, `{{${alias}.interval80_width|1dp}} (width of the current 80% range, people)`, ...v.factors.map((_, i) => `{{${alias}.factors.${i}.phi|1dp}} (${v.factors[i]!.label})`)],
     };
   },
 };

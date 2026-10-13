@@ -312,6 +312,7 @@ async def run_replicate(
         "seed": seed,
         "config": {"name": config, **cfg, "faq_round": FAQ_ROUND, "ama_round": AMA_ROUND},
         "provider": provider.name,
+        "model": getattr(provider, "model", None),
         "placeholder": provider.name == "stub",
         "sampling": {"temperature": 0.7, "top_p": 0.95, **getattr(provider, "sampling_note", {})},
         "personas": [

@@ -11,11 +11,12 @@ import { preRoute } from "../../shared/guard/prerouter";
 import { isRefusal, REFUSAL_MESSAGES, type RefusalCode } from "../../shared/policy/refusals";
 import { getTool, publishedCohorts, runTool, type ToolContext, toolsFor } from "../../shared/tools/registry";
 import { REPAIR_PROMPT, SYSTEM_PROMPT } from "./prompts";
-import { findRecording, type RecordedStep } from "./recorded-provider";
+import { UNRECORDED_CHAT, UNRECORDED_CHAT_NONE } from "../../shared/provenance";
+import { findRecording, type RecordedStep, recordedQuestions, replayLabel } from "./recorded-provider";
 import { openAiCompatible, type ProviderName, recordedModel, stubModel, LOCAL_URLS } from "./providers";
 import { type AigMetadata, type BudgetPort, neuronsFor, stripThink, TURN_CEILING, type WorkersAiConfig, withNoThink, workersAiModel } from "./workers-ai";
 
-export type Grounding = "passed" | "repaired" | "template" | "refused";
+export type Grounding = "passed" | "repaired" | "template" | "refused" | "unrecorded";
 
 export interface Span {
   kind: "prerouter" | "model_call" | "tool_call" | "grounding" | "repair" | "template";
@@ -48,6 +49,8 @@ export interface TurnOutput {
   label: string | null;
   violations: string[];
   spans: Span[];
+  /** The recorded provider only: the questions that have a recording, offered when this one has none. */
+  suggestions?: string[];
   /** The model's own steps (tool calls with their arguments, then the accepted text), returned only when
    * TurnOptions.captureSteps is set: the demo-turn recorder writes them to demo/recordings (ADR 0010). */
   model_steps?: RecordedStep[];
@@ -72,9 +75,9 @@ export interface TurnHooks {
 function modelFor(provider: ProviderName, aliases: AliasMap, question: string, opts: TurnOptions = {}): { model: LanguageModel; recorded: boolean; label: string | null } {
   if (provider === "workers-ai" && opts.workersAi) return { model: workersAiModel(opts.workersAi, opts.meta ?? {}, opts.fetch), recorded: false, label: null };
   if (provider === "recorded") {
+    // a question with no recording never reaches here: runTurn answers it with the unrecorded message first
     const rec = findRecording(question);
-    if (rec) return { model: recordedModel(rec), recorded: true, label: rec.label || "Model text replayed from a recorded 27B turn; tools ran live" };
-    return { model: stubModel(aliases), recorded: false, label: "No recorded turn for this question; the deterministic template answered" };
+    if (rec) return { model: recordedModel(rec), recorded: true, label: replayLabel(rec) };
   }
   if (provider === "llama" || provider === "mlx") return { model: openAiCompatible(provider, LOCAL_URLS[provider]), recorded: false, label: null };
   return { model: stubModel(aliases), recorded: false, label: provider === "stub" ? "Stub model (deterministic template)" : null };
@@ -98,6 +101,14 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   if (sized) {
     const msg = sized.refusal.message;
     return { ...base, aliases: {}, tool_calls: [], violations: [], text: msg, rendered: msg, grounding: "refused", refusal: { code: sized.refusal.code, message: msg, layer: "prerouter" }, recorded: false, label: null };
+  }
+  // the recorded provider (the demo) replays only what was recorded: a question with no recording gets a friendly
+  // message and the recorded questions, never a stub or template answer, and no model or tool runs
+  if (provider === "recorded" && !findRecording(question)) {
+    const suggestions = recordedQuestions();
+    const msg = suggestions.length ? UNRECORDED_CHAT : UNRECORDED_CHAT_NONE;
+    spans.push({ kind: "prerouter", name: "recording", start_ms: at(), dur_ms: 0, outcome: "unrecorded" });
+    return { ...base, aliases: {}, tool_calls: [], violations: [], text: msg, rendered: msg, grounding: "unrecorded", refusal: null, recorded: false, label: null, suggestions };
   }
   const aliases: AliasMap = new Map();
   const calls: ToolCallRecord[] = [];

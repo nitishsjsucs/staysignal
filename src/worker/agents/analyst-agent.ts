@@ -80,7 +80,8 @@ export class AnalystAgent extends AIChatAgent<Env, AnalystState> {
   /** The same turn over RPC: used by /api/dev/agent/turn and the eval harness. */
   async turn(p: Principal, question: string, provider?: ProviderName, history: { role: "user" | "assistant"; content: string }[] = [], captureSteps = false): Promise<TurnOutput> {
     const cfg = parseConfig(this.env);
-    const out = await runTurn(this.toolContext(p), provider ?? (cfg.llm as ProviderName), question, history as ModelMessage[], {}, { ...this.turnOptions(p, "api"), captureSteps });
+    // demo mode replays recordings only: a provider named in the request cannot reach a live model
+    const out = await runTurn(this.toolContext(p), cfg.demo ? "recorded" : (provider ?? (cfg.llm as ProviderName)), question, history as ModelMessage[], {}, { ...this.turnOptions(p, "api"), captureSteps });
     await this.recordTrace(p, out);
     return out;
   }
@@ -109,7 +110,7 @@ export class AnalystAgent extends AIChatAgent<Env, AnalystState> {
           onToolResult: (c) => writer.write({ type: "tool-output-available", toolCallId: c.toolCallId, output: { result_id: c.record.result_id, alias: c.record.alias, tool: c.record.tool, refused: c.record.refused } }),
         }, this.turnOptions(p, "chat"));
         const traceId = await this.recordTrace(p, out);
-        writer.write({ type: "data-turn", data: { grounding: out.grounding, aliases: out.aliases, refusal: out.refusal, label: out.label, recorded: out.recorded, trace_id: traceId } } as never);
+        writer.write({ type: "data-turn", data: { grounding: out.grounding, aliases: out.aliases, refusal: out.refusal, label: out.label, recorded: out.recorded, suggestions: out.suggestions ?? null, trace_id: traceId } } as never);
         writer.write({ type: "text-start", id: "answer" });
         writer.write({ type: "text-delta", id: "answer", delta: out.text });
         writer.write({ type: "text-end", id: "answer" });

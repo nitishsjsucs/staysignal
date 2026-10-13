@@ -117,6 +117,8 @@ interface TurnData {
   refusal: { code: string; message: string; layer: string } | null;
   label: string | null;
   recorded: boolean;
+  /** Demo mode, a question with no recording: the recorded questions to ask instead. */
+  suggestions?: string[] | null;
   trace_id: string;
 }
 
@@ -131,6 +133,9 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
   const agent = useAgent({ agent: "analyst-agent", basePath: "agents-ws/analyst" });
   const { messages, sendMessage, status, clearHistory } = useAgentChat({ agent, getInitialMessages: null });
   const [input, setInput] = useState("");
+  // demo mode replays recorded answers only, so its chips are exactly the recorded questions
+  const demo = me.demo ?? null;
+  const chips = demo ? demo.recorded_questions : SUGGESTIONS;
   const seen = useRef(new Set<string>());
   const bodyRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -163,7 +168,14 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
             <p style={{ color: "var(--ink-2)", fontSize: 13, marginBottom: 6 }}>
               Ask about a cohort's forecast, what changed, data quality or a review. Answers come from governed tools; every number links to the result that produced it.
             </p>
-            {SUGGESTIONS.map((s) => (
+            {demo ? (
+              <p style={{ color: "var(--ink-2)", fontSize: 12, marginBottom: 6 }} data-testid="dock-demo-note">
+                {demo.recorded_questions.length
+                  ? "Model text in this demo was recorded from Qwen3.6-27B on this laptop and is replayed; the tools and numbers compute live from the warehouse."
+                  : "No answers have been recorded for this demo yet: the model text is recorded once from Qwen3.6-27B on this laptop and replayed."}
+              </p>
+            ) : null}
+            {chips.map((s) => (
               <button key={s} type="button" onClick={() => submit(s)}>
                 {s}
               </button>
@@ -204,10 +216,19 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
               ))}
               {data?.data.refusal ? <StatusPill status="warning">Refused: {data.data.refusal.code}</StatusPill> : null}
               <div style={{ marginTop: data?.data.refusal ? 6 : 0 }}>{data ? <Answer text={text} aliases={data.data.aliases} /> : text}</div>
-              {data ? (
+              {data && data.data.grounding !== "unrecorded" ? (
                 <div className="msg-meta">
                   {data.data.refusal ? <Chip>Refused before any model call: {data.data.refusal.layer}</Chip> : <Chip title="Numeric grounding check">Grounding: {data.data.grounding}</Chip>}
                   {data.data.label ? <Chip>{data.data.label}</Chip> : null}
+                </div>
+              ) : null}
+              {data?.data.suggestions?.length ? (
+                <div className="suggestions" style={{ marginTop: 8 }} data-testid="dock-recorded-chips">
+                  {data.data.suggestions.map((s) => (
+                    <button key={s} type="button" onClick={() => submit(s)}>
+                      {s}
+                    </button>
+                  ))}
                 </div>
               ) : null}
             </div>

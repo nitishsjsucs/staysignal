@@ -1,31 +1,51 @@
 # Demo script
 
-The runbook for beats 1 to 5 of SPEC.md section 3, with exact clicks and a Q&A crib. Everything shown is the synthetic company Larkspur Systems; every number below was produced by this repository on the canonical world (seed 20261011) and is labeled synthetic in the app. Beat 6 of SPEC.md (the Scenario Lab with a live interview) is not part of the 7-day variant; two optional beats after beat 5 show the Research page and the Scenario Lab page as they stand.
+The runbook for beats 1 to 5 of SPEC.md section 3, with exact clicks and a Q&A crib. Everything shown is the synthetic company Larkspur Systems; every number below was produced by this repository on the canonical world (seed 20261011) and is labeled synthetic in the app. Beat 6 of SPEC.md (the Scenario Lab with an interview) is not part of the 7-day variant; two optional beats after beat 5 show the Research page and the Scenario Lab page. Model text is recorded and replayed (see Before you start); every number is computed live.
 
-## Before the demo
+## Before you start
+
+The demo runs no model live. Every piece of model text on screen (chat answers, Scenario Lab sessions, persona interview answers) was recorded once from Qwen3.6-27B on this laptop and is replayed; the tools, warehouse queries and numbers still compute live from the local warehouse. Each replayed output carries the same line: "Recorded from Qwen3.6-27B on this laptop, <date>; replayed", followed by what is live ("Numbers compute live from the warehouse" in the chat). Say why if asked: the 27B needs about 16.6 GB of the 24 GB laptop, the measured cold time to the first token for the agent's tool prefix is 20 to 34 seconds, and the memory guard has stopped it on swap growth several times (README Results, the 27B measurement), so a live call in an interview is impractical. No model server is needed; start nothing with `npm run llm`.
 
 ```sh
 npm run dev:keys                                            # once: local dev keys and the runner token
 uv run --project engine staysignal engine prepare --fresh   # land the world, build the warehouse, publish the two runs
-npm run demo:snapshots                                      # the per-beat snapshots under var/snapshots/
+npm run demo:snapshots                                      # the per-beat snapshots under var/snapshots/ (rebuild after any change to main)
 npm run demo:reset -- --beat 1                              # about 3 seconds: restore the start of beat 1 and start the demo profile
 ```
 
-Open `http://127.0.0.1:8795` in a browser at 1440 x 900 and sign in with the role switcher as **People Analytics Lead (pa-lead)**. The demo profile runs the built app under wrangler dev with the local engine on 8196; every routine job is computed live by the engine.
+`npm run demo` and `npm run demo:reset` start the demo profile with `SS_DEMO=1`: the built app under wrangler dev with the local engine on 8196, and the recorded provider only, whatever `SS_LLM` says. They print what can be replayed, for example `chat turns 6 of 6 demo questions; Lab sessions from the 27B: infra-data-merge, promotion-criteria-third-window; interview answers: 2`. Open `http://127.0.0.1:8795` in a browser at 1440 x 900 and sign in with the role switcher as **People Analytics Lead (pa-lead)**.
 
-Model text: the default demo mode replays recorded 27B turns with live tools. No 27B turn is committed yet, so answers currently come from the stub model, which routes each question to one governed tool and narrates with the template; the answer chips say so. To recover any beat: `npm run demo:reset -- --beat N`.
+In demo mode:
 
-To record the turns (once, with other apps closed; each question makes at least two 27B calls, and the measured cold tool prefix alone takes about 20 seconds to its first token, so allow about a minute a question):
+- The chat dock offers the recorded questions as chips. A question with no recording gets a short message saying the demo replays recorded answers, with the recorded questions as chips; it never falls back to a stub or template answer. The boundary question is refused before any model call, so it needs no recording.
+- The Scenario Lab lists only sessions recorded from the 27B; the stub placeholder sessions used by CI are hidden. With none recorded, the page says so.
+- The persona interview answers only the recorded questions (shown as chips); any other question gets a short message pointing at them.
+
+To reset during the demo: `npm run demo:reset -- --beat N` (beats 1 to 3 start from the same state, beat 4 with the run held, beat 5 after the repair). A reset also copies the current Lab sessions, research run and action audit into the restored state, so snapshots built before a new recording still show it.
+
+### Recording, once, before the interview day
+
+Close other apps and run nothing heavy beside the 27B. Each step writes files that are committed after both hygiene tiers pass (the pre-commit hook scans every staged file).
 
 ```sh
-npm run llm -- start 27b               # the guarded 27B on 8186 (refuses below 17 GB available)
-npm run dev:wrangler                   # fixtures mode on 8795
-npm run demo:record -- --provider mlx  # every question in demo/questions.json; --only beat-2-what-changed re-asks one
-npm run stop                           # stops the 27B, its guard and wrangler
-npm test -- test/worker/recordings.test.ts
+npm run llm -- start 27b                     # the guarded 27B on 8186 (refuses below 17 GB available)
+
+# 1. the chat turns: every question in demo/questions.json (each makes at least two 27B calls; allow about a minute each)
+npm run dev:wrangler                         # fixtures mode on 8795, not demo mode
+npm run demo:record -- --provider mlx        # --only beat-2-what-changed re-asks one; a turn that fails grounding is not written
+npm run stop                                 # stops wrangler and the 27B; start the 27B again for step 2
+
+# 2. the Scenario Lab sessions (about 300 calls each; a rerun after an interruption resumes from var/lab/cache)
+npm run lab:record -- --proposal promotion-criteria-third-window --provider openai
+npm run lab:record -- --proposal infra-data-merge --provider openai
+uv run --project engine staysignal lab export && npm run fixtures:index
+
+# 3. the persona interview answers: the engine streams from the 27B outside demo mode
+SS_LLM=mlx npm run dev:engine                # then on the Lab page ask each interview question once
+npm run stop
 ```
 
-Each recording (`demo/recordings/<id>.json`) holds the model's tool calls with their arguments and its text, and its label names the model and the date; the chat shows that label on replay ("Model text replayed from a recorded 27B turn (date); tools ran live"). A turn whose text fails the grounding check is not written: ask it again with `--only`. Beats 3 and 4 are clicks, and the boundary question is refused before any model call, so none of them needs a recording. After recording, `npm run demo` picks the recorded provider by itself.
+For step 3, copy each answer from `var/engine/work/lab/interviews.jsonl` into `lab/interviews.json` as `{ "proposal", "persona_id", "question", "answer", "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)", "recorded_at": "<date>" }`. Then `npm test` (recorded turns replay with live tools and must pass grounding), `uv run --project sim pytest sim/tests` (the new sessions replay to their hashes), `npm run demo:snapshots`, and `npm run demo:reset -- --beat 1`. Until a recording exists the demo still runs: the chat offers the recorded questions only and the Lab page says no session is recorded yet.
 
 ## Frame (0:00 to 0:10)
 
@@ -33,8 +53,8 @@ Say: "Cohort-level planning support for People Partners. No individual scores an
 
 ## Beat 1, forecast (0:10 to 0:50)
 
-1. Click **Ask** (top right) and send: *Forecast voluntary departures in Engineering over the next 90 days.*
-2. The dock shows the `forecast departures` tool card and an answer whose numbers link to the computed result. The page follows to Engineering at 3 months: **13.1** expected voluntary departures, 80% range **8 to 18**, 95% range **6 to 22**, next to the trailing-rate status quo.
+1. Click **Ask** (top right) and click the chip (or send): *Forecast voluntary departures in Engineering over the next 90 days.*
+2. The dock shows the `forecast departures` tool card and an answer whose numbers link to the computed result, with the chip "Recorded from Qwen3.6-27B on this laptop, <date>; replayed. Numbers compute live from the warehouse." The page follows to Engineering at 3 months: **13.1** expected voluntary departures, 80% range **8 to 18**, 95% range **6 to 22**, next to the trailing-rate status quo.
 3. Point at the trust strip (backtest observed over expected, how often the 80% range held, data freshness, checks passing), the fan chart (6 months, 80% and 95% bands, Other exits as a grey line) and the backtest strip (quarterly pseudo-real-time backtests: model and data as known at each cutoff, not forecasts that were published).
 
 Key point: "In non-overlapping quarterly backtests our 80% range held N of M times." Read N and M from the trust strip; they are synthetic-world results.
@@ -84,13 +104,12 @@ Key point: "Three of the six pre-registered verdicts count against the predictio
 
 ## Optional: Scenario Lab page (about 45 seconds)
 
-Click **Scenario Lab**. Read the label first: "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated." Personas built from cohort-level facts (cells of at least 10 people) react to a proposal on a simulated forum; nothing here feeds a forecast or a review.
+Skip this beat if `npm run demo` printed "Lab sessions from the 27B: none". Click **Scenario Lab**. Read the label first: "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated." Personas built from cohort-level facts (cells of at least 10 people) react to a proposal on a simulated forum; nothing here feeds a forecast or a review.
 
 1. Pick a proposal (promotion criteria with a June window, or the infrastructure and data merge).
-2. Point at the banner: the sessions on screen are placeholders written by a scripted stub provider ("[stub]"), not a model, so they exercise recording, replay and analysis and say nothing about anyone. Do not read meaning into their numbers. The 27B sessions replace them once recorded (PROGRESS.md, "Scenario Lab: to do on the Mac").
+2. Point at the banner: "Recorded from Qwen3.6-27B on this laptop, <date>; replayed. No model runs here; the charts are computed from the recorded posts." Every replicate replays to its database hash with no model (CI checks it).
 3. Walk the views: theme bars with replicate ranges, attitude trajectories by tenure band, the influence network (simulated, colored by cohort only, not organizational network analysis), draft pilot items with the wording linter's findings, and the sanity panel, whose facts-only baseline and two negative controls show how much agreement is prompt echo.
-
-4. Interview one persona: in **Ask one persona a question**, pick a persona, type a question and click **Ask**. Under `npm run demo` with the 27B running (`npm run llm -- start 27b`), the answer streams live from the local 27B (at most 100 tokens) and says so; without the 27B, or if nothing starts within 12 seconds, it shows a recorded answer for the same question, or a placeholder labeled "scripted stub text, not a model". Each answer carries the "Synthetic persona" chip and the Lab label. With the placeholder sessions on screen the persona's context is the stub's, so treat a live answer as a demonstration of the mechanism only.
+4. Interview one persona: in **Ask one persona a question**, click one of the recorded questions. The answer carries the "Synthetic persona" chip, the same recorded-from line and the Lab label. A typed question that was not recorded gets a short message pointing at the recorded ones.
 
 Key point: "This generates questions to test with real people; the sanity panel shows how much of it is prompt echo."
 
@@ -106,4 +125,5 @@ Key point: "This generates questions to test with real people; the sanity panel 
 - **What would validation on real data need?** Quarterly backtests at matured outcomes, calibration and coverage by cohort with block bootstrap, a data-quality baseline per source, and a review of the action audit before any rollout (SPEC 10, 17).
 - **Regulatory position?** Cohort-level planning support, not automated decisions about individuals; see `docs/regulatory-notes.md` and `docs/employee-notice-template.md` (SPEC 17). This is not legal advice.
 - **How do you know the agent stays inside its rules?** A 200-question synthetic eval runs through the same turn as the chat dock. On Qwen3-1.7B, the small local test model, after the server-side cohort guard (`evals/results/agent-llama-2026-10-13.json`): 0 prompt-injection successes in 30 attempts and refusal accuracy 100% on 40 refusal items, all refused before any model call; routing 51.7% and grounding 50%, which is why numbers come only from tools and an answer that fails grounding falls back to a template. The 27B eval run is not done yet.
+- **Why is the model output recorded rather than live?** The 27B (Qwen3.6-27B, 4-bit, on MLX) needs about 16.6 GB of this laptop's 24 GB; its measured cold time to the first token on the agent's tool prefix is 20 to 34 seconds, and the memory guard stopped it on swap growth during measurement. So every model output was recorded once on this laptop and is replayed, labeled with the model and date. The tools and numbers are not recorded: they run live against the warehouse on every replay, and `test/worker/recordings.test.ts` requires each replay to reproduce the recorded result IDs.
 - **Can you undo a publication?** Publication is a pointer: rollback moves it back to version 1 with a reason, and version 3 stays in the run history (ADR 0005).

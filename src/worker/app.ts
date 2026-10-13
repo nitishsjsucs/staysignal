@@ -4,6 +4,7 @@
 import { getAgentByName } from "agents";
 import { Hono } from "hono";
 import { canonicalJson } from "../shared/canonical-json";
+import { recordedProvenance } from "../shared/provenance";
 import type { FunnelData, FunnelPoint, HistoryFixture, QualityFixture } from "../shared/contracts";
 import { authorizeCohort, canUseTool, MIN_COMPARISON } from "../shared/policy/authorize";
 import { DEMO } from "../shared/routines/definitions";
@@ -16,7 +17,8 @@ import { AuthError } from "./auth/access";
 import { mintDevToken } from "./auth/dev-login";
 import { agentInstanceName } from "./auth/hmac";
 import { authenticate, DEV_COOKIE, runnerId } from "./auth/principal";
-import { fallbackAnswer, liveAnswer, parseInterview } from "./lab-interview";
+import { recordedQuestions } from "./agents/recorded-provider";
+import { fallbackAnswer, LAB_LABEL, liveAnswer, parseInterview, recordedInterviews, recordedOnlyAnswer } from "./lab-interview";
 import { type AppConfig, isLocalHost, parseConfig } from "./config";
 import { sha256HexSync } from "./store/chain";
 import { warehouseFor } from "./warehouse/client";
@@ -131,7 +133,8 @@ export function buildApp() {
     return next();
   });
 
-  app.get("/api/me", (c) => c.json({ principal: c.var.principal, label: "synthetic" }));
+  // demo: recorded model output only (SS_DEMO=1); the chat offers the recorded questions as chips
+  app.get("/api/me", (c) => c.json({ principal: c.var.principal, label: "synthetic", demo: c.var.config.demo ? { recorded_questions: recordedQuestions() } : null }));
 
   const tool = (name: string, args: Record<string, unknown>) => async (c: { env: Env; var: Vars }) => {
     const out = await runTool(toolContext(c.env, c.var.principal), name, args);
@@ -374,15 +377,22 @@ export function buildApp() {
   });
   // the Scenario Lab (SPEC 15): hypothesis generation with synthetic personas, recorded sessions only; it never feeds a
   // forecast number or review evidence (ADR 0008)
+  // demo mode lists model-recorded sessions only: the stub's placeholder sessions are hidden
   app.get("/api/lab", async (c) => {
     if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
     const doc = await warehouseFor(c.env).labIndex();
-    return doc ? c.json(doc) : c.json(refuse("OUT_OF_SCOPE", "No Lab session has been recorded."));
+    if (!doc) return c.json(refuse("OUT_OF_SCOPE", "No Lab session has been recorded."));
+    return c.json(c.var.config.demo ? { ...doc, proposals: doc.proposals.filter((p) => !p.placeholder), demo: true } : doc);
+  });
+  app.get("/api/lab/interviews/:proposal", async (c) => {
+    if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
+    return c.json({ label: LAB_LABEL, demo: c.var.config.demo, recorded: recordedInterviews(c.req.param("proposal")) });
   });
   app.get("/api/lab/:proposal", async (c) => {
     if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
     const doc = await warehouseFor(c.env).lab(c.req.param("proposal"));
-    return doc ? c.json(doc) : c.json({ error: "no recorded session for this proposal" }, 404);
+    if (!doc || (c.var.config.demo && doc.placeholder)) return c.json({ error: "no recorded session for this proposal" }, 404);
+    return c.json({ ...doc, provenance: doc.placeholder ? null : recordedProvenance(doc.model ?? "Qwen3.6-27B", doc.recorded_at ?? null, "lab") });
   });
   // the persona interview (SPEC 15.8): live only on the local machine in engine mode (the engine streams from the local
   // 27B, or its scripted stub under the stub model); anywhere else, or when the live answer does not start within 12
@@ -392,6 +402,8 @@ export function buildApp() {
     const req = parseInterview(await c.req.json().catch(() => null));
     if ("error" in req) return c.json({ error: req.error }, 400);
     const cfg = c.var.config;
+    // demo mode replays recorded answers only: neither the engine nor a model is called
+    if (cfg.demo) return recordedOnlyAnswer(req);
     const local = cfg.authMode === "dev" && isLocalHost(new URL(c.req.url));
     if (local && cfg.dataMode === "engine") return liveAnswer(cfg.engineUrl, req, cfg.llm === "stub" ? "stub" : "mlx");
     return fallbackAnswer(req);

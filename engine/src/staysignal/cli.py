@@ -661,12 +661,17 @@ def cmd_lab_export(args: argparse.Namespace) -> int:
             if (d / "manifest.json").exists()
         ]
         main = next(m for m in manifests if m["card_variant"] == "main")
+        prior = docs.get(analysis["proposal"])
+        if prior is not None and not prior["placeholder"]:
+            continue  # a model-recorded session wins over a stub placeholder for the same proposal
         docs[analysis["proposal"]] = {
             "label": analysis["label"],
             "proposal": analysis["proposal"],
             "session": session.name,
             "placeholder": analysis["placeholder"],
             "provider": main["provider"],
+            "model": main.get("model") or ("Qwen3.6-27B" if main["provider"] == "openai" else None),
+            "recorded_at": main.get("recorded_at"),
             "personas": [
                 {"persona_id": p["persona_id"], "handle": p["handle"], "tenure_band": p["tenure_band"]}
                 for p in main["personas"]

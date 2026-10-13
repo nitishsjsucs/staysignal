@@ -9,7 +9,8 @@ import { fileURLToPath } from "node:url";
 import { readDevVars } from "./dev-keys.ts";
 import { PORTS, startGroup, waitForHttp, waitPortFree } from "./lib/pids.ts";
 
-export async function serve(opts: { build?: boolean; llm?: string; dataMode?: string; runner?: boolean } = {}): Promise<void> {
+// `demo` (npm run demo only) sets SS_DEMO=1: the Worker then replays recorded model output only (src/worker/config.ts).
+export async function serve(opts: { build?: boolean; llm?: string; dataMode?: string; runner?: boolean; demo?: boolean } = {}): Promise<void> {
   if (!existsSync(".dev.vars")) execFileSync(process.execPath, ["scripts/dev-keys.ts"], { stdio: "inherit" });
   if (!(await waitPortFree(PORTS.worker))) throw new Error(`port ${PORTS.worker} is busy; run npm run stop`);
   if (opts.build !== false) execFileSync("npx", ["vite", "build"], { stdio: "inherit" });
@@ -24,7 +25,7 @@ export async function serve(opts: { build?: boolean; llm?: string; dataMode?: st
     });
     if (!(await waitForHttp(`http://127.0.0.1:${PORTS.engine}/health`, 120_000))) throw new Error("the engine did not become healthy; see var/logs/engine.log");
   }
-  const vars = [`SS_LLM:${opts.llm ?? process.env.SS_LLM ?? "stub"}`, `SS_DATA_MODE:${dataMode}`, "SS_DEMO:1"];
+  const vars = [`SS_LLM:${opts.llm ?? process.env.SS_LLM ?? "stub"}`, `SS_DATA_MODE:${dataMode}`, `SS_DEMO:${opts.demo ? "1" : "0"}`];
   startGroup("wrangler", "npx", ["wrangler", "dev", "-c", "dist/staysignal/wrangler.json", "--port", String(PORTS.worker), "--inspector-port", String(PORTS.inspector), "--ip", "127.0.0.1", ...vars.flatMap((v) => ["--var", v])], { port: PORTS.worker, env: { ...process.env, WRANGLER_SEND_METRICS: "false" } });
   if (!(await waitForHttp(`http://127.0.0.1:${PORTS.worker}/api/health`, 120_000))) throw new Error("wrangler dev did not become healthy; see var/logs/wrangler.log");
   if (opts.runner !== false && dataMode !== "engine") startGroup("fixture-runner", process.execPath, ["scripts/fixture-runner.ts", "--base", `http://127.0.0.1:${PORTS.worker}`], { port: null });

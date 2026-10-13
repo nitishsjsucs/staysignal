@@ -1,6 +1,7 @@
 // The demo profile and its per-beat snapshots (SPEC 22.4).
 //   npm run demo                      the demo profile: built app under wrangler dev 8795, the local engine on 8196,
-//                                     SS_DEMO=1; the recorded provider when recorded turns exist, otherwise the stub
+//                                     SS_DEMO=1: every model output is a recording (chat turns, Lab sessions, interview
+//                                     answers), replayed; no model server is needed or called; tools compute live
 //   npm run demo:snapshots            builds var/snapshots/beat-<N>/ by driving the routine through the API
 //   npm run demo:reset [-- --beat N]  stops everything, restores the snapshot for the start of beat N (default 1),
 //                                     restarts the demo profile and records the time it took with --record
@@ -8,7 +9,7 @@
 // store, the engine's published documents and the memory repository. Beats 1 to 3 start from the same data state (beats 1 and 2 only ask
 // questions; beat 3 starts the arrival), beat 4 starts with the run held and the mapping proposal waiting for a data
 // engineer, and beat 5 starts after the repair, the publication of version 3 and its replay.
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,17 +44,46 @@ function restore(name: string): void {
     rmSync(`${p}.wal`, { force: true });
     if (existsSync(join(dir, p))) cpSync(join(dir, p), p, { recursive: true });
   }
+  refreshStaticDocs();
 }
 
-// counted from the directory: the generated index imports JSON, which Node cannot import without an attribute
-function llmFor(): string {
-  const recorded = existsSync(join("demo", "recordings")) && readdirSync(join("demo", "recordings")).some((f) => f.endsWith(".json"));
-  return recorded ? "recorded" : "stub";
+const latest = (dir: string, prefix: string): string | null =>
+  existsSync(dir) ? (readdirSync(dir).filter((f) => f.startsWith(prefix) && f.endsWith(".json")).sort().at(-1) ?? null) : null;
+
+/** The published documents that no beat changes (the Scenario Lab's sessions, the research run, the action audit) are
+ * copied from the repository after a restore, as `staysignal engine prepare` does, so a snapshot built before a new
+ * Lab recording or research run still shows the current ones. */
+export function refreshStaticDocs(published = "var/engine/published"): void {
+  if (!existsSync(published)) return;
+  const lab = join("test", "fixtures", "api", "lab");
+  if (existsSync(lab)) {
+    rmSync(join(published, "lab"), { recursive: true, force: true });
+    mkdirSync(join(published, "lab"), { recursive: true });
+    for (const f of readdirSync(lab).filter((f) => f.endsWith(".json"))) cpSync(join(lab, f), join(published, "lab", f));
+  }
+  for (const [prefix, out] of [["research-", "research.json"], ["action-audit-", "action-audit.json"]] as const) {
+    const f = latest("results", prefix);
+    if (f) cpSync(join("results", f), join(published, out));
+  }
+}
+
+/** What the demo can replay: recorded chat turns for the demo questions, model-recorded Lab sessions, interview
+ * answers. Counted from the files, because the generated index imports JSON, which Node cannot import without an
+ * attribute. */
+export function recordingCoverage(): { questions: number; recorded: string[]; missing: string[]; labSessions: string[]; interviews: number } {
+  const qs = (JSON.parse(readFileSync(join("demo", "questions.json"), "utf8")) as { questions: { id: string; expect?: string }[] }).questions.filter((q) => q.expect !== "refusal");
+  const dir = join("demo", "recordings");
+  const have = new Set(existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5)) : []);
+  const labIndex = join("test", "fixtures", "api", "lab", "index.json");
+  const lab = existsSync(labIndex) ? (JSON.parse(readFileSync(labIndex, "utf8")) as { proposals: { id: string; placeholder: boolean }[] }).proposals.filter((p) => !p.placeholder).map((p) => p.id) : [];
+  const interviews = (JSON.parse(readFileSync(join("lab", "interviews.json"), "utf8")) as { answers: unknown[] }).answers.length;
+  return { questions: qs.length, recorded: qs.filter((q) => have.has(q.id)).map((q) => q.id), missing: qs.filter((q) => !have.has(q.id)).map((q) => q.id), labSessions: lab, interviews };
 }
 
 export async function startDemo(build: boolean): Promise<void> {
-  await serve({ build, dataMode: "engine", llm: llmFor() });
-  if (llmFor() === "stub") console.log("[demo] no recorded 27B turns yet: answers come from the stub model (labeled)");
+  await serve({ build, dataMode: "engine", llm: "recorded", demo: true });
+  const c = recordingCoverage();
+  console.log(`[demo] replaying recordings only (no model server): chat turns ${c.recorded.length} of ${c.questions} demo questions${c.missing.length ? ` (not recorded: ${c.missing.join(", ")})` : ""}; Lab sessions from the 27B: ${c.labSessions.length ? c.labSessions.join(", ") : "none"}; interview answers: ${c.interviews}`);
 }
 
 const tokens = new Map<string, string>();

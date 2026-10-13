@@ -6,6 +6,7 @@ export interface AppConfig {
   /** "external": a runner leases engine jobs (the local engine or the fixture runner); "inline": a fixtures
    * deployment completes each job from the committed job fixtures as it is enqueued (no runner). */
   runner: "external" | "inline";
+  /** SS_DEMO=1: recorded model output only (llm is always "recorded"); stub and live providers are off. */
   demo: boolean;
   engineUrl: string;
   devJwks: string | null;
@@ -31,7 +32,10 @@ export function parseConfig(env: Env): AppConfig {
   const e = env as unknown as Record<string, string | undefined>;
   const authMode = e.SS_AUTH_MODE === "access" ? "access" : "dev";
   const dataMode = (e.SS_DATA_MODE ?? "fixtures") as AppConfig["dataMode"];
-  const llm = (e.SS_LLM ?? "stub") as AppConfig["llm"];
+  const demo = e.SS_DEMO === "1";
+  // demo mode (npm run demo) replays recorded model output only: whatever SS_LLM says, no live model is reachable from
+  // any path (the chat, the dev turn, the investigation, the persona interview). The operator's decision, 2026-10-13.
+  const llm = (demo ? "recorded" : (e.SS_LLM ?? "stub")) as AppConfig["llm"];
   if (authMode === "access" && (!e.SS_ACCESS_TEAM_DOMAIN || !e.SS_ACCESS_AUD)) throw new Error("access mode needs SS_ACCESS_TEAM_DOMAIN and SS_ACCESS_AUD");
   if (dataMode === "bigquery" && (!e.SS_GCP_PROJECT_ID || !e.SS_GCP_SA_KEY)) throw new Error("SS_DATA_MODE=bigquery needs SS_GCP_PROJECT_ID and the SS_GCP_SA_KEY secret");
   if (llm === "workers-ai" && (!e.SS_AIG_ACCOUNT_ID || !e.SS_AIG_GATEWAY_ID || !e.SS_AIG_TOKEN)) throw new Error("SS_LLM=workers-ai needs SS_AIG_ACCOUNT_ID, SS_AIG_GATEWAY_ID and the SS_AIG_TOKEN secret");
@@ -40,7 +44,7 @@ export function parseConfig(env: Env): AppConfig {
     dataMode,
     llm,
     runner: e.SS_RUNNER === "inline" && dataMode === "fixtures" ? "inline" : "external",
-    demo: e.SS_DEMO === "1",
+    demo,
     engineUrl: e.SS_ENGINE_URL ?? "http://127.0.0.1:8196",
     devJwks: e.SS_DEV_JWKS ?? null,
     devSigningJwk: e.SS_DEV_SIGNING_JWK ?? null,

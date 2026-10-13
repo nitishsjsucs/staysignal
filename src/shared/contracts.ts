@@ -469,6 +469,8 @@ export interface ActionAuditDoc {
 export interface LabIndex {
   label: string | null;
   proposals: { id: string; session: string; placeholder: boolean }[];
+  /** Set by the Worker in demo mode, where placeholder sessions are left out. */
+  demo?: boolean;
 }
 
 export interface LabDoc {
@@ -477,6 +479,11 @@ export interface LabDoc {
   session: string;
   placeholder: boolean;
   provider: string;
+  /** The recording model and time (from the main replicate's manifest); null for a placeholder session. */
+  model?: string | null;
+  recorded_at?: string | null;
+  /** Added by the Worker: the shared provenance line of a model-recorded session, null for a placeholder. */
+  provenance?: string | null;
   personas: { persona_id: string; handle: string; tenure_band: string }[];
   replicates: { run: string; card_variant: string; seed: number; rounds: number; calls: number; db_sha256: string }[];
   analysis: Record<string, unknown>;

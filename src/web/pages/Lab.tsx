@@ -1,8 +1,10 @@
 // Scenario Lab page (SPEC 15, 16.1): recorded sessions of synthetic personas reacting to a proposed change on a
 // simulated forum. Hypothesis generation only: every view carries the label, every post and quote a "Synthetic
-// persona" chip, and nothing here feeds a forecast number or review evidence (ADR 0008). A placeholder session (the
-// scripted stub provider, no model) says so in a banner.
-import { type FormEvent, useState } from "react";
+// persona" chip, and nothing here feeds a forecast number or review evidence (ADR 0008). A model-recorded session
+// carries the shared provenance line; a placeholder session (the scripted stub provider, no model) says so in a banner
+// and is hidden in demo mode, where the interview answers only from recorded answers.
+import { type FormEvent, useEffect, useState } from "react";
+import { modelName } from "../../shared/provenance";
 import type { LabDoc, LabIndex } from "../../shared/contracts";
 import { isRefusal, type Me, type Refusal, useQuery } from "../api";
 import { fmtVal, TipRow, Tooltip, useTooltip, useWidth } from "../charts/kit";
@@ -183,7 +185,7 @@ function SanityPanel({ s, placeholder }: { s: Sanity; placeholder: boolean }) {
   );
 }
 
-function Session({ id }: { id: string }) {
+function Session({ id, demo }: { id: string; demo: boolean }) {
   const q = useQuery<LabDoc | Refusal>(`/api/lab/${encodeURIComponent(id)}`);
   if (q.error) return <ErrorState error={q.error} />;
   if (!q.data) return <Skeleton height={320} />;
@@ -199,7 +201,12 @@ function Session({ id }: { id: string }) {
           <IconAlert size={16} />
           <span>Placeholder session: the scripted stub provider wrote these posts ("[stub]"), not a model, to exercise recording, replay and analysis. Nothing here reflects anyone. The Qwen3.6-27B sessions are recorded on the operator's machine.</span>
         </div>
-      ) : null}
+      ) : (
+        <div className="banner" role="status" data-testid="lab-recorded" style={{ margin: "0 0 16px" }}>
+          <IconAlert size={16} />
+          <span>{doc.provenance ?? "Recorded session, replayed with no model."} Synthetic personas built from cohort-level facts: sampled model text, not people, so read it as questions to test, not as findings.</span>
+        </div>
+      )}
       <div className="grid">
         <ChartCard id="lab-themes" className="span-7" title="What did the personas talk about?" subtitle={`Share of coded posts by theme, mean across ${doc.replicates.filter((r) => r.card_variant === "main").length} replicates with their range; coded by a separate call that never saw the persona prompts`} height={300} table={<table className="table"><thead><tr><th>Theme</th><th className="num">Mean</th><th className="num">Range</th></tr></thead><tbody>{a.themes.shares.map((t) => <tr key={t.theme}><td>{THEME_LABEL[t.theme] ?? t.theme}</td><td className="num">{pct(t.mean)}</td><td className="num">{pct(t.min)} to {pct(t.max)}</td></tr>)}</tbody></table>}>
           <ThemeBars shares={a.themes.shares} />
@@ -234,9 +241,9 @@ function Session({ id }: { id: string }) {
         <section className="card span-12" data-testid="lab-personas">
           <div className="card-head"><div><h2 className="card-title">Who are the personas?</h2><div className="card-sub">Templates over cohort cells of at least 10 people: a handle, the cell's facts, the status quo and the proposal. Never an individual, a predicted risk or a protected attribute.</div></div></div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{doc.personas.map((p) => <Chip key={p.persona_id} title="Synthetic persona">{p.handle}</Chip>)}</div>
-          <p className="card-sub" style={{ marginTop: 8 }}>Session {doc.session}: {doc.replicates.length} replicates, provider {doc.provider}; each replays to its database hash with no model.</p>
+          <p className="card-sub" style={{ marginTop: 8 }}>Session {doc.session}: {doc.replicates.length} replicates, {doc.placeholder ? "scripted stub provider (placeholder)" : `recorded from ${modelName(doc.model)}`}; each replays to its database hash with no model.</p>
         </section>
-        <InterviewCard proposal={doc.proposal} personas={doc.personas} />
+        <InterviewCard proposal={doc.proposal} personas={doc.personas} demo={demo} />
       </div>
     </>
   );
@@ -249,28 +256,57 @@ const SOURCE_NOTE: Record<string, string> = {
   placeholder: "Placeholder: scripted stub text, not a model",
 };
 
-/** SPEC 15.8: one question to one synthetic persona; the answer streams in, with its source and the Lab label. */
-function InterviewCard({ proposal, personas }: { proposal: string; personas: { persona_id: string; handle: string }[] }) {
+interface RecordedQuestion { persona_id: string; question: string; provenance: string }
+
+/** SPEC 15.8: one question to one synthetic persona; the answer streams in, with its source and the Lab label. In demo
+ * mode the answers are recorded ones only, and the recorded questions are offered as chips. */
+function InterviewCard({ proposal, personas, demo }: { proposal: string; personas: { persona_id: string; handle: string }[]; demo: boolean }) {
   const [persona, setPersona] = useState(personas[0]?.persona_id ?? "P01");
   const [q, setQ] = useState("What would you want to know before this change starts?");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<{ text: string; source: string; model: string | null; handle: string } | null>(null);
-  async function ask(e: FormEvent) {
-    e.preventDefault();
-    if (!q.trim() || busy) return;
+  const [answer, setAnswer] = useState<{ text: string; source: string; model: string | null; provenance: string | null; handle: string } | null>(null);
+  const [recorded, setRecorded] = useState<RecordedQuestion[]>([]);
+  useEffect(() => {
+    let alive = true;
+    fetch(`/api/lab/interviews/${encodeURIComponent(proposal)}`, { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { recorded?: RecordedQuestion[] } | null) => {
+        if (!alive || !j?.recorded) return;
+        setRecorded(j.recorded);
+        const first = j.recorded[0];
+        if (demo && first) {
+          setPersona(first.persona_id);
+          setQ(first.question);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [proposal, demo]);
+  const handleOf = (id: string) => personas.find((p) => p.persona_id === id)?.handle ?? id;
+  async function ask(e: FormEvent | null, pick?: RecordedQuestion) {
+    e?.preventDefault();
+    const who = pick?.persona_id ?? persona;
+    const question = pick?.question ?? q;
+    if (!question.trim() || busy) return;
+    if (pick) {
+      setPersona(pick.persona_id);
+      setQ(pick.question);
+    }
     setBusy(true);
     setErr(null);
     setAnswer(null);
-    const handle = personas.find((p) => p.persona_id === persona)?.handle ?? persona;
+    const handle = handleOf(who);
     try {
-      const r = await fetch("/api/lab/interview", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ proposal, persona_id: persona, question: q }) });
+      const r = await fetch("/api/lab/interview", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ proposal, persona_id: who, question }) });
       if (!r.ok || (r.headers.get("content-type") ?? "").includes("application/json")) {
         const j = (await r.json().catch(() => null)) as { message?: string; error?: string } | null;
         setErr(j?.message ?? j?.error ?? `The interview failed (${r.status}).`);
         return;
       }
-      const meta = { source: r.headers.get("x-staysignal-source") ?? "placeholder", model: r.headers.get("x-staysignal-model"), handle };
+      const meta = { source: r.headers.get("x-staysignal-source") ?? "placeholder", model: r.headers.get("x-staysignal-model"), provenance: r.headers.get("x-staysignal-provenance"), handle };
       let text = "";
       const reader = r.body?.getReader();
       if (!reader) text = await r.text();
@@ -292,7 +328,18 @@ function InterviewCard({ proposal, personas }: { proposal: string; personas: { p
   }
   return (
     <section className="card span-12" data-testid="lab-interview">
-      <div className="card-head"><div><h2 className="card-title">Ask one persona a question</h2><div className="card-sub">{LAB_SUB} Live only on the local machine with the 27B; otherwise a recorded answer or a labeled placeholder.</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">Ask one persona a question</h2><div className="card-sub">{LAB_SUB} {demo ? "In this demo the personas answer the recorded questions below with what Qwen3.6-27B wrote on this laptop; no model runs here." : "Live only on the local machine with the 27B; otherwise a recorded answer or a labeled placeholder."}</div></div></div>
+      {recorded.length ? (
+        <div className="suggestions" style={{ marginBottom: 8 }} data-testid="lab-recorded-questions">
+          {recorded.map((r) => (
+            <button key={`${r.persona_id}|${r.question}`} type="button" disabled={busy} onClick={() => void ask(null, r)}>
+              {handleOf(r.persona_id)}: {r.question}
+            </button>
+          ))}
+        </div>
+      ) : demo ? (
+        <p className="card-sub" data-testid="lab-no-recorded-questions">No interview answers have been recorded for this proposal yet.</p>
+      ) : null}
       <form className="memory-form" style={{ flexWrap: "wrap" }} onSubmit={(e) => void ask(e)}>
         <select className="select" style={{ maxWidth: "100%" }} value={persona} onChange={(e) => setPersona(e.target.value)} aria-label="Persona">
           {personas.map((p) => <option key={p.persona_id} value={p.persona_id}>{p.handle}</option>)}
@@ -302,9 +349,11 @@ function InterviewCard({ proposal, personas }: { proposal: string; personas: { p
         <button type="submit" className="btn btn-primary" disabled={busy || !q.trim()} data-testid="lab-ask">{busy ? "Asking" : "Ask"}</button>
       </form>
       {err ? <p className="card-sub" role="alert">{err}</p> : null}
-      {answer ? (
+      {answer?.source === "unrecorded" ? (
+        <p className="card-sub" role="status" data-testid="lab-unrecorded">{answer.text}</p>
+      ) : answer ? (
         <blockquote className="lab-quote" data-testid="lab-answer"><PersonaChip /> <span className="card-sub">{answer.handle}:</span> <span>{answer.text}</span>
-          <div className="card-sub"><em>{SOURCE_NOTE[answer.source] ?? answer.source}{answer.model ? ` (${answer.model})` : ""}. {LAB_SUB}</em></div>
+          <div className="card-sub"><em>{answer.source === "recorded" && answer.provenance ? answer.provenance : `${SOURCE_NOTE[answer.source] ?? answer.source}${answer.model ? ` (${answer.model})` : ""}.`} {LAB_SUB}</em></div>
         </blockquote>
       ) : null}
     </section>
@@ -319,7 +368,14 @@ export function LabPage(_: { me: Me }) {
   if (!idx.data) return <>{head}<Skeleton height={200} /></>;
   if (isRefusal(idx.data)) return <>{head}<RefusalNote code={idx.data.code} message={idx.data.message} /></>;
   const proposals = idx.data.proposals;
-  if (!proposals.length) return <>{head}<EmptyState>No Lab session has been recorded.</EmptyState></>;
+  const demo = idx.data.demo === true;
+  if (!proposals.length)
+    return (
+      <>
+        {head}
+        <EmptyState>{demo ? "No Scenario Lab session has been recorded from Qwen3.6-27B yet. The demo shows only sessions recorded on this laptop and replayed; none is ready." : "No Lab session has been recorded."}</EmptyState>
+      </>
+    );
   const id = pick ?? proposals.find((p) => p.id === "promotion-criteria-third-window")?.id ?? proposals[0]!.id;
   return (
     <>
@@ -327,7 +383,7 @@ export function LabPage(_: { me: Me }) {
       <div style={{ margin: "0 0 16px" }}>
         <Segmented label="Proposal" value={id} onChange={setPick} options={proposals.map((p) => ({ value: p.id, label: p.id === "promotion-criteria-third-window" ? "Promotion criteria and a June window" : p.id === "infra-data-merge" ? "One group for Infrastructure and Data" : p.id }))} />
       </div>
-      <Session key={id} id={id} />
+      <Session key={id} id={id} demo={demo} />
     </>
   );
 }

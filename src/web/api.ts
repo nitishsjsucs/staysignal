@@ -88,6 +88,8 @@ export function useQuery<T>(url: string | null): Query<T> {
 
 export interface Me {
   principal: { id: string; role: string; display: string; scopes: string[]; assignedOrgs: string[] };
+  /** Demo mode (npm run demo): recorded model output only; the chat offers the recorded questions. */
+  demo?: { recorded_questions: string[] } | null;
 }
 
 export function hasScope(me: Me | null, scope: string): boolean {

@@ -255,6 +255,7 @@ class OpenAICompatibleProvider:
     dash ban (`logit_bias`), which is model-specific and so not part of the request hash."""
 
     name = "openai"
+    model = "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)"
     sampling_note = {
         "logit_bias": {
             "bias": -100,
@@ -286,6 +287,7 @@ class CachedProvider:
     def __init__(self, inner: Provider, path: Path) -> None:
         self.inner = inner
         self.name = inner.name
+        self.model = getattr(inner, "model", None)
         self.sampling_note = getattr(inner, "sampling_note", {})
         self.path = path
         self.entries: dict[str, dict] = {}

@@ -488,6 +488,34 @@ def cmd_eval_recovery(args: argparse.Namespace) -> int:
     return 0 if all(report["passed"].values()) else 1
 
 
+def cmd_lab_cells(args: argparse.Namespace) -> int:
+    """The Scenario Lab's cohort cells (SPEC 15.2) from the canonical world at the published run's cutoff, written to
+    lab/cohort_cells.json: cells of at least 10 people with rounded cohort facts, nothing individual."""
+    from datetime import date
+
+    from staysignal.clock import as_cutoff_datetime
+    from staysignal.features.reference import Vintage, features_at
+    from staysignal.ingest.landing import load_world_sources
+    from staysignal.lab.cells import export
+
+    repo, _ = _repo_var()
+    cutoff = date.fromisoformat(args.cutoff)
+    src = load_world_sources(Path(args.world))
+    doc = export(features_at(Vintage(src, as_cutoff_datetime(cutoff)), cutoff), args.run, cutoff)
+    out = repo / "lab" / "cohort_cells.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(doc, indent=1, sort_keys=True) + "\n"
+    if args.check:
+        same = out.exists() and out.read_text() == text
+        print(
+            "lab/cohort_cells.json is current" if same else "lab/cohort_cells.json is stale: run `staysignal lab cells`"
+        )
+        return 0 if same else 1
+    out.write_text(text)
+    print(json.dumps({"written": "lab/cohort_cells.json", "cells": len(doc["cells"]), "withheld": doc["withheld"]}))
+    return 0
+
+
 def cmd_prod_validate(args: argparse.Namespace) -> int:
     """prod:validate (SPEC 23.2): the offline BigQuery compile, then one free dry run per compiled file. Prints the plan
     unless --execute; --execute needs the project ID and application default credentials (the operator's Mac)."""
@@ -794,6 +822,14 @@ def build_parser() -> argparse.ArgumentParser:
     ch.set_defaults(func=cmd_eval_challenger)
     rc = esub.add_parser("recovery", help="C6: the fit on the recovery world against the generator's truth")
     rc.set_defaults(func=cmd_eval_recovery)
+    lab = sub.add_parser("lab", help="Scenario Lab inputs (hypothesis generation with synthetic personas)")
+    labsub = lab.add_subparsers(dest="lab_command", required=True)
+    lc = labsub.add_parser("cells", help="cohort cells of at least 10 people for the personas")
+    lc.add_argument("--world", default="var/world")
+    lc.add_argument("--run", default="R-2026-10-01#1")
+    lc.add_argument("--cutoff", default="2026-10-01")
+    lc.add_argument("--check", action="store_true", help="fail when the committed file differs")
+    lc.set_defaults(func=cmd_lab_cells)
     prod = sub.add_parser("prod", help="the production path (operator only; plan-only unless --execute)")
     psub = prod.add_subparsers(dest="prod_command", required=True)
     pv = psub.add_parser("validate", help="BigQuery dry runs of every compiled model and test (free)")

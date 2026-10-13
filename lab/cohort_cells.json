@@ -1,0 +1,1818 @@
+{
+ "cells": [
+  {
+   "cell_id": "C001",
+   "facts": {
+    "median_months_since_promotion": 17,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "AE",
+   "level_band": "early",
+   "n": 16,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "1-3y"
+  },
+  {
+   "cell_id": "C002",
+   "facts": {
+    "median_months_since_promotion": 5,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "early",
+   "n": 15,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C003",
+   "facts": {
+    "median_months_since_promotion": 37,
+    "share_below_midpoint": 0.3,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "early",
+   "n": 10,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C004",
+   "facts": {
+    "median_months_since_promotion": 24,
+    "share_below_midpoint": 0.25,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "AE",
+   "level_band": "manager",
+   "n": 12,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C005",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.45,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "mid",
+   "n": 13,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "1-3y"
+  },
+  {
+   "cell_id": "C006",
+   "facts": {
+    "median_months_since_promotion": 27,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "AE",
+   "level_band": "mid",
+   "n": 13,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "1-3y"
+  },
+  {
+   "cell_id": "C007",
+   "facts": {
+    "median_months_since_promotion": 40,
+    "share_below_midpoint": 0.35,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "mid",
+   "n": 11,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "3-5y"
+  },
+  {
+   "cell_id": "C008",
+   "facts": {
+    "median_months_since_promotion": 32,
+    "share_below_midpoint": 0.45,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "mid",
+   "n": 16,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C009",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.9,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C010",
+   "facts": {
+    "median_months_since_promotion": 6,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "AE",
+   "level_band": "mid",
+   "n": 21,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C011",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "mid",
+   "n": 15,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C012",
+   "facts": {
+    "median_months_since_promotion": 1,
+    "share_below_midpoint": 1.0,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "AE",
+   "level_band": "mid",
+   "n": 18,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C013",
+   "facts": {
+    "median_months_since_promotion": 37,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "AE",
+   "level_band": "senior",
+   "n": 20,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C014",
+   "facts": {
+    "median_months_since_promotion": 4,
+    "share_below_midpoint": 1.0,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "senior",
+   "n": 12,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C015",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "senior",
+   "n": 17,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C016",
+   "facts": {
+    "median_months_since_promotion": 29,
+    "share_below_midpoint": 0.45,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "AE",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C017",
+   "facts": {
+    "median_months_since_promotion": 6,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "AE",
+   "level_band": "senior",
+   "n": 16,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C018",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "CSM",
+   "level_band": "early",
+   "n": 12,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C019",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "CSM",
+   "level_band": "early",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C020",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "CSM",
+   "level_band": "mid",
+   "n": 20,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C021",
+   "facts": {
+    "median_months_since_promotion": 36,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "CSM",
+   "level_band": "mid",
+   "n": 18,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C022",
+   "facts": {
+    "median_months_since_promotion": 5,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "CSM",
+   "level_band": "mid",
+   "n": 23,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C023",
+   "facts": {
+    "median_months_since_promotion": 15,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "CSM",
+   "level_band": "senior",
+   "n": 14,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C024",
+   "facts": {
+    "median_months_since_promotion": 31,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "CSM",
+   "level_band": "senior",
+   "n": 17,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C025",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "DAT",
+   "level_band": "early",
+   "n": 16,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C026",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "DAT",
+   "level_band": "mid",
+   "n": 15,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C027",
+   "facts": {
+    "median_months_since_promotion": 31,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "DAT",
+   "level_band": "mid",
+   "n": 13,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C028",
+   "facts": {
+    "median_months_since_promotion": 6,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "DAT",
+   "level_band": "mid",
+   "n": 16,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C029",
+   "facts": {
+    "median_months_since_promotion": 16,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "DAT",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C030",
+   "facts": {
+    "median_months_since_promotion": 2,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "DAT",
+   "level_band": "senior",
+   "n": 12,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C031",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "DES",
+   "level_band": "early",
+   "n": 10,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C032",
+   "facts": {
+    "median_months_since_promotion": 32,
+    "share_below_midpoint": 0.3,
+    "share_manager_change_180d": 0.15
+   },
+   "job_family": "DES",
+   "level_band": "mid",
+   "n": 18,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C033",
+   "facts": {
+    "median_months_since_promotion": 12,
+    "share_below_midpoint": 0.8,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "DES",
+   "level_band": "mid",
+   "n": 12,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C034",
+   "facts": {
+    "median_months_since_promotion": 1,
+    "share_below_midpoint": 0.9,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "DES",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C035",
+   "facts": {
+    "median_months_since_promotion": 3,
+    "share_below_midpoint": 0.45,
+    "share_manager_change_180d": 0.2
+   },
+   "job_family": "FIN",
+   "level_band": "early",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C036",
+   "facts": {
+    "median_months_since_promotion": 24,
+    "share_below_midpoint": 0.3,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "FIN",
+   "level_band": "early",
+   "n": 14,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C037",
+   "facts": {
+    "median_months_since_promotion": 5,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "FIN",
+   "level_band": "mid",
+   "n": 11,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C038",
+   "facts": {
+    "median_months_since_promotion": 16,
+    "share_below_midpoint": 0.45,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "FIN",
+   "level_band": "mid",
+   "n": 11,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C039",
+   "facts": {
+    "median_months_since_promotion": 33,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "FIN",
+   "level_band": "mid",
+   "n": 16,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C040",
+   "facts": {
+    "median_months_since_promotion": 17,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "FIN",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C041",
+   "facts": {
+    "median_months_since_promotion": 9,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "FIN",
+   "level_band": "senior",
+   "n": 15,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C042",
+   "facts": {
+    "median_months_since_promotion": 38,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "INF",
+   "level_band": "early",
+   "n": 11,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C043",
+   "facts": {
+    "median_months_since_promotion": 9,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "INF",
+   "level_band": "early",
+   "n": 12,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C044",
+   "facts": {
+    "median_months_since_promotion": 21,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "INF",
+   "level_band": "manager",
+   "n": 10,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C045",
+   "facts": {
+    "median_months_since_promotion": 1,
+    "share_below_midpoint": 0.8,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "INF",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "1-3y"
+  },
+  {
+   "cell_id": "C046",
+   "facts": {
+    "median_months_since_promotion": 31,
+    "share_below_midpoint": 0.35,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "INF",
+   "level_band": "mid",
+   "n": 12,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C047",
+   "facts": {
+    "median_months_since_promotion": 6,
+    "share_below_midpoint": 0.9,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "INF",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C048",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.75,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "INF",
+   "level_band": "mid",
+   "n": 12,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C049",
+   "facts": {
+    "median_months_since_promotion": 4,
+    "share_below_midpoint": 0.9,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "INF",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C050",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "INF",
+   "level_band": "senior",
+   "n": 16,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C051",
+   "facts": {
+    "median_months_since_promotion": 1,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "INF",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C052",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.35,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "ITS",
+   "level_band": "early",
+   "n": 16,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C053",
+   "facts": {
+    "median_months_since_promotion": 15,
+    "share_below_midpoint": 0.45,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "ITS",
+   "level_band": "mid",
+   "n": 13,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C054",
+   "facts": {
+    "median_months_since_promotion": 5,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "ITS",
+   "level_band": "mid",
+   "n": 14,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C055",
+   "facts": {
+    "median_months_since_promotion": 19,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "ITS",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C056",
+   "facts": {
+    "median_months_since_promotion": 1,
+    "share_below_midpoint": 0.9,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "ITS",
+   "level_band": "senior",
+   "n": 11,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C057",
+   "facts": {
+    "median_months_since_promotion": 25,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "LGL",
+   "level_band": "early",
+   "n": 10,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C058",
+   "facts": {
+    "median_months_since_promotion": 34,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "LGL",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C059",
+   "facts": {
+    "median_months_since_promotion": 5,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "LGL",
+   "level_band": "mid",
+   "n": 12,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C060",
+   "facts": {
+    "median_months_since_promotion": 20,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "LGL",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C061",
+   "facts": {
+    "median_months_since_promotion": 6,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "MKT",
+   "level_band": "early",
+   "n": 13,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C062",
+   "facts": {
+    "median_months_since_promotion": 20,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "MKT",
+   "level_band": "early",
+   "n": 12,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C063",
+   "facts": {
+    "median_months_since_promotion": 19,
+    "share_below_midpoint": 0.9,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "MKT",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C064",
+   "facts": {
+    "median_months_since_promotion": 4,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "MKT",
+   "level_band": "mid",
+   "n": 13,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C065",
+   "facts": {
+    "median_months_since_promotion": 19,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "MKT",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C066",
+   "facts": {
+    "median_months_since_promotion": 31,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "MKT",
+   "level_band": "mid",
+   "n": 11,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C067",
+   "facts": {
+    "median_months_since_promotion": 1,
+    "share_below_midpoint": 0.95,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "MKT",
+   "level_band": "mid",
+   "n": 16,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C068",
+   "facts": {
+    "median_months_since_promotion": 15,
+    "share_below_midpoint": 0.3,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "MKT",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C069",
+   "facts": {
+    "median_months_since_promotion": 35,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "MKT",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C070",
+   "facts": {
+    "median_months_since_promotion": 5,
+    "share_below_midpoint": 0.8,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "MKT",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C071",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.75,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "OPS",
+   "level_band": "mid",
+   "n": 11,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C072",
+   "facts": {
+    "median_months_since_promotion": 17,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "OPS",
+   "level_band": "mid",
+   "n": 16,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C073",
+   "facts": {
+    "median_months_since_promotion": 34,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "OPS",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C074",
+   "facts": {
+    "median_months_since_promotion": 12,
+    "share_below_midpoint": 0.8,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "OPS",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C075",
+   "facts": {
+    "median_months_since_promotion": 21,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "PM",
+   "level_band": "early",
+   "n": 24,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C076",
+   "facts": {
+    "median_months_since_promotion": 19,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "PM",
+   "level_band": "mid",
+   "n": 13,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C077",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.75,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "PM",
+   "level_band": "mid",
+   "n": 17,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C078",
+   "facts": {
+    "median_months_since_promotion": 17,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "PM",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C079",
+   "facts": {
+    "median_months_since_promotion": 3,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "PM",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C080",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "PPL",
+   "level_band": "early",
+   "n": 13,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C081",
+   "facts": {
+    "median_months_since_promotion": 32,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "PPL",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C082",
+   "facts": {
+    "median_months_since_promotion": 3,
+    "share_below_midpoint": 0.9,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "PPL",
+   "level_band": "mid",
+   "n": 17,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C083",
+   "facts": {
+    "median_months_since_promotion": 34,
+    "share_below_midpoint": 0.35,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "PPL",
+   "level_band": "senior",
+   "n": 12,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C084",
+   "facts": {
+    "median_months_since_promotion": 10,
+    "share_below_midpoint": 0.95,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "PPL",
+   "level_band": "senior",
+   "n": 16,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C085",
+   "facts": {
+    "median_months_since_promotion": 5,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SDR",
+   "level_band": "early",
+   "n": 12,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C086",
+   "facts": {
+    "median_months_since_promotion": 17,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SDR",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "1-3y"
+  },
+  {
+   "cell_id": "C087",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 1.0,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "SDR",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C088",
+   "facts": {
+    "median_months_since_promotion": 16,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SDR",
+   "level_band": "mid",
+   "n": 20,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C089",
+   "facts": {
+    "median_months_since_promotion": 19,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SDR",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C090",
+   "facts": {
+    "median_months_since_promotion": 3,
+    "share_below_midpoint": 0.8,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SDR",
+   "level_band": "senior",
+   "n": 17,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C091",
+   "facts": {
+    "median_months_since_promotion": 19,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "SE",
+   "level_band": "early",
+   "n": 14,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C092",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SE",
+   "level_band": "mid",
+   "n": 12,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C093",
+   "facts": {
+    "median_months_since_promotion": 34,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "SE",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C094",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "SE",
+   "level_band": "mid",
+   "n": 16,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C095",
+   "facts": {
+    "median_months_since_promotion": 31,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SE",
+   "level_band": "senior",
+   "n": 12,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C096",
+   "facts": {
+    "median_months_since_promotion": 1,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "SE",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C097",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.2
+   },
+   "job_family": "SEC",
+   "level_band": "early",
+   "n": 10,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C098",
+   "facts": {
+    "median_months_since_promotion": 30,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.2
+   },
+   "job_family": "SEC",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C099",
+   "facts": {
+    "median_months_since_promotion": 3,
+    "share_below_midpoint": 0.8,
+    "share_manager_change_180d": 0.2
+   },
+   "job_family": "SEC",
+   "level_band": "mid",
+   "n": 14,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C100",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.5
+   },
+   "job_family": "SEC",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C101",
+   "facts": {
+    "median_months_since_promotion": 31,
+    "share_below_midpoint": 0.35,
+    "share_manager_change_180d": 0.2
+   },
+   "job_family": "SEC",
+   "level_band": "senior",
+   "n": 14,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C102",
+   "facts": {
+    "median_months_since_promotion": 21,
+    "share_below_midpoint": 0.35,
+    "share_manager_change_180d": 0.15
+   },
+   "job_family": "SWE",
+   "level_band": "early",
+   "n": 14,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "1-3y"
+  },
+  {
+   "cell_id": "C103",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "early",
+   "n": 23,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C104",
+   "facts": {
+    "median_months_since_promotion": 33,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "early",
+   "n": 13,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C105",
+   "facts": {
+    "median_months_since_promotion": 19,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "SWE",
+   "level_band": "manager",
+   "n": 17,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C106",
+   "facts": {
+    "median_months_since_promotion": 19,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "SWE",
+   "level_band": "mid",
+   "n": 21,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "1-3y"
+  },
+  {
+   "cell_id": "C107",
+   "facts": {
+    "median_months_since_promotion": 1,
+    "share_below_midpoint": 1.0,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "mid",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "1-3y"
+  },
+  {
+   "cell_id": "C108",
+   "facts": {
+    "median_months_since_promotion": 37,
+    "share_below_midpoint": 0.35,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "mid",
+   "n": 24,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "3-5y"
+  },
+  {
+   "cell_id": "C109",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.8,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "SWE",
+   "level_band": "mid",
+   "n": 17,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "3-5y"
+  },
+  {
+   "cell_id": "C110",
+   "facts": {
+    "median_months_since_promotion": 13,
+    "share_below_midpoint": 0.75,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "mid",
+   "n": 13,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C111",
+   "facts": {
+    "median_months_since_promotion": 31,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "mid",
+   "n": 22,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C112",
+   "facts": {
+    "median_months_since_promotion": 3,
+    "share_below_midpoint": 0.75,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "mid",
+   "n": 24,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C113",
+   "facts": {
+    "median_months_since_promotion": 16,
+    "share_below_midpoint": 0.45,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "mid",
+   "n": 26,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C114",
+   "facts": {
+    "median_months_since_promotion": 34,
+    "share_below_midpoint": 0.4,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "3-5y"
+  },
+  {
+   "cell_id": "C115",
+   "facts": {
+    "median_months_since_promotion": 15,
+    "share_below_midpoint": 0.8,
+    "share_manager_change_180d": 0.05
+   },
+   "job_family": "SWE",
+   "level_band": "senior",
+   "n": 20,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C116",
+   "facts": {
+    "median_months_since_promotion": 49,
+    "share_below_midpoint": 0.1,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "senior",
+   "n": 10,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C117",
+   "facts": {
+    "median_months_since_promotion": 2,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "SWE",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C118",
+   "facts": {
+    "median_months_since_promotion": 15,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C119",
+   "facts": {
+    "median_months_since_promotion": 3,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "SWE",
+   "level_band": "senior",
+   "n": 15,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C120",
+   "facts": {
+    "median_months_since_promotion": 8,
+    "share_below_midpoint": 0.45,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "TS",
+   "level_band": "early",
+   "n": 10,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C121",
+   "facts": {
+    "median_months_since_promotion": 23,
+    "share_below_midpoint": 0.3,
+    "share_manager_change_180d": 0.2
+   },
+   "job_family": "TS",
+   "level_band": "early",
+   "n": 19,
+   "promotion_band": "other",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C122",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.15
+   },
+   "job_family": "TS",
+   "level_band": "mid",
+   "n": 19,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C123",
+   "facts": {
+    "median_months_since_promotion": 18,
+    "share_below_midpoint": 0.65,
+    "share_manager_change_180d": 0.3
+   },
+   "job_family": "TS",
+   "level_band": "mid",
+   "n": 21,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C124",
+   "facts": {
+    "median_months_since_promotion": 28,
+    "share_below_midpoint": 0.5,
+    "share_manager_change_180d": 0.25
+   },
+   "job_family": "TS",
+   "level_band": "mid",
+   "n": 20,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C125",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.85,
+    "share_manager_change_180d": 0.15
+   },
+   "job_family": "TS",
+   "level_band": "mid",
+   "n": 25,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C126",
+   "facts": {
+    "median_months_since_promotion": 31,
+    "share_below_midpoint": 0.55,
+    "share_manager_change_180d": 0.1
+   },
+   "job_family": "TS",
+   "level_band": "senior",
+   "n": 11,
+   "promotion_band": "24 months or more",
+   "reorg_90d": false,
+   "tenure_band": "5y+"
+  },
+  {
+   "cell_id": "C127",
+   "facts": {
+    "median_months_since_promotion": 4,
+    "share_below_midpoint": 0.75,
+    "share_manager_change_180d": 0.0
+   },
+   "job_family": "TS",
+   "level_band": "senior",
+   "n": 12,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "<1y"
+  },
+  {
+   "cell_id": "C128",
+   "facts": {
+    "median_months_since_promotion": 15,
+    "share_below_midpoint": 0.6,
+    "share_manager_change_180d": 0.3
+   },
+   "job_family": "TS",
+   "level_band": "senior",
+   "n": 21,
+   "promotion_band": "12 to 24 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  },
+  {
+   "cell_id": "C129",
+   "facts": {
+    "median_months_since_promotion": 7,
+    "share_below_midpoint": 0.7,
+    "share_manager_change_180d": 0.25
+   },
+   "job_family": "TS",
+   "level_band": "senior",
+   "n": 13,
+   "promotion_band": "under 12 months",
+   "reorg_90d": false,
+   "tenure_band": "other"
+  }
+ ],
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "min_cell": 10,
+ "source": {
+  "cutoff": "2026-10-01",
+  "population": 2023,
+  "run_id": "R-2026-10-01#1"
+ },
+ "withheld": 214
+}

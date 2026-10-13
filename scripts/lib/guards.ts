@@ -54,7 +54,11 @@ export function guardViolation(baseline: MachineReading, now: MachineReading): s
 
 /** Processes the 27B must never run beside. */
 export function heavyWorkRunning(): string[] {
-  const patterns = ["docker build", "docker buildx", "buildkitd", "playwright test", "vitest run", "pytest engine/tests"];
+  const patterns = [
+    "docker build", "docker buildx", "buildkitd", "playwright test", "vitest run", "pytest engine/tests",
+    // the research arms run multi-process fits; a 27B load beside them grew swap by 2.18 GB on 2026-10-12
+    "staysignal research run",
+  ];
   const out: string[] = [];
   for (const p of patterns) {
     try {

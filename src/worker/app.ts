@@ -16,6 +16,7 @@ import { AuthError } from "./auth/access";
 import { mintDevToken } from "./auth/dev-login";
 import { agentInstanceName } from "./auth/hmac";
 import { authenticate, DEV_COOKIE, runnerId } from "./auth/principal";
+import { fallbackAnswer, liveAnswer, parseInterview } from "./lab-interview";
 import { type AppConfig, isLocalHost, parseConfig } from "./config";
 import { sha256HexSync } from "./store/chain";
 import { warehouseFor } from "./warehouse/client";
@@ -382,6 +383,18 @@ export function buildApp() {
     if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
     const doc = await warehouseFor(c.env).lab(c.req.param("proposal"));
     return doc ? c.json(doc) : c.json({ error: "no recorded session for this proposal" }, 404);
+  });
+  // the persona interview (SPEC 15.8): live only on the local machine in engine mode (the engine streams from the local
+  // 27B, or its scripted stub under the stub model); anywhere else, or when the live answer does not start within 12
+  // seconds, a recorded answer for the same question or a labeled placeholder
+  app.post("/api/lab/interview", async (c) => {
+    if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
+    const req = parseInterview(await c.req.json().catch(() => null));
+    if ("error" in req) return c.json({ error: req.error }, 400);
+    const cfg = c.var.config;
+    const local = cfg.authMode === "dev" && isLocalHost(new URL(c.req.url));
+    if (local && cfg.dataMode === "engine") return liveAnswer(cfg.engineUrl, req, cfg.llm === "stub" ? "stub" : "mlx");
+    return fallbackAnswer(req);
   });
   app.get("/api/audit/verify", async (c) => c.json(await (await workspace(c.env)).verifyAudit()));
 

@@ -1,0 +1,4 @@
+{
+  "note": "Recorded persona interview answers (SPEC 15.8), the fallback when the live interview cannot run (production, or no local 27B). Synthetic personas only; hypothesis generation, not a forecast, not a survey, not validated. Each entry is copied from the engine's local log (var/engine/work/lab/interviews.jsonl) after both hygiene tiers pass. None recorded yet.",
+  "answers": []
+}

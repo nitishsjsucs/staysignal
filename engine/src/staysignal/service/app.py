@@ -12,14 +12,17 @@ import re
 from pathlib import Path
 
 from fastapi import Body, FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from staysignal.fixtures.export_api import slug
+from staysignal.lab import interview
 from staysignal.runner.jobs import EngineState
 from staysignal.service import memory_api, warehouse_shim
 
 
-def create_app(st: EngineState, writer_token: str | None = None) -> FastAPI:
+def create_app(
+    st: EngineState, writer_token: str | None = None, lab_recordings: Path | None = None, mlx_url: str | None = None
+) -> FastAPI:
     app = FastAPI(title="StaySignal engine (synthetic)", docs_url=None, redoc_url=None, openapi_url=None)
 
     def doc(*parts: str) -> JSONResponse:
@@ -80,6 +83,49 @@ def create_app(st: EngineState, writer_token: str | None = None) -> FastAPI:
         return doc("lineage.json")
 
     memory_api.register(app, st.memory_dir or st.db_path.parent / "memory", writer_token)
+
+    @app.post("/lab/interview")
+    def lab_interview(body: dict = Body(default_factory=dict)) -> StreamingResponse:  # noqa: B008
+        # the live persona interview (SPEC 15.8): one synthetic persona of a recorded session answers one question,
+        # streamed from the local 27B (provider "mlx") or the scripted stub; 503 when the model server is not up, so
+        # the Worker can fall back to a recorded answer before anything was streamed
+        from staysignal.paths import REPO_ROOT
+
+        provider = body.get("provider", "mlx")
+        if provider not in ("mlx", "stub"):
+            raise HTTPException(status_code=400, detail="provider must be mlx or stub")
+        try:
+            session = interview.find_session(
+                lab_recordings or REPO_ROOT / "lab" / "recordings", str(body.get("proposal", ""))
+            )
+            ctx = interview.persona_context(session, str(body.get("persona_id", "")))
+            msgs = interview.messages(ctx, str(body.get("question", "")))
+        except interview.InterviewError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
+        chunks = (
+            interview.stream_stub() if provider == "stub" else interview.stream_mlx(msgs, mlx_url or interview.MLX_URL)
+        )
+        try:
+            first = next(chunks, "")
+        except OSError:
+            raise HTTPException(status_code=503, detail="the local model server is not running") from None
+
+        def body_stream():
+            parts = [first]
+            yield first
+            for c in chunks:
+                parts.append(c)
+                yield c
+            interview.append_log(
+                st.work_dir / "lab" / "interviews.jsonl", ctx, msgs[1]["content"], "".join(parts).strip(), provider
+            )
+
+        headers = {
+            "x-staysignal-label": interview.LABEL,
+            "x-staysignal-provider": provider,
+            "cache-control": "no-store",
+        }
+        return StreamingResponse(body_stream(), media_type="text/plain; charset=utf-8", headers=headers)
 
     @app.post("/catalog/{key}")
     def catalog(key: str, body: dict = Body(default_factory=dict)) -> JSONResponse:  # noqa: B008

@@ -90,7 +90,9 @@ Click **Scenario Lab**. Read the label first: "Hypothesis generation with synthe
 2. Point at the banner: the sessions on screen are placeholders written by a scripted stub provider ("[stub]"), not a model, so they exercise recording, replay and analysis and say nothing about anyone. Do not read meaning into their numbers. The 27B sessions replace them once recorded (PROGRESS.md, "Scenario Lab: to do on the Mac").
 3. Walk the views: theme bars with replicate ranges, attitude trajectories by tenure band, the influence network (simulated, colored by cohort only, not organizational network analysis), draft pilot items with the wording linter's findings, and the sanity panel, whose facts-only baseline and two negative controls show how much agreement is prompt echo.
 
-Key point: "This generates questions to test with real people; the sanity panel shows how much of it is prompt echo." The live persona interview is not built yet: do not offer it.
+4. Interview one persona: in **Ask one persona a question**, pick a persona, type a question and click **Ask**. Under `npm run demo` with the 27B running (`npm run llm -- start 27b`), the answer streams live from the local 27B (at most 100 tokens) and says so; without the 27B, or if nothing starts within 12 seconds, it shows a recorded answer for the same question, or a placeholder labeled "scripted stub text, not a model". Each answer carries the "Synthetic persona" chip and the Lab label. With the placeholder sessions on screen the persona's context is the stub's, so treat a live answer as a demonstration of the mechanism only.
+
+Key point: "This generates questions to test with real people; the sanity panel shows how much of it is prompt echo."
 
 ## Q&A crib
 

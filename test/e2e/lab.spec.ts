@@ -1,5 +1,6 @@
 // The Scenario Lab page (SPEC 15, 16.4): the label, the placeholder banner, the synthetic persona chips on quotes and
-// the persona handles, and both proposals; it fits a phone screen.
+// the persona handles, both proposals and the persona interview (a labeled placeholder in fixtures mode); it fits a
+// phone screen.
 import { expect, test } from "@playwright/test";
 
 const LABEL = "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.";
@@ -15,6 +16,20 @@ test("the Lab shows its label, the placeholder banner and the persona chips", as
   await expect(page.getByTestId("lab-personas")).toContainText("P01 ·");
   await page.getByRole("button", { name: "One group for Infrastructure and Data" }).click();
   await expect(page.getByTestId("lab-personas")).toContainText("Infrastructure Engineering");
+});
+
+test("a persona answers a question, labeled with its source and the Lab label", async ({ page }) => {
+  await page.goto("/lab");
+  await page.getByLabel("Acting as (local role switcher)").selectOption("pa-analyst@larkspur.example");
+  const card = page.getByTestId("lab-interview");
+  await card.getByLabel("Persona", { exact: true }).selectOption("P03");
+  await card.getByLabel("Question to the persona").fill("What would you ask first?");
+  await card.getByTestId("lab-ask").click();
+  const answer = card.getByTestId("lab-answer");
+  await expect(answer).toContainText("Synthetic persona");
+  await expect(answer).toContainText("P03 ·");
+  await expect(answer).toContainText("Placeholder: scripted stub text, not a model");
+  await expect(answer).toContainText(LABEL);
 });
 
 test("a data engineer without lab:read is refused", async ({ page }) => {

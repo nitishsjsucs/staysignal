@@ -2,7 +2,7 @@
 // simulated forum. Hypothesis generation only: every view carries the label, every post and quote a "Synthetic
 // persona" chip, and nothing here feeds a forecast number or review evidence (ADR 0008). A placeholder session (the
 // scripted stub provider, no model) says so in a banner.
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import type { LabDoc, LabIndex } from "../../shared/contracts";
 import { isRefusal, type Me, type Refusal, useQuery } from "../api";
 import { fmtVal, TipRow, Tooltip, useTooltip, useWidth } from "../charts/kit";
@@ -11,6 +11,7 @@ import { IconAlert } from "../components/icons";
 import { Chip, EmptyState, ErrorState, RefusalNote, Segmented, Skeleton } from "../components/ui";
 import { PageHead } from "./Forecast";
 
+const LAB_SUB = "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.";
 const POOLS = ["under 1 year", "1 to 3 years", "3 years or more"] as const;
 const POOL_COLOR: Record<string, string> = { "under 1 year": "var(--lab-a)", "1 to 3 years": "var(--lab-b)", "3 years or more": "var(--lab-c)", "program office": "var(--series-challenger)", other: "var(--series-other)" };
 
@@ -235,8 +236,78 @@ function Session({ id }: { id: string }) {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{doc.personas.map((p) => <Chip key={p.persona_id} title="Synthetic persona">{p.handle}</Chip>)}</div>
           <p className="card-sub" style={{ marginTop: 8 }}>Session {doc.session}: {doc.replicates.length} replicates, provider {doc.provider}; each replays to its database hash with no model.</p>
         </section>
+        <InterviewCard proposal={doc.proposal} personas={doc.personas} />
       </div>
     </>
+  );
+}
+
+const SOURCE_NOTE: Record<string, string> = {
+  live: "Live answer from the local 27B, at most 100 tokens",
+  stub: "Scripted stub text from the engine, not a model",
+  recorded: "Recorded answer",
+  placeholder: "Placeholder: scripted stub text, not a model",
+};
+
+/** SPEC 15.8: one question to one synthetic persona; the answer streams in, with its source and the Lab label. */
+function InterviewCard({ proposal, personas }: { proposal: string; personas: { persona_id: string; handle: string }[] }) {
+  const [persona, setPersona] = useState(personas[0]?.persona_id ?? "P01");
+  const [q, setQ] = useState("What would you want to know before this change starts?");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [answer, setAnswer] = useState<{ text: string; source: string; model: string | null; handle: string } | null>(null);
+  async function ask(e: FormEvent) {
+    e.preventDefault();
+    if (!q.trim() || busy) return;
+    setBusy(true);
+    setErr(null);
+    setAnswer(null);
+    const handle = personas.find((p) => p.persona_id === persona)?.handle ?? persona;
+    try {
+      const r = await fetch("/api/lab/interview", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ proposal, persona_id: persona, question: q }) });
+      if (!r.ok || (r.headers.get("content-type") ?? "").includes("application/json")) {
+        const j = (await r.json().catch(() => null)) as { message?: string; error?: string } | null;
+        setErr(j?.message ?? j?.error ?? `The interview failed (${r.status}).`);
+        return;
+      }
+      const meta = { source: r.headers.get("x-staysignal-source") ?? "placeholder", model: r.headers.get("x-staysignal-model"), handle };
+      let text = "";
+      const reader = r.body?.getReader();
+      if (!reader) text = await r.text();
+      else {
+        const dec = new TextDecoder();
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          text += dec.decode(value, { stream: true });
+          setAnswer({ ...meta, text });
+        }
+      }
+      setAnswer({ ...meta, text: text.trim() });
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : String(x));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section className="card span-12" data-testid="lab-interview">
+      <div className="card-head"><div><h2 className="card-title">Ask one persona a question</h2><div className="card-sub">{LAB_SUB} Live only on the local machine with the 27B; otherwise a recorded answer or a labeled placeholder.</div></div></div>
+      <form className="memory-form" style={{ flexWrap: "wrap" }} onSubmit={(e) => void ask(e)}>
+        <select className="select" style={{ maxWidth: "100%" }} value={persona} onChange={(e) => setPersona(e.target.value)} aria-label="Persona">
+          {personas.map((p) => <option key={p.persona_id} value={p.persona_id}>{p.handle}</option>)}
+        </select>
+        <label className="visually-hidden" htmlFor="lab-q">Question to the persona</label>
+        <input id="lab-q" value={q} maxLength={300} onChange={(e) => setQ(e.target.value)} />
+        <button type="submit" className="btn btn-primary" disabled={busy || !q.trim()} data-testid="lab-ask">{busy ? "Asking" : "Ask"}</button>
+      </form>
+      {err ? <p className="card-sub" role="alert">{err}</p> : null}
+      {answer ? (
+        <blockquote className="lab-quote" data-testid="lab-answer"><PersonaChip /> <span className="card-sub">{answer.handle}:</span> <span>{answer.text}</span>
+          <div className="card-sub"><em>{SOURCE_NOTE[answer.source] ?? answer.source}{answer.model ? ` (${answer.model})` : ""}. {LAB_SUB}</em></div>
+        </blockquote>
+      ) : null}
+    </section>
   );
 }
 

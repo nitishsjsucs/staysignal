@@ -1,0 +1,8 @@
+{
+  "@cf/qwen/qwen3-30b-a3b-fp8": {
+    "input_neurons_per_million": 4627,
+    "output_neurons_per_million": 30454,
+    "usd_per_million": { "input": 0.0509, "output": 0.335 },
+    "source": "Workers AI model catalog, verified 2026-10-12 (SPEC 14.11)"
+  }
+}

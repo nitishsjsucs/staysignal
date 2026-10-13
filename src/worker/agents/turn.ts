@@ -12,6 +12,7 @@ import { getTool, runTool, type ToolContext, toolsFor } from "../../shared/tools
 import { REPAIR_PROMPT, SYSTEM_PROMPT } from "./prompts";
 import { findRecording } from "./recorded-provider";
 import { openAiCompatible, type ProviderName, recordedModel, stubModel, LOCAL_URLS } from "./providers";
+import { type AigMetadata, type BudgetPort, neuronsFor, stripThink, TURN_CEILING, type WorkersAiConfig, withNoThink, workersAiModel } from "./workers-ai";
 
 export type Grounding = "passed" | "repaired" | "template" | "refused";
 
@@ -40,7 +41,7 @@ export interface TurnOutput {
   aliases: Record<string, string>;
   tool_calls: ToolCallRecord[];
   grounding: Grounding;
-  refusal: { code: RefusalCode; message: string; layer: "prerouter" | "tool" } | null;
+  refusal: { code: RefusalCode; message: string; layer: "prerouter" | "tool" | "budget" } | null;
   provider: ProviderName;
   recorded: boolean;
   label: string | null;
@@ -48,12 +49,22 @@ export interface TurnOutput {
   spans: Span[];
 }
 
+/** What a production turn needs beyond the tools: the Workers AI settings, the neuron budget, and the gateway
+ * metadata (ids only). Absent, a "workers-ai" turn falls back to the stub (local, CI). */
+export interface TurnOptions {
+  workersAi?: WorkersAiConfig | null;
+  budget?: BudgetPort | null;
+  meta?: AigMetadata;
+  fetch?: typeof fetch;
+}
+
 export interface TurnHooks {
   onToolCall?(call: { toolCallId: string; tool: string; args: Record<string, unknown> }): void;
   onToolResult?(call: { toolCallId: string; record: ToolCallRecord }): void;
 }
 
-function modelFor(provider: ProviderName, aliases: AliasMap, question: string): { model: LanguageModel; recorded: boolean; label: string | null } {
+function modelFor(provider: ProviderName, aliases: AliasMap, question: string, opts: TurnOptions = {}): { model: LanguageModel; recorded: boolean; label: string | null } {
+  if (provider === "workers-ai" && opts.workersAi) return { model: workersAiModel(opts.workersAi, opts.meta ?? {}, opts.fetch), recorded: false, label: null };
   if (provider === "recorded") {
     const rec = findRecording(question);
     if (rec) return { model: recordedModel(rec), recorded: true, label: "Model text replayed from a recorded 27B turn; tools ran live" };
@@ -63,7 +74,7 @@ function modelFor(provider: ProviderName, aliases: AliasMap, question: string): 
   return { model: stubModel(aliases), recorded: false, label: provider === "stub" ? "Stub model (deterministic template)" : null };
 }
 
-export async function runTurn(ctx: ToolContext, provider: ProviderName, question: string, history: ModelMessage[] = [], hooks: TurnHooks = {}): Promise<TurnOutput> {
+export async function runTurn(ctx: ToolContext, provider: ProviderName, question: string, history: ModelMessage[] = [], hooks: TurnHooks = {}, opts: TurnOptions = {}): Promise<TurnOutput> {
   const t0 = Date.now();
   const spans: Span[] = [];
   const at = () => Date.now() - t0;
@@ -77,7 +88,33 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   const aliases: AliasMap = new Map();
   const calls: ToolCallRecord[] = [];
   const toolArgs: unknown[] = [];
-  const { model, recorded, label } = modelFor(provider, aliases, question);
+  const { model, recorded, label } = modelFor(provider, aliases, question, opts);
+  const production = provider === "workers-ai" && Boolean(opts.workersAi);
+  const system = production ? withNoThink(SYSTEM_PROMPT) : SYSTEM_PROMPT;
+  // the neuron budget (SPEC 14.11): reserve the turn's worst case first; refuse when today's cap would be exceeded
+  let reservation: { reserved: number } | null = null;
+  const usage = { input: 0, output: 0, known: true };
+  const addUsage = (u: { inputTokens?: number; outputTokens?: number } | undefined) => {
+    if (u?.inputTokens === undefined || u?.outputTokens === undefined) usage.known = false;
+    else {
+      usage.input += u.inputTokens;
+      usage.output += u.outputTokens;
+    }
+  };
+  if (production && opts.budget) {
+    const want = neuronsFor(opts.workersAi!.model, TURN_CEILING) ?? 0;
+    const r = await opts.budget.reserve(want, opts.workersAi!.dailyNeuronCap);
+    spans.push({ kind: "prerouter", name: "budget", start_ms: at(), dur_ms: 0, outcome: r.ok ? "reserved" : "BUDGET_EXHAUSTED" });
+    if (!r.ok) {
+      const msg = REFUSAL_MESSAGES.BUDGET_EXHAUSTED;
+      return { ...base, aliases: {}, tool_calls: [], violations: [], text: msg, rendered: msg, grounding: "refused", refusal: { code: "BUDGET_EXHAUSTED", message: msg, layer: "budget" }, recorded: false, label: null };
+    }
+    reservation = { reserved: want };
+  }
+  const settle = async () => {
+    if (!reservation || !opts.budget) return;
+    await opts.budget.settle(reservation.reserved, usage.known ? neuronsFor(opts.workersAi!.model, usage) : null);
+  };
   const tools: Record<string, Tool> = {};
   for (const def of toolsFor(ctx.principal)) {
     tools[def.name] = {
@@ -110,15 +147,17 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   let text = "";
   for (let attempt = 0; attempt < 2; attempt++) {
     const s = at();
-    const res = await generateText({ model, system: SYSTEM_PROMPT, messages, tools, stopWhen: isStepCount(6), temperature: 0, maxOutputTokens: 400 });
+    const res = await generateText({ model, system, messages, tools, stopWhen: isStepCount(6), temperature: 0, maxOutputTokens: 400 });
+    addUsage(res.totalUsage ?? res.usage);
     spans.push({ kind: "model_call", name: `generate${attempt ? " (retry)" : ""}`, start_ms: s, dur_ms: at() - s, tokens: { input: res.usage.inputTokens ?? null, output: res.usage.outputTokens ?? null, cached: res.usage.inputTokenDetails?.cacheReadTokens ?? null }, outcome: res.finishReason });
-    text = res.text;
+    text = production ? stripThink(res.text) : res.text;
     // mlx drops an unparseable tool call silently: finish_reason tool-calls with no calls is retried once
     const silentDrop = res.finishReason === "tool-calls" && res.toolCalls.length === 0 && !text;
     if (!silentDrop) break;
   }
   const refusedCall = calls.find((c) => c.refused);
   if (refusedCall && aliases.size === 0) {
+    await settle();
     const r = refusedCall.refused!;
     return { ...base, aliases: {}, tool_calls: calls, violations: [], text: r.message, rendered: r.message, grounding: "refused", refusal: { code: r.code, message: r.message, layer: "tool" }, recorded, label };
   }
@@ -128,11 +167,13 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   spans.push({ kind: "grounding", name: "check", start_ms: at(), dur_ms: 0, outcome: check.ok ? "passed" : `${check.violations.length} violations` });
   if (!check.ok && !recorded && provider !== "stub") {
     const s = at();
-    const repair = await generateText({ model, system: REPAIR_PROMPT, messages: [...messages, { role: "assistant", content: text }, { role: "user", content: `Violations:\n- ${check.violations.join("\n- ")}\nAvailable results: ${[...aliases.keys()].join(", ")}.` }], temperature: 0, maxOutputTokens: 400 });
-    const again = checkGrounding({ text: repair.text, aliases, question, toolArgs });
+    const repair = await generateText({ model, system: production ? withNoThink(REPAIR_PROMPT) : REPAIR_PROMPT, messages: [...messages, { role: "assistant", content: text }, { role: "user", content: `Violations:\n- ${check.violations.join("\n- ")}\nAvailable results: ${[...aliases.keys()].join(", ")}.` }], temperature: 0, maxOutputTokens: 400 });
+    addUsage(repair.totalUsage ?? repair.usage);
+    const repairText = production ? stripThink(repair.text) : repair.text;
+    const again = checkGrounding({ text: repairText, aliases, question, toolArgs });
     spans.push({ kind: "repair", name: "repair", start_ms: s, dur_ms: at() - s, outcome: again.ok ? "passed" : "failed" });
     if (again.ok) {
-      text = repair.text;
+      text = repairText;
       check = again;
       grounding = "repaired";
     }
@@ -144,6 +185,7 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
     grounding = "template";
     spans.push({ kind: "template", name: "template", start_ms: s, dur_ms: at() - s, outcome: check.ok ? "passed" : "failed" });
   }
+  await settle();
   const rendered = renderPlaceholders(text, aliases).text;
   return {
     question,

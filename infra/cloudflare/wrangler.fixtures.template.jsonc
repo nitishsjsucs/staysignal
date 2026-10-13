@@ -1,7 +1,8 @@
 {
   // The fixtures-mode deployment (SPEC 18, 23.2 path A): the built app on Workers Free behind Cloudflare Access,
   // both Durable Objects (SQLite), the routine Workflow and /mcp, with the committed API fixtures as the warehouse,
-  // engine jobs completed inline from the committed job fixtures (no runner), and no Google resource. Rendered by
+  // engine jobs completed inline from the committed job fixtures (no runner), the production model through AI Gateway
+  // with metadata-only logging and a daily neuron cap (SPEC 14.11), and no Google resource. Rendered by
   // `npm run deploy -- --fixtures` with values from .prod/state.json (or placeholders with --dry-run); the rendered
   // file is gitignored. Synthetic data only.
   "$schema": "../../node_modules/wrangler/config-schema.json",
@@ -24,15 +25,19 @@
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AnalystAgent", "WorkspaceAgent"] }],
   "workflows": [{ "name": "staysignal-routine", "binding": "ROUTINE_WORKFLOW", "class_name": "RoutineWorkflow" }],
   "observability": { "enabled": true, "head_sampling_rate": 1 },
-  // Secret names only; the owner sets the values with `npx wrangler secret put` (README, Production setup, step 3).
-  "secrets": { "required": ["SS_HMAC_MASTER_KEY", "SS_ROLE_BINDINGS"] },
+  // Secret names only; the owner sets the values with `npx wrangler secret put` (README, Production setup, step 4).
+  "secrets": { "required": ["SS_HMAC_MASTER_KEY", "SS_ROLE_BINDINGS", "SS_AIG_TOKEN"] },
   "vars": {
     "SS_AUTH_MODE": "access",
     "SS_ACCESS_TEAM_DOMAIN": "__SS_ACCESS_TEAM_DOMAIN__",
     "SS_ACCESS_AUD": "__SS_ACCESS_AUD__",
     "SS_DATA_MODE": "fixtures",
     "SS_RUNNER": "inline",
-    "SS_LLM": "stub",
+    "SS_LLM": "workers-ai",
+    "SS_AI_MODEL": "@cf/qwen/qwen3-30b-a3b-fp8",
+    "SS_AI_DAILY_NEURON_CAP": "1500",
+    "SS_AIG_ACCOUNT_ID": "__SS_AIG_ACCOUNT_ID__",
+    "SS_AIG_GATEWAY_ID": "__SS_AIG_GATEWAY_ID__",
     "SS_DEMO": "1"
   }
 }

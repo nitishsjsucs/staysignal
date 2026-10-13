@@ -13,8 +13,8 @@ import { sha256HexSync } from "../store/chain";
 import { warehouseFor } from "../warehouse/client";
 import { principalFromHeader } from "./workspace-agent";
 import { type ProviderName, } from "./providers";
-import { runTurn, type TurnOutput } from "./turn";
-import { workspaceStub } from "./workspace-port";
+import { runTurn, type TurnOptions, type TurnOutput } from "./turn";
+import { workspace, workspaceStub } from "./workspace-port";
 
 export interface AnalystState {
   role: string | null;
@@ -56,10 +56,31 @@ export class AnalystAgent extends AIChatAgent<Env, AnalystState> {
     return { principal: p, warehouse: warehouseFor(this.env), workspace: workspaceStub(this.env), sha256: async (t) => sha256HexSync(t), canonical: canonicalJson };
   }
 
+  /** The production model's settings and the shared neuron budget (WorkspaceAgent), when SS_LLM=workers-ai. */
+  turnOptions(p: Principal, route: string): TurnOptions {
+    const cfg = parseConfig(this.env);
+    if (!cfg.workersAi) return {};
+    let day = "";
+    return {
+      workersAi: cfg.workersAi,
+      meta: { route, role: p.role },
+      budget: {
+        reserve: async (neurons, cap) => {
+          const r = await (await workspace(this.env)).reserveNeurons(neurons, cap);
+          day = r.day;
+          return r;
+        },
+        settle: async (reserved, actual) => {
+          if (day) await (await workspace(this.env)).settleNeurons(day, reserved, actual);
+        },
+      },
+    };
+  }
+
   /** The same turn over RPC: used by /api/dev/agent/turn and the eval harness. */
   async turn(p: Principal, question: string, provider?: ProviderName, history: { role: "user" | "assistant"; content: string }[] = []): Promise<TurnOutput> {
     const cfg = parseConfig(this.env);
-    const out = await runTurn(this.toolContext(p), provider ?? (cfg.llm as ProviderName), question, history as ModelMessage[]);
+    const out = await runTurn(this.toolContext(p), provider ?? (cfg.llm as ProviderName), question, history as ModelMessage[], {}, this.turnOptions(p, "api"));
     await this.recordTrace(p, out);
     return out;
   }
@@ -86,7 +107,7 @@ export class AnalystAgent extends AIChatAgent<Env, AnalystState> {
         const out = await runTurn(this.toolContext(p), cfg.llm as ProviderName, question, history, {
           onToolCall: (c) => writer.write({ type: "tool-input-available", toolCallId: c.toolCallId, toolName: c.tool, input: c.args }),
           onToolResult: (c) => writer.write({ type: "tool-output-available", toolCallId: c.toolCallId, output: { result_id: c.record.result_id, alias: c.record.alias, tool: c.record.tool, refused: c.record.refused } }),
-        });
+        }, this.turnOptions(p, "chat"));
         const traceId = await this.recordTrace(p, out);
         writer.write({ type: "data-turn", data: { grounding: out.grounding, aliases: out.aliases, refusal: out.refusal, label: out.label, recorded: out.recorded, trace_id: traceId } } as never);
         writer.write({ type: "text-start", id: "answer" });

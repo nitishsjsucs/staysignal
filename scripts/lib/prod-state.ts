@@ -4,17 +4,21 @@ export interface ProdState {
   account_id?: string;
   workers_subdomain?: string;
   access?: { team_domain?: string; aud?: string };
+  ai_gateway?: { id?: string };
 }
 
-export const PLACEHOLDERS = ["__SS_ACCESS_TEAM_DOMAIN__", "__SS_ACCESS_AUD__"] as const;
+export const PLACEHOLDERS = ["__SS_ACCESS_TEAM_DOMAIN__", "__SS_ACCESS_AUD__", "__SS_AIG_ACCOUNT_ID__", "__SS_AIG_GATEWAY_ID__"] as const;
 
 /** Values for every placeholder; `dryRun` uses obvious stand-ins so a dry run never needs the operator's state. */
 export function placeholderValues(state: ProdState | null, dryRun: boolean): Record<(typeof PLACEHOLDERS)[number], string> {
-  if (dryRun) return { __SS_ACCESS_TEAM_DOMAIN__: "https://example-team.cloudflareaccess.com", __SS_ACCESS_AUD__: "dry-run-audience" };
+  if (dryRun) return { __SS_ACCESS_TEAM_DOMAIN__: "https://example-team.cloudflareaccess.com", __SS_ACCESS_AUD__: "dry-run-audience", __SS_AIG_ACCOUNT_ID__: "dry-run-account", __SS_AIG_GATEWAY_ID__: "staysignal" };
   const team = state?.access?.team_domain;
   const aud = state?.access?.aud;
-  if (!team || !aud) throw new Error(".prod/state.json needs access.team_domain and access.aud (run npm run setup:prod -- --phase A first)");
-  return { __SS_ACCESS_TEAM_DOMAIN__: team, __SS_ACCESS_AUD__: aud };
+  if (!team || !aud) throw new Error(".prod/state.json needs access.team_domain and access.aud (README Production setup, step 2)");
+  const account = state?.account_id;
+  const gateway = state?.ai_gateway?.id;
+  if (!account || !gateway) throw new Error(".prod/state.json needs account_id and ai_gateway.id (README Production setup, step 3)");
+  return { __SS_ACCESS_TEAM_DOMAIN__: team, __SS_ACCESS_AUD__: aud, __SS_AIG_ACCOUNT_ID__: account, __SS_AIG_GATEWAY_ID__: gateway };
 }
 
 /** Replaces placeholders inside string values of a JSONC template (comments are kept). */

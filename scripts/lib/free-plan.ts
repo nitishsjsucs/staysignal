@@ -46,6 +46,13 @@ export function freePlanProblems(configText: string): string[] {
   const model = vars.SS_AI_MODEL ?? "";
   if ((PAID_OR_EXCLUDED_MODELS as readonly string[]).includes(model)) problems.push(`SS_AI_MODEL ${model} is not the production model`);
   if (c.ai !== undefined && vars.SS_LLM !== "workers-ai") problems.push("an ai binding without SS_LLM=workers-ai bills Workers AI for nothing");
+  if (vars.SS_LLM === "workers-ai") {
+    if (!vars.SS_AIG_ACCOUNT_ID || !vars.SS_AIG_GATEWAY_ID) problems.push("SS_LLM=workers-ai needs SS_AIG_ACCOUNT_ID and SS_AIG_GATEWAY_ID (the AI Gateway)");
+    const cap = Number(vars.SS_AI_DAILY_NEURON_CAP);
+    if (!(cap > 0 && cap <= 10_000)) problems.push("SS_AI_DAILY_NEURON_CAP must be a positive cap within the account's 10,000 free neurons a day");
+    const secrets = ((c as { secrets?: { required?: string[] } }).secrets?.required ?? []) as string[];
+    if (!secrets.includes("SS_AIG_TOKEN")) problems.push("SS_LLM=workers-ai needs the SS_AIG_TOKEN secret declared in secrets.required");
+  }
   for (const key of Object.keys(vars)) {
     if (/SECRET|TOKEN|PRIVATE|MASTER_KEY|JWK/.test(key)) problems.push(`${key} looks like a secret; set it with wrangler secret, never in vars`);
   }

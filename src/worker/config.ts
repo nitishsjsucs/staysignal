@@ -14,6 +14,8 @@ export interface AppConfig {
   hmacKey: string;
   runnerToken: string | null;
   roleBindings: string | null;
+  /** The production model through AI Gateway (SS_LLM=workers-ai); null otherwise. */
+  workersAi: { accountId: string; gatewayId: string; token: string; model: string; dailyNeuronCap: number } | null;
 }
 
 export const DEV_ISSUER = "http://localhost/dev-access";
@@ -28,6 +30,7 @@ export function parseConfig(env: Env): AppConfig {
   const dataMode = (e.SS_DATA_MODE ?? "fixtures") as AppConfig["dataMode"];
   const llm = (e.SS_LLM ?? "stub") as AppConfig["llm"];
   if (authMode === "access" && (!e.SS_ACCESS_TEAM_DOMAIN || !e.SS_ACCESS_AUD)) throw new Error("access mode needs SS_ACCESS_TEAM_DOMAIN and SS_ACCESS_AUD");
+  if (llm === "workers-ai" && (!e.SS_AIG_ACCOUNT_ID || !e.SS_AIG_GATEWAY_ID || !e.SS_AIG_TOKEN)) throw new Error("SS_LLM=workers-ai needs SS_AIG_ACCOUNT_ID, SS_AIG_GATEWAY_ID and the SS_AIG_TOKEN secret");
   return {
     authMode,
     dataMode,
@@ -41,6 +44,16 @@ export function parseConfig(env: Env): AppConfig {
     hmacKey: e.SS_HMAC_MASTER_KEY ?? (authMode === "dev" ? TEST_HMAC_KEY : ""),
     runnerToken: e.SS_RUNNER_TOKEN ?? null,
     roleBindings: e.SS_ROLE_BINDINGS ?? null,
+    workersAi:
+      llm === "workers-ai"
+        ? {
+            accountId: e.SS_AIG_ACCOUNT_ID as string,
+            gatewayId: e.SS_AIG_GATEWAY_ID as string,
+            token: e.SS_AIG_TOKEN as string,
+            model: e.SS_AI_MODEL ?? "@cf/qwen/qwen3-30b-a3b-fp8",
+            dailyNeuronCap: Number(e.SS_AI_DAILY_NEURON_CAP ?? "1500"),
+          }
+        : null,
   };
 }
 

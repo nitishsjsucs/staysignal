@@ -349,6 +349,30 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     this.refreshState();
   }
 
+  // ---------- the daily neuron budget (SPEC 14.11) ----------
+
+  /** Reserves neurons for one model turn if they fit under today's cap (UTC day); otherwise changes nothing. A
+   * Durable Object runs one call at a time and nothing here awaits, so concurrent turns can never exceed the cap. */
+  reserveNeurons(neurons: number, cap: number): { ok: boolean; used: number; cap: number; day: string } {
+    const day = new Date().toISOString().slice(0, 10);
+    const want = Math.ceil(neurons);
+    if (!Number.isFinite(want) || want < 0 || !Number.isFinite(cap)) return { ok: false, used: 0, cap, day };
+    const used = this.sql<{ neurons: number }>`SELECT neurons FROM ai_usage WHERE day = ${day}`[0]?.neurons ?? 0;
+    if (used + want > cap) return { ok: false, used, cap, day };
+    this.sql`INSERT INTO ai_usage (day, neurons) VALUES (${day}, ${want}) ON CONFLICT(day) DO UPDATE SET neurons = neurons + ${want}`;
+    return { ok: true, used: used + want, cap, day };
+  }
+
+  /** Replaces a reservation with what the call used; unknown usage keeps the reservation (the safe side). */
+  settleNeurons(day: string, reserved: number, actual: number | null): void {
+    if (actual === null || !Number.isFinite(actual)) return;
+    this.sql`UPDATE ai_usage SET neurons = MAX(0, neurons - ${Math.ceil(reserved)} + ${Math.ceil(actual)}) WHERE day = ${day}`;
+  }
+
+  neuronUsage(day: string): number {
+    return this.sql<{ neurons: number }>`SELECT neurons FROM ai_usage WHERE day = ${day}`[0]?.neurons ?? 0;
+  }
+
   // ---------- multi-agent investigation (SPEC 14.6) ----------
 
   /** Tools as the agent principal, inside this Durable Object: results are stored here and shared. */

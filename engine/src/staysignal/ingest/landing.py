@@ -170,6 +170,10 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
+def read_csv_text(text: str) -> list[dict[str, str]]:
+    return list(csv.DictReader(io.StringIO(text, newline="")))
+
+
 def parse_hris(row: dict[str, str]) -> HrisRecord:
     return HrisRecord(
         record_id=row["record_id"],
@@ -195,9 +199,13 @@ def parse_hris(row: dict[str, str]) -> HrisRecord:
 
 def add_file(src: Sources, path: Path, name: str | None = None) -> None:
     """Parses one extract into `src`. `name` is the delivered file name when `path` is a content-addressed copy."""
-    name = name or path.name
-    src.file_hashes[name] = hashlib.sha256(path.read_bytes()).hexdigest()
-    rows = read_csv(path)
+    add_text(src, name or path.name, path.read_bytes().decode("utf-8"))
+
+
+def add_text(src: Sources, name: str, text: str) -> None:
+    """Parses one extract given as text (the generator's in-memory output, for the research benchmark)."""
+    src.file_hashes[name] = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    rows = read_csv_text(text)
     if name.startswith("hris_"):
         parsed = [parse_hris(r) for r in rows]
         src.hris.extend(parsed)

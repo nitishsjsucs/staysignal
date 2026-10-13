@@ -314,6 +314,39 @@ def cmd_policy_compile(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_eval_dq_faults(args: argparse.Namespace) -> int:
+    """C53: the data-quality fault benchmark on copies of the small world, recorded in results/."""
+    import datetime as dt
+
+    from staysignal.quality.faults import FAULTS, SEEDS, run_seed, summarize
+
+    repo, _ = _repo_var()
+    t0 = time.perf_counter()
+    rows = [r for s in SEEDS for r in run_seed(s)]
+    doc = {
+        "kind": "dq-faults",
+        "command": "uv run --project engine staysignal eval dq-faults",
+        "date": dt.date.today().isoformat(),
+        "label": "synthetic",
+        "design": (
+            "each fault injected into what the sources recorded for copies of the small world (seeds 1 to 5, planted "
+            "problems off); detection is a phase-1 check that fires and did not on the clean copy, and a failing "
+            "error-severity check holds the run; localization is the rank of the true root node in the root-cause "
+            "ranking; impact is the company's expected 3-month voluntary departures from the faulty sources over the "
+            "clean ones, under a model trained on the clean world, had the run not been held"
+        ),
+        "faults": list(FAULTS),
+        "seeds": list(SEEDS),
+        "summary": summarize(rows),
+        "rows": rows,
+        "seconds": round(time.perf_counter() - t0, 1),
+    }
+    out = repo / "results" / f"dq-faults-{doc['date']}.json"
+    out.write_text(json.dumps(doc, indent=1) + "\n")
+    print(json.dumps({"written": str(out.relative_to(repo)), "summary": doc["summary"]}, indent=1))
+    return 0
+
+
 def cmd_eval_challenger(args: argparse.Namespace) -> int:
     """C15: SurvivalBoost and the like-for-like 12,000-row model on the comparison's origins (needs the extra)."""
     import datetime as dt
@@ -536,6 +569,8 @@ def build_parser() -> argparse.ArgumentParser:
     ef.set_defaults(func=cmd_eval_effects)
     ex = esub.add_parser("export", help="the Trust page's data from the latest recorded results")
     ex.set_defaults(func=cmd_eval_export)
+    dq = esub.add_parser("dq-faults", help="C53: the data-quality fault benchmark on the small world")
+    dq.set_defaults(func=cmd_eval_dq_faults)
     ch = esub.add_parser("challenger", help="C15: SurvivalBoost and a like-for-like model on the comparison origins")
     ch.add_argument("--n-iter", type=int, default=100)
     ch.add_argument("--cap", type=int, default=12_000)

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { loadReports } from "../../scripts/results-to-readme.ts";
-import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type RecoveryReport, renderActionAudit, renderChallenger, renderBacktest, renderModelComparison, renderOracleCoverage, renderRecovery, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
+import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type DqFaultsReport, type RecoveryReport, renderActionAudit, renderChallenger, renderDqFaults, renderBacktest, renderModelComparison, renderOracleCoverage, renderRecovery, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
 
 describe("README Results generation", () => {
   it("replaces only the marked section", () => {
@@ -17,6 +17,13 @@ describe("README Results generation", () => {
   it("keeps the committed README in sync with the committed results", () => {
     const readme = readFileSync("README.md", "utf8");
     expect(replaceSection(readme, renderResults(loadReports(process.cwd())))).toBe(readme);
+  });
+
+  it("renders the fault benchmark per fault", () => {
+    const r: DqFaultsReport = { kind: "dq-faults", command: "uv run --project engine staysignal eval dq-faults", date: "2026-10-12", seeds: [1, 2], summary: { pay_basis: { seeds: 2, detected: 2, held: 2, checks: ["C01", "C04"], root_top1: 2, root_found: 2, mean_abs_impact: 0.161, max_abs_impact: 0.25 }, broken_manager: { seeds: 2, detected: 0, held: 0, checks: [], root_top1: 0, root_found: 0, mean_abs_impact: null, max_abs_impact: null } } };
+    const md = renderDqFaults("results/dq.json", r);
+    expect(md).toContain("| Pay-basis code with annual amounts | 2 of 2 | 2 of 2 | C01, C04 | 2 of 2 | 16.1%, 25.0% |");
+    expect(md).toContain("| Broken manager references | 0 of 2 | 0 of 2 | none | 0 of 2 | n/a |");
   });
 
   it("renders the challenger with its row cap and the like-for-like model", () => {

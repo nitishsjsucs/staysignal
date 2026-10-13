@@ -1,0 +1,497 @@
+{
+ "kind": "dq-faults",
+ "command": "uv run --project engine staysignal eval dq-faults",
+ "date": "2026-10-12",
+ "label": "synthetic",
+ "design": "each fault injected into what the sources recorded for copies of the small world (seeds 1 to 5, planted problems off); detection is a phase-1 check that fires and did not on the clean copy, and a failing error-severity check holds the run; localization is the rank of the true root node in the root-cause ranking; impact is the company's expected 3-month voluntary departures from the faulty sources over the clean ones, under a model trained on the clean world, had the run not been held",
+ "faults": [
+  "pay_basis",
+  "duplicates",
+  "late_terminations",
+  "missing_extract",
+  "broken_manager"
+ ],
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "summary": {
+  "pay_basis": {
+   "seeds": 5,
+   "detected": 5,
+   "held": 5,
+   "checks": [
+    "C01",
+    "C02",
+    "C03",
+    "C04"
+   ],
+   "root_top1": 5,
+   "root_found": 5,
+   "mean_abs_impact": 0.161,
+   "max_abs_impact": 0.2516
+  },
+  "duplicates": {
+   "seeds": 5,
+   "detected": 5,
+   "held": 0,
+   "checks": [
+    "U01"
+   ],
+   "root_top1": 5,
+   "root_found": 5,
+   "mean_abs_impact": 0.0,
+   "max_abs_impact": 0.0
+  },
+  "late_terminations": {
+   "seeds": 5,
+   "detected": 1,
+   "held": 1,
+   "checks": [
+    "F01"
+   ],
+   "root_top1": 1,
+   "root_found": 1,
+   "mean_abs_impact": 0.222,
+   "max_abs_impact": 0.6144
+  },
+  "missing_extract": {
+   "seeds": 5,
+   "detected": 5,
+   "held": 5,
+   "checks": [
+    "X01"
+   ],
+   "root_top1": 5,
+   "root_found": 5,
+   "mean_abs_impact": 0.0044,
+   "max_abs_impact": 0.0109
+  },
+  "broken_manager": {
+   "seeds": 5,
+   "detected": 0,
+   "held": 0,
+   "checks": [],
+   "root_top1": 0,
+   "root_found": 0,
+   "mean_abs_impact": 0.0003,
+   "max_abs_impact": 0.0013
+  }
+ },
+ "rows": [
+  {
+   "seed": 1,
+   "fault": "pay_basis",
+   "detected": true,
+   "checks": {
+    "C01": "fail",
+    "C02": "fail",
+    "C03": "fail",
+    "C04": "warn"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "stg_map__pay_basis",
+    "stg_payroll__lines",
+    "src_payroll",
+    "int_comp__annualized",
+    "fct_comp_position"
+   ],
+   "expected_clean": 0.2572,
+   "expected_faulty": 0.2249,
+   "impact": -0.1255
+  },
+  {
+   "seed": 1,
+   "fault": "duplicates",
+   "detected": true,
+   "checks": {
+    "U01": "warn"
+   },
+   "held": false,
+   "root_rank": 1,
+   "ranking": [
+    "src_hris",
+    "stg_hris__records"
+   ],
+   "expected_clean": 0.2572,
+   "expected_faulty": 0.2572,
+   "impact": 0.0
+  },
+  {
+   "seed": 1,
+   "fault": "late_terminations",
+   "detected": true,
+   "checks": {
+    "F01": "fail"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "src_hris",
+    "stg_hris__records"
+   ],
+   "expected_clean": 0.2572,
+   "expected_faulty": 0.4152,
+   "impact": 0.6144
+  },
+  {
+   "seed": 1,
+   "fault": "missing_extract",
+   "detected": true,
+   "checks": {
+    "X01": "fail"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "src_payroll",
+    "stg_payroll__lines"
+   ],
+   "expected_clean": 0.2572,
+   "expected_faulty": 0.2571,
+   "impact": -0.0002
+  },
+  {
+   "seed": 1,
+   "fault": "broken_manager",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 0.2572,
+   "expected_faulty": 0.2572,
+   "impact": 0.0
+  },
+  {
+   "seed": 2,
+   "fault": "pay_basis",
+   "detected": true,
+   "checks": {
+    "C01": "fail",
+    "C02": "fail",
+    "C03": "fail",
+    "C04": "warn"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "stg_map__pay_basis",
+    "stg_payroll__lines",
+    "src_payroll",
+    "int_comp__annualized",
+    "fct_comp_position"
+   ],
+   "expected_clean": 3.3416,
+   "expected_faulty": 2.5007,
+   "impact": -0.2516
+  },
+  {
+   "seed": 2,
+   "fault": "duplicates",
+   "detected": true,
+   "checks": {
+    "U01": "warn"
+   },
+   "held": false,
+   "root_rank": 1,
+   "ranking": [
+    "src_hris",
+    "stg_hris__records"
+   ],
+   "expected_clean": 3.3416,
+   "expected_faulty": 3.3416,
+   "impact": 0.0
+  },
+  {
+   "seed": 2,
+   "fault": "late_terminations",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 3.3416,
+   "expected_faulty": 3.5784,
+   "impact": 0.0709
+  },
+  {
+   "seed": 2,
+   "fault": "missing_extract",
+   "detected": true,
+   "checks": {
+    "X01": "fail"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "src_payroll",
+    "stg_payroll__lines"
+   ],
+   "expected_clean": 3.3416,
+   "expected_faulty": 3.3396,
+   "impact": -0.0006
+  },
+  {
+   "seed": 2,
+   "fault": "broken_manager",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 3.3416,
+   "expected_faulty": 3.3416,
+   "impact": 0.0
+  },
+  {
+   "seed": 3,
+   "fault": "pay_basis",
+   "detected": true,
+   "checks": {
+    "C01": "fail",
+    "C02": "fail",
+    "C03": "fail",
+    "C04": "warn"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "stg_map__pay_basis",
+    "stg_payroll__lines",
+    "src_payroll",
+    "int_comp__annualized",
+    "fct_comp_position"
+   ],
+   "expected_clean": 13.0222,
+   "expected_faulty": 12.0583,
+   "impact": -0.074
+  },
+  {
+   "seed": 3,
+   "fault": "duplicates",
+   "detected": true,
+   "checks": {
+    "U01": "warn"
+   },
+   "held": false,
+   "root_rank": 1,
+   "ranking": [
+    "src_hris",
+    "stg_hris__records"
+   ],
+   "expected_clean": 13.0222,
+   "expected_faulty": 13.0222,
+   "impact": 0.0
+  },
+  {
+   "seed": 3,
+   "fault": "late_terminations",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 13.0222,
+   "expected_faulty": 15.8287,
+   "impact": 0.2155
+  },
+  {
+   "seed": 3,
+   "fault": "missing_extract",
+   "detected": true,
+   "checks": {
+    "X01": "fail"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "src_payroll",
+    "stg_payroll__lines"
+   ],
+   "expected_clean": 13.0222,
+   "expected_faulty": 12.9291,
+   "impact": -0.0072
+  },
+  {
+   "seed": 3,
+   "fault": "broken_manager",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 13.0222,
+   "expected_faulty": 13.0222,
+   "impact": 0.0
+  },
+  {
+   "seed": 4,
+   "fault": "pay_basis",
+   "detected": true,
+   "checks": {
+    "C01": "fail",
+    "C02": "fail",
+    "C03": "fail",
+    "C04": "warn"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "stg_map__pay_basis",
+    "stg_payroll__lines",
+    "src_payroll",
+    "int_comp__annualized",
+    "fct_comp_position"
+   ],
+   "expected_clean": 3.304,
+   "expected_faulty": 2.7245,
+   "impact": -0.1754
+  },
+  {
+   "seed": 4,
+   "fault": "duplicates",
+   "detected": true,
+   "checks": {
+    "U01": "warn"
+   },
+   "held": false,
+   "root_rank": 1,
+   "ranking": [
+    "src_hris",
+    "stg_hris__records"
+   ],
+   "expected_clean": 3.304,
+   "expected_faulty": 3.304,
+   "impact": 0.0
+  },
+  {
+   "seed": 4,
+   "fault": "late_terminations",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 3.304,
+   "expected_faulty": 3.5814,
+   "impact": 0.0839
+  },
+  {
+   "seed": 4,
+   "fault": "missing_extract",
+   "detected": true,
+   "checks": {
+    "X01": "fail"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "src_payroll",
+    "stg_payroll__lines"
+   ],
+   "expected_clean": 3.304,
+   "expected_faulty": 3.3402,
+   "impact": 0.0109
+  },
+  {
+   "seed": 4,
+   "fault": "broken_manager",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 3.304,
+   "expected_faulty": 3.3084,
+   "impact": 0.0013
+  },
+  {
+   "seed": 5,
+   "fault": "pay_basis",
+   "detected": true,
+   "checks": {
+    "C01": "fail",
+    "C02": "fail",
+    "C03": "fail",
+    "C04": "warn"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "stg_map__pay_basis",
+    "stg_payroll__lines",
+    "src_payroll",
+    "int_comp__annualized",
+    "fct_comp_position"
+   ],
+   "expected_clean": 3.407,
+   "expected_faulty": 2.7982,
+   "impact": -0.1787
+  },
+  {
+   "seed": 5,
+   "fault": "duplicates",
+   "detected": true,
+   "checks": {
+    "U01": "warn"
+   },
+   "held": false,
+   "root_rank": 1,
+   "ranking": [
+    "src_hris",
+    "stg_hris__records"
+   ],
+   "expected_clean": 3.407,
+   "expected_faulty": 3.407,
+   "impact": 0.0
+  },
+  {
+   "seed": 5,
+   "fault": "late_terminations",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 3.407,
+   "expected_faulty": 3.8342,
+   "impact": 0.1254
+  },
+  {
+   "seed": 5,
+   "fault": "missing_extract",
+   "detected": true,
+   "checks": {
+    "X01": "fail"
+   },
+   "held": true,
+   "root_rank": 1,
+   "ranking": [
+    "src_payroll",
+    "stg_payroll__lines"
+   ],
+   "expected_clean": 3.407,
+   "expected_faulty": 3.4169,
+   "impact": 0.0029
+  },
+  {
+   "seed": 5,
+   "fault": "broken_manager",
+   "detected": false,
+   "checks": {},
+   "held": false,
+   "root_rank": null,
+   "ranking": [],
+   "expected_clean": 3.407,
+   "expected_faulty": 3.4082,
+   "impact": 0.0004
+  }
+ ],
+ "seconds": 4.3
+}

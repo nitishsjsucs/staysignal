@@ -166,8 +166,16 @@ export interface ChallengerReport {
   summary: ModelComparisonReport["summary"];
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport | ChallengerReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery", "challenger"];
+export interface DqFaultsReport {
+  kind: "dq-faults";
+  command: string;
+  date: string;
+  seeds: number[];
+  summary: Record<string, { seeds: number; detected: number; held: number; checks: string[]; root_top1: number; root_found: number; mean_abs_impact: number | null; max_abs_impact: number | null }>;
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport | ChallengerReport | DqFaultsReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery", "challenger", "dq-faults"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -279,6 +287,24 @@ export function renderChallenger(file: string, r: ChallengerReport): string {
   return lines.join("\n");
 }
 
+const FAULT_NAMES: Record<string, string> = { pay_basis: "Pay-basis code with annual amounts", duplicates: "Duplicate HRIS records", late_terminations: "Late terminations", missing_extract: "Missing payroll extract", broken_manager: "Broken manager references" };
+
+/** C53: which phase-1 checks catch each planted fault, where the ranking puts its root, and its forecast impact. */
+export function renderDqFaults(file: string, r: DqFaultsReport): string {
+  const n = r.seeds.length;
+  const lines = [
+    `**Data-quality fault benchmark** (\`${r.command}\`, ${r.date}, [${file}](${file})): each fault injected into what the sources recorded for ${n} copies of the small world; detection by the phase-1 checks, localization by the root-cause ranking, and the forecast's change had the run not been held. ${SYNTHETIC}`,
+    "",
+    "| Fault | Detected | Held | Checks that fired | Root ranked first | Forecast change (mean, max) |",
+    "|---|---|---|---|---|---|",
+  ];
+  for (const [fault, x] of Object.entries(r.summary)) {
+    const impact = x.mean_abs_impact === null ? "n/a" : `${pct(x.mean_abs_impact)}, ${pct(x.max_abs_impact ?? 0)}`;
+    lines.push(`| ${FAULT_NAMES[fault] ?? fault} | ${x.detected} of ${x.seeds} | ${x.held} of ${x.seeds} | ${x.checks.join(", ") || "none"} | ${x.root_top1} of ${x.seeds} | ${impact} |`);
+  }
+  return lines.join("\n");
+}
+
 const MODEL_NAMES: Record<string, string> = { stub: "scripted stub", llama: "Qwen3-1.7B (local)", mlx: "Qwen3.6-27B (local)" };
 
 export function renderAgentEval(file: string, r: AgentEvalReport): string {
@@ -347,7 +373,7 @@ export function renderResults(reports: { file: string; report: Report }[]): stri
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : report.kind === "challenger" ? renderChallenger(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : report.kind === "challenger" ? renderChallenger(file, report) : report.kind === "dq-faults" ? renderDqFaults(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

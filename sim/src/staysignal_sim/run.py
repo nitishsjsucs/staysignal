@@ -4,7 +4,8 @@ A replicate is one proposal, one card variant and one seed: personas answer the 
 active personas (drawn from their activation priors with `random` seeded from (seed, round), ordered by influence)
 refresh their feed, all their model calls go out concurrently through the recorder, and the returned actions are
 applied one at a time in persona ID order; the round ends with one recommender update. The program office posts an
-FAQ in round 3 and opens a manager AMA in round 5. Post items follow the last round.
+FAQ in round 3 and opens a manager AMA in round 5. Post items follow the last round, asked with the persona's own
+posts and the last feed it read.
 
 Everything the forum needs to be rebuilt is in `actions.jsonl` (including round ends and the program office's
 posts), so `replay` reapplies it to a fresh forum with no model and must reproduce the manifest's database hash.
@@ -145,15 +146,25 @@ async def run_replicate(
             :160
         ]
 
+    last_feed: dict[str, list[dict]] = {}
+
     async def ask_items(phase: str) -> None:
         reqs = []
         for p in personas:
             descending = random.Random(f"{seed}:{p.persona_id}:scale").random() < 0.5
+            context = card(p, proposal, voices[p.persona_id])
+            if phase == "post":
+                # after the rounds the persona answers with what it posted and the last feed it read, so the post items
+                # can differ from the pre items for a reason (an identical request would also share one cached answer)
+                context = (
+                    user_message(context, digests[p.persona_id][-3:], last_feed.get(p.persona_id, []))
+                    + "\n\nThe discussion has ended."
+                )
             reqs.append(
                 (
                     build_request(
                         system,
-                        items_prompt(card(p, proposal, voices[p.persona_id]), descending),
+                        items_prompt(context, descending),
                         tools=None,
                         max_tokens=40,
                     ),
@@ -237,6 +248,7 @@ async def run_replicate(
             i = personas.index(p)
             feed = (await forum.refresh(i)).get("posts", [])
             feeds[p.persona_id] = feed
+            last_feed[p.persona_id] = feed
             # OASIS records each refresh in its trace table, so replay must refresh too
             actions.append(
                 {
@@ -301,7 +313,7 @@ async def run_replicate(
         "config": {"name": config, **cfg, "faq_round": FAQ_ROUND, "ama_round": AMA_ROUND},
         "provider": provider.name,
         "placeholder": provider.name == "stub",
-        "sampling": {"temperature": 0.7, "top_p": 0.95},
+        "sampling": {"temperature": 0.7, "top_p": 0.95, **getattr(provider, "sampling_note", {})},
         "personas": [
             {
                 "persona_id": p.persona_id,

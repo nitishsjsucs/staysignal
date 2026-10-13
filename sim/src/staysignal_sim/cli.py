@@ -3,8 +3,10 @@
 record: one session per proposal: three main replicates (seeds 1 to 3, 16 personas x 8 rounds) and the two controls
 (facts removed and facts shuffled, 16 x 4, seed 1), the coding pass on each, then `analysis.json`. `--provider stub`
 writes a labeled placeholder session (scripted text, no model); `--provider openai` is the Mac's 27B through
-`scripts/llm.ts`, the only way real recordings are made. Both hygiene tiers scan the decompressed calls before a
-recording is committed (the pre-commit hook does this for every staged file).
+`scripts/llm.ts`, the only way real recordings are made; its responses are cached under var/lab/cache, so a rerun
+after an interruption (the memory guard, a server error) resumes where it stopped, and `--fresh` records anew. Both
+hygiene tiers scan the decompressed calls before a recording is committed (the pre-commit hook does this for every
+staged file).
 
 replay: rebuilds every replicate of a session from its actions with no model and checks each database hash against
 its manifest; exits non-zero on any mismatch.
@@ -21,7 +23,7 @@ import tempfile
 from pathlib import Path
 
 from staysignal_sim.analysis import analyze
-from staysignal_sim.client import OpenAICompatibleProvider, RecordedProvider, StubProvider
+from staysignal_sim.client import CachedProvider, OpenAICompatibleProvider, RecordedProvider, StubProvider
 from staysignal_sim.coding import code_run
 from staysignal_sim.personas import load_cells, load_proposals, repo_root
 from staysignal_sim.run import replay, run_replicate
@@ -45,17 +47,30 @@ def provider_for(name: str, run_dir: Path | None = None):
     raise ValueError(f"unknown provider {name}")
 
 
-async def record(proposal_id: str, provider: str, out: Path, rehearsal: bool = False) -> dict:
+def cache_path(proposal_id: str, provider: str, rehearsal: bool = False) -> Path:
+    """The live provider's request cache (var/, never committed): a rerun after an interruption resumes from it."""
+    suffix = "-rehearsal" if rehearsal else ""
+    return repo_root() / "var" / "lab" / "cache" / f"{proposal_id}-{provider}{suffix}.jsonl"
+
+
+async def record(proposal_id: str, provider: str, out: Path, rehearsal: bool = False, fresh: bool = False) -> dict:
     proposal = load_proposals()[proposal_id]
     cells = load_cells()
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
     plan = [("main", "rehearsal", 1)] if rehearsal else PLAN
+    live = provider_for(provider)
+    if provider == "openai":
+        cache = cache_path(proposal_id, provider, rehearsal)
+        if fresh and cache.exists():
+            cache.unlink()
+        live = CachedProvider(live, cache)
     for card_variant, config, seed in plan:
         run_dir = out / f"{card_variant}-s{seed}"
-        await run_replicate(proposal, cells, card_variant, seed, config, provider_for(provider), run_dir)
-        await code_run(run_dir, provider_for(provider))
+        await run_replicate(proposal, cells, card_variant, seed, config, live, run_dir)
+        await code_run(run_dir, live)
+        print(json.dumps({"replicate": run_dir.name, "cache_hits": getattr(live, "hits", 0)}), flush=True)
     doc = analyze(out)
     (out / "analysis.json").write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
     return doc
@@ -79,12 +94,13 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--provider", default="stub", choices=["stub", "openai"])
     r.add_argument("--rehearsal", action="store_true", help="8 personas x 4 rounds, one replicate")
     r.add_argument("--out", default=None)
+    r.add_argument("--fresh", action="store_true", help="discard the live provider's request cache first")
     v = sub.add_parser("replay")
     v.add_argument("--session", required=True)
     args = ap.parse_args(argv)
     if args.cmd == "record":
         out = Path(args.out) if args.out else repo_root() / "lab" / "recordings" / f"{args.proposal}-{args.provider}"
-        doc = asyncio.run(record(args.proposal, args.provider, out, args.rehearsal))
+        doc = asyncio.run(record(args.proposal, args.provider, out, args.rehearsal, args.fresh))
         print(
             json.dumps(
                 {

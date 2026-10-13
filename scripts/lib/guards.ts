@@ -6,6 +6,17 @@ import os from "node:os";
 export const SWAP_GROWTH_LIMIT_BYTES = 2e9;
 export const MIN_FREE_DISK_BYTES = 6e9;
 
+/** The swap growth limit for this run: 2 GB, or the operator's explicit override `SS_SWAP_GROWTH_LIMIT_GB` (a positive
+ * number of GB), for a low-memory run with `--allow-swap` where a one-time eviction to swap is expected and the disk has
+ * room for it. The free-disk floor (6 GB) is never overridden. */
+export function swapGrowthLimitBytes(env: NodeJS.ProcessEnv = process.env): number {
+  const raw = env.SS_SWAP_GROWTH_LIMIT_GB?.trim();
+  if (!raw) return SWAP_GROWTH_LIMIT_BYTES;
+  const gb = Number(raw);
+  if (!Number.isFinite(gb) || gb <= 0) throw new Error(`SS_SWAP_GROWTH_LIMIT_GB must be a positive number of GB, got "${raw}"`);
+  return gb * 1e9;
+}
+
 const UNIT: Record<string, number> = { K: 1024, M: 1024 ** 2, G: 1024 ** 3 };
 
 /** Parses `sysctl vm.swapusage` ("total = 7168.00M  used = 5999.06M  free = ..."). */
@@ -44,10 +55,10 @@ export function readMachine(): MachineReading {
   return { at: new Date().toISOString(), swapUsedBytes: swap.usedBytes, swapTotalBytes: swap.totalBytes, freeDiskBytes: parseDfAvailable(dfK), swapusage, dfHome };
 }
 
-/** Why an LLM run must stop now, or null. */
-export function guardViolation(baseline: MachineReading, now: MachineReading): string | null {
+/** Why an LLM run must stop now, or null. `swapLimitBytes` defaults to `swapGrowthLimitBytes()`. */
+export function guardViolation(baseline: MachineReading, now: MachineReading, swapLimitBytes: number = swapGrowthLimitBytes()): string | null {
   const growth = now.swapUsedBytes - baseline.swapUsedBytes;
-  if (growth > SWAP_GROWTH_LIMIT_BYTES) return `swap grew by ${(growth / 1e9).toFixed(2)} GB (limit 2 GB)`;
+  if (growth > swapLimitBytes) return `swap grew by ${(growth / 1e9).toFixed(2)} GB (limit ${Number((swapLimitBytes / 1e9).toFixed(2))} GB)`;
   if (now.freeDiskBytes < MIN_FREE_DISK_BYTES) return `free disk ${(now.freeDiskBytes / 1e9).toFixed(2)} GB is under 6 GB`;
   return null;
 }

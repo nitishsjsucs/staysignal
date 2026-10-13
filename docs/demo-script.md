@@ -27,6 +27,8 @@ To reset during the demo: `npm run demo:reset -- --beat N` (beats 1 to 3 start f
 
 Close other apps and run nothing heavy beside the 27B. Each step writes files that are committed after both hygiene tiers pass (the pre-commit hook scans every staged file).
 
+Low memory: `npm run llm -- start 27b` refuses with less than 17 GB available. On 2026-10-13 about 12.5 GB was all this laptop had with only Claude open, and Nitish decided to run anyway: `SS_SWAP_GROWTH_LIMIT_GB=6 npm run llm -- start 27b --profile agent --allow-swap` skips the pre-flight and lets the guard allow 6 GB of swap growth instead of 2 (unset, the limit stays 2 GB; the 6 GB free-disk floor is never overridden), and `--decode-concurrency 1` runs the `lab` profile at one sequence. Each override is recorded in `var/llm/session.json`. Stop and restart at concurrency 1 if swap keeps growing for 3 minutes after the first request or decode falls below 1 token a second.
+
 ```sh
 npm run llm -- start 27b                     # the guarded 27B on 8186 (refuses below 17 GB available)
 

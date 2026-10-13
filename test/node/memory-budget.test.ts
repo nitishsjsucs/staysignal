@@ -15,7 +15,8 @@ describe("27B memory budget (C65)", () => {
   });
 });
 
-import { guardViolation, parseDfAvailable, parseSwapUsage } from "../../scripts/lib/guards.ts";
+import { guardViolation, parseDfAvailable, parseSwapUsage, swapGrowthLimitBytes } from "../../scripts/lib/guards.ts";
+import { decodeConcurrency, mlxArgs } from "../../scripts/llm.ts";
 
 describe("machine guards", () => {
   it("parses sysctl vm.swapusage and df -k", () => {
@@ -31,6 +32,30 @@ describe("machine guards", () => {
     expect(guardViolation(base, { ...base, swapUsedBytes: 7.9e9 })).toBeNull();
     expect(guardViolation(base, { ...base, swapUsedBytes: 8.1e9 })).toMatch(/swap grew/);
     expect(guardViolation(base, { ...base, freeDiskBytes: 5e9 })).toMatch(/free disk/);
+  });
+
+  it("takes the operator's SS_SWAP_GROWTH_LIMIT_GB override, and never overrides the free-disk floor", () => {
+    expect(swapGrowthLimitBytes({})).toBe(2e9);
+    expect(swapGrowthLimitBytes({ SS_SWAP_GROWTH_LIMIT_GB: "" })).toBe(2e9);
+    expect(swapGrowthLimitBytes({ SS_SWAP_GROWTH_LIMIT_GB: "6" })).toBe(6e9);
+    expect(swapGrowthLimitBytes({ SS_SWAP_GROWTH_LIMIT_GB: "1.5" })).toBe(1.5e9);
+    expect(() => swapGrowthLimitBytes({ SS_SWAP_GROWTH_LIMIT_GB: "0" })).toThrow(/positive/);
+    expect(() => swapGrowthLimitBytes({ SS_SWAP_GROWTH_LIMIT_GB: "six" })).toThrow(/positive/);
+    const base = { at: "", swapUsedBytes: 1e9, swapTotalBytes: 2e9, freeDiskBytes: 46e9, swapusage: "", dfHome: "" };
+    const limit = swapGrowthLimitBytes({ SS_SWAP_GROWTH_LIMIT_GB: "6" });
+    expect(guardViolation(base, { ...base, swapUsedBytes: 6.9e9 }, limit)).toBeNull();
+    expect(guardViolation(base, { ...base, swapUsedBytes: 7.1e9 }, limit)).toMatch(/swap grew by 6\.10 GB \(limit 6 GB\)/);
+    expect(guardViolation(base, { ...base, swapUsedBytes: 3.1e9 }, swapGrowthLimitBytes({}))).toMatch(/limit 2 GB/);
+    expect(guardViolation(base, { ...base, freeDiskBytes: 5.9e9 }, limit)).toMatch(/free disk 5\.90 GB is under 6 GB/);
+  });
+
+  it("runs fewer sequences than the profile only when the operator asks, never more", () => {
+    expect(decodeConcurrency("lab", null)).toBe(3);
+    expect(decodeConcurrency("lab", 1)).toBe(1);
+    expect(() => decodeConcurrency("lab", 4)).toThrow(/1 to 3/);
+    expect(() => decodeConcurrency("agent", 0)).toThrow(/1 to 1/);
+    const args = mlxArgs("lab", 1);
+    expect(args[args.indexOf("--decode-concurrency") + 1]).toBe("1");
   });
 });
 

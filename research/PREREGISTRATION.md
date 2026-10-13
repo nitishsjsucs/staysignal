@@ -56,4 +56,8 @@ Alberge, Haugomat, Varoquaux and Abecassis, "On the calibration of survival mode
 
 ## Deviations
 
-None yet.
+Logged on 2026-10-12, before any research result, while building the runner. The text above is unchanged.
+
+1. Features come from the Python reference implementation (`features/reference.py`) instead of the planned SQL fast path. Reason: it computes the 24 monthly landmarks of one canonical-size training set in about one second, so the fast path is not needed for speed, and `pit.sql` reproduces it exactly (feature test 17), so the features are the same.
+2. Details the design left open, fixed here before any result: the Monte Carlo uses 500 simulations per fit (10 parameter draws x 5 organization-shock draws x 10 team-shock draws); a late termination is recorded 30 to 75 days after its effective date, uniformly; the missing extract is every termination record recorded in June 2024 (before all eight origins); "treated as censored" ends each person-landmark's follow-up at the start of the missing month and drops a landmark inside it; "not deduplicated" counts a duplicated departure's person-landmark twice; the interaction arm has contagion off like factor C; team cohorts for H3b have at least 10 people at the origin; each fit is warm-started from the previous origin's fit of the same world and handling (the optimum and tolerance are unchanged).
+3. Reading the decision rules: "inside the bounds" means equivalence shown by the TOST at alpha 0.05 (the seed-bootstrap 90% interval inside the bounds), and "outside the bounds" means equivalence not shown.

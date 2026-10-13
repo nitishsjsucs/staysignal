@@ -166,6 +166,17 @@ export interface ChallengerReport {
   summary: ModelComparisonReport["summary"];
 }
 
+export interface ResearchReport {
+  kind: "research";
+  command: string;
+  date: string;
+  prereg_sha256: string;
+  seeds: number[];
+  origins: string[];
+  cells: { factor: string; level: string; handling: string; oe: number; oe_lo90: number; oe_hi90: number; oe_equivalent: boolean; cov80: number; cov80_equivalent: boolean; team_pit_ks: number | null }[];
+  hypotheses: Record<string, { verdict: string }>;
+}
+
 export interface DqFaultsReport {
   kind: "dq-faults";
   command: string;
@@ -181,8 +192,8 @@ export interface RecoveryShockReport extends Omit<RecoveryReport, "kind"> {
   targets: { file: string; seed: number; baseline_headcount: number; rows: number };
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport | RecoveryShockReport | ChallengerReport | DqFaultsReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery", "recovery-shock", "challenger", "dq-faults"];
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport | RecoveryShockReport | ChallengerReport | ResearchReport | DqFaultsReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery", "recovery-shock", "challenger", "research", "dq-faults"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -294,6 +305,22 @@ export function renderChallenger(file: string, r: ChallengerReport): string {
   return lines.join("\n");
 }
 
+/** The pre-registered research benchmark: each hypothesis's verdict, then every cell. */
+export function renderResearch(file: string, r: ResearchReport): string {
+  const lines = [
+    `**Research benchmark** (\`${r.command}\`, ${r.date}, [${file}](${file}); pre-registration [research/PREREGISTRATION.md](research/PREREGISTRATION.md), SHA-256 \`${r.prereg_sha256.slice(0, 12)}\`): ${r.seeds.length} seeds, ${r.origins.length} quarterly origins, 3-month horizon, on synthetic research worlds with a known truth; equivalence by two one-sided tests on a seed bootstrap. ${SYNTHETIC}`,
+    "",
+    `Verdicts by the registered rules: ${Object.entries(r.hypotheses).map(([k, v]) => `${k} ${v.verdict}`).join("; ")}.`,
+    "",
+    "| Factor | Level | Handling | O/E (seed 90% interval) | O/E equivalent | 80% range held | Team PIT distance |",
+    "|---|---|---|---|---|---|---|",
+  ];
+  for (const c of r.cells) {
+    lines.push(`| ${c.factor} | ${c.level} | ${c.handling.replace(/_/g, " ")} | ${c.oe.toFixed(3)} (${c.oe_lo90.toFixed(3)} to ${c.oe_hi90.toFixed(3)}) | ${c.oe_equivalent ? "yes" : "no"} | ${pct(c.cov80)} | ${c.team_pit_ks === null ? "" : c.team_pit_ks.toFixed(3)} |`);
+  }
+  return lines.join("\n");
+}
+
 const FAULT_NAMES: Record<string, string> = { pay_basis: "Pay-basis code with annual amounts", duplicates: "Duplicate HRIS records", late_terminations: "Late terminations", missing_extract: "Missing payroll extract", broken_manager: "Broken manager references" };
 
 /** C53: which checks catch each planted fault, where the ranking puts its root, and its forecast impact. */
@@ -397,7 +424,7 @@ export function renderResults(reports: { file: string; report: Report }[]): stri
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : report.kind === "recovery-shock" ? renderRecoveryShock(file, report) : report.kind === "challenger" ? renderChallenger(file, report) : report.kind === "dq-faults" ? renderDqFaults(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : report.kind === "recovery-shock" ? renderRecoveryShock(file, report) : report.kind === "challenger" ? renderChallenger(file, report) : report.kind === "research" ? renderResearch(file, report) : report.kind === "dq-faults" ? renderDqFaults(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

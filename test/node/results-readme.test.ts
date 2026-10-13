@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { loadReports } from "../../scripts/results-to-readme.ts";
-import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type DqFaultsReport, type RecoveryReport, renderActionAudit, renderChallenger, renderDqFaults, renderBacktest, renderModelComparison, renderOracleCoverage, renderRecovery, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
+import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type DqFaultsReport, type RecoveryReport, type ResearchReport, renderActionAudit, renderChallenger, renderDqFaults, renderResearch, renderBacktest, renderModelComparison, renderOracleCoverage, renderRecovery, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
 
 describe("README Results generation", () => {
   it("replaces only the marked section", () => {
@@ -24,6 +24,23 @@ describe("README Results generation", () => {
     const md = renderDqFaults("results/dq.json", r);
     expect(md).toContain("| Pay-basis code with annual amounts | 2 of 2 | 2 of 2 | C01, C04 | 2 of 2 | 16.1%, 25.0% |");
     expect(md).toContain("| Broken manager references | 0 of 2 | 0 of 2 | none | 0 of 2 | n/a |");
+  });
+
+  it("renders the research benchmark with each verdict and every cell", () => {
+    const r: ResearchReport = {
+      kind: "research",
+      command: "uv run --project engine staysignal research run --seeds 1-20",
+      date: "2026-10-12",
+      prereg_sha256: "abcdef0123456789",
+      seeds: [1, 2],
+      origins: ["2024-10-01"],
+      cells: [{ factor: "A", level: "0.30", handling: "matured", oe: 1.0123, oe_lo90: 0.98, oe_hi90: 1.04, oe_equivalent: true, cov80: 0.8, cov80_equivalent: true, team_pit_ks: null }],
+      hypotheses: { H1: { verdict: "consistent" }, H5: { verdict: "descriptive" } },
+    };
+    const md = renderResearch("results/research.json", r);
+    expect(md).toContain("SHA-256 `abcdef012345`");
+    expect(md).toContain("Verdicts by the registered rules: H1 consistent; H5 descriptive.");
+    expect(md).toContain("| A | 0.30 | matured | 1.012 (0.980 to 1.040) | yes | 80.0% |  |");
   });
 
   it("renders the challenger with its row cap and the like-for-like model", () => {

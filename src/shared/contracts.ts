@@ -168,6 +168,44 @@ export interface HistoryFixture {
   series: Record<string, Record<string, HistoryPoint[]>>; // cohort_id -> horizon -> points
 }
 
+/** One pre-registered cell of the research benchmark (research/PREREGISTRATION.md, SPEC 11). */
+export interface ResearchCell {
+  factor: "A" | "B" | "C" | "D" | "AxC";
+  level: string;
+  handling: string;
+  seeds: number;
+  company_windows: number;
+  oe: number;
+  oe_lo90: number;
+  oe_hi90: number;
+  oe_tost_p: number;
+  oe_equivalent: boolean;
+  cov80: number;
+  cov80_lo90: number;
+  cov80_hi90: number;
+  cov80_tost_p: number;
+  cov80_equivalent: boolean;
+  cov95: number | null;
+  interval_score80: number | null;
+  team_pit_ks: number | null;
+  team_cov80: number | null;
+  team_windows: number;
+}
+
+export interface ResearchDoc {
+  kind: "research";
+  label: "synthetic";
+  command: string;
+  date: string;
+  prereg_sha256: string;
+  seeds: number[];
+  origins: string[];
+  horizon_months: number;
+  design: string;
+  cells: ResearchCell[];
+  hypotheses: Record<string, { rule: string; verdict: "consistent" | "counts against" | "descriptive" } & Record<string, unknown>>;
+}
+
 /** One cohort on the Workforce page's funnel plot (SPEC 16.2): a mature backtest window, groups and above, n >= 50. */
 export interface FunnelPoint {
   cohort: string;

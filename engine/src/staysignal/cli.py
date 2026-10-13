@@ -196,6 +196,9 @@ def cmd_engine_prepare(args: argparse.Namespace) -> int:
     audits = sorted((repo / "results").glob("action-audit-*.json"))
     if audits:  # the recorded action audit, served at /published/action-audit
         write_json(published / "action-audit.json", json.loads(audits[-1].read_text()), compact=True)
+    research = sorted((repo / "results").glob("research-*.json"))
+    if research:  # the recorded research benchmark, served at /published/research
+        write_json(published / "research.json", json.loads(research[-1].read_text()), compact=True)
     lab_docs = repo / "test" / "fixtures" / "api" / "lab"
     for f in sorted(lab_docs.glob("*.json")):  # the Scenario Lab's exported documents, served at /published/lab/<name>
         write_json(published / "lab" / f.name, json.loads(f.read_text()), compact=True)
@@ -375,6 +378,118 @@ def cmd_policy_compile(args: argparse.Namespace) -> int:
         print("policy and grant plan are current")
         return 0
     print("wrote policy/compiled/policy.json and infra/gcp/grants.json")
+    return 0
+
+
+def _seed_list(spec: str) -> list[int]:
+    out: list[int] = []
+    for part in spec.split(","):
+        a, _, b = part.partition("-")
+        out += list(range(int(a), int(b) + 1)) if b else [int(a)]
+    return sorted(set(out))
+
+
+def _research_seed(args: tuple[int, bool, int | None, str]) -> int:
+    from staysignal.research.run import run_seeds
+
+    seed, small, n_origins, out = args
+    run_seeds([seed], Path(out), small, n_origins)
+    return seed
+
+
+def cmd_research_time(args: argparse.Namespace) -> int:
+    """The timed 2-seed run the pre-registration asks for before the full run: seeds 1 and 2 into the full run's
+    checkpoint directory (so the full run reuses them), timed, with the estimate for 20 seeds written to timing.json."""
+    import datetime as dt
+    import os
+
+    from staysignal.research.run import checkpoint_path, run_seeds
+
+    _, var = _repo_var()
+    out = Path(args.out) if args.out else var / "research" / "canonical"
+    out.mkdir(parents=True, exist_ok=True)
+    if any(checkpoint_path(out, s).exists() for s in (1, 2)):
+        print("seeds 1 and 2 already have checkpoints; the timing run must start from none", flush=True)
+        return 1
+    t0 = time.perf_counter()
+    docs = run_seeds([1, 2], out, False, None)
+    per_seed = {str(d["seed"]): d["seconds"] for d in docs}
+    mean = sum(per_seed.values()) / len(per_seed)
+    doc = {
+        "date": dt.date.today().isoformat(),
+        "seeds": [1, 2],
+        "seconds_per_seed": per_seed,
+        "wall_seconds": round(time.perf_counter() - t0, 1),
+        "cpus": os.cpu_count(),
+        "estimate_20_seeds_hours_by_workers": {str(w): round(20 * mean / w / 3600, 2) for w in (1, 2, 4)},
+    }
+    (out / "timing.json").write_text(json.dumps(doc, indent=1) + "\n")
+    print(json.dumps(doc, indent=1))
+    return 0
+
+
+def cmd_research_run(args: argparse.Namespace) -> int:
+    """The research benchmark (SPEC 11): runs or resumes the seeds (one checkpoint each), then writes the results."""
+    import datetime as dt
+    from concurrent.futures import ProcessPoolExecutor
+
+    from staysignal.research.report import prereg_sha256, summarize
+    from staysignal.research.run import checkpoint_path, run_seeds
+    from staysignal.world.emit import GENERATOR_VERSION
+
+    repo, var = _repo_var()
+    seeds = _seed_list(args.seeds)
+    out = Path(args.out) if args.out else var / "research" / ("small" if args.small else "canonical")
+    t0 = time.perf_counter()
+    todo = [s for s in seeds if not checkpoint_path(out, s).exists()]
+    if args.workers > 1 and len(todo) > 1:
+        with ProcessPoolExecutor(max_workers=args.workers) as pool:
+            for s in pool.map(_research_seed, [(s, args.small, args.origins, str(out)) for s in todo]):
+                print(f"seed {s} done", flush=True)
+    docs = run_seeds(seeds, out, args.small, args.origins)
+    summary = summarize(docs)
+    flags = (
+        f" --seeds {args.seeds}"
+        + (" --small" if args.small else "")
+        + (f" --origins {args.origins}" if args.origins else "")
+    )
+    doc = {
+        "kind": "research",
+        "command": f"uv run --project engine staysignal research run{flags}",
+        "date": dt.date.today().isoformat(),
+        "label": "synthetic",
+        "prereg_sha256": prereg_sha256(),
+        "generator_version": GENERATOR_VERSION,
+        "profile": "research-small" if args.small else "research",
+        "seeds": seeds,
+        "origins": docs[0]["origins"] if docs else [],
+        "horizon_months": 3,
+        "design": "one factor at a time around the base world plus the A x C interaction; one fit per origin and handling (sandwich parameters, warm-started); nested Monte Carlo of 500 simulations; actuals from the generator's clean final truth; seed bootstrap of 2,000 resamples for TOST",
+        "seconds_per_seed": {str(d["seed"]): d["seconds"] for d in docs},
+        # the timed 2-seed run that preceded the full run (research/PREREGISTRATION.md, analysis plan)
+        "timing_run": json.loads((out / "timing.json").read_text()) if (out / "timing.json").exists() else None,
+        **summary,
+        "seconds": round(time.perf_counter() - t0, 1),
+    }
+    target = (
+        Path(args.results)
+        if args.results
+        else (out / "research.json" if args.small else repo / "results" / f"research-{doc['date']}.json")
+    )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(doc, indent=1) + "\n")
+    if not args.small and not args.results:
+        from staysignal.fixtures.export_api import write_json
+
+        for dest in (
+            repo / "test" / "fixtures" / "api" / "research.json",
+            var / "engine" / "published" / "research.json",
+        ):
+            if dest.parent.exists():
+                write_json(dest, doc, compact=True)
+    print(
+        json.dumps({"written": str(target), "hypotheses": {k: v["verdict"] for k, v in summary["hypotheses"].items()}})
+    )
     return 0
 
 
@@ -944,6 +1059,19 @@ def build_parser() -> argparse.ArgumentParser:
     pc = psub.add_parser("compile", help="compile policy/access.yaml into the compiled policy and the grant plan")
     pc.add_argument("--check", action="store_true", help="fail when a generated file drifts")
     pc.set_defaults(func=cmd_policy_compile)
+    rs = sub.add_parser("research", help="the pre-registered research benchmark (synthetic worlds)")
+    rsub = rs.add_subparsers(dest="research_command", required=True)
+    rr = rsub.add_parser("run", help="run or resume the seeds and write the results")
+    rr.add_argument("--seeds", default="1-20")
+    rr.add_argument("--small", action="store_true", help="the small world (the CI run)")
+    rr.add_argument("--origins", type=int, default=None, help="only the first N origins")
+    rr.add_argument("--workers", type=int, default=1)
+    rr.add_argument("--out", default=None, help="checkpoint directory (default var/research/<profile>)")
+    rr.add_argument("--results", default=None, help="results file (default results/research-<date>.json)")
+    rr.set_defaults(func=cmd_research_run)
+    rt = rsub.add_parser("time", help="the timed 2-seed run that precedes the full run (writes timing.json)")
+    rt.add_argument("--out", default=None, help="checkpoint directory (default var/research/canonical)")
+    rt.set_defaults(func=cmd_research_time)
     demo = sub.add_parser("demo", help="demo state")
     dsub = demo.add_subparsers(dest="demo_command", required=True)
     db = dsub.add_parser("build", help="train or load models, score the published runs, export API fixtures")

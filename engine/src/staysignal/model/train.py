@@ -87,13 +87,20 @@ def collect_landmarks(
     vintage_T: datetime,
     buffer_days: int = REPORTING_BUFFER_DAYS,
     landmarks: list[date] | None = None,
+    feature_cache: dict[date, list[FeatureRow]] | None = None,
 ) -> list[Collected]:
+    """`feature_cache` (landmark -> rows) lets callers that collect the same sources at many cutoffs compute each
+    landmark's features once; features at a landmark depend only on that landmark's vintage."""
     vin_T = Vintage(src, vintage_T)
     lms = landmarks if landmarks is not None else landmark_dates(start, T, buffer_days)
     out: list[Collected] = []
     for s in lms:
-        vin_s = Vintage(src, as_cutoff_datetime(s))
-        rows = features_at(vin_s, s)
+        if feature_cache is not None and s in feature_cache:
+            rows = feature_cache[s]
+        else:
+            rows = features_at(Vintage(src, as_cutoff_datetime(s)), s)
+            if feature_cache is not None:
+                feature_cache[s] = rows
         outs = outcomes_at(vin_T, s, [r.employee_number for r in rows])
         kept: list[FeatureRow] = []
         periods: list[int] = []
@@ -202,13 +209,21 @@ def train(src: Sources, start: date, T: date, vintage_T: datetime, version: str,
 
 
 def fit_artifact(
-    ts: TrainingSet, T: date, vintage_T: datetime, version: str, mapping: str = "payroll@1", t0: float | None = None
+    ts: TrainingSet,
+    T: date,
+    vintage_T: datetime,
+    version: str,
+    mapping: str = "payroll@1",
+    t0: float | None = None,
+    theta0: np.ndarray | None = None,
+    ftol: float = 1e-15,
 ) -> dict:
-    """Fits the model on a training set and returns the artifact (SPEC 9.6)."""
+    """Fits the model on a training set and returns the artifact (SPEC 9.6). `theta0` warm-starts the optimizer (the
+    research benchmark passes the previous origin's fit); the optimum and its tolerance are the same."""
     t0 = time.perf_counter() if t0 is None else t0
     Xs = standardize(ts.X, ts.spec)
     pk = packing(ts.spec)
-    res = mnl.fit(Xs, ts.Y, pk, lam=LAMBDA)
+    res = mnl.fit(Xs, ts.Y, pk, lam=LAMBDA, theta0=theta0, ftol=ftol)
     V = mnl.cluster_sandwich(res.theta, Xs, ts.Y, ts.clusters, pk, LAMBDA)
     shocks = estimate_shocks(ts, Xs, res.theta, pk, seed=int(hashlib.sha256(version.encode()).hexdigest()[:8], 16))
     names = []

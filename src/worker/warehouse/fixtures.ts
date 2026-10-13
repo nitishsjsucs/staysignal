@@ -1,7 +1,7 @@
 // Fixtures warehouse: answers published-layer reads from committed API fixtures exported by the engine
 // (`staysignal demo build`). Used by CI, e2e, Playwright and the fixtures-mode deployment (no Google resource).
 import { canonicalJson } from "../../shared/canonical-json";
-import type { ActionAuditDoc, CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, LabDoc, LabIndex, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { ActionAuditDoc, CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, LabDoc, LabIndex, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, ResearchDoc, RunsIndex } from "../../shared/contracts";
 import { type MemoryFileText, type MemoryHit, parseNote, searchMemory } from "../../shared/memory/search";
 import { sha256Hex } from "../../shared/sha256";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
@@ -105,6 +105,10 @@ export class FixturesWarehouse implements WarehouseClient {
 
   async actionAudit(): Promise<ActionAuditDoc | null> {
     return this.get<ActionAuditDoc>("action-audit.json");
+  }
+
+  async research(): Promise<ResearchDoc | null> {
+    return this.get<ResearchDoc>("research.json");
   }
 
   /** Engine job outputs keyed by job key (the fixture runner's source; SPEC 14.7). */

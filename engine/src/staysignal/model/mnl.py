@@ -107,8 +107,10 @@ def fit(
     gtol: float = 1e-10,
     maxiter: int = 5000,
     theta0: np.ndarray | None = None,
+    ftol: float = 1e-15,
 ) -> Fit:
-    """Y is the (n, K) one-hot outcome matrix (all zeros for stay)."""
+    """Y is the (n, K) one-hot outcome matrix (all zeros for stay). `ftol` stops L-BFGS-B earlier when looser; the
+    Newton polish still brings the gradient's max norm under `gtol`, so the optimum is the same."""
     theta = np.zeros(pk.n_params) if theta0 is None else theta0.copy()
     if theta0 is None:
         # start the intercepts at the marginal log-odds of each cause
@@ -124,7 +126,7 @@ def fit(
         args=(X, Y, pk, lam),
         jac=True,
         method="L-BFGS-B",
-        options={"maxiter": maxiter, "gtol": gtol, "ftol": 1e-15, "maxcor": 30},
+        options={"maxiter": maxiter, "gtol": gtol, "ftol": ftol, "maxcor": 30},
     )
     theta = res.x
     steps = 0

@@ -47,7 +47,8 @@
     "setup:prod": "node scripts/setup-prod.ts",
     "prod:validate": "uv run --project engine staysignal prod validate",
     "prod:load": "uv run --project engine staysignal prod load",
-    "runner:prod": "uv run --project engine staysignal runner prod"
+    "runner:prod": "uv run --project engine staysignal runner prod",
+    "prod:smoke": "node scripts/prod-smoke.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "3.0.57",

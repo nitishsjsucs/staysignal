@@ -3,13 +3,23 @@
 // demo/recordings/*.json and are bundled through the generated index.
 import { RECORDINGS } from "../generated/recordings-index";
 
+export interface RecordedStep {
+  tool_calls?: { tool: string; args: Record<string, unknown>; result_id?: string | null }[];
+  text?: string;
+}
+
+/** One recorded turn (written by npm run demo:record, scripts/demo-record.ts). `label` is what the chat shows on
+ * replay and names the model and the recording date. */
 export interface RecordedTurn {
   id: string;
   question: string;
   model: string;
   recorded_at: string;
   label: string;
-  steps: { tool_calls?: { tool: string; args: Record<string, unknown>; result_id?: string }[]; text?: string }[];
+  principal?: string;
+  provider?: string;
+  grounding?: string;
+  steps: RecordedStep[];
 }
 
 function norm(s: string): string {

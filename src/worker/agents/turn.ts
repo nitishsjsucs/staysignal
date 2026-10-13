@@ -11,7 +11,7 @@ import { preRoute } from "../../shared/guard/prerouter";
 import { isRefusal, REFUSAL_MESSAGES, type RefusalCode } from "../../shared/policy/refusals";
 import { getTool, publishedCohorts, runTool, type ToolContext, toolsFor } from "../../shared/tools/registry";
 import { REPAIR_PROMPT, SYSTEM_PROMPT } from "./prompts";
-import { findRecording } from "./recorded-provider";
+import { findRecording, type RecordedStep } from "./recorded-provider";
 import { openAiCompatible, type ProviderName, recordedModel, stubModel, LOCAL_URLS } from "./providers";
 import { type AigMetadata, type BudgetPort, neuronsFor, stripThink, TURN_CEILING, type WorkersAiConfig, withNoThink, workersAiModel } from "./workers-ai";
 
@@ -48,6 +48,9 @@ export interface TurnOutput {
   label: string | null;
   violations: string[];
   spans: Span[];
+  /** The model's own steps (tool calls with their arguments, then the accepted text), returned only when
+   * TurnOptions.captureSteps is set: the demo-turn recorder writes them to demo/recordings (ADR 0010). */
+  model_steps?: RecordedStep[];
 }
 
 /** What a production turn needs beyond the tools: the Workers AI settings, the neuron budget, and the gateway
@@ -57,6 +60,8 @@ export interface TurnOptions {
   budget?: BudgetPort | null;
   meta?: AigMetadata;
   fetch?: typeof fetch;
+  /** Return the model's steps with the turn (dev and localhost only, for npm run demo:record). */
+  captureSteps?: boolean;
 }
 
 export interface TurnHooks {
@@ -68,7 +73,7 @@ function modelFor(provider: ProviderName, aliases: AliasMap, question: string, o
   if (provider === "workers-ai" && opts.workersAi) return { model: workersAiModel(opts.workersAi, opts.meta ?? {}, opts.fetch), recorded: false, label: null };
   if (provider === "recorded") {
     const rec = findRecording(question);
-    if (rec) return { model: recordedModel(rec), recorded: true, label: "Model text replayed from a recorded 27B turn; tools ran live" };
+    if (rec) return { model: recordedModel(rec), recorded: true, label: rec.label || "Model text replayed from a recorded 27B turn; tools ran live" };
     return { model: stubModel(aliases), recorded: false, label: "No recorded turn for this question; the deterministic template answered" };
   }
   if (provider === "llama" || provider === "mlx") return { model: openAiCompatible(provider, LOCAL_URLS[provider]), recorded: false, label: null };
@@ -96,6 +101,7 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   }
   const aliases: AliasMap = new Map();
   const calls: ToolCallRecord[] = [];
+  const byCallId = new Map<string, ToolCallRecord>();
   const toolArgs: unknown[] = [];
   const { model, recorded, label } = modelFor(provider, aliases, question, opts);
   const production = provider === "workers-ai" && Boolean(opts.workersAi);
@@ -146,6 +152,7 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
           digest = getTool(def.name)?.digest(out, alias);
         }
         calls.push(record);
+        byCallId.set(opts.toolCallId, record);
         spans.push({ kind: "tool_call", name: def.name, start_ms: s, dur_ms: at() - s, outcome: record.refused ? record.refused.code : "ok", result_ids: record.result_id ? [record.result_id] : [] });
         hooks.onToolResult?.({ toolCallId: opts.toolCallId, record });
         return digest;
@@ -154,12 +161,16 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   }
   const messages: ModelMessage[] = [...history, { role: "user", content: question }];
   let text = "";
+  let modelText = "";
+  let lastSteps: { toolCalls: { toolCallId: string; toolName: string; input: unknown }[] }[] = [];
   for (let attempt = 0; attempt < 2; attempt++) {
     const s = at();
     const res = await generateText({ model, system, messages, tools, stopWhen: isStepCount(6), temperature: 0, maxOutputTokens: 400 });
     addUsage(res.totalUsage ?? res.usage);
     spans.push({ kind: "model_call", name: `generate${attempt ? " (retry)" : ""}`, start_ms: s, dur_ms: at() - s, tokens: { input: res.usage.inputTokens ?? null, output: res.usage.outputTokens ?? null, cached: res.usage.inputTokenDetails?.cacheReadTokens ?? null }, outcome: res.finishReason });
     text = production ? stripThink(res.text) : res.text;
+    modelText = text;
+    lastSteps = res.steps;
     // mlx drops an unparseable tool call silently: finish_reason tool-calls with no calls is retried once
     const silentDrop = res.finishReason === "tool-calls" && res.toolCalls.length === 0 && !text;
     if (!silentDrop) break;
@@ -196,6 +207,16 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   }
   await settle();
   const rendered = renderPlaceholders(text, aliases).text;
+  // the recorder's view: each model step that called tools, then the text the turn accepted (the model's own text or
+  // its repair; when the turn fell to the template, the model's failed text, so a replay falls to the template too)
+  const model_steps: RecordedStep[] | undefined = opts.captureSteps
+    ? [
+        ...lastSteps
+          .filter((st) => st.toolCalls.length > 0)
+          .map((st) => ({ tool_calls: st.toolCalls.map((tc) => ({ tool: tc.toolName, args: (tc.input ?? {}) as Record<string, unknown>, result_id: byCallId.get(tc.toolCallId)?.result_id ?? null })) })),
+        { text: grounding === "template" ? modelText : text },
+      ]
+    : undefined;
   return {
     question,
     text,
@@ -209,5 +230,6 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
     label,
     violations,
     spans,
+    ...(model_steps ? { model_steps } : {}),
   };
 }

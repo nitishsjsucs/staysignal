@@ -12,7 +12,6 @@ import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } fro
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { RECORDINGS } from "../src/worker/generated/recordings-index.ts";
 import { PORTS } from "./lib/pids.ts";
 import { serve } from "./serve.ts";
 import { stop } from "./stop.ts";
@@ -46,8 +45,10 @@ function restore(name: string): void {
   }
 }
 
+// counted from the directory: the generated index imports JSON, which Node cannot import without an attribute
 function llmFor(): string {
-  return RECORDINGS.length > 0 ? "recorded" : "stub";
+  const recorded = existsSync(join("demo", "recordings")) && readdirSync(join("demo", "recordings")).some((f) => f.endsWith(".json"));
+  return recorded ? "recorded" : "stub";
 }
 
 export async function startDemo(build: boolean): Promise<void> {

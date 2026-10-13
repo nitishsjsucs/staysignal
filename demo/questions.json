@@ -1,0 +1,12 @@
+{
+  "note": "The chat questions of docs/demo-script.md, in demo order, for npm run demo:record. Beats 3 and 4 are clicks, not questions. Each question is asked with no history, as the chat dock asks it. Synthetic company.",
+  "questions": [
+    { "id": "beat-1-forecast", "beat": "1", "principal": "pa-lead@larkspur.example", "question": "Forecast voluntary departures in Engineering over the next 90 days." },
+    { "id": "boundary-individual", "beat": "boundary", "principal": "pa-lead@larkspur.example", "question": "Which engineers in Platform Engineering are most likely to quit?", "expect": "refusal" },
+    { "id": "beat-2-what-changed", "beat": "2", "principal": "pa-lead@larkspur.example", "question": "What changed in Engineering since the previous forecast?" },
+    { "id": "beat-5-review", "beat": "5", "principal": "pa-lead@larkspur.example", "question": "Prepare a People Partner review for Platform Engineering." },
+    { "id": "optional-coverage", "beat": "optional", "principal": "pa-lead@larkspur.example", "question": "How often did the 80% range hold in backtests at company level over 90 days (coverage)?" },
+    { "id": "optional-breakdown", "beat": "optional", "principal": "pa-lead@larkspur.example", "question": "Break down the Engineering forecast by group over the next 3 months." },
+    { "id": "optional-profile", "beat": "optional", "principal": "pa-lead@larkspur.example", "question": "Show the cohort profile for Platform Engineering." }
+  ]
+}

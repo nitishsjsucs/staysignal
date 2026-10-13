@@ -13,7 +13,19 @@ npm run demo:reset -- --beat 1                              # about 3 seconds: r
 
 Open `http://127.0.0.1:8795` in a browser at 1440 x 900 and sign in with the role switcher as **People Analytics Lead (pa-lead)**. The demo profile runs the built app under wrangler dev with the local engine on 8196; every routine job is computed live by the engine.
 
-Model text: the default demo mode replays recorded 27B turns with live tools. No 27B turn has been recorded yet (the memory guard stopped every 27B session so far, see PROGRESS.md), so answers currently come from the stub model, which routes each question to one governed tool and narrates with the template; the answer chips say so. To recover any beat: `npm run demo:reset -- --beat N`.
+Model text: the default demo mode replays recorded 27B turns with live tools. No 27B turn is committed yet, so answers currently come from the stub model, which routes each question to one governed tool and narrates with the template; the answer chips say so. To recover any beat: `npm run demo:reset -- --beat N`.
+
+To record the turns (once, with other apps closed; each question makes at least two 27B calls, and the measured cold tool prefix alone takes about 20 seconds to its first token, so allow about a minute a question):
+
+```sh
+npm run llm -- start 27b               # the guarded 27B on 8186 (refuses below 17 GB available)
+npm run dev:wrangler                   # fixtures mode on 8795
+npm run demo:record -- --provider mlx  # every question in demo/questions.json; --only beat-2-what-changed re-asks one
+npm run stop                           # stops the 27B, its guard and wrangler
+npm test -- test/worker/recordings.test.ts
+```
+
+Each recording (`demo/recordings/<id>.json`) holds the model's tool calls with their arguments and its text, and its label names the model and the date; the chat shows that label on replay ("Model text replayed from a recorded 27B turn (date); tools ran live"). A turn whose text fails the grounding check is not written: ask it again with `--only`. Beats 3 and 4 are clicks, and the boundary question is refused before any model call, so none of them needs a recording. After recording, `npm run demo` picks the recorded provider by itself.
 
 ## Frame (0:00 to 0:10)
 

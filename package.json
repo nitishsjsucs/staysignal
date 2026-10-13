@@ -38,6 +38,7 @@
     "demo": "node scripts/demo.ts start",
     "demo:snapshots": "node scripts/demo.ts snapshots",
     "demo:reset": "node scripts/demo.ts reset",
+    "demo:record": "node scripts/demo-record.ts",
     "stop": "node scripts/stop.ts",
     "research:run": "uv run --project engine staysignal research run",
     "policy:compile": "uv run --project engine staysignal policy compile",

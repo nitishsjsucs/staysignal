@@ -181,7 +181,7 @@ export function QualityPage({ me }: { me: Me }) {
           id="heatmap"
           className="span-12"
           title="Which checks failed, when, and on which source?"
-          subtitle="Phase-1 checks at the daily 06:00 batch on the synthetic clock, plus every routine run"
+          subtitle="Every built check at the daily 06:00 batch on the synthetic clock, plus every routine run"
           loading={q.loading && !q.data}
           error={q.error}
           table={

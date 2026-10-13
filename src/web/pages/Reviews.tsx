@@ -196,7 +196,7 @@ export function ReviewsPage({ me }: { me: Me }) {
               <div className="card-sub">Draft, submitted, approved or refused, tasks, rolled back</div>
             </div>
           </div>
-          {list.length === 0 ? <p style={{ color: "var(--ink-3)" }}>No reviews yet.</p> : null}
+          {list.length === 0 ? <p style={{ color: "var(--ink-3)" }}>No reviews yet. Draft one above: it stays a draft until you submit it, and a different person with approval rights decides.</p> : null}
           <div className="list">
             {[...list].reverse().map((r) => {
               const approveSeq = (audit.data?.actions ?? []).find((a) => a.kind === "review.approve" && JSON.parse(a.payload_json).review_id === r.review_id)?.seq;

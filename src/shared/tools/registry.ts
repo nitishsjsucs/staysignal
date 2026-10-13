@@ -201,6 +201,7 @@ export function normalizeName(s: string): string {
   return s
     .toLowerCase()
     .replace(/[’']/g, "")
+    .replace(/&/g, " and ")
     .replace(/\b(the|org|organization|organisation|group|department|dept|team|cohort)\b/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -243,6 +244,12 @@ async function publishedRun(ctx: ToolContext): Promise<string> {
   if (ctx.publishedRunId) return ctx.publishedRunId;
   const p = ctx.workspace?.publishedRunId ? await ctx.workspace.publishedRunId() : null;
   return p ?? (await ctx.warehouse.runs()).published;
+}
+
+/** The published run's cohorts, for the cohort guard that runs before any model call. */
+export async function publishedCohorts(ctx: ToolContext): Promise<ForecastFixture["cohorts"] | null> {
+  const fx = await ctx.warehouse.forecast(await publishedRun(ctx));
+  return fx ? fx.cohorts : null;
 }
 
 async function loadRun(ctx: ToolContext, runArg: string | undefined): Promise<ForecastFixture | Refusal> {

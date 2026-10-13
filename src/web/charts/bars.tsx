@@ -191,7 +191,7 @@ export function Waterfall({ from, to, factors, width80, step, fromLabel, toLabel
                 </text>
                 {next && next.kind === "delta" ? <line x1={cx + bw / 2} x2={(x(next.key) ?? 0) + x.bandwidth() / 2 - bw / 2} y1={y(s.kind === "total" ? s.value : s.base + s.value)} y2={y(s.kind === "total" ? s.value : s.base + s.value)} stroke="var(--axis)" /> : null}
                 <foreignObject x={cx - x.step() / 2} y={ih + 6} width={x.step()} height={60}>
-                  <div style={{ fontSize: 11, color: "var(--ink-2)", textAlign: "center", lineHeight: 1.25, overflowWrap: "anywhere" }}>{s.label}</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-2)", textAlign: "center", lineHeight: 1.25 }}>{softHyphens(s.label)}</div>
                 </foreignObject>
               </g>
             );
@@ -213,4 +213,12 @@ export function Waterfall({ from, to, factors, width80, step, fromLabel, toLabel
       <Tooltip tip={tip} />
     </div>
   );
+}
+
+// Waterfall columns can be narrower than a factor name: break long words only at a syllable (a soft hyphen shows as
+// "Compo-" when the word wraps and is invisible otherwise), never mid-syllable as overflow-wrap would.
+const SYLLABLES: Record<string, string> = { Composition: "Compo\u00adsition", Definition: "Defi\u00adnition", Calendar: "Calen\u00addar", Previous: "Previ\u00adous" };
+
+export function softHyphens(label: string): string {
+  return label.replace(/[A-Za-z]+/g, (w) => SYLLABLES[w] ?? w);
 }

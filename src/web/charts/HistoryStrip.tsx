@@ -8,7 +8,7 @@ import { fmtVal, niceTicks, shortDate, TipRow, Tooltip, useTooltip, useWidth } f
 export function HistoryStrip({ points, step, height = 220 }: { points: HistoryPoint[]; step: number; height?: number }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const { tip, show, hide } = useTooltip();
-  const m = { top: 14, right: 12, bottom: 30, left: 40 };
+  const m = { top: 14, right: 12, bottom: 36, left: 40 };
   const iw = Math.max(120, width - m.left - m.right);
   const ih = height - m.top - m.bottom;
   const ymax = Math.max(1, ...points.map((p) => Math.max(p.i95[1], p.actual ?? 0)));
@@ -20,6 +20,13 @@ export function HistoryStrip({ points, step, height = 220 }: { points: HistoryPo
     .paddingOuter(0.2);
   const y = scaleLinear().domain([0, ticks[ticks.length - 1]!]).range([ih, 0]);
   const breakAt = points.findIndex((p) => p.origin >= "2026-09-20" || p.published_run_id === "R-2026-10-01#1");
+  // Date labels are about 40 px wide at 11 px: label every k-th backtest so neighbours never touch, and give the
+  // published runs one bracketed label under the group (their dates are in the tooltip and the table view).
+  const backtestIdx = points.flatMap((p, i) => (p.published_run_id ? [] : [i]));
+  const stride = Math.max(1, Math.ceil(44 / x.step()));
+  const labeled = new Set(backtestIdx.filter((_, j) => j % stride === 0));
+  const pubKeys = points.filter((p) => p.published_run_id).map((p) => `${p.origin}${p.published_run_id ?? ""}`);
+  const pubSpan = pubKeys.length > 0 ? [x(pubKeys[0]!) ?? 0, (x(pubKeys[pubKeys.length - 1]!) ?? 0) + x.bandwidth()] : null;
   return (
     <div ref={ref}>
       <svg className="chart" width={width} height={height} role="img" aria-label="Backtest strip: expected departures with 80% and 95% ranges against actual departures at quarterly origins">
@@ -40,7 +47,7 @@ export function HistoryStrip({ points, step, height = 220 }: { points: HistoryPo
               </text>
             </g>
           ) : null}
-          {points.map((p) => {
+          {points.map((p, i) => {
             const key = `${p.origin}${p.published_run_id ?? ""}`;
             const cx = (x(key) ?? 0) + x.bandwidth() / 2;
             const pub = Boolean(p.published_run_id);
@@ -83,17 +90,22 @@ export function HistoryStrip({ points, step, height = 220 }: { points: HistoryPo
                     {pub ? <circle cx={cx} cy={y(p.expected)} r={6} fill="none" stroke="var(--accent)" strokeWidth={2} /> : null}
                   </>
                 )}
-                <text x={cx} y={ih + 16} textAnchor="middle">
-                  {pub ? "Run" : shortDate(p.origin)}
-                </text>
-                {pub ? (
-                  <text x={cx} y={ih + 27} textAnchor="middle" style={{ fontSize: 10 }}>
+                {labeled.has(i) ? (
+                  <text x={cx} y={ih + 16} textAnchor="middle">
                     {shortDate(p.origin)}
                   </text>
                 ) : null}
               </g>
             );
           })}
+          {pubSpan ? (
+            <g>
+              <path d={`M${pubSpan[0]},${ih + 6}v4H${pubSpan[1]}v-4`} fill="none" stroke="var(--axis)" strokeWidth={1} />
+              <text x={pubSpan[1]} y={ih + 32} textAnchor="end">
+                {pubKeys.length > 1 ? "Published runs" : "Published run"}
+              </text>
+            </g>
+          ) : null}
           <line className="axis-line" x1={0} x2={iw} y1={ih} y2={ih} />
         </g>
       </svg>

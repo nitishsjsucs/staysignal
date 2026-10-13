@@ -182,6 +182,7 @@ export interface DqFaultsReport {
   command: string;
   date: string;
   seeds: number[];
+  design?: string;
   summary: Record<string, { seeds: number; detected: number; held: number; checks: string[]; root_top1: number; root_found: number; mean_abs_impact: number | null; max_abs_impact: number | null }>;
 }
 
@@ -316,11 +317,13 @@ export function renderResearch(file: string, r: ResearchReport): string {
 
 const FAULT_NAMES: Record<string, string> = { pay_basis: "Pay-basis code with annual amounts", duplicates: "Duplicate HRIS records", late_terminations: "Late terminations", missing_extract: "Missing payroll extract", broken_manager: "Broken manager references" };
 
-/** C53: which phase-1 checks catch each planted fault, where the ranking puts its root, and its forecast impact. */
+/** C53: which checks catch each planted fault, where the ranking puts its root, and its forecast impact. */
 export function renderDqFaults(file: string, r: DqFaultsReport): string {
   const n = r.seeds.length;
+  // runs from 2026-10-13 also run the built phase-2 checks; the design text of each run says which suite it used
+  const suite = r.design?.includes("phase-2") ? "the phase-1 checks and the built phase-2 checks (F04, R02, R04)" : "the phase-1 checks";
   const lines = [
-    `**Data-quality fault benchmark** (\`${r.command}\`, ${r.date}, [${file}](${file})): each fault injected into what the sources recorded for ${n} copies of the small world; detection by the phase-1 checks, localization by the root-cause ranking, and the forecast's change had the run not been held. ${SYNTHETIC}`,
+    `**Data-quality fault benchmark** (\`${r.command}\`, ${r.date}, [${file}](${file})): each fault injected into what the sources recorded for ${n} copies of the small world; detection by ${suite}, localization by the root-cause ranking, and the forecast's change had the run not been held. ${SYNTHETIC}`,
     "",
     "| Fault | Detected | Held | Checks that fired | Root ranked first | Forecast change (mean, max) |",
     "|---|---|---|---|---|---|",

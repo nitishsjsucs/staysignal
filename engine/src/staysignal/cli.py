@@ -333,6 +333,37 @@ def _research_seed(args: tuple[int, bool, int | None, str]) -> int:
     return seed
 
 
+def cmd_research_time(args: argparse.Namespace) -> int:
+    """The timed 2-seed run the pre-registration asks for before the full run: seeds 1 and 2 into the full run's
+    checkpoint directory (so the full run reuses them), timed, with the estimate for 20 seeds written to timing.json."""
+    import datetime as dt
+    import os
+
+    from staysignal.research.run import checkpoint_path, run_seeds
+
+    _, var = _repo_var()
+    out = Path(args.out) if args.out else var / "research" / "canonical"
+    out.mkdir(parents=True, exist_ok=True)
+    if any(checkpoint_path(out, s).exists() for s in (1, 2)):
+        print("seeds 1 and 2 already have checkpoints; the timing run must start from none", flush=True)
+        return 1
+    t0 = time.perf_counter()
+    docs = run_seeds([1, 2], out, False, None)
+    per_seed = {str(d["seed"]): d["seconds"] for d in docs}
+    mean = sum(per_seed.values()) / len(per_seed)
+    doc = {
+        "date": dt.date.today().isoformat(),
+        "seeds": [1, 2],
+        "seconds_per_seed": per_seed,
+        "wall_seconds": round(time.perf_counter() - t0, 1),
+        "cpus": os.cpu_count(),
+        "estimate_20_seeds_hours_by_workers": {str(w): round(20 * mean / w / 3600, 2) for w in (1, 2, 4)},
+    }
+    (out / "timing.json").write_text(json.dumps(doc, indent=1) + "\n")
+    print(json.dumps(doc, indent=1))
+    return 0
+
+
 def cmd_research_run(args: argparse.Namespace) -> int:
     """The research benchmark (SPEC 11): runs or resumes the seeds (one checkpoint each), then writes the results."""
     import datetime as dt
@@ -414,7 +445,8 @@ def cmd_eval_dq_faults(args: argparse.Namespace) -> int:
         "label": "synthetic",
         "design": (
             "each fault injected into what the sources recorded for copies of the small world (seeds 1 to 5, planted "
-            "problems off); detection is a phase-1 check that fires and did not on the clean copy, and a failing "
+            "problems off); detection is an active check (phase 1 and the built phase-2 checks F04, R02 and R04) that "
+            "fires and did not on the clean copy, and a failing "
             "error-severity check holds the run; localization is the rank of the true root node in the root-cause "
             "ranking; impact is the company's expected 3-month voluntary departures from the faulty sources over the "
             "clean ones, under a model trained on the clean world, had the run not been held"
@@ -683,6 +715,9 @@ def build_parser() -> argparse.ArgumentParser:
     rr.add_argument("--out", default=None, help="checkpoint directory (default var/research/<profile>)")
     rr.add_argument("--results", default=None, help="results file (default results/research-<date>.json)")
     rr.set_defaults(func=cmd_research_run)
+    rt = rsub.add_parser("time", help="the timed 2-seed run that precedes the full run (writes timing.json)")
+    rt.add_argument("--out", default=None, help="checkpoint directory (default var/research/canonical)")
+    rt.set_defaults(func=cmd_research_time)
     demo = sub.add_parser("demo", help="demo state")
     dsub = demo.add_subparsers(dest="demo_command", required=True)
     db = dsub.add_parser("build", help="train or load models, score the published runs, export API fixtures")

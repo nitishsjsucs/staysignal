@@ -1,5 +1,6 @@
-"""Phase-1 checks on the warehouse (SPEC 13.1): the registry's singular checks are dbt tests (`warehouse/tests/dq`,
-one row per failing unit), and its engine checks (F01 freshness, U01 new duplicates, C03 pay distribution) run here
+"""Checks on the warehouse (SPEC 13.1): the registry's singular checks are dbt tests (`warehouse/tests/dq`, one row
+per failing unit), and its engine checks (F01 freshness, U01 new duplicates, C03 pay distribution, F04 termination
+reporting) run here
 as SQL on the engine's connection after the build. Results have the same shape as `quality.run_checks`, which is the
 pure-Python reference; `engine/tests/quality/test_warehouse_checks.py` asserts both agree on the canonical world,
 including the payroll defect pattern. Counts only: no failing row leaves the engine.
@@ -13,7 +14,7 @@ from datetime import datetime, timedelta
 import duckdb
 
 from staysignal.lineage.capture import BuildResult
-from staysignal.quality.run_checks import phase1, psi
+from staysignal.quality.run_checks import LATE_DAYS, LOOKBACK_DAYS, active_checks, psi
 
 
 def _status(severity: str, failing: int) -> str:
@@ -71,17 +72,40 @@ def engine_checks(con: duckdb.DuckDBPyConnection, v: datetime) -> dict[str, tupl
             default=0.0,
         )
     out["C03"] = (1 if worst >= 0.25 else 0, f"max PSI {worst:.3f}")
+
+    # F04 on the current termination records (the same rule as run_checks.termination_reporting)
+    since = v - timedelta(days=LOOKBACK_DAYS)
+    base_hi = since.date()
+    recent, late, base = con.execute(
+        "SELECT count(*) FILTER (WHERE recorded_at >= ? AND recorded_at <= ?), "
+        "count(*) FILTER (WHERE recorded_at >= ? AND recorded_at <= ? "
+        "AND date_diff('day', effective_date, CAST(recorded_at AS DATE)) > ?), "
+        "count(*) FILTER (WHERE effective_date >= ? AND effective_date < ?) "
+        "FROM staging.int_hris__spell_records WHERE record_type = 'termination'",
+        [since, v, since, v, LATE_DAYS, base_hi - timedelta(days=365), base_hi],
+    ).fetchone()
+    if recent >= 2 and 2 * late > recent:
+        failing = int(late)
+    elif recent == 0 and base >= 12:
+        failing = 1
+    else:
+        failing = 0
+    out["F04"] = (
+        failing,
+        f"{late} of {recent} recent terminations over {LATE_DAYS} days late; {base} in the year before",
+    )
     return out
 
 
 def phase1_results(con: duckdb.DuckDBPyConnection, build: BuildResult, v: datetime) -> list[dict]:
-    """Phase-1 results at vintage v after a build at that vintage, in `run_checks` format."""
-    reg = {c["id"]: c for c in phase1()}
+    """Results of the active checks (phase 1 and the built phase-2 checks) at vintage v after a build at that
+    vintage, in `run_checks` format. The name is kept for its callers."""
+    reg = {c["id"]: c for c in active_checks()}
     counts: dict[str, tuple[int, str]] = {cid: (n, "") for cid, n in dbt_failures(build).items()}
     counts.update(engine_checks(con, v))
     missing = sorted(set(reg) - set(counts))
     if missing:
-        raise RuntimeError(f"phase-1 checks without an implementation: {missing}")
+        raise RuntimeError(f"active checks without an implementation: {missing}")
     out = []
     for cid in sorted(reg):
         c = reg[cid]

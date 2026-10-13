@@ -262,6 +262,16 @@ Proxy strength for the audit-only age-40-or-over flag (AUC, 0.5 means none): ten
 | Missing payroll extract | 5 of 5 | 5 of 5 | X01 | 5 of 5 | 0.4%, 1.1% |
 | Broken manager references | 0 of 5 | 0 of 5 | none | 0 of 5 | 0.0%, 0.1% |
 
+**Data-quality fault benchmark** (`uv run --project engine staysignal eval dq-faults`, 2026-10-13, [results/dq-faults-2026-10-13.json](results/dq-faults-2026-10-13.json)): each fault injected into what the sources recorded for 5 copies of the small world; detection by the phase-1 checks and the built phase-2 checks (F04, R02, R04), localization by the root-cause ranking, and the forecast's change had the run not been held. Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy.
+
+| Fault | Detected | Held | Checks that fired | Root ranked first | Forecast change (mean, max) |
+|---|---|---|---|---|---|
+| Pay-basis code with annual amounts | 5 of 5 | 5 of 5 | C01, C02, C03, C04 | 5 of 5 | 16.1%, 25.2% |
+| Duplicate HRIS records | 5 of 5 | 0 of 5 | U01 | 5 of 5 | 0.0%, 0.0% |
+| Late terminations | 5 of 5 | 5 of 5 | F01, F04 | 5 of 5 | 22.2%, 61.4% |
+| Missing payroll extract | 5 of 5 | 5 of 5 | X01 | 5 of 5 | 0.4%, 1.1% |
+| Broken manager references | 5 of 5 | 5 of 5 | R04 | 5 of 5 | 0.0%, 0.1% |
+
 **Feature effects** (`uv run --project engine staysignal eval effects`, 2026-10-12, [results/effects-2026-10-12.json](results/effects-2026-10-12.json)): the mean predicted 3-month voluntary probability over the 1,998 people of the 2026-10-01 population when one feature is set to each value; associational, not causal. Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy.
 
 | Feature | Lowest value | Highest value |

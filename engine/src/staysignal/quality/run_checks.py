@@ -1,7 +1,7 @@
-"""Phase-1 data-quality checks (SPEC 13.1) over the landed sources at a vintage, under a pay-basis mapping.
+"""Data-quality checks (SPEC 13.1) over the landed sources at a vintage, under a pay-basis mapping.
 
-Engine implementations of the registry's phase-1 checks; the dbt singular tests of M2 implement the same rules and a
-test compares them. Freshness runs against the synthetic clock. Results are counts only: no row of a failing check
+Engine implementations of the registry's phase-1 checks and the phase-2 checks marked `built` (F04, R02, R04); the dbt
+singular tests and `warehouse_checks` implement the same rules and a test compares them. Freshness runs against the synthetic clock. Results are counts only: no row of a failing check
 leaves the engine (record-level inspection is the break-glass path of SPEC 13.7).
 """
 
@@ -31,6 +31,57 @@ def registry() -> list[dict]:
 
 def phase1() -> list[dict]:
     return [c for c in registry() if c["phase"] == 1]
+
+
+def active_checks() -> list[dict]:
+    """The checks that run: phase 1 and every phase-2 check marked `built`."""
+    return [c for c in registry() if c["phase"] == 1 or c.get("built")]
+
+
+# R02: reports keep a departed manager's reference until they are reassigned; more than this after the manager's
+# spell ended (or before it started) the reference is stale.
+MANAGER_GRACE = timedelta(days=30)
+# F04: a termination recorded more than LATE_DAYS after its effective date is late; the check fails when more than
+# half of the last LOOKBACK_DAYS' arrivals are late, or when none arrived although the year before averaged one a month.
+LATE_DAYS = 30
+LOOKBACK_DAYS = 90
+
+
+def termination_reporting(spells, v: datetime) -> tuple[int, str]:
+    """F04 on the current termination records of every spell: (failing units, detail)."""
+    terms = [r for sps in spells.values() for sp in sps for r in sp.records if r.record_type == "termination"]
+    since = v - timedelta(days=LOOKBACK_DAYS)
+    recent = [r for r in terms if since <= r.recorded_at <= v]
+    late = sum(1 for r in recent if (r.recorded_at.date() - r.effective_date).days > LATE_DAYS)
+    base_hi = since.date()
+    base_lo = base_hi - timedelta(days=365)
+    base = sum(1 for r in terms if base_lo <= r.effective_date < base_hi)
+    if len(recent) >= 2 and 2 * late > len(recent):
+        failing = late
+    elif not recent and base >= 12:
+        failing = 1
+    else:
+        failing = 0
+    return failing, f"{late} of {len(recent)} recent terminations over {LATE_DAYS} days late; {base} in the year before"
+
+
+def manager_references(spells) -> tuple[int, int]:
+    """(R02 stale references, R04 unknown references) over the current non-termination records of every spell."""
+    stale = unknown = 0
+    for sps in spells.values():
+        for sp in sps:
+            for r in sp.records:
+                if r.record_type == "termination" or not r.manager:
+                    continue
+                theirs = spells.get(r.manager)
+                if not theirs:
+                    unknown += 1
+                elif not any(
+                    m.start <= r.effective_date and (m.end is None or r.effective_date < m.end + MANAGER_GRACE)
+                    for m in theirs
+                ):
+                    stale += 1
+    return stale, unknown
 
 
 def psi(a: list[float], b: list[float], bins: int = 10) -> float:
@@ -63,10 +114,10 @@ def _annualized(lines, mapping) -> dict[tuple[str, str], tuple[float | None, str
 
 
 def run_checks(src: Sources, v: datetime, mapping_name: str = "payroll@1") -> list[dict]:
-    """Phase-1 results at vintage v; each result has status pass, warn or fail and a failing-row count."""
+    """Results of the active checks at vintage v; each has status pass, warn or fail and a failing-row count."""
     mapping = MAPPINGS[mapping_name]
     vin = Vintage(src, v)
-    by_id = {c["id"]: c for c in phase1()}
+    by_id = {c["id"]: c for c in active_checks()}
     results: dict[str, tuple[str, int, str]] = {}
 
     def put(cid: str, failing: int, detail: str = "") -> None:
@@ -127,6 +178,11 @@ def run_checks(src: Sources, v: datetime, mapping_name: str = "payroll@1") -> li
             if a.end is None or a.end > b.start:
                 overlaps += 1
     put("H01", overlaps)
+
+    put("F04", *termination_reporting(vin.spells, v))
+    stale, unknown = manager_references(vin.spells)
+    put("R02", stale)
+    put("R04", unknown)
 
     ids = {r.record_id for r in hris}
     put("H02", sum(1 for r in hris if r.record_type in ("correction", "rescission") and r.corrects not in ids))

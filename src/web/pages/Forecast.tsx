@@ -38,7 +38,9 @@ function TrustTile({ label, value, note, status }: { label: string; value: strin
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
       <div style={{ marginTop: 4 }}>
-        <StatusPill status={status}>{note}</StatusPill>
+        <StatusPill status={status}>
+          <span>{note}</span>
+        </StatusPill>
       </div>
     </div>
   );

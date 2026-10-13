@@ -1,4 +1,4 @@
-"""C53: the data-quality fault benchmark (SPEC 13.6) on one copy of the small world: what the phase-1 checks catch,
+"""C53: the data-quality fault benchmark (SPEC 13.6) on one copy of the small world: what the active checks catch,
 where the root-cause ranking puts the root, and how much the forecast would have moved had the run not been held."""
 
 from staysignal.quality.faults import FAULTS, run_seed, summarize
@@ -14,7 +14,11 @@ def test_one_seed_of_the_fault_benchmark():
     dup = rows["duplicates"]
     assert dup["checks"] == {"U01": "warn"} and not dup["held"] and dup["impact"] == 0.0  # staging deduplicates
     assert rows["missing_extract"]["checks"] == {"X01": "fail"}
-    # R02 (manager references) is a phase-2 check, so the phase-1 suite misses a broken reference
-    assert not rows["broken_manager"]["detected"]
+    # phase-1 checks missed both; R04 catches a reference to no known employee, F04 terminations recorded late
+    mgr = rows["broken_manager"]
+    assert mgr["checks"] == {"R04": "fail"} and mgr["held"] and mgr["root_rank"] == 1
+    late = rows["late_terminations"]
+    assert late["checks"]["F04"] == "fail" and late["held"] and late["root_rank"] == 1
+    assert abs(late["impact"]) > 0.05  # departures missing from the history move the forecast
     s = summarize(list(rows.values()))
-    assert s["pay_basis"]["root_top1"] == 1 and s["broken_manager"]["detected"] == 0
+    assert s["pay_basis"]["root_top1"] == 1 and s["broken_manager"]["detected"] == 1

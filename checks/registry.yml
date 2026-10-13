@@ -1,15 +1,19 @@
 # StaySignal data-quality check registry (SPEC 13.1). Format follows DataTrust's registry (MIT): id, name, category,
 # kind (generic | singular | engine), node, columns, severity (error | warn), sources, phase. Phase 1 checks run in
-# M1 and M2; phase 2 arrives in M5. Freshness is evaluated against the synthetic clock.
+# M1 and M2; phase 2 arrives in M5, and a phase-2 check runs once it is marked `built: true`. Freshness is evaluated
+# against the synthetic clock. R04 and F04 are not in SPEC 13.1: the fault benchmark showed that broken manager
+# references and late-reported terminations passed every phase-1 check (PROGRESS.md, deviations).
 checks:
   - { id: F01, name: "HRIS extract newer than 36 hours", category: freshness, kind: engine, node: stg_hris__records, columns: [recorded_at], severity: error, sources: [hris], phase: 1 }
   - { id: F02, name: "Payroll extract for the previous month present by business day 5", category: freshness, kind: engine, node: stg_payroll__lines, columns: [pay_period], severity: warn, sources: [payroll], phase: 2 }
+  - { id: F04, name: "Terminations reported on time (at most half of the last 90 days' arrivals over 30 days late; none missing for 90 days)", category: freshness, kind: engine, node: stg_hris__records, columns: [effective_date, recorded_at], severity: error, sources: [hris], phase: 2, built: true }
   - { id: F03, name: "ATS extract newer than 36 hours", category: freshness, kind: engine, node: stg_ats__requisitions, columns: [recorded_at], severity: warn, sources: [ats], phase: 2 }
   - { id: U01, name: "HRIS records unique by content hash (new duplicates counted)", category: uniqueness, kind: engine, node: stg_hris__records, columns: [record_id], severity: warn, sources: [hris], phase: 1 }
   - { id: U02, name: "Payroll lines unique by entity, employee and period", category: uniqueness, kind: singular, node: stg_payroll__lines, columns: [entity_code, employee_key, pay_period], severity: error, sources: [payroll], phase: 1 }
   - { id: U03, name: "Exactly one current assignment per active employee", category: uniqueness, kind: singular, node: int_hris__assignment_timeline, columns: [employee_key], severity: error, sources: [hris], phase: 2 }
   - { id: R01, name: "Every payroll employee exists in HRIS for that period", category: referential, kind: singular, node: stg_payroll__lines, columns: [employee_key], severity: error, sources: [payroll, hris], phase: 1 }
-  - { id: R02, name: "Manager references an employee active on the effective date", category: referential, kind: singular, node: int_hris__manager_timeline, columns: [manager_key], severity: error, sources: [hris], phase: 2 }
+  - { id: R02, name: "Manager references an employee active on the effective date (30-day reassignment grace)", category: referential, kind: singular, node: int_hris__manager_timeline, columns: [manager_key], severity: warn, sources: [hris], phase: 2, built: true }
+  - { id: R04, name: "Every manager reference resolves to a known employee", category: referential, kind: singular, node: int_hris__manager_timeline, columns: [manager_key], severity: error, sources: [hris], phase: 2, built: true }
   - { id: R03, name: "Team exists in the organization tree on the effective date", category: referential, kind: singular, node: int_hris__assignment_timeline, columns: [team_id], severity: error, sources: [hris, org], phase: 2 }
   - { id: H01, name: "Assignment intervals do not overlap (SCD2)", category: interval, kind: singular, node: int_hris__assignment_timeline, columns: [valid_from, valid_to], severity: error, sources: [hris], phase: 1 }
   - { id: H02, name: "Every correction references an existing record", category: interval, kind: singular, node: stg_hris__records, columns: [corrects_record_id], severity: error, sources: [hris], phase: 1 }

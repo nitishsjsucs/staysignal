@@ -1,0 +1,9 @@
+{
+  "note": "The persona interview questions the demo offers (SPEC 15.8). npm run lab:interviews asks each one once through the engine's interview with Qwen3.6-27B and writes the answers to lab/interviews.json. Synthetic personas only; hypothesis generation, not a forecast, not a survey, not validated.",
+  "questions": [
+    { "proposal": "promotion-criteria-third-window", "persona_id": "P07", "question": "What would you want to know before this change starts?" },
+    { "proposal": "promotion-criteria-third-window", "persona_id": "P13", "question": "Which part of this proposal is least clear to you?" },
+    { "proposal": "infra-data-merge", "persona_id": "P02", "question": "What would you want to know before this change starts?" },
+    { "proposal": "infra-data-merge", "persona_id": "P10", "question": "Which part of this proposal is least clear to you?" }
+  ]
+}

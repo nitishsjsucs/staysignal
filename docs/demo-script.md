@@ -40,12 +40,13 @@ npm run lab:record -- --proposal promotion-criteria-third-window --provider open
 npm run lab:record -- --proposal infra-data-merge --provider openai
 uv run --project engine staysignal lab export && npm run fixtures:index
 
-# 3. the persona interview answers: the engine streams from the 27B outside demo mode
-SS_LLM=mlx npm run dev:engine                # then on the Lab page ask each interview question once
-npm run stop
+# 3. the persona interview answers (lab/interview-questions.json), through the engine's interview with the 27B
+uv run --project engine staysignal serve     # the engine's HTTP app on 8196 in another terminal (Ctrl-C after)
+npm run lab:interviews                       # writes lab/interviews.json; --only 2 asks the second question again
+npm run llm -- stop
 ```
 
-For step 3, copy each answer from `var/engine/work/lab/interviews.jsonl` into `lab/interviews.json` as `{ "proposal", "persona_id", "question", "answer", "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)", "recorded_at": "<date>" }`. Then `npm test` (recorded turns replay with live tools and must pass grounding), `uv run --project sim pytest sim/tests` (the new sessions replay to their hashes), `npm run demo:snapshots`, and `npm run demo:reset -- --beat 1`. Until a recording exists the demo still runs: the chat offers the recorded questions only and the Lab page says no session is recorded yet.
+Step 3 refuses an answer from a placeholder session and asks again, never edits, when an answer is cut off by the 100-token cap or fails the public hygiene tier. The 27B's chat turns and interview answers ban dash tokens at sampling time, as the Lab recorder does, so no recorded text needs editing. Then `npm test` (recorded turns replay with live tools and must pass grounding), `uv run --project sim pytest sim/tests` (the new sessions replay to their hashes), `npm run demo:snapshots`, and `npm run demo:reset -- --beat 1`. Until a recording exists the demo still runs: the chat offers the recorded questions only and the Lab page says no session is recorded yet.
 
 ## Frame (0:00 to 0:10)
 

@@ -77,6 +77,12 @@ test("beats 1 to 5 click through", async ({ page }) => {
     await expect(page.getByTestId("ranking").locator("span.mono").first()).toContainText("pay_basis");
     await expect(page.getByTestId("mapping")).toContainText("ANN");
     await expect(page.getByTestId("mapping")).toContainText("Waiting for a data engineer");
+    // the three specialists' merged findings, most severe first, each with its evidence (SPEC 14.6)
+    const investigation = page.getByTestId("investigation");
+    await expect(investigation).toContainText("Data-quality investigator");
+    await expect(investigation).toContainText("Workforce-composition analyst");
+    await expect(investigation.locator("li").first()).toContainText("Failing checks: C01, C02, C03");
+    await expect(investigation).toContainText("quality/mapping_proposal.py");
   });
 
   await test.step("beat 4: a data engineer approves the mapping fix; the repair publishes and replays", async () => {

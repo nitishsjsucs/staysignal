@@ -36,6 +36,13 @@ describe("inline job completion (fixtures deployment)", () => {
     expect(jobs.every((j) => j.status === "done" && j.attempt === 1)).toBe(true);
     // nothing is left to lease
     expect(((await (await ws()).leaseJob("nobody")) as unknown as { job: unknown }).job).toBeNull();
+    // the held run was investigated by the three specialists; the failing checks lead, and the mapping proposal the
+    // routine drafted is linked to the investigation's pointer at the generator (SPEC 14.6)
+    const investigated = ((await (await ws()).listIncidents()) as unknown as { investigation_id?: string; proposal_id?: string }[]).find((i) => i.investigation_id);
+    const inv = (await (await ws()).getInvestigation(investigated!.investigation_id!)) as unknown as { specialists: { specialist: string }[]; merged: { findings: { severity: string; specialist: string }[]; proposals: { subject_id: string | null }[] } };
+    expect(inv.specialists.map((s) => s.specialist)).toEqual(["data_quality", "model", "composition"]);
+    expect(inv.merged.findings[0]).toMatchObject({ severity: "critical", specialist: "data_quality" });
+    expect(inv.merged.proposals[0]?.subject_id).toBe(investigated!.proposal_id);
     // the routine ends by recording itself in memory; fixtures mode has no writable memory, so it says why it skipped
     type Routine = { status: string; steps: { step: string; outcome: string; reason?: string }[] };
     let routine: Routine | undefined;

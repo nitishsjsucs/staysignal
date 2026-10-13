@@ -4,7 +4,7 @@
 // in the same synchronous block. The Worker calls these methods over Durable Object RPC after authenticating; browser
 // connections call the @callable wrappers, which read the principal the Worker verified at connect time.
 import { Agent, type Connection, type ConnectionContext, callable, getCurrentAgent } from "agents";
-import type { MemoryNoteInput, MemoryWriteOutcome, RunBrief } from "../../shared/contracts";
+import type { MemoryNoteInput, MemoryWriteOutcome, QualityFixture, RunBrief } from "../../shared/contracts";
 import { syntheticNow } from "../../shared/clock";
 import { isReadOnly, type Principal, ROLES, type Role } from "../../shared/policy/roles";
 import { hasScope } from "../../shared/policy/roles";
@@ -17,6 +17,13 @@ import { GENESIS_HASH, WORKSPACE_DDL } from "../store/schema.sql";
 import { parseConfig } from "../config";
 import { warehouseFor } from "../warehouse/client";
 import { FixturesWarehouse } from "../warehouse/fixtures";
+import { canonicalJson } from "../../shared/canonical-json";
+import type { AliasMap } from "../../shared/grounding/aliases";
+import { agentPrincipal } from "../../shared/policy/roles";
+import type { ToolContext } from "../../shared/tools/registry";
+import { type Merged, mergeRuns } from "./investigation/merge";
+import { runSpecialist, type SpecialistRun } from "./investigation/run";
+import { type InvestigationBrief, specialist } from "./investigation/specialists";
 import { decisionMemoryNote } from "../memory/notes";
 import { writeMemoryNote } from "../memory/writer";
 
@@ -342,6 +349,91 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     this.refreshState();
   }
 
+  // ---------- multi-agent investigation (SPEC 14.6) ----------
+
+  /** Tools as the agent principal, inside this Durable Object: results are stored here and shared. */
+  private agentToolContext(): ToolContext {
+    return {
+      principal: agentPrincipal(),
+      warehouse: warehouseFor(this.env),
+      workspace: {
+        storeResult: async (r, owner) => this.storeResult(r, owner),
+        saveDraft: async (d, owner) => this.saveDraft(d, owner),
+        publishedRunId: async () => this.publishedRunId(),
+        routineCheckResults: async () => this.routineCheckResults(),
+      },
+      sha256: async (t) => sha256HexSync(t),
+      canonical: canonicalJson,
+      publishedRunId: this.publishedRunId(),
+    };
+  }
+
+  startInvestigation(b: Omit<InvestigationBrief, "investigation_id">): string {
+    const id = this.nextId("IVG");
+    const brief: InvestigationBrief = { investigation_id: id, ...b };
+    this.sql`INSERT INTO investigations (investigation_id, routine_id, run_id, incident_id, status, brief_json, runs_json, merged_json, created_at, updated_at)
+      VALUES (${id}, ${b.routine_id}, ${b.run_id}, ${b.incident_id}, 'running', ${JSON.stringify(brief)}, '[]', NULL, ${this.now()}, ${this.now()})`;
+    return id;
+  }
+
+  private investigationRow(id: string): { brief: InvestigationBrief; runs: SpecialistRun[]; merged: Merged | null; status: string; created_at: string; updated_at: string } | null {
+    const r = this.sql<{ brief_json: string; runs_json: string; merged_json: string | null; status: string; created_at: string; updated_at: string }>`SELECT brief_json, runs_json, merged_json, status, created_at, updated_at FROM investigations WHERE investigation_id = ${id}`[0];
+    return r ? { brief: JSON.parse(r.brief_json) as InvestigationBrief, runs: JSON.parse(r.runs_json) as SpecialistRun[], merged: r.merged_json ? (JSON.parse(r.merged_json) as Merged) : null, status: r.status, created_at: r.created_at, updated_at: r.updated_at } : null;
+  }
+
+  private aliasesOf(runs: SpecialistRun[]): AliasMap {
+    return new Map(runs.flatMap((r) => r.aliases).map((a) => [a.alias, a]));
+  }
+
+  /** One specialist, in its own workflow step (a fresh CPU budget on Workers Free); idempotent per specialist. */
+  async runSpecialist(id: string, name: string): Promise<{ specialist: string; outcome: string; findings: number }> {
+    const row = this.investigationRow(id);
+    const def = specialist(name);
+    if (!row || !def) throw new Error(`no investigation ${id} or specialist ${name}`);
+    const done = row.runs.find((r) => r.specialist === def.name);
+    if (done) return { specialist: done.specialist, outcome: done.outcome, findings: done.report.findings.length };
+    const run = await runSpecialist(this.agentToolContext(), parseConfig(this.env).llm, def, row.brief, this.aliasesOf(row.runs));
+    const runs = [...row.runs, run];
+    this.sql`UPDATE investigations SET runs_json = ${JSON.stringify(runs)}, updated_at = ${this.now()} WHERE investigation_id = ${id}`;
+    return { specialist: run.specialist, outcome: run.outcome, findings: run.report.findings.length };
+  }
+
+  mergeInvestigation(id: string): { findings: number; critical: number; proposals: string[] } {
+    const row = this.investigationRow(id);
+    if (!row) throw new Error(`no investigation ${id}`);
+    const merged = row.merged ?? mergeRuns(row.runs, this.aliasesOf(row.runs));
+    this.sql`UPDATE investigations SET merged_json = ${JSON.stringify(merged)}, status = 'done', updated_at = ${this.now()} WHERE investigation_id = ${id}`;
+    this.refreshState();
+    return { findings: merged.findings.length, critical: merged.findings.filter((f) => f.severity === "critical").length, proposals: merged.proposals.map((p) => p.generator) };
+  }
+
+  /** The routine drafts the generator's output as an approval; the investigation's proposal then names it. */
+  linkInvestigationProposal(id: string, generator: string, subjectId: string): void {
+    const row = this.investigationRow(id);
+    if (!row?.merged) return;
+    const merged: Merged = { ...row.merged, proposals: row.merged.proposals.map((p) => (p.generator === generator ? { ...p, subject_id: subjectId } : p)) };
+    this.sql`UPDATE investigations SET merged_json = ${JSON.stringify(merged)}, updated_at = ${this.now()} WHERE investigation_id = ${id}`;
+  }
+
+  getInvestigation(id: string): Record<string, unknown> | null {
+    const row = this.investigationRow(id);
+    if (!row) return null;
+    return {
+      investigation_id: id,
+      status: row.status,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      brief: row.brief,
+      label: "synthetic",
+      specialists: row.runs.map((r) => ({ specialist: r.specialist, title: r.title, provider: r.provider, outcome: r.outcome, ms: r.ms, calls: r.calls, problems: r.problems, findings: r.report.findings.length })),
+      merged: row.merged,
+    };
+  }
+
+  listInvestigations(): Record<string, unknown>[] {
+    return this.sql<{ investigation_id: string }>`SELECT investigation_id FROM investigations ORDER BY created_at DESC, investigation_id DESC`.map((r) => this.getInvestigation(r.investigation_id) as Record<string, unknown>);
+  }
+
   /** The agent's memory write (SPEC 14.10), committed at the synthetic time; never throws (see memory/writer.ts). */
   async memoryNote(note: MemoryNoteInput): Promise<MemoryWriteOutcome> {
     return writeMemoryNote(this.env, note, this.now());
@@ -639,6 +731,16 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
       }
     }
     return { accepted: true, workflow_instance_id: r.workflow_instance_id };
+  }
+
+  /** Results of the routine's completed check runs, in the order they ran (merged after the published results). */
+  routineCheckResults(): QualityFixture["results"] {
+    const out: QualityFixture["results"] = [];
+    for (const j of this.sql<{ result_json: string | null }>`SELECT result_json FROM engine_jobs WHERE kind = 'run_checks' AND status = 'done' ORDER BY created_at, rowid`) {
+      const r = j.result_json ? (JSON.parse(j.result_json) as { results?: QualityFixture["results"] }) : null;
+      for (const x of r?.results ?? []) if (!out.some((y) => y.check_id === x.check_id && y.date === x.date && y.status === x.status)) out.push(x);
+    }
+    return out;
   }
 
   listJobs(): Record<string, unknown>[] {

@@ -8,6 +8,8 @@ import { AgentWorkflow, type AgentWorkflowEvent, type AgentWorkflowStep } from "
 import { NonRetryableError } from "cloudflare:workflows";
 import type { MemoryNoteInput, RunBrief } from "../../shared/contracts";
 import { DEMO, jobs, TOLERANCE } from "../../shared/routines/definitions";
+import { GENERATORS } from "../agents/investigation/report";
+import { SPECIALIST_NAMES } from "../agents/investigation/specialists";
 import type { WorkspaceAgent } from "../agents/workspace-agent";
 import { awaitApproval, awaitJob, type GateCtx, stepJson, type WorkspaceRpc } from "./gates";
 
@@ -59,7 +61,7 @@ interface Published {
 
 /** What the routine commits to memory (SPEC 14.10): cohort-level bullets citing the run, incident, proposal and the
  * action sequence number of the publish; never a person. A held run gets an investigation note. */
-export function routineMemoryNote(r: { routineId: string; failing: string[]; incidentId: string | null; lineage: string[]; proposalId: string | null; decision: string | null; out: Published | null }): MemoryNoteInput {
+export function routineMemoryNote(r: { routineId: string; failing: string[]; incidentId: string | null; lineage: string[]; proposalId: string | null; decision: string | null; out: Published | null; investigationId?: string | null }): MemoryNoteInput {
   const publishedLine = (o: Published) =>
     o.published
       ? `Published run ${o.run_id} under ${TOLERANCE.policy} (action ${o.seq}); replay ${o.replay_equal ? "matched the stored business-result hash" : "did NOT match the stored hash"}.`
@@ -71,6 +73,7 @@ export function routineMemoryNote(r: { routineId: string; failing: string[]; inc
     `Routine ${r.routineId} held its run: check${r.failing.length > 1 ? "s" : ""} ${r.failing.join(", ")} failed (incident ${r.incidentId}).`,
     `Lineage traced the failure along ${r.lineage.join(" > ")}.`,
   ];
+  if (r.investigationId) bullets.push(`The specialists' merged findings, each with its evidence, are in investigation ${r.investigationId}.`);
   if (r.proposalId) bullets.push(`Drafted mapping proposal ${r.proposalId}; decision: ${r.decision ?? "pending"}.`);
   if (r.out) bullets.push(`After the repair: ${publishedLine(r.out)}`);
   return { kind: "investigation", title: `Run held by check${r.failing.length > 1 ? "s" : ""} ${r.failing.join(", ")}`, bullets };
@@ -127,16 +130,20 @@ export class RoutineWorkflow extends AgentWorkflow<WorkspaceAgent, RoutineParams
     await live("investigate");
     const probe = (await awaitJob(ctx, "investigate", jobs.probe(runId, checks.failing))) as ProbeResult;
     await stepJson(step, "incident.probe", async () => ws.updateIncident(incidentId, { probe, lineage_path: probe.path }));
-    await note("investigate", "traced", { path: probe.path });
+    // the multi-agent investigation (SPEC 14.6): three specialists, each in its own step, then the deterministic merge
+    const inv = await this.investigate(ctx, { routine_id: p.routine_id, run_id: runId, incident_id: incidentId, reason: "held", failing: checks.failing, lineage: probe.path });
+    await stepJson(step, "incident.investigation", async () => ws.updateIncident(incidentId, { investigation_id: inv.id }));
+    await note("investigate", "traced", { path: probe.path, investigation_id: inv.id, findings: inv.findings, critical: inv.critical });
 
     await live("draft");
     const proposal = (await awaitJob(ctx, "draft", jobs.proposeMapping(runId))) as ProposalResult;
     await stepJson(step, "mapping.propose", async () => ws.proposeMapping({ ...proposal, source: "payroll", incident_id: incidentId }, p.routine_id));
     await stepJson(step, "incident.proposal", async () => ws.updateIncident(incidentId, { proposal_id: proposal.proposal_id }));
+    if (inv.proposals.includes(GENERATORS.mapping)) await stepJson(step, "investigation.link", async () => ws.linkInvestigationProposal(inv.id, GENERATORS.mapping, proposal.proposal_id));
     await note("draft", "mapping proposed", { proposal_id: proposal.proposal_id }, "waiting_for_approval");
 
     const decision = await awaitApproval(ctx, "publish_or_approve", "mapping", proposal.proposal_id);
-    const held = { routineId: p.routine_id, failing: checks.failing, incidentId, lineage: probe.path, proposalId: proposal.proposal_id, decision };
+    const held = { routineId: p.routine_id, failing: checks.failing, incidentId, lineage: probe.path, proposalId: proposal.proposal_id, decision, investigationId: inv.id };
     if (decision !== "approved") {
       await note("publish_or_approve", decision, { proposal_id: proposal.proposal_id }, decision === "expired" ? "expired" : "closed");
       await remember(routineMemoryNote({ ...held, out: null }), decision === "expired" ? "expired" : "closed");
@@ -161,6 +168,14 @@ export class RoutineWorkflow extends AgentWorkflow<WorkspaceAgent, RoutineParams
     return { routine_id: p.routine_id, held: false, published: repairedId };
   }
 
+  private async investigate(ctx: GateCtx, b: Parameters<WorkspaceRpc["startInvestigation"]>[0]): Promise<{ id: string; findings: number; critical: number; proposals: string[] }> {
+    const { step, ws } = ctx;
+    const id = await stepJson(step, "investigation.start", async () => ws.startInvestigation(b));
+    for (const name of SPECIALIST_NAMES) await stepJson(step, `investigation.${name}`, async () => ws.runSpecialist(id, name));
+    const merged = await stepJson(step, "investigation.merge", async () => ws.mergeInvestigation(id));
+    return { id, ...merged };
+  }
+
   private async compareAndPublish(ctx: GateCtx, runId: string, note: (n: string, o: string, d?: Record<string, unknown>, s?: string) => Promise<void>): Promise<Published> {
     const { step, ws } = ctx;
     const published = await stepJson(step, "published.read", async () => ws.publishedRunId());
@@ -168,6 +183,8 @@ export class RoutineWorkflow extends AgentWorkflow<WorkspaceAgent, RoutineParams
     const tol = withinTolerance(change);
     await note("what_changed", tol.ok ? "within tolerance" : "beyond tolerance", { company_change: Math.round(tol.company * 1000) / 1000, worst_org_change: Math.round(tol.worstOrg * 1000) / 1000 });
     if (!tol.ok) {
+      const inv = await this.investigate(ctx, { routine_id: ctx.routineId, run_id: runId, incident_id: null, reason: "beyond_tolerance", failing: [], lineage: [] });
+      await note("investigate", "change beyond tolerance", { run_id: runId, investigation_id: inv.id, findings: inv.findings });
       await note("publish_or_approve", "waiting for publish approval", { run_id: runId }, "waiting_for_approval");
       return { run_id: runId, published: false, seq: null, replay_equal: null };
     }

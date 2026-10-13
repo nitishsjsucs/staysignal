@@ -27,6 +27,66 @@ interface Incident {
   probe?: { probes: { entity: string; pay_basis_code: string; median_ratio: number; n: number; anomaly: number }[]; ranking: { node: string; score: number; parts: Record<string, number> }[]; path: string[] };
   proposal_id?: string;
   resolved_by_run?: string;
+  investigation_id?: string;
+}
+
+interface InvestigationResp {
+  investigation_id: string;
+  status: string;
+  specialists: { specialist: string; title: string; provider: string; outcome: "passed" | "repaired" | "template"; findings: number; calls: { tool: string; result_id: string | null; refused: string | null }[] }[];
+  merged: {
+    findings: { specialist: string; severity: "critical" | "warn" | "info"; rendered: string; evidence: string[] }[];
+    proposals: { kind: string; generator: string; proposed_by: string[]; subject_id: string | null }[];
+    rendered: string;
+  } | null;
+}
+
+const SEVERITY: Record<string, "critical" | "warning" | "info"> = { critical: "critical", warn: "warning", info: "info" };
+const OUTCOME: Record<string, string> = { passed: "model report", repaired: "model report, repaired once", template: "template report from its tool results" };
+
+function InvestigationCard({ id }: { id: string }) {
+  const inv = useQuery<InvestigationResp>(`/api/investigations/${encodeURIComponent(id)}`);
+  const d = inv.data;
+  if (!d?.merged) return null;
+  const titles = Object.fromEntries(d.specialists.map((s) => [s.specialist, s.title]));
+  return (
+    <section className="card span-12" aria-label="Investigation" data-testid="investigation">
+      <div className="card-head">
+        <div>
+          <h2 className="card-title">What did the specialists find, and on what evidence?</h2>
+          <div className="card-sub">
+            {d.investigation_id} · three specialists, one after another, each with its own scoped tools; every finding cites the results behind it, most severe first
+          </div>
+        </div>
+        <SyntheticChip label="Synthetic data" />
+      </div>
+      <div className="chip-row" style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+        {d.specialists.map((s) => (
+          <span key={s.specialist} className="chip" title={`${s.calls.length} tool calls`} style={{ whiteSpace: "normal", maxWidth: "100%", height: "auto" }}>
+            {s.title}: {OUTCOME[s.outcome] ?? s.outcome}
+          </span>
+        ))}
+      </div>
+      <p style={{ margin: "0 0 10px" }}>{d.merged.rendered}</p>
+      <ul className="findings" style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 8 }}>
+        {d.merged.findings.map((f) => (
+          <li key={f.evidence.join("|")} style={{ display: "grid", gap: 4 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+              <StatusPill status={SEVERITY[f.severity] ?? "info"}>{f.severity}</StatusPill>
+              <span className="card-sub">{titles[f.specialist] ?? f.specialist}</span>
+            </div>
+            <div style={{ overflowWrap: "anywhere" }}>{f.rendered}</div>
+            <div className="card-sub mono" style={{ overflowWrap: "anywhere" }}>evidence: {f.evidence.join(", ")}</div>
+          </li>
+        ))}
+      </ul>
+      {d.merged.proposals.map((p) => (
+        <p key={p.generator} className="card-sub" style={{ marginTop: 10 }}>
+          Points at the deterministic {p.kind} proposal (<span className="mono">{p.generator}</span>){p.subject_id ? <>, drafted as <span className="mono">{p.subject_id}</span></> : null}; the specialists never write its content, and a person decides.
+        </p>
+      ))}
+    </section>
+  );
 }
 
 interface Mapping {
@@ -212,6 +272,7 @@ export function QualityPage({ me }: { me: Me }) {
             </section>
           </>
         ) : null}
+        {latest?.investigation_id ? <InvestigationCard id={latest.investigation_id} /> : null}
         {proposal ? (
           <section className="card span-7" aria-label="Mapping change" data-testid="mapping">
             <div className="card-head">

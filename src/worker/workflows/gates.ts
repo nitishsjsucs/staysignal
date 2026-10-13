@@ -24,6 +24,10 @@ export interface WorkspaceRpc {
   publishRun(runId: string, actor: string, actorKind: "human" | "routine", policy: string, routineId: string | null): Promise<number>;
   recordReplay(runId: string, r: { replay_hash: string; equal: boolean; duration_ms: number; detail: unknown }): Promise<void>;
   memoryNote(note: MemoryNoteInput): Promise<MemoryWriteOutcome>;
+  startInvestigation(b: { routine_id: string; run_id: string; incident_id: string | null; reason: "held" | "beyond_tolerance"; failing: string[]; lineage: string[] }): Promise<string>;
+  runSpecialist(id: string, name: string): Promise<{ specialist: string; outcome: string; findings: number }>;
+  mergeInvestigation(id: string): Promise<{ findings: number; critical: number; proposals: string[] }>;
+  linkInvestigationProposal(id: string, generator: string, subjectId: string): Promise<void>;
 }
 
 export interface GateCtx {

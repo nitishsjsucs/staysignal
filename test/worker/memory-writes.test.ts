@@ -11,11 +11,11 @@ const PERSON = /\bE\d{6}\b|\ber_[a-z2-7]{20,}\b/;
 
 describe("routine memory notes", () => {
   it("a held, repaired run becomes an investigation citing the run, incident, proposal and publish action", () => {
-    const n = routineMemoryNote({ routineId: "RT-0001", failing: ["C01"], incidentId: "INC-0001", lineage: ["payroll", "stg_payroll", "pit"], proposalId: "MAP-0001", decision: "approved", out: { run_id: "R-2026-10-01#3", published: true, seq: 14, replay_equal: true } });
+    const n = routineMemoryNote({ routineId: "RT-0001", failing: ["C01"], incidentId: "INC-0001", lineage: ["payroll", "stg_payroll", "pit"], proposalId: "MAP-0001", decision: "approved", out: { run_id: "R-2026-10-01#3", published: true, seq: 14, replay_equal: true }, investigationId: "IVG-0001" });
     expect(n.kind).toBe("investigation");
     expect(n.title).toBe("Run held by check C01");
     const text = n.bullets.join(" ");
-    for (const cite of ["RT-0001", "INC-0001", "MAP-0001", "R-2026-10-01#3", "action 14", "payroll > stg_payroll > pit", "matched"]) expect(text).toContain(cite);
+    for (const cite of ["RT-0001", "INC-0001", "MAP-0001", "IVG-0001", "R-2026-10-01#3", "action 14", "payroll > stg_payroll > pit", "matched"]) expect(text).toContain(cite);
     expect(text).not.toMatch(PERSON);
   });
 

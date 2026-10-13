@@ -234,17 +234,24 @@ export function buildApp() {
     if (!hasScope(c.var.principal, "quality:read")) return c.json({ refused: true, code: "NOT_PERMITTED", message: "Your role does not include data quality." });
     const q = (await warehouseFor(c.env).quality()) as QualityFixture | null;
     const ws = await workspace(c.env);
-    const extra = ((await ws.listJobs()) as unknown as { job_key: string; kind: string; status: string }[]).filter((j) => j.kind === "run_checks" && j.status === "done");
     const results = [...(q?.results ?? [])];
-    for (const j of extra) {
-      const full = (await ws.getJob(String(j.job_key))) as unknown as { result: unknown } | null;
-      const r = full?.result as { results?: QualityFixture["results"] } | null;
-      for (const x of r?.results ?? []) if (!results.some((y) => y.check_id === x.check_id && y.date === x.date && y.status === x.status)) results.push(x);
-    }
+    for (const x of (await ws.routineCheckResults()) as QualityFixture["results"]) if (!results.some((y) => y.check_id === x.check_id && y.date === x.date && y.status === x.status)) results.push(x);
     return c.json({ label: "synthetic", checks: q?.checks ?? [], results, incidents: await ws.listIncidents() });
   });
 
   app.get("/api/quality/incidents/:id", async (c) => c.json((await (await workspace(c.env)).getIncident(c.req.param("id"))) ?? { error: "not found" }));
+
+  // multi-agent investigations (SPEC 14.6): cohort-level findings, each citing the result IDs that back it
+  const mayInvestigate = (p: Principal) => hasScope(p, "quality:read") || hasScope(p, "investigate:run");
+  app.get("/api/investigations", async (c) => {
+    if (!mayInvestigate(c.var.principal)) return c.json(refuse("NOT_PERMITTED", "Investigations are for analysts, leads and data engineers."));
+    return c.json({ label: "synthetic", investigations: await (await workspace(c.env)).listInvestigations() });
+  });
+  app.get("/api/investigations/:id", async (c) => {
+    if (!mayInvestigate(c.var.principal)) return c.json(refuse("NOT_PERMITTED", "Investigations are for analysts, leads and data engineers."));
+    const inv = await (await workspace(c.env)).getInvestigation(c.req.param("id"));
+    return inv ? c.json(inv) : c.json({ error: "not found" }, 404);
+  });
 
   app.get("/api/runs", async (c) => {
     const ws = await workspace(c.env);

@@ -19,6 +19,9 @@ export function workspaceStub(env: Env): WorkspacePort & { storeTrace(id: string
     async publishedRunId() {
       return (await workspace(env)).publishedRunId();
     },
+    async routineCheckResults() {
+      return (await workspace(env)).routineCheckResults();
+    },
     async storeTrace(id: string, owner: string, payload: unknown) {
       await (await workspace(env)).storeTrace(id, owner, payload);
     },

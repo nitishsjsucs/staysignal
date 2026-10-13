@@ -28,8 +28,8 @@
     },
     "agent": {
       "label": "StaySignal agent",
-      "scopes": ["review:draft", "mapping:propose", "memory:write"],
-      "notes": "proposes only; never approves"
+      "scopes": ["review:draft", "mapping:propose", "memory:write", "forecast:read:all", "quality:read", "lineage:read", "model:read"],
+      "notes": "proposes only; never approves; reads cohort-level results for investigations (SPEC 14.6)"
     }
   }
 }

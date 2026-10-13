@@ -84,6 +84,8 @@ export interface WorkspacePort {
   storeResult(result: ToolResult<unknown>, owner: string): Promise<void>;
   saveDraft?(draft: ReviewDraft, owner: string): Promise<void>;
   publishedRunId?(): Promise<string | null>;
+  /** Check results from the routine's own check runs, after the published daily results (the Data health page's view). */
+  routineCheckResults?(): Promise<QualityFixture["results"]>;
 }
 
 export interface ToolContext {
@@ -579,8 +581,12 @@ const dataQualityStatus: ToolDef<typeof toolInputs.data_quality_status, QualityD
   kind: "read",
   available: true,
   async run(ctx, args) {
-    const q = await ctx.warehouse.quality();
-    if (!q) return refuse("OUT_OF_SCOPE", "No check results are published yet.");
+    const published = await ctx.warehouse.quality();
+    if (!published) return refuse("OUT_OF_SCOPE", "No check results are published yet.");
+    // the routine's own check runs count too (the Data health page shows the same), in the order they ran
+    const results = [...published.results];
+    for (const x of (await ctx.workspace?.routineCheckResults?.()) ?? []) if (!results.some((y) => y.check_id === x.check_id && y.date === x.date && y.status === x.status)) results.push(x);
+    const q = { ...published, results };
     const source = args.source ?? "all";
     const defs = q.checks.filter((c) => source === "all" || c.source === source);
     const latest = defs.map((d) => {

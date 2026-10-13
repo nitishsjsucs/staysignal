@@ -7,6 +7,7 @@ import type { MemoryHit } from "../../shared/memory/search";
 import type { WarehouseClient } from "../../shared/tools/registry";
 import { workspace } from "../agents/workspace-port";
 import { parseConfig } from "../config";
+import { BigQueryWarehouse } from "./bigquery";
 import { EngineWarehouse } from "./engine-shim";
 import { FixturesWarehouse } from "./fixtures";
 
@@ -18,6 +19,7 @@ export interface MemoryPort {
 }
 
 let fixtures: FixturesWarehouse | null = null;
+let bigquery: BigQueryWarehouse | null = null; // one per isolate, so its access token is reused
 
 function workspaceMemory(env: Env): MemoryPort {
   return {
@@ -32,7 +34,6 @@ function workspaceMemory(env: Env): MemoryPort {
 export function warehouseFor(env: Env, memory?: MemoryPort): WarehouseClient {
   const cfg = parseConfig(env);
   if (cfg.dataMode === "engine") return new EngineWarehouse(cfg.engineUrl);
-  if (!fixtures) fixtures = new FixturesWarehouse();
-  const client = Object.create(fixtures) as WarehouseClient;
-  return Object.assign(client, memory ?? workspaceMemory(env));
+  const base: WarehouseClient = cfg.bigquery ? (bigquery ??= new BigQueryWarehouse(cfg.bigquery)) : (fixtures ??= new FixturesWarehouse());
+  return Object.assign(Object.create(base) as WarehouseClient, memory ?? workspaceMemory(env));
 }

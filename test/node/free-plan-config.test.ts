@@ -2,7 +2,8 @@
 // script renders the fixtures template with placeholders in a dry run and refuses without the operator's state.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { render, TEMPLATE } from "../../scripts/deploy.ts";
+import { join } from "node:path";
+import { PRODUCTION_TEMPLATE, render, TEMPLATE } from "../../scripts/deploy.ts";
 import { freePlanProblems } from "../../scripts/lib/free-plan.ts";
 import { parseJsonc, stripJsonc } from "../../scripts/lib/jsonc.ts";
 
@@ -42,6 +43,19 @@ describe("Workers Free rules for deployments", () => {
     expect(problems({ vars: { ...vars, SS_LLM: "mlx" } }).join(" ")).toMatch(/local model/);
     expect(problems({ vars: { ...vars, SS_RUNNER_TOKEN: "x" } }).join(" ")).toMatch(/secret/);
     expect(problems({ ai: { binding: "AI" }, vars: { ...vars, SS_LLM: "stub" } }).join(" ")).toMatch(/ai binding/);
+  });
+
+  it("accept the production template: BigQuery with the service account key as a secret and the runner", () => {
+    const text = render(true, join(process.cwd(), ".prod", "nonexistent.json"), PRODUCTION_TEMPLATE);
+    expect(freePlanProblems(text)).toEqual([]);
+    const c = parseJsonc<{ vars: Record<string, string>; secrets: { required: string[] } }>(text);
+    expect(c.vars).toMatchObject({ SS_DATA_MODE: "bigquery", SS_GCP_PROJECT_ID: "dry-run-project", SS_RUNNER: "external", SS_LLM: "workers-ai" });
+    expect(c.secrets.required).toEqual(expect.arrayContaining(["SS_GCP_SA_KEY", "SS_RUNNER_TOKEN", "SS_AIG_TOKEN"]));
+    const base = JSON.parse(stripJsonc(text)) as { vars: Record<string, string>; secrets: { required: string[] } };
+    const problems = (patch: Record<string, unknown>) => freePlanProblems(JSON.stringify({ ...base, ...patch })).join(" ");
+    expect(problems({ vars: { ...base.vars, SS_GCP_PROJECT_ID: "" } })).toMatch(/SS_GCP_PROJECT_ID/);
+    expect(problems({ secrets: { required: ["SS_AIG_TOKEN"] } })).toMatch(/SS_GCP_SA_KEY/);
+    expect(problems({ vars: { ...base.vars, SS_RUNNER: "inline" } })).toMatch(/needs the runner/);
   });
 
   it("render placeholders only in a dry run and keep URLs inside strings", () => {

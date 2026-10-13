@@ -12,14 +12,16 @@ import { placeholderValues, type ProdState, renderTemplate } from "./lib/prod-st
 
 const ROOT = process.cwd();
 export const TEMPLATE = join("infra", "cloudflare", "wrangler.fixtures.template.jsonc");
+export const PRODUCTION_TEMPLATE = join("infra", "cloudflare", "wrangler.production.template.jsonc");
 export const RENDERED = join("var", "deploy", "wrangler.fixtures.jsonc");
+export const PRODUCTION_RENDERED = join("var", "deploy", "wrangler.production.jsonc");
 export const OUTDIR = join("var", "deploy", "out");
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 
-export function render(dryRun: boolean, statePath = join(ROOT, ".prod", "state.json")): string {
+export function render(dryRun: boolean, statePath = join(ROOT, ".prod", "state.json"), template = TEMPLATE): string {
   const state = existsSync(statePath) ? (JSON.parse(readFileSync(statePath, "utf8")) as ProdState) : null;
-  const header = "// Rendered by scripts/deploy.ts from infra/cloudflare/wrangler.fixtures.template.jsonc; gitignored, never committed.\n";
-  return header + renderTemplate(readFileSync(join(ROOT, TEMPLATE), "utf8"), placeholderValues(state, dryRun));
+  const header = `// Rendered by scripts/deploy.ts from ${template}; gitignored, never committed.\n`;
+  return header + renderTemplate(readFileSync(join(ROOT, template), "utf8"), placeholderValues(state, dryRun));
 }
 
 function dirBytes(dir: string): number {
@@ -38,24 +40,26 @@ function run(cmd: string, args: string[], env: NodeJS.ProcessEnv = process.env):
 
 function main(): void {
   const dryRun = process.argv.includes("--dry-run");
-  if (!process.argv.includes("--fixtures")) {
-    console.error("deploy: only --fixtures exists yet; the production (BigQuery) deployment arrives with the BigQuery client");
+  const production = process.argv.includes("--production");
+  if (!production && !process.argv.includes("--fixtures")) {
+    console.error("deploy: name the target: --fixtures (path A) or --production (path B, BigQuery)");
     process.exit(2);
   }
   if (!dryRun && !process.argv.includes("--yes")) {
     console.error("deploy: this deploys to the operator's Cloudflare account; rerun with --yes, or use --dry-run");
     process.exit(2);
   }
-  const text = render(dryRun);
+  const text = render(dryRun, join(ROOT, ".prod", "state.json"), production ? PRODUCTION_TEMPLATE : TEMPLATE);
+  const target = production ? PRODUCTION_RENDERED : RENDERED;
   const problems = freePlanProblems(text);
   if (problems.length) {
     console.error(`deploy: the config breaks the Workers Free rules:\n- ${problems.join("\n- ")}`);
     process.exit(1);
   }
   mkdirSync(join(ROOT, "var", "deploy"), { recursive: true });
-  writeFileSync(join(ROOT, RENDERED), text);
-  console.log(`[deploy] rendered ${RENDERED}${dryRun ? " with placeholder values" : ""}`);
-  run("npx", ["vite", "build"], { ...process.env, SS_WRANGLER_CONFIG: join(ROOT, RENDERED) });
+  writeFileSync(join(ROOT, target), text);
+  console.log(`[deploy] rendered ${target}${dryRun ? " with placeholder values" : ""}`);
+  run("npx", ["vite", "build"], { ...process.env, SS_WRANGLER_CONFIG: join(ROOT, target) });
   const built = join("dist", "staysignal", "wrangler.json");
   if (dryRun) {
     run("npx", ["wrangler", "deploy", "--dry-run", "--outdir", OUTDIR, "-c", built]);
@@ -68,7 +72,7 @@ function main(): void {
     return;
   }
   run("npx", ["wrangler", "deploy", "-c", built]);
-  console.log("[deploy] deployed the fixtures-mode Worker; open it through Cloudflare Access and run npm run prod:smoke -- --fixtures");
+  console.log(`[deploy] deployed the ${production ? "production" : "fixtures-mode"} Worker; open it through Cloudflare Access`);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main();

@@ -42,7 +42,7 @@
     "policy:compile": "uv run --project engine staysignal policy compile",
     "policy:check": "uv run --project engine staysignal policy compile --check",
     "deploy": "node scripts/deploy.ts",
-    "deploy:dry-run": "node scripts/deploy.ts --fixtures --dry-run",
+    "deploy:dry-run": "node scripts/deploy.ts --fixtures --dry-run && node scripts/deploy.ts --production --dry-run",
     "doctor": "node scripts/doctor.ts",
     "setup:prod": "node scripts/setup-prod.ts"
   },

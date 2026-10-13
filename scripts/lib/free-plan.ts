@@ -46,6 +46,12 @@ export function freePlanProblems(configText: string): string[] {
   const model = vars.SS_AI_MODEL ?? "";
   if ((PAID_OR_EXCLUDED_MODELS as readonly string[]).includes(model)) problems.push(`SS_AI_MODEL ${model} is not the production model`);
   if (c.ai !== undefined && vars.SS_LLM !== "workers-ai") problems.push("an ai binding without SS_LLM=workers-ai bills Workers AI for nothing");
+  if (vars.SS_DATA_MODE === "bigquery") {
+    if (!vars.SS_GCP_PROJECT_ID) problems.push("SS_DATA_MODE=bigquery needs SS_GCP_PROJECT_ID");
+    const secrets = ((c as { secrets?: { required?: string[] } }).secrets?.required ?? []) as string[];
+    if (!secrets.includes("SS_GCP_SA_KEY")) problems.push("SS_DATA_MODE=bigquery needs the SS_GCP_SA_KEY secret declared in secrets.required");
+    if (vars.SS_RUNNER === "inline") problems.push("SS_RUNNER=inline completes jobs from fixtures; the BigQuery path needs the runner");
+  }
   if (vars.SS_LLM === "workers-ai") {
     if (!vars.SS_AIG_ACCOUNT_ID || !vars.SS_AIG_GATEWAY_ID) problems.push("SS_LLM=workers-ai needs SS_AIG_ACCOUNT_ID and SS_AIG_GATEWAY_ID (the AI Gateway)");
     const cap = Number(vars.SS_AI_DAILY_NEURON_CAP);

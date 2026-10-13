@@ -14,6 +14,8 @@ export interface AppConfig {
   hmacKey: string;
   runnerToken: string | null;
   roleBindings: string | null;
+  /** The production warehouse (SS_DATA_MODE=bigquery): project, location and the service account key secret. */
+  bigquery: { projectId: string; location: string; serviceAccount: { client_email: string; private_key: string; token_uri?: string } } | null;
   /** The production model through AI Gateway (SS_LLM=workers-ai); null otherwise. */
   workersAi: { accountId: string; gatewayId: string; token: string; model: string; dailyNeuronCap: number } | null;
 }
@@ -30,6 +32,7 @@ export function parseConfig(env: Env): AppConfig {
   const dataMode = (e.SS_DATA_MODE ?? "fixtures") as AppConfig["dataMode"];
   const llm = (e.SS_LLM ?? "stub") as AppConfig["llm"];
   if (authMode === "access" && (!e.SS_ACCESS_TEAM_DOMAIN || !e.SS_ACCESS_AUD)) throw new Error("access mode needs SS_ACCESS_TEAM_DOMAIN and SS_ACCESS_AUD");
+  if (dataMode === "bigquery" && (!e.SS_GCP_PROJECT_ID || !e.SS_GCP_SA_KEY)) throw new Error("SS_DATA_MODE=bigquery needs SS_GCP_PROJECT_ID and the SS_GCP_SA_KEY secret");
   if (llm === "workers-ai" && (!e.SS_AIG_ACCOUNT_ID || !e.SS_AIG_GATEWAY_ID || !e.SS_AIG_TOKEN)) throw new Error("SS_LLM=workers-ai needs SS_AIG_ACCOUNT_ID, SS_AIG_GATEWAY_ID and the SS_AIG_TOKEN secret");
   return {
     authMode,
@@ -44,6 +47,7 @@ export function parseConfig(env: Env): AppConfig {
     hmacKey: e.SS_HMAC_MASTER_KEY ?? (authMode === "dev" ? TEST_HMAC_KEY : ""),
     runnerToken: e.SS_RUNNER_TOKEN ?? null,
     roleBindings: e.SS_ROLE_BINDINGS ?? null,
+    bigquery: dataMode === "bigquery" ? { projectId: e.SS_GCP_PROJECT_ID as string, location: e.SS_BQ_LOCATION ?? "US", serviceAccount: JSON.parse(e.SS_GCP_SA_KEY as string) as { client_email: string; private_key: string; token_uri?: string } } : null,
     workersAi:
       llm === "workers-ai"
         ? {

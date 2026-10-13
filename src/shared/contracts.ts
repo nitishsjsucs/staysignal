@@ -158,6 +158,7 @@ export interface HistoryPoint {
   published_run_id: string | null;
   omitted_reason: string | null;
   definition_break?: boolean;
+  n?: number; // the cohort's size at the origin
 }
 
 export interface HistoryFixture {
@@ -165,6 +166,25 @@ export interface HistoryFixture {
   note: string;
   definition_change: string;
   series: Record<string, Record<string, HistoryPoint[]>>; // cohort_id -> horizon -> points
+}
+
+/** One cohort on the Workforce page's funnel plot (SPEC 16.2): a mature backtest window, groups and above, n >= 50. */
+export interface FunnelPoint {
+  cohort: string;
+  name: string;
+  level: "company" | "organization" | "group";
+  n: number;
+  expected: number;
+  observed: number;
+  oe: number;
+}
+
+export interface FunnelData {
+  label: "synthetic";
+  horizon: number;
+  origin: string | null;
+  design: string;
+  points: FunnelPoint[];
 }
 
 /** Recorded evaluation on the synthetic world (results/backtest, calibration and model-comparison), SPEC 10. */

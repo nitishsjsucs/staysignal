@@ -88,3 +88,28 @@ describe("flowSide (disclosure merging)", () => {
     expect(side([25, 0, 11])).toEqual({ links: [{ label: "f0", value: 25 }, { label: "f2", value: 11 }], total: 36 });
   });
 });
+
+describe("GET /api/workforce/funnel", () => {
+  type F = { horizon: number; origin: string | null; points: { cohort: string; level: string; n: number; expected: number; observed: number; oe: number }[]; code?: string };
+  it("gives analysts the company, organizations and groups of the latest mature window, never teams", async () => {
+    const f = await json<F>("/api/workforce/funnel?horizon=3", { as: P.analyst });
+    expect(f.horizon).toBe(3);
+    expect(f.origin).toMatch(/^\d{4}-\d{2}-01$/);
+    const levels = new Set(f.points.map((p) => p.level));
+    expect([...levels].sort()).toEqual(["company", "group", "organization"]);
+    for (const p of f.points) {
+      expect(p.cohort).not.toMatch(/^team:/);
+      expect(p.n).toBeGreaterThanOrEqual(50);
+      expect(p.oe).toBeCloseTo(p.observed / p.expected, 10);
+    }
+  });
+
+  it("scopes People Partners to their organizations and aggregate roles to the company", async () => {
+    const hrbp = await json<F>("/api/workforce/funnel?horizon=3", { as: P.hrbpEng });
+    expect(hrbp.points.length).toBeGreaterThan(0);
+    expect(hrbp.points.every((p) => ["org:Engineering", "org:Product & Design"].includes(p.cohort) || p.level === "group")).toBe(true);
+    expect(hrbp.points.some((p) => p.cohort === "company" || p.cohort === "org:Sales" || p.cohort === "group:Commercial Sales")).toBe(false);
+    const de = await json<F>("/api/workforce/funnel?horizon=3", { as: P.dataEng });
+    expect(de.points.map((p) => p.cohort)).toEqual(["company"]);
+  });
+});

@@ -1,9 +1,10 @@
 // Workforce page (SPEC 16.1, 16.2): where the people of a cohort came from and went over the last 12 months, from the
 // governed semantic layer (the `workforce_flows` tool over a compiled catalog entry). Cohort-level only; links under 10
 // people are merged and a side under 10 is withheld (SPEC 17.5). Synthetic data.
-import type { WorkforceFlowsData } from "../../shared/contracts";
+import type { FunnelData, WorkforceFlowsData } from "../../shared/contracts";
 import { isRefusal, type Me, type Refusal, useQuery } from "../api";
 import { FlowSankey, FlowTable } from "../charts/FlowSankey";
+import { FunnelPlot, FunnelTable } from "../charts/FunnelPlot";
 import { ChartCard } from "../components/ChartCard";
 import { ErrorState, RefusalNote, Skeleton } from "../components/ui";
 import { useView } from "../router";
@@ -26,6 +27,29 @@ function Tile({ label, value, note }: { label: string; value: string; note: stri
 }
 
 const fmt = (v: number | null) => (v === null ? "withheld" : v.toLocaleString("en-US"));
+
+function Funnel({ horizon }: { horizon: number }) {
+  const q = useQuery<FunnelData | Refusal>(`/api/workforce/funnel?horizon=${horizon}`);
+  const d = q.data && !isRefusal(q.data) ? q.data : null;
+  return (
+    <ChartCard
+      id="funnel"
+      title="Which cohorts are unusual once size is taken into account?"
+      subtitle={d?.origin ? `Observed over expected voluntary departures in the ${d.horizon}-month window from ${d.origin} (a pseudo-real-time backtest: model and data as known then), against the expected count; small cohorts scatter more, so the limits narrow as cohorts grow. Groups and above with 50 or more people; synthetic data.` : "No mature backtest window yet"}
+      loading={q.loading && !q.data}
+      error={q.error}
+      empty={Boolean(d && !d.points.length)}
+      emptyText="No cohort you can see has a mature window at this horizon."
+      table={d ? <FunnelTable points={d.points} /> : undefined}
+      height={340}
+    >
+      {d ? <FunnelPlot points={d.points} /> : null}
+      <p className="card-sub" style={{ marginTop: 8 }}>
+        A point outside the limits is a reason to look, not a finding: one window, and the limits assume independent people.
+      </p>
+    </ChartCard>
+  );
+}
 
 export function WorkforcePage(_: { me: Me }) {
   const view = useView();
@@ -72,6 +96,9 @@ export function WorkforcePage(_: { me: Me }) {
           Links under 10 people are merged, and a side under 10 is withheld; exits other than voluntary are one band, never by type. Voluntary exits keep their forecast color; every other band is neutral.
         </p>
       </ChartCard>
+      <div style={{ marginTop: 16 }} data-testid="funnel-card">
+        <Funnel horizon={view.horizon} />
+      </div>
     </>
   );
 }

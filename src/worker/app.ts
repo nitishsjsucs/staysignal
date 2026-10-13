@@ -4,8 +4,8 @@
 import { getAgentByName } from "agents";
 import { Hono } from "hono";
 import { canonicalJson } from "../shared/canonical-json";
-import type { HistoryFixture, QualityFixture } from "../shared/contracts";
-import { authorizeCohort, canUseTool } from "../shared/policy/authorize";
+import type { FunnelData, FunnelPoint, HistoryFixture, QualityFixture } from "../shared/contracts";
+import { authorizeCohort, canUseTool, MIN_COMPARISON } from "../shared/policy/authorize";
 import { DEMO } from "../shared/routines/definitions";
 import { isRefusal, type Refusal, refuse } from "../shared/policy/refusals";
 import { hasScope, LOCAL_PRINCIPALS, type Principal } from "../shared/policy/roles";
@@ -203,6 +203,37 @@ export function buildApp() {
     const levels = Object.fromEntries(Object.entries(ev.backtest.levels).filter(([, v]) => company && (v.level === "company" || hasScope(p, "forecast:read:all"))));
     const comparison = company ? { ...ev.comparison, summary: Object.fromEntries(Object.entries(ev.comparison.summary).filter(([, v]) => v.level === "company" || hasScope(p, "forecast:read:all"))) } : null;
     return c.json({ ...ev, backtest: { ...ev.backtest, levels, entries }, calibration: company ? ev.calibration : null, comparison, effects: company ? (ev.effects ?? null) : null });
+  });
+
+  // the funnel plot (SPEC 16.2): each cohort's observed over expected in the latest mature quarterly backtest window,
+  // against its expected count; groups and above with n >= 50, scoped like every comparison over time (17.5)
+  app.get("/api/workforce/funnel", async (c) => {
+    const h = ["1", "3", "6"].includes(c.req.query("horizon") ?? "") ? (c.req.query("horizon") as string) : "3";
+    const wh = warehouseFor(c.env);
+    const hist = await wh.history();
+    if (!hist) return c.json({ error: "no recorded backtests" }, 404);
+    const p = c.var.principal;
+    const runId = (await (await workspace(c.env)).publishedRunId()) ?? (await wh.runs()).published;
+    const all = (await wh.forecast(runId))?.cohorts ?? [];
+    const meta = (id: string) => all.find((x) => x.cohort_id === id);
+    const allowed = (id: string): boolean => {
+      const co = meta(id);
+      return Boolean(co && authorizeCohort(p, "forecast_history", cohortMeta(co, all)) === null);
+    };
+    const mature = (hist.series.company?.[h] ?? []).filter((x) => x.actual_status === "mature" && !x.omitted_reason).map((x) => x.origin).sort();
+    const origin = mature[mature.length - 1] ?? null;
+    const points: FunnelPoint[] = [];
+    for (const [cohort, byH] of Object.entries(hist.series)) {
+      const co = meta(cohort);
+      if (!co || !["company", "organization", "group"].includes(co.kind) || !allowed(cohort)) continue;
+      const x = byH[h]?.find((y) => y.origin === origin);
+      const n = x?.n ?? co.n;
+      if (!x || x.actual_status !== "mature" || x.omitted_reason || n < MIN_COMPARISON || !(x.expected > 0) || x.actual === null) continue;
+      points.push({ cohort, name: co.kind === "company" ? "Larkspur (company)" : co.name, level: co.kind as FunnelPoint["level"], n, expected: x.expected, observed: x.actual, oe: x.actual / x.expected });
+    }
+    points.sort((a, b) => a.cohort.localeCompare(b.cohort));
+    const data: FunnelData = { label: "synthetic", horizon: Number(h), origin, design: "pseudo-real-time quarterly backtest: model and data as known at the origin; observed departures in the mature window", points };
+    return c.json(data);
   });
 
   app.get("/api/trust", async (c) => {

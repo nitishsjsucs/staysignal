@@ -12,6 +12,12 @@ test("the Workforce page shows where a cohort's people came from and went", asyn
   await expect(page.getByTestId("flows").locator("svg.chart path").first()).toBeVisible();
   await page.getByTestId("flows").getByRole("button", { name: "View as table" }).click();
   await expect(page.getByTestId("flows").locator("table")).toContainText("Voluntary exits");
+  // the funnel plot (SPEC 16.2): O/E against expected with Poisson limits, groups and above, with a table view
+  const funnel = page.getByTestId("funnel");
+  await expect(funnel).toContainText("Which cohorts are unusual once size is taken into account?");
+  await expect(funnel.locator("svg.chart circle").first()).toBeVisible();
+  await funnel.getByRole("button", { name: "View as table" }).click();
+  await expect(funnel.locator("table")).toContainText("Observed over expected");
   await expect(page.getByText("Synthetic data").first()).toBeVisible();
 });
 

@@ -1,0 +1,390 @@
+{
+ "kind": "recovery-shock",
+ "command": "uv run --project engine staysignal eval recovery-shock",
+ "date": "2026-10-13",
+ "label": "synthetic",
+ "profile": "recovery-shock",
+ "seed": 1013,
+ "sigma_team": 0.45,
+ "baseline_headcount": 40040,
+ "months": 42,
+ "targets": {
+  "file": "results/recovery-shock-targets.json",
+  "seed": 1012,
+  "baseline_headcount": 200200,
+  "rows": 9297761
+ },
+ "rows": 1865993,
+ "events": {
+  "voluntary": 14825,
+  "involuntary": 3629,
+  "retirement": 1087
+ },
+ "clusters": 2524,
+ "simulate_seconds": 150.6,
+ "fit_seconds": 134.3,
+ "converged": true,
+ "grad_max": 3.642361412481421e-11,
+ "wald": {
+  "statistic": 30.5694,
+  "df": 29,
+  "p_value": 0.386,
+  "alpha": 0.01
+ },
+ "coverage_95": {
+  "inside": 32,
+  "slopes": 34,
+  "share": 0.9412
+ },
+ "signs": {
+  "checked": 28,
+  "correct": 28
+ },
+ "passed": {
+  "wald": true,
+  "coverage": true,
+  "signs": true
+ },
+ "slopes": [
+  {
+   "cause": "vol",
+   "column": "month_01",
+   "truth": 0.09017477,
+   "estimate": 0.021674,
+   "se": 0.036713,
+   "inside_95": true,
+   "sign_checked": false,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "month_02",
+   "truth": 0.2546813122,
+   "estimate": 0.300346,
+   "se": 0.032367,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "month_03",
+   "truth": 0.2411906453,
+   "estimate": 0.274594,
+   "se": 0.032642,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "month_11",
+   "truth": -0.1594364309,
+   "estimate": -0.172397,
+   "se": 0.040539,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "month_12",
+   "truth": -0.2882601023,
+   "estimate": -0.330368,
+   "se": 0.042958,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "tenure_lt12",
+   "truth": 0.15622088,
+   "estimate": 0.078134,
+   "se": 0.034073,
+   "inside_95": false,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "tenure_12_24",
+   "truth": 0.3966527639,
+   "estimate": 0.37428,
+   "se": 0.033419,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "tenure_24_48",
+   "truth": 0.2136562678,
+   "estimate": 0.194512,
+   "se": 0.026795,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "tenure_ge84",
+   "truth": -0.3912404548,
+   "estimate": -0.332709,
+   "se": 0.035723,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "time_in_role_gt30",
+   "truth": 0.1868307227,
+   "estimate": 0.173218,
+   "se": 0.033765,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "since_promotion_ge24",
+   "truth": 0.3056709557,
+   "estimate": 0.311453,
+   "se": 0.032361,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "first_promotion_gt36",
+   "truth": 0.1602195139,
+   "estimate": 0.076903,
+   "se": 0.036834,
+   "inside_95": false,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "manager_changes_180d",
+   "truth": 0.2585193257,
+   "estimate": 0.255893,
+   "se": 0.030882,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "below_midpoint",
+   "truth": 3.9290414552,
+   "estimate": 4.102927,
+   "se": 0.157001,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "above_midpoint",
+   "truth": -1.0531796964,
+   "estimate": -1.061551,
+   "se": 0.188988,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "prior_team_rate",
+   "truth": 3.3035079485,
+   "estimate": 3.285161,
+   "se": 0.249665,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "reorg_90d",
+   "truth": 0.4543331803,
+   "estimate": 0.405954,
+   "se": 0.14307,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "family_AE",
+   "truth": 0.2933918889,
+   "estimate": 0.30321,
+   "se": 0.03006,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "family_CSM",
+   "truth": 0.1212777382,
+   "estimate": 0.150958,
+   "se": 0.038089,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "family_DAT",
+   "truth": 0.0917452621,
+   "estimate": 0.083378,
+   "se": 0.045447,
+   "inside_95": true,
+   "sign_checked": false,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "family_INF",
+   "truth": 0.0987231114,
+   "estimate": 0.100178,
+   "se": 0.040908,
+   "inside_95": true,
+   "sign_checked": false,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "family_SDR",
+   "truth": 0.4207651418,
+   "estimate": 0.382958,
+   "se": 0.03734,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "family_SEC",
+   "truth": 0.0937832318,
+   "estimate": 0.142022,
+   "se": 0.049287,
+   "inside_95": true,
+   "sign_checked": false,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "family_SWE",
+   "truth": 0.0887764157,
+   "estimate": 0.123959,
+   "se": 0.027905,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "family_TS",
+   "truth": 0.2789007886,
+   "estimate": 0.301153,
+   "se": 0.033392,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "level_early",
+   "truth": 0.090793806,
+   "estimate": 0.124133,
+   "se": 0.0219,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "level_senior",
+   "truth": -0.0927807179,
+   "estimate": -0.07975,
+   "se": 0.024404,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "level_manager",
+   "truth": -0.2725975628,
+   "estimate": -0.223994,
+   "se": 0.047445,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "vol",
+   "column": "fixed_term",
+   "truth": -0.266958892,
+   "estimate": -0.2135,
+   "se": 0.068089,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "inv",
+   "column": "tenure_lt12",
+   "truth": 0.5007837242,
+   "estimate": 0.474634,
+   "se": 0.040739,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "inv",
+   "column": "manager_changes_180d",
+   "truth": 0.1208728841,
+   "estimate": 0.061482,
+   "se": 0.066943,
+   "inside_95": true,
+   "sign_checked": false,
+   "sign_ok": true
+  },
+  {
+   "cause": "inv",
+   "column": "reorg_90d",
+   "truth": 0.5561662106,
+   "estimate": 0.408487,
+   "se": 0.322879,
+   "inside_95": true,
+   "sign_checked": false,
+   "sign_ok": true
+  },
+  {
+   "cause": "inv",
+   "column": "level_early",
+   "truth": 0.1768271389,
+   "estimate": 0.181525,
+   "se": 0.040721,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  },
+  {
+   "cause": "ret",
+   "column": "age_over_55",
+   "truth": 0.3539165336,
+   "estimate": 0.354748,
+   "se": 0.007399,
+   "inside_95": true,
+   "sign_checked": true,
+   "sign_ok": true
+  }
+ ]
+}

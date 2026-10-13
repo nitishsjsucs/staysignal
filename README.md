@@ -365,6 +365,14 @@ Both the oracle and the realized counts come from the generator, so this checks 
 | Joint Wald test of the 29 voluntary slopes against the truth | p = 0.876 (passed) | p of at least 0.01 |
 | Slopes inside their 95% intervals | 33 of 34, 97.1% (passed) | at least 85% |
 | Correct sign where the truth is at least 3 standard errors from zero | 28 of 28 (passed) | all |
+
+**Ground-truth recovery with team shocks (C6)** (`uv run --project engine staysignal eval recovery-shock`, 2026-10-13, [results/recovery-shock-2026-10-13.json](results/recovery-shock-2026-10-13.json)). Synthetic world (`recovery-shock`, seed 1013): the recovery world with lognormal mean-one team shocks per quarter (sigma 0.45) that the model omits, so its slopes estimate marginal effects. They are compared with marginal targets, the same fit on a separate 200,200-person world from the same truth (seed 1012, [results/recovery-shock-targets.json](results/recovery-shock-targets.json)), with the targets' covariance added to the fit's. 1,865,993 person-months, standard errors clustered by 2,524 teams. Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy.
+
+| Check | Result | Rule |
+|---|---|---|
+| Joint Wald test of the 29 voluntary slopes against the targets | p = 0.386 (passed) | p of at least 0.01 |
+| Slopes inside their 95% intervals around the targets | 32 of 34, 94.1% (passed) | at least 85% |
+| Correct sign where the target is at least 3 standard errors from zero | 28 of 28 (passed) | all |
 <!-- results:end -->
 
 ## License

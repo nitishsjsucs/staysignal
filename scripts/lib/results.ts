@@ -175,8 +175,14 @@ export interface DqFaultsReport {
   summary: Record<string, { seeds: number; detected: number; held: number; checks: string[]; root_top1: number; root_found: number; mean_abs_impact: number | null; max_abs_impact: number | null }>;
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport | ChallengerReport | DqFaultsReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery", "challenger", "dq-faults"];
+export interface RecoveryShockReport extends Omit<RecoveryReport, "kind"> {
+  kind: "recovery-shock";
+  sigma_team: number;
+  targets: { file: string; seed: number; baseline_headcount: number; rows: number };
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport | RecoveryShockReport | ChallengerReport | DqFaultsReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery", "recovery-shock", "challenger", "dq-faults"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -371,12 +377,27 @@ export function renderRecovery(file: string, r: RecoveryReport): string {
   ].join("\n");
 }
 
+/** C6, shock-world variant: the fit on a world with team shocks against simulated marginal targets. */
+export function renderRecoveryShock(file: string, r: RecoveryShockReport): string {
+  const n = (v: number) => v.toLocaleString("en-US");
+  const ok = (b: boolean) => (b ? "passed" : "failed");
+  return [
+    `**Ground-truth recovery with team shocks (C6)** (\`${r.command}\`, ${r.date}, [${file}](${file})). Synthetic world (\`${r.profile}\`, seed ${r.seed}): the recovery world with lognormal mean-one team shocks per quarter (sigma ${r.sigma_team}) that the model omits, so its slopes estimate marginal effects. They are compared with marginal targets, the same fit on a separate ${n(r.targets.baseline_headcount)}-person world from the same truth (seed ${r.targets.seed}, [${r.targets.file}](${r.targets.file})), with the targets' covariance added to the fit's. ${n(r.rows)} person-months, standard errors clustered by ${n(r.clusters)} teams. ${SYNTHETIC}`,
+    "",
+    "| Check | Result | Rule |",
+    "|---|---|---|",
+    `| Joint Wald test of the ${r.wald.df} voluntary slopes against the targets | p = ${r.wald.p_value.toFixed(3)} (${ok(r.passed.wald)}) | p of at least ${r.wald.alpha} |`,
+    `| Slopes inside their 95% intervals around the targets | ${r.coverage_95.inside} of ${r.coverage_95.slopes}, ${pct(r.coverage_95.share)} (${ok(r.passed.coverage)}) | at least 85% |`,
+    `| Correct sign where the target is at least 3 standard errors from zero | ${r.signs.correct} of ${r.signs.checked} (${ok(r.passed.signs)}) | all |`,
+  ].join("\n");
+}
+
 export function renderResults(reports: { file: string; report: Report }[]): string {
   if (reports.length === 0) return "No recorded results yet.";
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : report.kind === "challenger" ? renderChallenger(file, report) : report.kind === "dq-faults" ? renderDqFaults(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : report.kind === "recovery-shock" ? renderRecoveryShock(file, report) : report.kind === "challenger" ? renderChallenger(file, report) : report.kind === "dq-faults" ? renderDqFaults(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

@@ -587,6 +587,61 @@ def cmd_prod_load(args: argparse.Namespace) -> int:
     return 0 if res["ok"] else 1
 
 
+def cmd_eval_recovery_shock(args: argparse.Namespace) -> int:
+    """C6, shock-world variant (SPEC 9.1): with --targets, fit the 200,200-person shock world once and cache the
+    marginal targets in results/recovery-shock-targets.json (several minutes, about 8 GB); without, fit a separate
+    40,040-person shock world against the cached targets and record the checks in results/."""
+    import datetime as dt
+
+    from staysignal.model import recovery
+    from staysignal.world.spec import TARGETS_FACTOR, recovery_shock_profile
+
+    repo, _ = _repo_var()
+    cache = repo / "results" / "recovery-shock-targets.json"
+    if args.targets:
+        profile = recovery_shock_profile(TARGETS_FACTOR, seed=1012)
+        doc = {
+            "kind": "recovery-shock-targets",
+            "command": "uv run --project engine staysignal eval recovery-shock --targets",
+            "date": dt.date.today().isoformat(),
+            "label": "synthetic",
+            "profile": profile.name,
+            "seed": profile.seed,
+            "sigma_team": profile.sigma_team,
+            "baseline_headcount": profile.baseline_headcount,
+            "months": profile.months,
+            **recovery.marginal_targets(recovery.simulate(profile)),
+        }
+        cache.write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: v for k, v in doc.items() if k not in ("theta", "cov", "params")}, indent=2))
+        return 0
+    targets = json.loads(cache.read_text())
+    profile = recovery_shock_profile()
+    report = recovery.check(recovery.simulate(profile), targets)
+    doc = {
+        "kind": "recovery-shock",
+        "command": "uv run --project engine staysignal eval recovery-shock",
+        "date": dt.date.today().isoformat(),
+        "label": "synthetic",
+        "profile": profile.name,
+        "seed": profile.seed,
+        "sigma_team": profile.sigma_team,
+        "baseline_headcount": profile.baseline_headcount,
+        "months": profile.months,
+        "targets": {
+            "file": "results/recovery-shock-targets.json",
+            "seed": targets["seed"],
+            "baseline_headcount": targets["baseline_headcount"],
+            "rows": targets["rows"],
+        },
+        **report,
+    }
+    out = repo / "results" / f"recovery-shock-{doc['date']}.json"
+    out.write_text(json.dumps(doc, indent=1) + "\n")
+    print(json.dumps({k: v for k, v in doc.items() if k != "slopes"}, indent=2))
+    return 0 if all(report["passed"].values()) else 1
+
+
 def cmd_eval_oracle_coverage(args: argparse.Namespace) -> int:
     import datetime as dt
 
@@ -758,6 +813,9 @@ def build_parser() -> argparse.ArgumentParser:
     pl.add_argument("--world", default="var/world")
     pl.add_argument("--published", default="test/fixtures/api", help="the published documents (demo build output)")
     pl.set_defaults(func=cmd_prod_load)
+    rs = esub.add_parser("recovery-shock", help="C6 shock-world variant: the fit against simulated marginal targets")
+    rs.add_argument("--targets", action="store_true", help="fit the 200,200-person world and cache the targets")
+    rs.set_defaults(func=cmd_eval_recovery_shock)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")
     oc.add_argument("--profile", default="canonical", choices=["canonical", "small"])
     oc.add_argument("--futures", type=int, default=2000)

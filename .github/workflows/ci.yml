@@ -43,6 +43,8 @@ jobs:
       - run: uv run --locked --project engine staysignal warehouse compile-bigquery
       # the semantic catalog (MetricFlow SQL for DuckDB and BigQuery) is current with the semantic layer
       - run: uv run --locked --project engine staysignal semantic catalog --check
+      # the purpose-scoped access policy (SPEC 17.2): the compiled policy and the BigQuery grant plan are current
+      - run: uv run --locked --project engine staysignal policy compile --check
       # C1 across platforms: regenerate the canonical world on Linux and compare every macOS-made pin
       - run: uv run --locked --project engine staysignal world generate --profile canonical --out var/world
       - run: uv run --locked --project engine staysignal world verify --manifest data/world/manifest.json --dir var/world

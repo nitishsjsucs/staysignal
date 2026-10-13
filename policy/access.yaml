@@ -1,0 +1,40 @@
+# Purpose-scoped data access (SPEC 17.2), the source of truth for the production (BigQuery) path. Pattern from
+# PeopleVault policy/policy.yaml and its compiler (MIT). `npm run policy:compile` writes policy/compiled/policy.json
+# and the grant plan infra/gcp/grants.json; `npm run policy:check` fails when either drifts from this file.
+#
+# The Google Cloud project is shared with four sibling repos: every dataset, service account and job label this repo
+# creates starts with the prefix, every data grant is dataset-scoped, and the only project-level role any identity
+# holds is BigQuery Job User. The project ID never appears in a committed file (the plan uses <PROJECT_ID>).
+version: 1
+naming:
+  prefix: staysignal
+location: US
+
+datasets:
+  staysignal_raw: landed extracts as delivered (employee numbers present)
+  staysignal_staging: staging models with er_ pseudonyms (no employee numbers downstream of here)
+  staysignal_restricted: point-in-time features and compensation facts
+  staysignal_published: published runs, cohort tables and documents the Worker reads
+  staysignal_semantic: the semantic layer's catalog views
+  staysignal_lab: Scenario Lab recordings and cohort cells
+  staysignal_audit: the action audit; only an authorized view of aggregates leaves it
+
+purposes:
+  forecasting: {reads: [staysignal_staging, staysignal_restricted], writes: [staysignal_restricted, staysignal_published, staysignal_semantic]}
+  quality: {reads: [staysignal_raw, staysignal_staging], writes: [staysignal_published]}
+  lab: {reads: [staysignal_published], writes: [staysignal_lab]}
+  audit: {reads: [staysignal_staging], writes: [staysignal_audit]}
+
+identities:
+  staysignal-worker:
+    description: the Cloudflare Worker (serves cohort-level reads only)
+    reads: [staysignal_published, staysignal_semantic, staysignal_lab]
+    authorized_views: [staysignal_audit.v_action_audit_aggregates]
+    max_bytes_billed: 104857600  # 100 MiB per job
+  staysignal-runner:
+    description: the local runner (ingest, dbt, scoring, publishing)
+    purposes: [forecasting, quality, lab, audit]
+    loads: [staysignal_raw]
+    max_bytes_billed: 1073741824  # 1 GiB per job
+
+job_labels: {app: staysignal}

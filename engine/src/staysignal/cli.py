@@ -299,6 +299,21 @@ def cmd_eval_export(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_policy_compile(args: argparse.Namespace) -> int:
+    """SPEC 17.2: policy/access.yaml -> policy/compiled/policy.json and the grant plan infra/gcp/grants.json."""
+    from staysignal.prod.policy import build
+
+    stale = build(check=args.check)
+    if args.check:
+        if stale:
+            print(f"stale: {', '.join(stale)}; run `npm run policy:compile`")
+            return 1
+        print("policy and grant plan are current")
+        return 0
+    print("wrote policy/compiled/policy.json and infra/gcp/grants.json")
+    return 0
+
+
 def cmd_eval_challenger(args: argparse.Namespace) -> int:
     """C15: SurvivalBoost and the like-for-like 12,000-row model on the comparison's origins (needs the extra)."""
     import datetime as dt
@@ -534,6 +549,11 @@ def build_parser() -> argparse.ArgumentParser:
     oc.add_argument("--workers", type=int, default=None)
     oc.add_argument("--out", default=None)
     oc.set_defaults(func=cmd_eval_oracle_coverage)
+    pol = sub.add_parser("policy", help="purpose-scoped data access for the production path")
+    psub = pol.add_subparsers(dest="policy_command", required=True)
+    pc = psub.add_parser("compile", help="compile policy/access.yaml into the compiled policy and the grant plan")
+    pc.add_argument("--check", action="store_true", help="fail when a generated file drifts")
+    pc.set_defaults(func=cmd_policy_compile)
     demo = sub.add_parser("demo", help="demo state")
     dsub = demo.add_subparsers(dest="demo_command", required=True)
     db = dsub.add_parser("build", help="train or load models, score the published runs, export API fixtures")

@@ -39,6 +39,11 @@ export const READ_ONLY: readonly (readonly string[])[] = [
   ["gcloud", "billing", "projects", "describe"],
   ["gcloud", "services", "list"],
   ["bq", "ls"],
+  // read by setup:prod to show which planned steps are already done (lists and describes only)
+  ["gcloud", "iam", "service-accounts", "list"],
+  ["gcloud", "projects", "get-iam-policy"],
+  ["npx", "wrangler", "r2", "bucket", "list"],
+  ["npx", "wrangler", "secret", "list"],
   ["df", "-k"],
   ["sysctl", "vm.swapusage"],
 ];

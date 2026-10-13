@@ -39,9 +39,12 @@
     "demo:snapshots": "node scripts/demo.ts snapshots",
     "demo:reset": "node scripts/demo.ts reset",
     "stop": "node scripts/stop.ts",
+    "policy:compile": "uv run --project engine staysignal policy compile",
+    "policy:check": "uv run --project engine staysignal policy compile --check",
     "deploy": "node scripts/deploy.ts",
     "deploy:dry-run": "node scripts/deploy.ts --fixtures --dry-run",
-    "doctor": "node scripts/doctor.ts"
+    "doctor": "node scripts/doctor.ts",
+    "setup:prod": "node scripts/setup-prod.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "3.0.57",

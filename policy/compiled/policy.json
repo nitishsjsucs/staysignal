@@ -1,0 +1,70 @@
+{
+ "version": 1,
+ "prefix": "staysignal",
+ "purposes": {
+  "forecasting": {
+   "reads": [
+    "staysignal_staging",
+    "staysignal_restricted"
+   ],
+   "writes": [
+    "staysignal_restricted",
+    "staysignal_published",
+    "staysignal_semantic"
+   ]
+  },
+  "quality": {
+   "reads": [
+    "staysignal_raw",
+    "staysignal_staging"
+   ],
+   "writes": [
+    "staysignal_published"
+   ]
+  },
+  "lab": {
+   "reads": [
+    "staysignal_published"
+   ],
+   "writes": [
+    "staysignal_lab"
+   ]
+  },
+  "audit": {
+   "reads": [
+    "staysignal_staging"
+   ],
+   "writes": [
+    "staysignal_audit"
+   ]
+  }
+ },
+ "identities": {
+  "staysignal-worker": {
+   "reads": [
+    "staysignal_published",
+    "staysignal_semantic",
+    "staysignal_lab"
+   ],
+   "authorized_views": [
+    "staysignal_audit.v_action_audit_aggregates"
+   ],
+   "max_bytes_billed": 104857600
+  },
+  "staysignal-runner": {
+   "purposes": [
+    "forecasting",
+    "quality",
+    "lab",
+    "audit"
+   ],
+   "loads": [
+    "staysignal_raw"
+   ],
+   "max_bytes_billed": 1073741824
+  }
+ },
+ "job_labels": {
+  "app": "staysignal"
+ }
+}

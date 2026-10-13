@@ -74,6 +74,11 @@ export class FixturesWarehouse implements WarehouseClient {
     return this.get<CatalogResult>(`catalog/${catalogFixtureId(key, request)}.json`);
   }
 
+  /** The committed memory export: what the production memory store starts from (SPEC 14.10). */
+  memoryFixture(): MemoryFixture | null {
+    return this.memory();
+  }
+
   private memory(): MemoryFixture | null {
     return this.get<MemoryFixture>("memory.json");
   }

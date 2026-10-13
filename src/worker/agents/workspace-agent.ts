@@ -4,7 +4,7 @@
 // in the same synchronous block. The Worker calls these methods over Durable Object RPC after authenticating; browser
 // connections call the @callable wrappers, which read the principal the Worker verified at connect time.
 import { Agent, type Connection, type ConnectionContext, callable, getCurrentAgent } from "agents";
-import type { MemoryNoteInput, MemoryWriteOutcome, QualityFixture, RunBrief } from "../../shared/contracts";
+import type { MemoryCommit, MemoryFileDoc, MemoryFileInfo, MemoryNoteInput, MemoryWriteOutcome, QualityFixture, RunBrief } from "../../shared/contracts";
 import { syntheticNow } from "../../shared/clock";
 import { isReadOnly, type Principal, ROLES, type Role } from "../../shared/policy/roles";
 import { hasScope } from "../../shared/policy/roles";
@@ -25,6 +25,9 @@ import { type Merged, mergeRuns } from "./investigation/merge";
 import { runSpecialist, type SpecialistRun } from "./investigation/run";
 import { type InvestigationBrief, specialist } from "./investigation/specialists";
 import { decisionMemoryNote } from "../memory/notes";
+import { blobHash, commitHash, short, treeHash } from "../memory/githash";
+import { NoteRejected, writeNote } from "../../shared/memory/write";
+import { type MemoryHit, parseAliases, parseNote, searchMemory } from "../../shared/memory/search";
 import { writeMemoryNote } from "../memory/writer";
 
 export interface RunBriefState {
@@ -379,7 +382,12 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
   private agentToolContext(): ToolContext {
     return {
       principal: agentPrincipal(),
-      warehouse: warehouseFor(this.env),
+      warehouse: warehouseFor(this.env, {
+        memoryFiles: () => this.memoryFilesLocal(),
+        memoryFile: (path) => this.memoryFileLocal(path),
+        memoryLog: () => this.memoryLogLocal(),
+        memorySearch: (q) => this.memorySearchLocal(q),
+      }),
       workspace: {
         storeResult: async (r, owner) => this.storeResult(r, owner),
         saveDraft: async (d, owner) => this.saveDraft(d, owner),
@@ -458,9 +466,85 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     return this.sql<{ investigation_id: string }>`SELECT investigation_id FROM investigations ORDER BY created_at DESC, investigation_id DESC`.map((r) => this.getInvestigation(r.investigation_id) as Record<string, unknown>);
   }
 
-  /** The agent's memory write (SPEC 14.10), committed at the synthetic time; never throws (see memory/writer.ts). */
+  /** The agent's memory write (SPEC 14.10), committed at the synthetic time; never throws. The engine's git memory
+   * locally; this Durable Object's git-style store everywhere else (CI, the fixtures deployment). */
   async memoryNote(note: MemoryNoteInput): Promise<MemoryWriteOutcome> {
-    return writeMemoryNote(this.env, note, this.now());
+    if (parseConfig(this.env).dataMode === "engine") return writeMemoryNote(this.env, note, this.now());
+    return this.memoryWriteLocal(note, this.now());
+  }
+
+  // ---------- the production memory store: git-style history, not git (SPEC 14.10) ----------
+
+  private memoryRows(): { path: string; text: string; blob: string; commit_id: string; date: string }[] {
+    return this.sql<{ path: string; text: string; blob: string; commit_id: string; date: string }>`SELECT path, text, blob, commit_id, date FROM memory_files ORDER BY path`;
+  }
+
+  /** Starts the store from the committed memory export, keeping its history (imported commits) on first use. */
+  private async ensureMemory(): Promise<void> {
+    if (this.sql<{ n: number }>`SELECT COUNT(*) AS n FROM memory_files`[0]?.n) return;
+    const fx = new FixturesWarehouse().memoryFixture();
+    if (!fx) return;
+    const blobs = await Promise.all(Object.values(fx.files).map((f) => blobHash(f.text)));
+    if (this.sql<{ n: number }>`SELECT COUNT(*) AS n FROM memory_files`[0]?.n) return; // imported while hashing
+    Object.entries(fx.files).forEach(([path, f], i) => {
+      this.sql`INSERT INTO memory_files (path, text, blob, commit_id, date) VALUES (${path}, ${f.text}, ${blobs[i]!}, ${f.commit}, ${f.date})`;
+    });
+    for (const c of [...fx.log].reverse()) {
+      this.sql`INSERT INTO memory_commits (commit_id, parent, tree, message, date, files_json, imported) VALUES (${c.commit}, NULL, NULL, ${c.message}, ${c.date}, ${JSON.stringify(c.files)}, 1)`;
+    }
+  }
+
+  async memoryWriteLocal(note: MemoryNoteInput, at: string): Promise<MemoryWriteOutcome> {
+    await this.ensureMemory();
+    const rows = this.memoryRows();
+    let result: ReturnType<typeof writeNote>;
+    try {
+      result = writeNote(Object.fromEntries(rows.map((r) => [r.path, r.text])), note, at);
+    } catch (e) {
+      return { written: false, reason: e instanceof NoteRejected ? e.message : `memory write failed: ${String(e)}` };
+    }
+    const paths = Object.keys(result.changed).sort();
+    if (!paths.length) return { written: true, id: result.id, commit: null, files: [] };
+    const blobs = Object.fromEntries(rows.map((r) => [r.path, r.blob]));
+    for (const p of paths) blobs[p] = await blobHash(result.changed[p]!);
+    const parent = this.sql<{ commit_id: string }>`SELECT commit_id FROM memory_commits ORDER BY seq DESC LIMIT 1`[0]?.commit_id ?? null;
+    const tree = await treeHash(blobs);
+    const commit = await commitHash(tree, parent, at, result.message);
+    for (const p of paths) {
+      this.sql`INSERT INTO memory_files (path, text, blob, commit_id, date) VALUES (${p}, ${result.changed[p]!}, ${blobs[p]!}, ${short(commit)}, ${at})
+        ON CONFLICT(path) DO UPDATE SET text = excluded.text, blob = excluded.blob, commit_id = excluded.commit_id, date = excluded.date`;
+    }
+    this.sql`INSERT INTO memory_commits (commit_id, parent, tree, message, date, files_json, imported) VALUES (${short(commit)}, ${parent}, ${tree}, ${result.message}, ${at}, ${JSON.stringify(paths)}, 0)`;
+    return { written: true, id: result.id, commit: short(commit), files: paths };
+  }
+
+  async memoryFilesLocal(): Promise<MemoryFileInfo[]> {
+    await this.ensureMemory();
+    return this.memoryRows()
+      .filter((r) => r.path.endsWith(".md"))
+      .map((r) => {
+        const n = parseNote(r.text);
+        return { path: r.path, id: (n.meta.id as string | undefined) ?? null, type: (n.meta.type as string | undefined) ?? null, title: n.title, bullets: n.bullets.length, commit: r.commit_id, date: r.date };
+      })
+      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.path.localeCompare(b.path)));
+  }
+
+  async memoryFileLocal(path: string): Promise<MemoryFileDoc | null> {
+    await this.ensureMemory();
+    const r = this.sql<{ text: string; commit_id: string; date: string }>`SELECT text, commit_id, date FROM memory_files WHERE path = ${path}`[0];
+    return r && path.endsWith(".md") ? { path, ...parseNote(r.text), commit: r.commit_id, date: r.date } : null;
+  }
+
+  async memoryLogLocal(limit = 50): Promise<MemoryCommit[]> {
+    await this.ensureMemory();
+    return this.sql<{ commit_id: string; date: string; message: string; files_json: string }>`SELECT commit_id, date, message, files_json FROM memory_commits ORDER BY seq DESC LIMIT ${limit}`.map((c) => ({ commit: c.commit_id, date: c.date, message: c.message, files: JSON.parse(c.files_json) as string[] }));
+  }
+
+  async memorySearchLocal(query: string): Promise<MemoryHit[]> {
+    await this.ensureMemory();
+    const rows = this.memoryRows();
+    const files = Object.fromEntries(rows.map((r) => [r.path, { text: r.text, commit: r.commit_id, date: r.date }]));
+    return searchMemory(files, parseAliases(files["index/aliases.yml"]?.text ?? ""), query);
   }
 
   /** Records a human decision or rollback in memory after it is written (see memory/notes.ts). */

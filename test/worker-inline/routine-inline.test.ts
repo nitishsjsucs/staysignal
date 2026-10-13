@@ -50,6 +50,11 @@ describe("inline job completion (fixtures deployment)", () => {
       routine = ((await (await ws()).listRoutines()) as unknown as Routine[])[0];
       return routine?.status === "done";
     });
-    expect(routine!.steps.at(-1)).toMatchObject({ step: "memory_note", outcome: "skipped", reason: "fixtures mode serves the committed memory read-only" });
+    // the routine records itself in the git-style memory store (SPEC 14.10): an investigation note, read back through
+    // the same memory API, after the data engineer's decision note
+    expect(routine!.steps.at(-1)).toMatchObject({ step: "memory_note", outcome: "written", note_id: expect.stringMatching(/^INV-\d{4}-\d{2}-\d{2}-01$/), commit: expect.stringMatching(/^[0-9a-f]{16}$/) });
+    const log = await json<{ commits: { message: string }[] }>("/api/memory/log", { as: P.analyst });
+    expect(log.commits.map((c) => c.message).slice(0, 2)).toEqual([expect.stringMatching(/^memory: investigation INV-/), expect.stringMatching(/^memory: decision DEC-/)]);
+    expect(log.commits.at(-1)?.message).toBe("memory: seed");
   });
 });

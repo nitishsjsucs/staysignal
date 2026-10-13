@@ -14,6 +14,8 @@ export const WORKSPACE_DDL = [
   `CREATE TABLE IF NOT EXISTS incidents (incident_id TEXT PRIMARY KEY, run_id TEXT NOT NULL, status TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS routine_runs (routine_id TEXT PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT NULL, trigger_json TEXT NOT NULL, steps_json TEXT NOT NULL, workflow_instance_id TEXT, demo_epoch INTEGER NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS ai_usage (day TEXT PRIMARY KEY, neurons INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS memory_files (path TEXT PRIMARY KEY, text TEXT NOT NULL, blob TEXT NOT NULL, commit_id TEXT NOT NULL, date TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS memory_commits (seq INTEGER PRIMARY KEY, commit_id TEXT NOT NULL, parent TEXT, tree TEXT, message TEXT NOT NULL, date TEXT NOT NULL, files_json TEXT NOT NULL, imported INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS investigations (investigation_id TEXT PRIMARY KEY, routine_id TEXT, run_id TEXT NOT NULL, incident_id TEXT, status TEXT NOT NULL, brief_json TEXT NOT NULL, runs_json TEXT NOT NULL, merged_json TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS replays (run_id TEXT NOT NULL, replay_hash TEXT NOT NULL, equal INTEGER NOT NULL, duration_ms INTEGER NOT NULL, detail_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS traces (trace_id TEXT PRIMARY KEY, owner TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)`,

@@ -132,3 +132,17 @@ export function parseNote(text: string): { meta: Record<string, unknown>; title:
   }
   return { meta, title, bullets };
 }
+
+/** The alias table (`index/aliases.yml`: one `phrase: [term, ...]` per line), as the engine's YAML load reads it. */
+export function parseAliases(text: string): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  const unq = (s: string) => s.trim().replace(/^['"]|['"]$/g, "");
+  for (const line of text.split("\n")) {
+    const t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+    const m = /^(.+?):\s*\[(.*)\]\s*$/.exec(t);
+    if (!m) continue;
+    out[unq(m[1]!)] = m[2]!.split(",").map(unq).filter(Boolean);
+  }
+  return out;
+}

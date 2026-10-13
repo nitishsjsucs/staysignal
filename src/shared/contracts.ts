@@ -365,6 +365,7 @@ export interface MemoryFileInfo {
 /** The agent's memory write (SPEC 14.10): cohort-level bullets citing result IDs, runs or action sequence numbers. */
 export interface MemoryNoteInput {
   kind: "timeline" | "investigation" | "decision";
+  id?: string; // append to an existing investigation or decision note
   title?: string;
   bullets: string[];
   links?: string[];

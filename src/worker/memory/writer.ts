@@ -1,7 +1,7 @@
-// The agent's memory writes (SPEC 14.10). Locally the engine commits the note to the git memory at `var/memory`,
-// accepting the write only with the runner token, so only the Worker's agent writes. A fixtures deployment serves the
-// committed memory and has no writable store yet (the SQLite store of 14.10 is not built), so the write is skipped and
-// the routine says so. A failed write never fails the routine: memory is a record of the work, not part of it.
+// The agent's memory writes to the engine (SPEC 14.10), in engine mode: the engine commits the note to the git memory
+// at `var/memory`, accepting the write only with the runner token, so only the Worker's agent writes. Every other mode
+// writes to the WorkspaceAgent's git-style store instead (WorkspaceAgent.memoryNote). A failed write never fails the
+// routine: memory is a record of the work, not part of it.
 import type { MemoryNoteInput, MemoryWriteOutcome } from "../../shared/contracts";
 import { parseConfig } from "../config";
 

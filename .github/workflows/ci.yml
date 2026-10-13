@@ -62,6 +62,31 @@ jobs:
           enable-cache: true
       - run: uv sync --locked --project engine --extra challenger
       - run: uv run --locked --project engine --extra challenger pytest engine/tests/baselines/test_survivalboost.py -q
+  e2e:
+    # SPEC 16.4: the Playwright screenshot and flow specs in the same amd64 image that makes the baselines
+    # (npm run test:e2e), against the built app under wrangler dev in fixtures mode with the stub model and the fixture
+    # runner; no Python and no model server. The comparison is exact, so a baseline made anywhere else fails here.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host --init
+    env:
+      HOME: /root
+      SS_E2E_SCREENSHOTS: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - run: npm ci --no-audit --no-fund
+      - run: npm run dev:keys
+      - run: npx playwright test
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
   agent-eval-stub:
     # the 200-item agent eval with the scripted stub model against the built app under wrangler dev: proves the
     # harness, the pre-router and the refusal codes, and that no injected request gets through (SPEC 14.12)

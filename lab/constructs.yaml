@@ -1,0 +1,21 @@
+# Constructs for draft pilot items (SPEC 15.6). Where a published, validated measure exists, the draft item cites it
+# and recommends using it instead of the draft wording.
+constructs:
+  - id: criteria_clarity
+    label: Clarity of promotion criteria
+    validated_measure: "Role ambiguity (Rizzo, House and Lirtzman 1970)"
+  - id: process_fairness
+    label: Fairness of how promotion decisions are made
+    validated_measure: "Procedural justice (Colquitt 2001)"
+  - id: career_future
+    label: Seeing a future for one's career here
+    validated_measure: null
+  - id: change_uncertainty
+    label: Uncertainty about the change
+    validated_measure: null
+  - id: team_identity
+    label: Identification with the team
+    validated_measure: null
+  - id: manager_support
+    label: Support from one's manager
+    validated_measure: null

@@ -9,6 +9,7 @@ import { AskPage } from "./pages/Ask";
 import { ChangesPage } from "./pages/Changes";
 import { ForecastPage } from "./pages/Forecast";
 import { GovernancePage } from "./pages/Governance";
+import { ResearchPage } from "./pages/Research";
 import { MemoryPage } from "./pages/Memory";
 import { QualityPage } from "./pages/Quality";
 import { ResultPage } from "./pages/ResultDetail";
@@ -60,6 +61,7 @@ export function App() {
         {route.page === "memory" ? <MemoryPage me={me} /> : null}
         {route.page === "traces" ? <TracesPage me={me} /> : null}
         {route.page === "governance" ? <GovernancePage me={me} /> : null}
+        {route.page === "research" ? <ResearchPage me={me} /> : null}
         {route.page === "ask" ? <AskPage me={me} /> : null}
         {route.page === "result" ? <ResultPage id={route.id} /> : null}
         {route.page === "not_found" ? <p>Page not found.</p> : null}

@@ -39,3 +39,16 @@ describe("GET /api/evaluation", () => {
     expect(text).not.toMatch(/\bE\d{6}\b|er_[a-z2-7]{26}|employee/);
   });
 });
+
+describe("GET /api/research", () => {
+  it("serves the recorded research benchmark to every signed-in role, with its pre-registration hash", async () => {
+    for (const who of [P.analyst, P.hrbpEng, P.auditor]) {
+      const doc = await json<{ kind: string; label: string; prereg_sha256: string; cells: unknown[]; hypotheses: Record<string, { verdict: string }> }>("/api/research", { as: who });
+      expect(doc.kind).toBe("research");
+      expect(doc.label).toBe("synthetic");
+      expect(doc.prereg_sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(doc.cells).toHaveLength(22);
+      expect(Object.keys(doc.hypotheses).sort()).toEqual(["H1", "H2", "H3a", "H3b", "H4", "H5"]);
+    }
+  });
+});

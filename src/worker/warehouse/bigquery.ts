@@ -1,11 +1,11 @@
 // The production warehouse client (SPEC 7.3, 17.2, 18, path B): BigQuery REST from the Worker. Published documents
-// (runs, forecasts, history, quality, lineage, evaluation, the action audit) are rows of
+// (runs, forecasts, history, quality, lineage, evaluation, the action audit, research) are rows of
 // `staysignal_published.documents` keyed by the same paths the fixtures use; semantic-catalog entries run as compiled
 // for BigQuery (src/worker/generated/catalog.bigquery.json) with server-bound named parameters, never model-written SQL.
 // Every job carries maximumBytesBilled (100 MiB for the Worker) and the label app=staysignal. The service account key
 // is the SS_GCP_SA_KEY secret; tokens come from a signed JWT (RS256 through WebCrypto) and are cached until a minute
 // before expiry. Memory is not here: production memory lives in the WorkspaceAgent (warehouseFor wraps it).
-import type { ActionAuditDoc, CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { ActionAuditDoc, CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, ResearchDoc, RunsIndex } from "../../shared/contracts";
 import type { MemoryHit } from "../../shared/memory/search";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
 import catalog from "../generated/catalog.bigquery.json";
@@ -123,6 +123,9 @@ export class BigQueryWarehouse implements WarehouseClient {
   }
   actionAudit() {
     return this.doc<ActionAuditDoc>("action-audit.json");
+  }
+  research() {
+    return this.doc<ResearchDoc>("research.json");
   }
 
   async catalog(key: string, request: CatalogRequest): Promise<CatalogResult | null> {

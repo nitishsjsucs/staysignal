@@ -205,6 +205,13 @@ export function buildApp() {
     return c.json({ ...ev, backtest: { ...ev.backtest, levels, entries }, calibration: company ? ev.calibration : null, comparison, effects: company ? (ev.effects ?? null) : null });
   });
 
+  // the research benchmark (SPEC 11): pre-registered cells and hypotheses on synthetic research worlds, not Larkspur's
+  // cohorts, so every signed-in role may read it
+  app.get("/api/research", async (c) => {
+    const doc = await warehouseFor(c.env).research();
+    return doc ? c.json(doc) : c.json({ error: "no recorded research run" }, 404);
+  });
+
   // the funnel plot (SPEC 16.2): each cohort's observed over expected in the latest mature quarterly backtest window,
   // against its expected count; groups and above with n >= 50, scoped like every comparison over time (17.5)
   app.get("/api/workforce/funnel", async (c) => {

@@ -27,6 +27,7 @@ import type {
   ProfilesFixture,
   Provenance,
   QualityFixture,
+  ResearchDoc,
   Rounding,
   RunsIndex,
 } from "../contracts";
@@ -66,6 +67,7 @@ export interface WarehouseClient {
   memorySearch(query: string): Promise<MemoryHit[] | null>;
   /** The recorded action audit (SPEC 17.7); the API decides which screens a principal sees. */
   actionAudit(): Promise<ActionAuditDoc | null>;
+  research(): Promise<ResearchDoc | null>;
 }
 
 export interface ReviewDraft {

@@ -2,35 +2,7 @@
 // the eval harness. Every tool is read-only or drafts only; every result is cohort-level, authorized, suppressed,
 // rounded and stored under a content-addressed result ID. The model sees a result only through its digest.
 import type { z } from "zod";
-import type {
-  ActionAuditDoc,
-  Audience,
-  CatalogRequest,
-  CatalogResult,
-  ComparisonMetrics,
-  FlowLink,
-  MemoryCommit,
-  MemoryFileDoc,
-  MemoryFileInfo,
-  MemorySearchData,
-  WorkforceFlowsData,
-  EvaluationFixture,
-  BreakdownData,
-  BreakdownRow,
-  ChangesFixture,
-  CohortForecast,
-  CohortProfile,
-  ForecastData,
-  ForecastFixture,
-  HistoryFixture,
-  Horizon,
-  ProfilesFixture,
-  Provenance,
-  QualityFixture,
-  ResearchDoc,
-  Rounding,
-  RunsIndex,
-} from "../contracts";
+import type { ActionAuditDoc, Audience, BreakdownData, BreakdownRow, CatalogRequest, CatalogResult, ChangesFixture, CohortForecast, CohortProfile, ComparisonMetrics, EvaluationFixture, FlowLink, ForecastData, ForecastFixture, HistoryFixture, Horizon, LabDoc, LabIndex, MemoryCommit, MemoryFileDoc, MemoryFileInfo, MemorySearchData, ProfilesFixture, Provenance, QualityFixture, ResearchDoc, Rounding, RunsIndex, WorkforceFlowsData } from "../contracts";
 import { authorizeCohort, type CohortMeta, canUseTool, MIN_CELL, MIN_COMPARISON } from "../policy/authorize";
 import { isRefusal, type Refusal, refuse } from "../policy/refusals";
 import { hasScope, type Principal } from "../policy/roles";
@@ -68,6 +40,8 @@ export interface WarehouseClient {
   /** The recorded action audit (SPEC 17.7); the API decides which screens a principal sees. */
   actionAudit(): Promise<ActionAuditDoc | null>;
   research(): Promise<ResearchDoc | null>;
+  labIndex(): Promise<LabIndex | null>;
+  lab(proposal: string): Promise<LabDoc | null>;
 }
 
 export interface ReviewDraft {

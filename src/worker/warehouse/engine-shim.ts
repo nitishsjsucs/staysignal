@@ -1,6 +1,6 @@
 // Engine warehouse shim client (SPEC 7.2, ADR 0012): the local engine on 8196 answers published-layer reads from
 // compiled catalog entries on its DuckDB connection. Same contract as the fixtures client.
-import type { ActionAuditDoc, ResearchDoc, CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, RunsIndex } from "../../shared/contracts";
+import type { ActionAuditDoc, CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, LabDoc, LabIndex, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, ResearchDoc, RunsIndex } from "../../shared/contracts";
 import type { MemoryHit } from "../../shared/memory/search";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
 
@@ -95,5 +95,14 @@ export class EngineWarehouse implements WarehouseClient {
       return (await r.json()) as CatalogResult;
     }
     throw new Error("warehouse busy");
+  }
+
+  async labIndex(): Promise<LabIndex | null> {
+    return this.get<LabIndex>("lab/index");
+  }
+
+  async lab(proposal: string): Promise<LabDoc | null> {
+    if (!/^[a-z0-9-]{3,60}$/.test(proposal)) return null;
+    return this.get<LabDoc>(`lab/${proposal}`);
   }
 }

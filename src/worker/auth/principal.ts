@@ -36,14 +36,24 @@ export function principalId(payload: { sub?: unknown; common_name?: unknown; ema
   throw new AuthError("invalid", "token has neither sub nor common_name");
 }
 
+/** The runner's principal ID: a service token's ID is svc: plus the JWT's common_name, which Access sets to the token's
+ * client ID in production (SS_RUNNER_TOKEN_ID); dev tokens are minted with the token's name. */
+export function runnerId(config: AppConfig): string {
+  return config.authMode === "dev" ? "svc:staysignal-runner" : `svc:${config.serviceTokens.runner ?? "unset"}`;
+}
+
+export function mcpId(config: AppConfig): string {
+  return config.authMode === "dev" ? "svc:staysignal-mcp" : `svc:${config.serviceTokens.mcp ?? "unset"}`;
+}
+
 export function bindRole(config: AppConfig, id: string): Principal | null {
   if (config.authMode === "dev") {
     const local = localPrincipal(id);
     if (local) return local;
-    if (id === "svc:staysignal-runner") return principalFor(id, "data_engineer", [], "Runner service");
-    if (id === "svc:staysignal-mcp") return principalFor(id, "people_analyst", [], "MCP client");
-    return null;
   }
+  if (id === runnerId(config) && (config.authMode === "dev" || config.serviceTokens.runner)) return principalFor(id, "data_engineer", [], "Runner service");
+  if (id === mcpId(config) && (config.authMode === "dev" || config.serviceTokens.mcp)) return principalFor(id, "people_analyst", [], "MCP client");
+  if (config.authMode === "dev") return null;
   if (!config.roleBindings) return null;
   const bindings = JSON.parse(config.roleBindings) as Record<string, { role: Role; assigned_orgs?: string[]; display?: string }>;
   const b = bindings[id];

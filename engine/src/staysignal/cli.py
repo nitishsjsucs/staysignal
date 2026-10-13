@@ -199,6 +199,9 @@ def cmd_engine_prepare(args: argparse.Namespace) -> int:
     research = sorted((repo / "results").glob("research-*.json"))
     if research:  # the recorded research benchmark, served at /published/research
         write_json(published / "research.json", json.loads(research[-1].read_text()), compact=True)
+    lab_docs = repo / "test" / "fixtures" / "api" / "lab"
+    for f in sorted(lab_docs.glob("*.json")):  # the Scenario Lab's exported documents, served at /published/lab/<name>
+        write_json(published / "lab" / f.name, json.loads(f.read_text()), compact=True)
     for doc in sorted((published / "forecast").glob("*.json")):
         write_run(con, json.loads(doc.read_text()))
     con.close()
@@ -260,6 +263,67 @@ def cmd_serve(args: argparse.Namespace) -> int:
         uvicorn.run(create_app(st, writer_token=token), host=args.host, port=args.port, log_level="warning")
     finally:
         stop.set()
+        st.con.close()
+    return 0
+
+
+def read_env_file(path: Path) -> dict[str, str]:
+    """KEY=value lines of the operator's gitignored secrets file; quotes trimmed, comments and blanks skipped."""
+    out: dict[str, str] = {}
+    if path.exists():
+        for line in path.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                out[k.strip()] = v.strip().strip("'\"")
+    return out
+
+
+def prod_runner_config(env: dict[str, str], worker: str | None) -> tuple[dict, list[str]]:
+    """The production runner's Worker URL and Access service-token headers, or the reasons it cannot start."""
+    from urllib.parse import urlparse
+
+    from staysignal.runner.loop import access_headers
+
+    problems = []
+    url = worker or env.get("SS_WORKER_URL", "")
+    u = urlparse(url)
+    if u.scheme != "https" or not u.hostname or u.hostname in ("localhost", "127.0.0.1"):
+        problems.append("the production Worker URL must be https and not local (--worker or SS_WORKER_URL)")
+    cid, secret = env.get("SS_RUNNER_CLIENT_ID", ""), env.get("SS_RUNNER_CLIENT_SECRET", "")
+    if not cid or not secret:
+        problems.append(
+            "SS_RUNNER_CLIENT_ID and SS_RUNNER_CLIENT_SECRET (the staysignal-runner service token) are missing"
+        )
+    return {"base": url.rstrip("/"), "headers": access_headers(cid, secret)}, problems
+
+
+def cmd_runner_prod(args: argparse.Namespace) -> int:
+    """runner:prod (SPEC 23.2 step 12): the runner thread alone against the production Worker, authenticated with the
+    staysignal-runner Access service token, polling at the Worker's pace. Ctrl-C stops it. The secret is never printed."""
+    import os
+    import signal
+    import threading
+
+    from staysignal.runner.jobs import EngineState
+    from staysignal.runner.loop import run_forever
+
+    repo, var = _repo_var()
+    env = {**read_env_file(repo / ".secrets" / "staysignal.env"), **os.environ}
+    cfg, problems = prod_runner_config(env, args.worker)
+    if problems:
+        print("\n".join(problems), flush=True)
+        return 2
+    st = EngineState.open(repo, var)
+    if not (st.published_dir / "runs.json").exists():
+        print("no published state: run `staysignal engine prepare` first", flush=True)
+        return 1
+    stop = threading.Event()
+    signal.signal(signal.SIGINT, lambda *_: stop.set())
+    print(f"[runner:prod] polling {cfg['base']} as the staysignal-runner service token; Ctrl-C stops", flush=True)
+    try:
+        run_forever(st, cfg["base"], cfg["headers"], stop, owner="engine-runner-prod", max_wait_ms=None)
+    finally:
         st.con.close()
     return 0
 
@@ -542,6 +606,260 @@ def cmd_eval_recovery(args: argparse.Namespace) -> int:
     return 0 if all(report["passed"].values()) else 1
 
 
+def cmd_lab_cells(args: argparse.Namespace) -> int:
+    """The Scenario Lab's cohort cells (SPEC 15.2) from the canonical world at the published run's cutoff, written to
+    lab/cohort_cells.json: cells of at least 10 people with rounded cohort facts, nothing individual."""
+    from datetime import date
+
+    from staysignal.clock import as_cutoff_datetime
+    from staysignal.features.reference import Vintage, features_at
+    from staysignal.ingest.landing import load_world_sources
+    from staysignal.lab.cells import export
+
+    repo, _ = _repo_var()
+    cutoff = date.fromisoformat(args.cutoff)
+    src = load_world_sources(Path(args.world))
+    doc = export(features_at(Vintage(src, as_cutoff_datetime(cutoff)), cutoff), args.run, cutoff)
+    out = repo / "lab" / "cohort_cells.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(doc, indent=1, sort_keys=True) + "\n"
+    if args.check:
+        same = out.exists() and out.read_text() == text
+        print(
+            "lab/cohort_cells.json is current" if same else "lab/cohort_cells.json is stale: run `staysignal lab cells`"
+        )
+        return 0 if same else 1
+    out.write_text(text)
+    print(json.dumps({"written": "lab/cohort_cells.json", "cells": len(doc["cells"]), "withheld": doc["withheld"]}))
+    return 0
+
+
+def cmd_lab_export(args: argparse.Namespace) -> int:
+    """The Scenario Lab's API documents (SPEC 15.6, 15.7): for each recorded session, its analysis, the sanity panel
+    computed here with the published model (the sim never sees model outputs) and a summary of the session, written to
+    test/fixtures/api/lab/<proposal>.json with an index. `--check` fails when a committed document is stale."""
+    from datetime import date
+
+    from staysignal.clock import as_cutoff_datetime
+    from staysignal.features.reference import Vintage, features_at
+    from staysignal.fixtures.export_api import write_json
+    from staysignal.ingest.landing import load_world_sources
+    from staysignal.lab.sanity import cell_rates, panel
+    from staysignal.model import artifact as artifact_io
+
+    repo, _ = _repo_var()
+    cutoff = date.fromisoformat(args.cutoff)
+    rows = features_at(Vintage(load_world_sources(Path(args.world)), as_cutoff_datetime(cutoff)), cutoff)
+    rates, facts, tenure = cell_rates(artifact_io.load(repo / "models" / args.model / "model.json"), rows, cutoff)
+    out_dir = repo / "test" / "fixtures" / "api" / "lab"
+    docs: dict[str, dict] = {}
+    for session in sorted(p for p in (repo / "lab" / "recordings").iterdir() if (p / "analysis.json").exists()):
+        analysis = json.loads((session / "analysis.json").read_text())
+        manifests = [
+            json.loads((d / "manifest.json").read_text())
+            for d in sorted(session.iterdir())
+            if (d / "manifest.json").exists()
+        ]
+        main = next(m for m in manifests if m["card_variant"] == "main")
+        docs[analysis["proposal"]] = {
+            "label": analysis["label"],
+            "proposal": analysis["proposal"],
+            "session": session.name,
+            "placeholder": analysis["placeholder"],
+            "provider": main["provider"],
+            "personas": [
+                {"persona_id": p["persona_id"], "handle": p["handle"], "tenure_band": p["tenure_band"]}
+                for p in main["personas"]
+            ],
+            "replicates": [
+                {
+                    "run": f"{m['card_variant']}-s{m['seed']}",
+                    "card_variant": m["card_variant"],
+                    "seed": m["seed"],
+                    "rounds": m["config"]["rounds"],
+                    "calls": m["calls"],
+                    "db_sha256": m["db_sha256"],
+                }
+                for m in manifests
+            ],
+            "analysis": analysis,
+            "sanity": panel(session, rates, facts, tenure),
+        }
+    index = {
+        "label": next(iter(docs.values()))["label"] if docs else None,
+        "proposals": [
+            {"id": k, "session": v["session"], "placeholder": v["placeholder"]} for k, v in sorted(docs.items())
+        ],
+    }
+    targets = {out_dir / "index.json": index} | {out_dir / f"{k}.json": v for k, v in docs.items()}
+    if args.check:
+        stale = [
+            str(p.relative_to(repo))
+            for p, d in targets.items()
+            if not p.exists() or json.loads(p.read_text()) != json.loads(json.dumps(d))
+        ]
+        print("Lab documents are current" if not stale else f"stale: {stale}; run `staysignal lab export`")
+        return 0 if not stale else 1
+    for p, d in targets.items():
+        write_json(p, d, compact=True)
+    print(json.dumps({"written": [str(p.relative_to(repo)) for p in targets]}))
+    return 0
+
+
+def cmd_prod_validate(args: argparse.Namespace) -> int:
+    """prod:validate (SPEC 23.2): the offline BigQuery compile, then one free dry run per compiled file. Prints the plan
+    unless --execute; --execute needs the project ID and application default credentials (the operator's Mac)."""
+    import os
+
+    from staysignal.prod import validate
+    from staysignal.prod.dialect import compile_bigquery
+
+    res = compile_bigquery(Path(args.target))
+    if not res["ok"] or res["banned"] or res["unparsed"]:
+        print(json.dumps({k: v for k, v in res.items() if k != "compiled_dir"}, indent=1))
+        return 1
+    runs = validate.plan(Path(res["compiled_dir"]))
+    results = None
+    if args.execute:
+        project = args.project or os.environ.get("SS_GCP_PROJECT")
+        if not project:
+            print("--execute needs --project or SS_GCP_PROJECT", flush=True)
+            return 2
+        from google.cloud import bigquery  # only here: plan mode never builds a client
+
+        client = bigquery.Client(project=project)
+        results = validate.execute(runs, client, project, bigquery.QueryJobConfig)
+    doc = validate.summarize(runs, results, strict=args.strict)
+    print(json.dumps(doc, indent=1))
+    if not args.execute:
+        print("plan only: nothing was sent; rerun with --execute --project <id> on the operator's machine", flush=True)
+    return 0 if doc["ok"] else 1
+
+
+def cmd_prod_load(args: argparse.Namespace) -> int:
+    """prod:load (SPEC 23.2, path B): the canonical world to R2 and BigQuery, dbt build, the published documents.
+    Prints the plan unless --execute, which needs the project, the production pseudonym key and the Mac's logins."""
+    import os
+    import subprocess
+
+    from staysignal.prod import load
+
+    repo, var = _repo_var()
+    world, published = Path(args.world), Path(args.published)
+    if not (world / "manifest.json").exists() or not (published / "runs.json").exists():
+        print(f"needs the canonical world in {world} and the published documents in {published}", flush=True)
+        return 2
+    p = load.plan(world, published, repo / "demo" / "lab")
+    print(json.dumps(p.summary(), indent=1))
+    if not args.execute:
+        print("plan only: nothing was sent; rerun with --execute --project <id> on the operator's machine", flush=True)
+        return 0 if not p.rejected else 1
+    project = args.project or os.environ.get("SS_GCP_PROJECT")
+    blocked = load.preflight(dict(os.environ), project)
+    if blocked or p.rejected:
+        print("\n".join(blocked + [f"not a known extract: {x}" for x in p.rejected]), flush=True)
+        return 2
+    from google.cloud import bigquery
+
+    from staysignal.lineage.capture import invoke
+
+    client = bigquery.Client(project=project)
+
+    def r2_put(key: str, path: Path) -> None:
+        subprocess.run(
+            ["npx", "wrangler", "r2", "object", "put", f"{load.BUCKET}/{key}", "--file", str(path), "--remote"],
+            check=True,
+            capture_output=True,
+        )
+
+    def load_parquet(path: Path, table: str) -> None:
+        cfg = bigquery.LoadJobConfig(
+            source_format=bigquery.SourceFormat.PARQUET,
+            write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+            labels=load.LABELS,
+        )
+        with path.open("rb") as fh:
+            client.load_table_from_file(fh, table, job_config=cfg).result()
+
+    def load_documents(rows: list[dict], table: str) -> None:
+        cfg = bigquery.LoadJobConfig(
+            schema=[
+                bigquery.SchemaField("key", "STRING", "REQUIRED"),
+                bigquery.SchemaField("doc", "STRING", "REQUIRED"),
+            ],
+            write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+            labels=load.LABELS,
+        )
+        client.load_table_from_json(rows, table, job_config=cfg).result()
+
+    def dbt_build(profiles: Path, dbt_vars: dict) -> bool:
+        ok, _ = invoke(
+            ["build"], var / "prod" / "unused.duckdb", var / "prod" / "dbt", profiles_dir=profiles, dbt_vars=dbt_vars
+        )
+        return ok
+
+    res = load.execute(
+        p, world, published, var / "prod" / "load", project, load.Deps(r2_put, load_parquet, load_documents, dbt_build)
+    )
+    print(json.dumps(res, indent=1))
+    return 0 if res["ok"] else 1
+
+
+def cmd_eval_recovery_shock(args: argparse.Namespace) -> int:
+    """C6, shock-world variant (SPEC 9.1): with --targets, fit the 200,200-person shock world once and cache the
+    marginal targets in results/recovery-shock-targets.json (several minutes, about 8 GB); without, fit a separate
+    40,040-person shock world against the cached targets and record the checks in results/."""
+    import datetime as dt
+
+    from staysignal.model import recovery
+    from staysignal.world.spec import TARGETS_FACTOR, recovery_shock_profile
+
+    repo, _ = _repo_var()
+    cache = repo / "results" / "recovery-shock-targets.json"
+    if args.targets:
+        profile = recovery_shock_profile(TARGETS_FACTOR, seed=1012)
+        doc = {
+            "kind": "recovery-shock-targets",
+            "command": "uv run --project engine staysignal eval recovery-shock --targets",
+            "date": dt.date.today().isoformat(),
+            "label": "synthetic",
+            "profile": profile.name,
+            "seed": profile.seed,
+            "sigma_team": profile.sigma_team,
+            "baseline_headcount": profile.baseline_headcount,
+            "months": profile.months,
+            **recovery.marginal_targets(recovery.simulate(profile)),
+        }
+        cache.write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: v for k, v in doc.items() if k not in ("theta", "cov", "params")}, indent=2))
+        return 0
+    targets = json.loads(cache.read_text())
+    profile = recovery_shock_profile()
+    report = recovery.check(recovery.simulate(profile), targets)
+    doc = {
+        "kind": "recovery-shock",
+        "command": "uv run --project engine staysignal eval recovery-shock",
+        "date": dt.date.today().isoformat(),
+        "label": "synthetic",
+        "profile": profile.name,
+        "seed": profile.seed,
+        "sigma_team": profile.sigma_team,
+        "baseline_headcount": profile.baseline_headcount,
+        "months": profile.months,
+        "targets": {
+            "file": "results/recovery-shock-targets.json",
+            "seed": targets["seed"],
+            "baseline_headcount": targets["baseline_headcount"],
+            "rows": targets["rows"],
+        },
+        **report,
+    }
+    out = repo / "results" / f"recovery-shock-{doc['date']}.json"
+    out.write_text(json.dumps(doc, indent=1) + "\n")
+    print(json.dumps({k: v for k, v in doc.items() if k != "slopes"}, indent=2))
+    return 0 if all(report["passed"].values()) else 1
+
+
 def cmd_eval_oracle_coverage(args: argparse.Namespace) -> int:
     import datetime as dt
 
@@ -694,6 +1012,42 @@ def build_parser() -> argparse.ArgumentParser:
     ch.set_defaults(func=cmd_eval_challenger)
     rc = esub.add_parser("recovery", help="C6: the fit on the recovery world against the generator's truth")
     rc.set_defaults(func=cmd_eval_recovery)
+    lab = sub.add_parser("lab", help="Scenario Lab inputs (hypothesis generation with synthetic personas)")
+    labsub = lab.add_subparsers(dest="lab_command", required=True)
+    lc = labsub.add_parser("cells", help="cohort cells of at least 10 people for the personas")
+    lc.add_argument("--world", default="var/world")
+    lc.add_argument("--run", default="R-2026-10-01#1")
+    lc.add_argument("--cutoff", default="2026-10-01")
+    lc.add_argument("--check", action="store_true", help="fail when the committed file differs")
+    lc.set_defaults(func=cmd_lab_cells)
+    le = labsub.add_parser("export", help="the Lab's API documents: analysis, sanity panel and session summary")
+    le.add_argument("--world", default="var/world")
+    le.add_argument("--cutoff", default="2026-10-01")
+    le.add_argument("--model", default="m2026.09")
+    le.add_argument("--check", action="store_true", help="fail when a committed document is stale")
+    le.set_defaults(func=cmd_lab_export)
+    prod = sub.add_parser("prod", help="the production path (operator only; plan-only unless --execute)")
+    psub = prod.add_subparsers(dest="prod_command", required=True)
+    pv = psub.add_parser("validate", help="BigQuery dry runs of every compiled model and test (free)")
+    pv.add_argument("--execute", action="store_true", help="send the dry runs (application default credentials)")
+    pv.add_argument("--strict", action="store_true", help="after prod:load: every file must pass")
+    pv.add_argument("--project", default=None, help="Google Cloud project ID (or SS_GCP_PROJECT)")
+    pv.add_argument("--target", default="var/dbt-bigquery-validate", help="dbt target path for the compile")
+    pv.set_defaults(func=cmd_prod_validate)
+    rp = sub.add_parser("runner", help="the runner against the production Worker (operator only)")
+    rpsub = rp.add_subparsers(dest="runner_command", required=True)
+    rpp = rpsub.add_parser("prod", help="lease jobs from the production Worker with the runner service token")
+    rpp.add_argument("--worker", default=None, help="the production Worker's https URL (or SS_WORKER_URL)")
+    rpp.set_defaults(func=cmd_runner_prod)
+    pl = psub.add_parser("load", help="the canonical world to R2 and BigQuery, dbt build, published documents")
+    pl.add_argument("--execute", action="store_true", help="run the plan (the operator's Mac, after setup:prod B)")
+    pl.add_argument("--project", default=None, help="Google Cloud project ID (or SS_GCP_PROJECT)")
+    pl.add_argument("--world", default="var/world")
+    pl.add_argument("--published", default="test/fixtures/api", help="the published documents (demo build output)")
+    pl.set_defaults(func=cmd_prod_load)
+    rs = esub.add_parser("recovery-shock", help="C6 shock-world variant: the fit against simulated marginal targets")
+    rs.add_argument("--targets", action="store_true", help="fit the 200,200-person world and cache the targets")
+    rs.set_defaults(func=cmd_eval_recovery_shock)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")
     oc.add_argument("--profile", default="canonical", choices=["canonical", "small"])
     oc.add_argument("--futures", type=int, default=2000)

@@ -24,8 +24,12 @@ const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 export function ArmDots({ cells, metric, band, title }: { cells: ResearchCell[]; metric: "oe" | "cov80"; band: [number, number]; title: string }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const { tip, show, hide } = useTooltip();
-  const rowH = 24;
-  const labelW = Math.min(170, Math.max(120, width * 0.38));
+  const label = (c: ResearchCell) => `${c.level} · ${HANDLING_LABEL[c.handling] ?? c.handling}`;
+  const colW = Math.min(170, Math.max(120, width * 0.38));
+  // labels too long for the side column (the A x C arms) sit above their row instead of overflowing the card
+  const stacked = Math.max(...cells.map((c) => label(c).length)) * 6.6 + 8 > colW;
+  const rowH = stacked ? 38 : 24;
+  const labelW = stacked ? 8 : colW;
   const h = cells.length * rowH + 44;
   const lo = (c: ResearchCell) => (metric === "oe" ? c.oe_lo90 : c.cov80_lo90);
   const hi = (c: ResearchCell) => (metric === "oe" ? c.oe_hi90 : c.cov80_hi90);
@@ -55,7 +59,7 @@ export function ArmDots({ cells, metric, band, title }: { cells: ResearchCell[];
           ))}
           <line x1={x(ref1)} x2={x(ref1)} y1={18} y2={h - 26} stroke="var(--axis)" strokeDasharray="4 3" />
           {cells.map((c, i) => {
-            const cy = 18 + i * rowH + rowH / 2;
+            const cy = 18 + i * rowH + (stacked ? 26 : rowH / 2);
             const eq = metric === "oe" ? c.oe_equivalent : c.cov80_equivalent;
             const p = metric === "oe" ? c.oe_tost_p : c.cov80_tost_p;
             return (
@@ -78,9 +82,9 @@ export function ArmDots({ cells, metric, band, title }: { cells: ResearchCell[];
                 }
                 onPointerLeave={hide}
               >
-                <rect x={-labelW} y={cy - rowH / 2} width={labelW + x.range()[1]!} height={rowH} fill="transparent" />
-                <text x={-8} y={cy} dy="0.32em" textAnchor="end" style={{ fill: "var(--ink-2)" }}>
-                  {c.level} · {HANDLING_LABEL[c.handling] ?? c.handling}
+                <rect x={-labelW} y={18 + i * rowH} width={labelW + x.range()[1]!} height={rowH} fill="transparent" />
+                <text x={stacked ? 0 : -8} y={stacked ? cy - 14 : cy} dy="0.32em" textAnchor={stacked ? "start" : "end"} className={stacked ? "halo" : undefined} style={{ fill: "var(--ink-2)" }}>
+                  {label(c)}
                 </text>
                 <line x1={x(lo(c))} x2={x(hi(c))} y1={cy} y2={cy} stroke={color(c.handling)} strokeWidth={2} />
                 <circle cx={x(val(c))} cy={cy} r={eq ? 5 : 4.5} fill={eq ? color(c.handling) : "var(--surface)"} stroke={color(c.handling)} strokeWidth={2} />
@@ -97,8 +101,8 @@ export function ArmDots({ cells, metric, band, title }: { cells: ResearchCell[];
 export function CoverageBySigma({ cells, metric, title }: { cells: ResearchCell[]; metric: "cov80" | "team_cov80"; title: string }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const { tip, show, hide } = useTooltip();
-  const h = 220;
-  const m = { top: 24, right: 16, bottom: 30, left: 40 };
+  const h = 238;
+  const m = { top: 42, right: 16, bottom: 30, left: 40 };
   const iw = Math.max(120, width - m.left - m.right);
   const ih = h - m.top - m.bottom;
   const sigmas = ["0", "0.25", "0.5"];
@@ -114,6 +118,15 @@ export function CoverageBySigma({ cells, metric, title }: { cells: ResearchCell[
         <text x={0} y={12} style={{ fill: "var(--ink)", fontWeight: 600 }}>
           {title}
         </text>
+        {/* a legend instead of end labels: the two lines often finish within a few points of each other */}
+        {series.map((s, i) => (
+          <g key={s.handling} transform={`translate(${i * 110},22)`}>
+            <line x1={0} x2={14} y1={4} y2={4} stroke={color(s.handling)} strokeWidth={2} />
+            <text x={18} y={4} dy="0.32em" style={{ fill: "var(--ink-2)" }}>
+              {HANDLING_LABEL[s.handling]}
+            </text>
+          </g>
+        ))}
         <g transform={`translate(${m.left},${m.top})`}>
           <rect x={0} y={y(0.85)} width={iw} height={y(0.75) - y(0.85)} fill="var(--good)" fillOpacity={0.1} />
           {[0.4, 0.6, 0.8, 1].map((t) => (
@@ -138,11 +151,6 @@ export function CoverageBySigma({ cells, metric, title }: { cells: ResearchCell[
                   <circle cx={x(p.s)} cy={y(Math.max(0.4, p.v))} r={4.5} fill={color(s.handling)} stroke="var(--surface)" strokeWidth={2} />
                 </g>
               ))}
-              {s.points.length ? (
-                <text x={x(s.points[s.points.length - 1]!.s) - 6} y={y(Math.max(0.4, s.points[s.points.length - 1]!.v)) - 10} textAnchor="end" style={{ fill: "var(--ink-2)" }}>
-                  {HANDLING_LABEL[s.handling]}
-                </text>
-              ) : null}
             </g>
           ))}
         </g>

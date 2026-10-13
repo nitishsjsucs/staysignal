@@ -1,0 +1,24 @@
+{"action": 9, "call": 0, "persona": "P03", "round": 1, "themes": ["manager_support"]}
+{"action": 10, "call": 1, "persona": "P06", "round": 1, "themes": ["change_uncertainty"]}
+{"action": 11, "call": 2, "persona": "P07", "round": 1, "themes": ["change_uncertainty"]}
+{"action": 12, "call": 3, "persona": "P10", "round": 1, "themes": ["manager_support"]}
+{"action": 13, "call": 4, "persona": "P11", "round": 1, "themes": ["criteria_clarity"]}
+{"action": 14, "call": 5, "persona": "P12", "round": 1, "themes": ["criteria_clarity"]}
+{"action": 15, "call": 6, "persona": "P14", "round": 1, "themes": ["criteria_clarity"]}
+{"action": 16, "call": 7, "persona": "P16", "round": 1, "themes": ["manager_support", "process_fairness"]}
+{"action": 30, "call": 8, "persona": "P02", "round": 2, "themes": ["criteria_clarity"]}
+{"action": 31, "call": 9, "persona": "P03", "round": 2, "themes": ["manager_support"]}
+{"action": 34, "call": 10, "persona": "P09", "round": 2, "themes": ["criteria_clarity"]}
+{"action": 35, "call": 11, "persona": "P10", "round": 2, "themes": ["change_uncertainty"]}
+{"action": 37, "call": 12, "persona": "P15", "round": 2, "themes": ["manager_support", "process_fairness"]}
+{"action": 38, "call": 13, "persona": "P16", "round": 2, "themes": ["criteria_clarity"]}
+{"action": 54, "call": 14, "persona": "P04", "round": 3, "themes": ["criteria_clarity"]}
+{"action": 55, "call": 15, "persona": "P05", "round": 3, "themes": ["manager_support", "process_fairness"]}
+{"action": 56, "call": 16, "persona": "P06", "round": 3, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 58, "call": 17, "persona": "P10", "round": 3, "themes": ["manager_support"]}
+{"action": 59, "call": 18, "persona": "P11", "round": 3, "themes": ["change_uncertainty"]}
+{"action": 73, "call": 19, "persona": "P02", "round": 4, "themes": ["manager_support", "process_fairness"]}
+{"action": 76, "call": 20, "persona": "P05", "round": 4, "themes": ["manager_support", "process_fairness"]}
+{"action": 78, "call": 21, "persona": "P10", "round": 4, "themes": ["criteria_clarity"]}
+{"action": 79, "call": 22, "persona": "P13", "round": 4, "themes": ["manager_support", "process_fairness"]}
+{"action": 81, "call": 23, "persona": "P16", "round": 4, "themes": ["criteria_clarity"]}

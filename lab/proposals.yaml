@@ -1,0 +1,13 @@
+# Scenario Lab proposals (SPEC 15.3). Each states the status quo and the change; `target` selects the cohort cells the
+# personas are drawn from. Hypothesis generation with synthetic personas: not a forecast, not a survey, not validated.
+proposals:
+  - id: promotion-criteria-third-window
+    title: Published promotion criteria and a third window
+    status_quo: Promotions are decided in March and September. The criteria for each level are not published.
+    change: Publish the IC3 to IC4 promotion criteria and add a third promotion window in June.
+    target: {level_band: [early, mid]}
+  - id: infra-data-merge
+    title: One group for Infrastructure and Data
+    status_quo: Infrastructure Engineering and Data Engineering are separate groups, each with its own director.
+    change: Merge the two groups into one group under one director.
+    target: {job_family: [INF, DAT]}

@@ -19,6 +19,7 @@ test("the Research page shows the verdicts, the arms and coverage by sigma", asy
 test("the Research page fits a phone screen", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/research");
+  await page.getByLabel("Acting as (local role switcher)").selectOption("pa-analyst@larkspur.example");
   await expect(page.getByTestId("research-hypotheses")).toBeVisible();
   const overflow = await page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth");
   expect(overflow).toBe(0);

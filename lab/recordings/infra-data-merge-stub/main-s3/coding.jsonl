@@ -1,0 +1,37 @@
+{"action": 10, "call": 0, "persona": "P01", "round": 1, "themes": ["change_uncertainty"]}
+{"action": 11, "call": 1, "persona": "P02", "round": 1, "themes": ["criteria_clarity"]}
+{"action": 12, "call": 2, "persona": "P04", "round": 1, "themes": ["manager_support"]}
+{"action": 13, "call": 3, "persona": "P05", "round": 1, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 14, "call": 4, "persona": "P08", "round": 1, "themes": ["change_uncertainty"]}
+{"action": 15, "call": 5, "persona": "P09", "round": 1, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 16, "call": 6, "persona": "P13", "round": 1, "themes": ["criteria_clarity"]}
+{"action": 17, "call": 7, "persona": "P15", "round": 1, "themes": ["manager_support"]}
+{"action": 18, "call": 8, "persona": "P16", "round": 1, "themes": ["change_uncertainty"]}
+{"action": 31, "call": 9, "persona": "P08", "round": 2, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 33, "call": 10, "persona": "P15", "round": 2, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 34, "call": 11, "persona": "P16", "round": 2, "themes": ["manager_support", "process_fairness"]}
+{"action": 43, "call": 12, "persona": "P03", "round": 3, "themes": ["criteria_clarity"]}
+{"action": 45, "call": 13, "persona": "P08", "round": 3, "themes": ["change_uncertainty"]}
+{"action": 62, "call": 14, "persona": "P05", "round": 4, "themes": ["criteria_clarity"]}
+{"action": 63, "call": 15, "persona": "P06", "round": 4, "themes": ["manager_support"]}
+{"action": 64, "call": 16, "persona": "P08", "round": 4, "themes": ["manager_support"]}
+{"action": 65, "call": 17, "persona": "P09", "round": 4, "themes": ["criteria_clarity"]}
+{"action": 67, "call": 18, "persona": "P12", "round": 4, "themes": ["manager_support"]}
+{"action": 68, "call": 19, "persona": "P13", "round": 4, "themes": ["manager_support", "process_fairness"]}
+{"action": 83, "call": 20, "persona": "P02", "round": 5, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 85, "call": 21, "persona": "P04", "round": 5, "themes": ["manager_support", "process_fairness"]}
+{"action": 86, "call": 22, "persona": "P05", "round": 5, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 88, "call": 23, "persona": "P09", "round": 5, "themes": ["manager_support"]}
+{"action": 90, "call": 24, "persona": "P15", "round": 5, "themes": ["criteria_clarity"]}
+{"action": 102, "call": 25, "persona": "P03", "round": 6, "themes": ["change_uncertainty"]}
+{"action": 103, "call": 26, "persona": "P05", "round": 6, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 104, "call": 27, "persona": "P06", "round": 6, "themes": ["change_uncertainty"]}
+{"action": 106, "call": 28, "persona": "P10", "round": 6, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 107, "call": 29, "persona": "P12", "round": 6, "themes": ["criteria_clarity", "change_uncertainty"]}
+{"action": 120, "call": 30, "persona": "P08", "round": 7, "themes": ["criteria_clarity"]}
+{"action": 121, "call": 31, "persona": "P14", "round": 7, "themes": ["criteria_clarity"]}
+{"action": 122, "call": 32, "persona": "P15", "round": 7, "themes": ["manager_support", "process_fairness"]}
+{"action": 131, "call": 33, "persona": "P10", "round": 8, "themes": ["change_uncertainty"]}
+{"action": 132, "call": 34, "persona": "P11", "round": 8, "themes": ["manager_support", "process_fairness"]}
+{"action": 133, "call": 35, "persona": "P13", "round": 8, "themes": ["manager_support", "process_fairness"]}
+{"action": 134, "call": 36, "persona": "P15", "round": 8, "themes": ["manager_support"]}

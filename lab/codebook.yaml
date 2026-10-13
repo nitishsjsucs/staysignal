@@ -1,0 +1,13 @@
+# The coding pass's themes (SPEC 15.3, 15.6). Used only by the separate coding call, never in persona prompts.
+themes:
+  - {id: criteria_clarity, label: Promotion criteria clarity}
+  - {id: process_fairness, label: Fairness of process}
+  - {id: workload, label: Workload}
+  - {id: pay_fairness, label: Compensation fairness}
+  - {id: manager_support, label: Manager support}
+  - {id: career_mobility, label: Career mobility}
+  - {id: team_identity, label: Team identity}
+  - {id: process_overhead, label: Process overhead}
+  - {id: recognition, label: Recognition}
+  - {id: change_uncertainty, label: Uncertainty about the change}
+  - {id: other, label: Other}

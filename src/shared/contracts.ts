@@ -464,3 +464,21 @@ export interface ActionAuditDoc {
   proxy_strength: { date: string; people: number; tenure_band_auc: number | null; level_band_auc: number | null; note: string } | null;
   notes: string[];
 }
+
+/** The Scenario Lab (SPEC 15): hypothesis generation with synthetic personas; never a forecast or review evidence. */
+export interface LabIndex {
+  label: string | null;
+  proposals: { id: string; session: string; placeholder: boolean }[];
+}
+
+export interface LabDoc {
+  label: string;
+  proposal: string;
+  session: string;
+  placeholder: boolean;
+  provider: string;
+  personas: { persona_id: string; handle: string; tenure_band: string }[];
+  replicates: { run: string; card_variant: string; seed: number; rounds: number; calls: number; db_sha256: string }[];
+  analysis: Record<string, unknown>;
+  sanity: Record<string, unknown>;
+}

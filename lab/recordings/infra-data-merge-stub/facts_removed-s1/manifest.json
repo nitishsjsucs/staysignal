@@ -1,0 +1,152 @@
+{
+ "calls": 82,
+ "card_variant": "facts_removed",
+ "config": {
+  "ama_round": 5,
+  "faq_round": 3,
+  "name": "control",
+  "personas": 16,
+  "rounds": 4
+ },
+ "db_sha256": "3addbafca1ebb92bcb6ce30549b39a3f378e807f56e92da7941570b038a2a577",
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "personas": [
+  {
+   "cell_id": "C025",
+   "handle": "P01 \u00b7 Data Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P01",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C026",
+   "handle": "P02 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P02",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C027",
+   "handle": "P03 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P03",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C028",
+   "handle": "P04 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P04",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C029",
+   "handle": "P05 \u00b7 Data Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P05",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C030",
+   "handle": "P06 \u00b7 Data Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P06",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C042",
+   "handle": "P07 \u00b7 Infrastructure Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P07",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C043",
+   "handle": "P08 \u00b7 Infrastructure Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P08",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C044",
+   "handle": "P09 \u00b7 Infrastructure Engineering \u00b7 M1-M4 \u00b7 other",
+   "level_band": "manager",
+   "persona_id": "P09",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C045",
+   "handle": "P10 \u00b7 Infrastructure Engineering \u00b7 IC3-IC4 \u00b7 1-3y",
+   "level_band": "mid",
+   "persona_id": "P10",
+   "tenure_band": "1-3y",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C046",
+   "handle": "P11 \u00b7 Infrastructure Engineering \u00b7 IC3-IC4 \u00b7 5y+",
+   "level_band": "mid",
+   "persona_id": "P11",
+   "tenure_band": "5y+",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C047",
+   "handle": "P12 \u00b7 Infrastructure Engineering \u00b7 IC3-IC4 \u00b7 5y+",
+   "level_band": "mid",
+   "persona_id": "P12",
+   "tenure_band": "5y+",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C048",
+   "handle": "P13 \u00b7 Infrastructure Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P13",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C049",
+   "handle": "P14 \u00b7 Infrastructure Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P14",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C050",
+   "handle": "P15 \u00b7 Infrastructure Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P15",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C051",
+   "handle": "P16 \u00b7 Infrastructure Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P16",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  }
+ ],
+ "placeholder": true,
+ "proposal": "infra-data-merge",
+ "provider": "stub",
+ "recorded_at": null,
+ "sampling": {
+  "temperature": 0.7,
+  "top_p": 0.95
+ },
+ "seed": 1
+}

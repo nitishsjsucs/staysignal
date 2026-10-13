@@ -459,4 +459,22 @@ def recovery_profile(factor: int = RECOVERY_FACTOR) -> Profile:
 
 RECOVERY = recovery_profile()
 
+# The shock-world variant of C6 (SPEC 9.1): the same truth with team shocks per quarter. The marginal targets come from
+# one 200,200-person world (seed 1012), the tested world is a separate 40,040-person world (seed 1013).
+SHOCK_SIGMA_TEAM = 0.45
+TARGETS_FACTOR = 110  # 1,820 x 110 = 200,200
+
+
+def recovery_shock_profile(factor: int = RECOVERY_FACTOR, seed: int = 1013) -> Profile:
+    """The recovery world with mean-one lognormal team shocks (sigma 0.45): the model omits the shocks, so its slopes
+    estimate marginal effects, which C6's shock-world variant compares with simulated targets, not with the truth."""
+    return replace(
+        recovery_profile(factor),
+        name="recovery-shock",
+        seed=seed,
+        sigma_team=SHOCK_SIGMA_TEAM,
+        notes=("recovery profile with team shocks: the slopes are marginal, compared with simulated targets",),
+    )
+
+
 PROFILES: dict[str, Profile] = {"canonical": CANONICAL, "small": SMALL, "recovery": RECOVERY}

@@ -35,7 +35,9 @@ export interface Step {
 }
 
 export const LANDING_BUCKET = "staysignal-landing";
-export const WORKER_SECRETS = ["SS_HMAC_MASTER_KEY", "SS_ROLE_BINDINGS", "SS_AIG_TOKEN"] as const;
+// SS_RUNNER_TOKEN_ID and SS_MCP_TOKEN_ID are the service tokens' client IDs: Access sets a service token JWT's
+// common_name to its client ID, and the Worker binds svc:<client ID> to the runner and the MCP roles
+export const WORKER_SECRETS = ["SS_HMAC_MASTER_KEY", "SS_ROLE_BINDINGS", "SS_AIG_TOKEN", "SS_RUNNER_TOKEN_ID", "SS_MCP_TOKEN_ID"] as const;
 const APIS = ["iam.googleapis.com", "iamcredentials.googleapis.com", "cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com"];
 
 const has = (xs: string[] | null, x: string) => Boolean(xs?.includes(x));

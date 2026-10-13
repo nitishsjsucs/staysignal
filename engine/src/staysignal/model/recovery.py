@@ -139,14 +139,32 @@ def simulate(profile: Profile = RECOVERY) -> RecoveryData:
     return RecoveryData(X, Y, clusters, time.perf_counter() - t0)
 
 
-def check(data: RecoveryData) -> dict:
-    """The unpenalized fit, the cluster-robust covariance and the three checks, as a JSON-ready report."""
+def fit(data: RecoveryData) -> tuple[np.ndarray, np.ndarray, bool, float, float]:
+    """The unpenalized fit and its cluster-robust covariance: (theta, V, converged, grad_max, seconds)."""
     pk = packing()
     t0 = time.perf_counter()
     f = mnl.fit(data.X, data.Y, pk, lam=0.0, gtol=1e-8)
     V = mnl.cluster_sandwich(f.theta, data.X, data.Y, data.clusters, pk, lam=0.0)
-    fit_seconds = time.perf_counter() - t0
+    return f.theta, V, f.converged, f.grad_max, time.perf_counter() - t0
+
+
+def param_names() -> list[str]:
+    pk = packing()
+    return [f"{k}:{COLUMNS[j].name}" for k, m in zip(CAUSES, pk.masks, strict=True) for j in m]
+
+
+def check(data: RecoveryData, targets: dict | None = None) -> dict:
+    """The fit, the cluster-robust covariance and the three checks, as a JSON-ready report. Against the generator's
+    truth by default; with `targets` (from `marginal_targets`, the shock-world variant) against those estimates,
+    with their own covariance added to the fit's, since the targets are estimates too."""
+    pk = packing()
+    theta, V, converged, grad_max, fit_seconds = fit(data)
     truth = truth_vector(pk)
+    if targets is not None:
+        if targets["params"] != param_names():
+            raise ValueError("the cached targets were fitted with a different design; regenerate them")
+        truth = np.array(targets["theta"])
+        V = V + np.array(targets["cov"])
     se = np.sqrt(np.diag(V))
     params = []
     o = 0
@@ -156,24 +174,24 @@ def check(data: RecoveryData) -> dict:
             o += 1
     slopes = [q for q in params if not q["intercept"]]
     vol = [q["i"] for q in slopes if q["cause"] == "vol"]
-    d = f.theta[vol] - truth[vol]
+    d = theta[vol] - truth[vol]
     wald = float(d @ np.linalg.solve(V[np.ix_(vol, vol)], d))
     p_value = float(chi2.sf(wald, df=len(vol)))
     rows = []
     for q in slopes:
         i = q["i"]
-        inside = abs(f.theta[i] - truth[i]) <= Z95 * se[i]
+        inside = abs(theta[i] - truth[i]) <= Z95 * se[i]
         signed = abs(truth[i]) >= SIGN_SE * se[i]
         rows.append(
             {
                 "cause": q["cause"],
                 "column": q["column"],
                 "truth": float(truth[i]),
-                "estimate": round(float(f.theta[i]), 6),
+                "estimate": round(float(theta[i]), 6),
                 "se": round(float(se[i]), 6),
                 "inside_95": bool(inside),
                 "sign_checked": bool(signed),
-                "sign_ok": bool(not signed or np.sign(f.theta[i]) == np.sign(truth[i])),
+                "sign_ok": bool(not signed or np.sign(theta[i]) == np.sign(truth[i])),
             }
         )
     coverage = sum(r["inside_95"] for r in rows) / len(rows)
@@ -184,8 +202,8 @@ def check(data: RecoveryData) -> dict:
         "clusters": int(data.clusters.max()) + 1,
         "simulate_seconds": round(data.seconds, 1),
         "fit_seconds": round(fit_seconds, 1),
-        "converged": f.converged,
-        "grad_max": f.grad_max,
+        "converged": converged,
+        "grad_max": grad_max,
         "wald": {"statistic": round(wald, 4), "df": len(vol), "p_value": round(p_value, 6), "alpha": ALPHA},
         "coverage_95": {"inside": sum(r["inside_95"] for r in rows), "slopes": len(rows), "share": round(coverage, 4)},
         "signs": {"checked": len(signs_checked), "correct": sum(r["sign_ok"] for r in signs_checked)},
@@ -198,4 +216,32 @@ def check(data: RecoveryData) -> dict:
     }
 
 
-__all__ = ["COLUMNS", "RecoveryData", "check", "encode", "packing", "simulate", "truth_vector"]
+def marginal_targets(data: RecoveryData) -> dict:
+    """The shock-world targets (SPEC 9.1): the same unpenalized fit on a large world with team shocks, with its
+    cluster-robust covariance. Cached in results/ by `staysignal eval recovery-shock --targets`."""
+    theta, V, converged, grad_max, seconds = fit(data)
+    if not converged:
+        raise RuntimeError(f"the targets fit did not converge (max gradient {grad_max:.2e})")
+    return {
+        "params": param_names(),
+        "theta": [round(float(x), 10) for x in theta],
+        "cov": [[float(x) for x in row] for row in V],
+        "rows": int(data.X.shape[0]),
+        "clusters": int(data.clusters.max()) + 1,
+        "simulate_seconds": round(data.seconds, 1),
+        "fit_seconds": round(seconds, 1),
+    }
+
+
+__all__ = [
+    "COLUMNS",
+    "RecoveryData",
+    "check",
+    "encode",
+    "fit",
+    "marginal_targets",
+    "packing",
+    "param_names",
+    "simulate",
+    "truth_vector",
+]

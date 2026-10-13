@@ -15,7 +15,7 @@ import { workspace, workspaceStub } from "./agents/workspace-port";
 import { AuthError } from "./auth/access";
 import { mintDevToken } from "./auth/dev-login";
 import { agentInstanceName } from "./auth/hmac";
-import { authenticate, DEV_COOKIE } from "./auth/principal";
+import { authenticate, DEV_COOKIE, runnerId } from "./auth/principal";
 import { type AppConfig, isLocalHost, parseConfig } from "./config";
 import { sha256HexSync } from "./store/chain";
 import { warehouseFor } from "./warehouse/client";
@@ -371,6 +371,18 @@ export function buildApp() {
     const screens = Object.fromEntries(Object.entries(doc.screens).filter(([, s]) => s.kind === "proxy" || attributes));
     return c.json({ ...doc, screens, proxy_strength: attributes ? doc.proxy_strength : null, audience: attributes ? "auditor" : "lead" });
   });
+  // the Scenario Lab (SPEC 15): hypothesis generation with synthetic personas, recorded sessions only; it never feeds a
+  // forecast number or review evidence (ADR 0008)
+  app.get("/api/lab", async (c) => {
+    if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
+    const doc = await warehouseFor(c.env).labIndex();
+    return doc ? c.json(doc) : c.json(refuse("OUT_OF_SCOPE", "No Lab session has been recorded."));
+  });
+  app.get("/api/lab/:proposal", async (c) => {
+    if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
+    const doc = await warehouseFor(c.env).lab(c.req.param("proposal"));
+    return doc ? c.json(doc) : c.json({ error: "no recorded session for this proposal" }, 404);
+  });
   app.get("/api/audit/verify", async (c) => c.json(await (await workspace(c.env)).verifyAudit()));
 
   // ---------- routines and the demo arrival ----------
@@ -405,7 +417,7 @@ export function buildApp() {
     if (cfg.runnerToken && auth === `Bearer ${cfg.runnerToken}`) return next();
     try {
       const p = await authenticate(c.req.raw, cfg);
-      if (p.id === "svc:staysignal-runner") return next();
+      if (p.id === runnerId(cfg)) return next();
     } catch {
       // fall through
     }

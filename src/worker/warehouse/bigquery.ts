@@ -5,7 +5,7 @@
 // Every job carries maximumBytesBilled (100 MiB for the Worker) and the label app=staysignal. The service account key
 // is the SS_GCP_SA_KEY secret; tokens come from a signed JWT (RS256 through WebCrypto) and are cached until a minute
 // before expiry. Memory is not here: production memory lives in the WorkspaceAgent (warehouseFor wraps it).
-import type { ActionAuditDoc, CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, ResearchDoc, RunsIndex } from "../../shared/contracts";
+import type { ActionAuditDoc, CatalogRequest, CatalogResult, ChangesFixture, EvaluationFixture, ForecastFixture, HistoryFixture, LabDoc, LabIndex, MemoryCommit, MemoryFileDoc, MemoryFileInfo, ProfilesFixture, QualityFixture, ResearchDoc, RunsIndex } from "../../shared/contracts";
 import type { MemoryHit } from "../../shared/memory/search";
 import type { LineageFixture, WarehouseClient } from "../../shared/tools/registry";
 import catalog from "../generated/catalog.bigquery.json";
@@ -156,5 +156,14 @@ export class BigQueryWarehouse implements WarehouseClient {
   }
   async memorySearch(): Promise<MemoryHit[] | null> {
     return null;
+  }
+
+  async labIndex(): Promise<LabIndex | null> {
+    return this.doc<LabIndex>("lab/index.json");
+  }
+
+  async lab(proposal: string): Promise<LabDoc | null> {
+    if (!/^[a-z0-9-]{3,60}$/.test(proposal)) return null;
+    return this.doc<LabDoc>(`lab/${proposal}.json`);
   }
 }

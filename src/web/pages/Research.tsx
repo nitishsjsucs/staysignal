@@ -98,17 +98,18 @@ export function ResearchPage(_: { me: Me }) {
               <tr>
                 <th>Hypothesis</th>
                 <th>Verdict</th>
-                <th>Registered rule</th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(d.hypotheses).map(([id, h]) => (
                 <tr key={id}>
-                  <td>{HYPOTHESIS_TITLE[id] ?? id}</td>
+                  <td style={{ whiteSpace: "normal" }}>
+                    {HYPOTHESIS_TITLE[id] ?? id}
+                    <div className="card-sub">Registered rule: {h.rule}</div>
+                  </td>
                   <td>
                     <StatusPill status={h.verdict === "consistent" ? "good" : h.verdict === "counts against" ? "warning" : "info"}>{h.verdict}</StatusPill>
                   </td>
-                  <td style={{ whiteSpace: "normal" }}>{h.rule}</td>
                 </tr>
               ))}
             </tbody>
@@ -132,7 +133,7 @@ export function ResearchPage(_: { me: Me }) {
         </ChartCard>
       </div>
       <p className="card-sub" style={{ marginTop: 12 }}>
-        {d.design}. Results file: <span className="mono">{d.command}</span>, {d.date}. Synthetic worlds only.
+        Design: {d.design}. Results file: <span className="mono">{d.command}</span>, {d.date}. Synthetic worlds only.
       </p>
     </>
   );

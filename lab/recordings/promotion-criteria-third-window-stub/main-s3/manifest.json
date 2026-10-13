@@ -1,0 +1,152 @@
+{
+ "calls": 113,
+ "card_variant": "main",
+ "config": {
+  "ama_round": 5,
+  "faq_round": 3,
+  "name": "main",
+  "personas": 16,
+  "rounds": 8
+ },
+ "db_sha256": "11c467e8bea9d21ece529debc872d00daaad505eb3ab7c7c4abbdfcfaa9734da",
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "personas": [
+  {
+   "cell_id": "C010",
+   "handle": "P01 \u00b7 Account Executive \u00b7 IC3-IC4 \u00b7 <1y",
+   "level_band": "mid",
+   "persona_id": "P01",
+   "tenure_band": "<1y",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C020",
+   "handle": "P02 \u00b7 Customer Success \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P02",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C022",
+   "handle": "P03 \u00b7 Customer Success \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P03",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C075",
+   "handle": "P04 \u00b7 Product Management \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P04",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C088",
+   "handle": "P05 \u00b7 Sales Development \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P05",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C103",
+   "handle": "P06 \u00b7 Software Engineering \u00b7 IC1-IC2 \u00b7 <1y",
+   "level_band": "early",
+   "persona_id": "P06",
+   "tenure_band": "<1y",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C106",
+   "handle": "P07 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 1-3y",
+   "level_band": "mid",
+   "persona_id": "P07",
+   "tenure_band": "1-3y",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C108",
+   "handle": "P08 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 3-5y",
+   "level_band": "mid",
+   "persona_id": "P08",
+   "tenure_band": "3-5y",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C111",
+   "handle": "P09 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 5y+",
+   "level_band": "mid",
+   "persona_id": "P09",
+   "tenure_band": "5y+",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C112",
+   "handle": "P10 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 <1y",
+   "level_band": "mid",
+   "persona_id": "P10",
+   "tenure_band": "<1y",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C113",
+   "handle": "P11 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P11",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C121",
+   "handle": "P12 \u00b7 Technical Support \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P12",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C122",
+   "handle": "P13 \u00b7 Technical Support \u00b7 IC3-IC4 \u00b7 <1y",
+   "level_band": "mid",
+   "persona_id": "P13",
+   "tenure_band": "<1y",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C123",
+   "handle": "P14 \u00b7 Technical Support \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P14",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C124",
+   "handle": "P15 \u00b7 Technical Support \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P15",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  },
+  {
+   "cell_id": "C125",
+   "handle": "P16 \u00b7 Technical Support \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P16",
+   "tenure_band": "other",
+   "voice": "[stub] Practical, asks about timing."
+  }
+ ],
+ "placeholder": true,
+ "proposal": "promotion-criteria-third-window",
+ "provider": "stub",
+ "recorded_at": null,
+ "sampling": {
+  "temperature": 0.7,
+  "top_p": 0.95
+ },
+ "seed": 3
+}

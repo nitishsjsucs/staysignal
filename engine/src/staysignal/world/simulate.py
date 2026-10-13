@@ -203,6 +203,10 @@ class Simulator:
         self.shock_salt = ""  # the oracle's futures draw fresh shocks for quarters not yet realized
         self.rehire_months: dict[int, int] = {}
         self.next_month = 0
+        # the recovery test (SPEC 9.1, C6) records every person-month's hazard inputs, its outcome (0 stay,
+        # 1 voluntary, 2 involuntary, 3 retirement) and its team; None leaves the generator unchanged
+        self.recorder: list[tuple[hazards.HazardInputs, int, str]] | None = None
+        self._org_rate: dict[str, float] = {}  # per step: the organization's 180-day rate, the same for all members
         s = profile.seed
         self.r_org = stream(s, "org")
         self.r_people = stream(s, "people")
@@ -495,10 +499,12 @@ class Simulator:
         cnt = sum(1 for d in team.vol_exits if lo <= d < c)
         past = self.headcount_snap.get(max(0, m - 6), {})
         hc = past.get(person.team, self.month_hc.get(person.team, 0))
-        org_past = self.org_snap.get(max(0, m - 6), {})
-        org_hc = max(1, org_past.get(team.org, 1))
-        org_cnt = sum(1 for d in self.org_vol_exits[team.org] if lo <= d < c)
-        org_rate = org_cnt / org_hc
+        org_rate = self._org_rate.get(team.org)
+        if org_rate is None:
+            org_past = self.org_snap.get(max(0, m - 6), {})
+            org_hc = max(1, org_past.get(team.org, 1))
+            org_cnt = sum(1 for d in self.org_vol_exits[team.org] if lo <= d < c)
+            org_rate = self._org_rate[team.org] = org_cnt / org_hc
         return (cnt + 10.0 * org_rate) / (hc + 10.0)
 
     def team_headcount(self, tid: str) -> int:
@@ -567,7 +573,9 @@ class Simulator:
             self.org_snap[m][self.teams[person.team].org] += 1
         self.month_hc = dict(self.headcount_snap[m])
         start_active = self.active_people()
-        # 1. hazards from the state at the start of the month
+        # 1. hazards from the state at the start of the month (exits are applied in step 4, so an organization's
+        # 180-day rate is fixed for the whole loop and computed once)
+        self._org_rate = {}
         exits: list[tuple[Person, date, str, str]] = []
         for person in start_active:
             x = self.hazard_inputs(person, m, c)
@@ -577,13 +585,19 @@ class Simulator:
             u = self.r_hazard.uniform()
             day = 1 + self.r_days.below(days_in_month(c))
             end = c + timedelta(days=day)
+            outcome = 0
             if u < pv:
                 exits.append((person, end, "voluntary", "VOL_RESIGN"))
+                outcome = 1
             elif u < pv + pi:
                 reason = "INVOL_POSITION" if self.r_hazard.uniform() < 0.4 else "INVOL_PERFORMANCE"
                 exits.append((person, end, "involuntary", reason))
+                outcome = 2
             elif u < pv + pi + pr:
                 exits.append((person, end, "retirement", "RETIRE"))
+                outcome = 3
+            if self.recorder is not None:
+                self.recorder.append((x, outcome, person.team))
         exiting = {e[0].en for e in exits}
         # fixed-term contract ends in this month
         for person in start_active:

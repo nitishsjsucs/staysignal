@@ -299,6 +299,32 @@ def cmd_eval_export(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_eval_recovery(args: argparse.Namespace) -> int:
+    """C6: the recovery profile's fit against the generator's truth, recorded in results/ (about a minute)."""
+    import datetime as dt
+
+    from staysignal.model import recovery
+    from staysignal.world.spec import RECOVERY
+
+    repo, _ = _repo_var()
+    report = recovery.check(recovery.simulate())
+    doc = {
+        "kind": "recovery",
+        "command": "uv run --project engine staysignal eval recovery",
+        "date": dt.date.today().isoformat(),
+        "label": "synthetic",
+        "profile": RECOVERY.name,
+        "seed": RECOVERY.seed,
+        "baseline_headcount": RECOVERY.baseline_headcount,
+        "months": RECOVERY.months,
+        **report,
+    }
+    out = repo / "results" / f"recovery-{doc['date']}.json"
+    out.write_text(json.dumps(doc, indent=1) + "\n")
+    print(json.dumps({k: v for k, v in doc.items() if k != "slopes"}, indent=2))
+    return 0 if all(report["passed"].values()) else 1
+
+
 def cmd_eval_oracle_coverage(args: argparse.Namespace) -> int:
     import datetime as dt
 
@@ -442,6 +468,8 @@ def build_parser() -> argparse.ArgumentParser:
     ef.set_defaults(func=cmd_eval_effects)
     ex = esub.add_parser("export", help="the Trust page's data from the latest recorded results")
     ex.set_defaults(func=cmd_eval_export)
+    rc = esub.add_parser("recovery", help="C6: the fit on the recovery world against the generator's truth")
+    rc.set_defaults(func=cmd_eval_recovery)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")
     oc.add_argument("--profile", default="canonical", choices=["canonical", "small"])
     oc.add_argument("--futures", type=int, default=2000)

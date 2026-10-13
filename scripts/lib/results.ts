@@ -136,8 +136,25 @@ export interface ActionAuditReport {
   proxy_strength: { tenure_band_auc: number | null; level_band_auc: number | null } | null;
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit"];
+export interface RecoveryReport {
+  kind: "recovery";
+  command: string;
+  date: string;
+  profile: string;
+  seed: number;
+  baseline_headcount: number;
+  months: number;
+  rows: number;
+  events: { voluntary: number; involuntary: number; retirement: number };
+  clusters: number;
+  wald: { statistic: number; df: number; p_value: number; alpha: number };
+  coverage_95: { inside: number; slopes: number; share: number };
+  signs: { checked: number; correct: number };
+  passed: { wald: boolean; coverage: boolean; signs: boolean };
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -277,12 +294,27 @@ export function renderActionAudit(file: string, r: ActionAuditReport): string {
   return lines.join("\n");
 }
 
+/** C6: does the estimator recover a correctly specified truth? */
+export function renderRecovery(file: string, r: RecoveryReport): string {
+  const n = (v: number) => v.toLocaleString("en-US");
+  const ok = (b: boolean) => (b ? "passed" : "failed");
+  return [
+    `**Ground-truth recovery (C6)** (\`${r.command}\`, ${r.date}, [${file}](${file})). Synthetic world (\`${r.profile}\`, seed ${r.seed}): ${n(r.baseline_headcount)} employees at the start, ${r.months} months, with the latent propensity, the interaction, drift and shocks switched off, so the generator's hazards are exactly a multinomial logit. An unpenalized fit of the generator's own encodings on ${n(r.rows)} person-months (${n(r.events.voluntary)} voluntary, ${n(r.events.involuntary)} involuntary and ${n(r.events.retirement)} retirement exits), with standard errors clustered by ${n(r.clusters)} teams. ${SYNTHETIC}`,
+    "",
+    "| Check | Result | Rule |",
+    "|---|---|---|",
+    `| Joint Wald test of the ${r.wald.df} voluntary slopes against the truth | p = ${r.wald.p_value.toFixed(3)} (${ok(r.passed.wald)}) | p of at least ${r.wald.alpha} |`,
+    `| Slopes inside their 95% intervals | ${r.coverage_95.inside} of ${r.coverage_95.slopes}, ${pct(r.coverage_95.share)} (${ok(r.passed.coverage)}) | at least 85% |`,
+    `| Correct sign where the truth is at least 3 standard errors from zero | ${r.signs.correct} of ${r.signs.checked} (${ok(r.passed.signs)}) | all |`,
+  ].join("\n");
+}
+
 export function renderResults(reports: { file: string; report: Report }[]): string {
   if (reports.length === 0) return "No recorded results yet.";
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

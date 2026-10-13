@@ -6,7 +6,7 @@ profile is a scaled copy for tests and CI.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date
 
 # Job families: code, name. Exactly 17 (SPEC 6.2).
@@ -410,4 +410,53 @@ SMALL = Profile(
     ),
 )
 
-PROFILES: dict[str, Profile] = {"canonical": CANONICAL, "small": SMALL}
+RECOVERY_FACTOR = 22  # 1,820 x 22 = 40,040 employees at the start, about 40,000 at a time (SPEC 6.7)
+
+
+def scaled(profile: Profile, factor: int) -> Profile:
+    """The same company `factor` times larger: every organization, group (by team count), location, hiring and
+    fixed-term count multiplied; team sizes, cycles and reorganizations unchanged."""
+    orgs = tuple(
+        OrgSpec(
+            o.name,
+            o.code,
+            o.headcount * factor,
+            tuple(GroupSpec(g.name, g.teams * factor, g.families, g.stems) for g in o.groups),
+        )
+        for o in profile.orgs
+    )
+    return replace(
+        profile,
+        orgs=orgs,
+        locations=tuple(replace(loc, baseline=loc.baseline * factor) for loc in profile.locations),
+        hires_per_month=profile.hires_per_month * factor,
+        rehires=profile.rehires * factor,
+        baseline_fixed_term=profile.baseline_fixed_term * factor,
+    )
+
+
+def recovery_profile(factor: int = RECOVERY_FACTOR) -> Profile:
+    """Ground-truth recovery (SPEC 6.7, 9.1, C6): a correctly specified world. No latent propensity, no interaction,
+    the promotion effect as an exact step at 24 months, no drift, no shocks, contagion on, no planted problems."""
+    return replace(
+        scaled(CANONICAL, factor),
+        name="recovery",
+        seed=1011,
+        latent_sd=0.0,
+        interaction=False,
+        promo_effect="step",
+        drift=False,
+        sigma_team=0.0,
+        sigma_org=0.0,
+        contagion=True,
+        planted=None,
+        exact_requisitions=None,
+        exact_declined_offers=None,
+        min_engineering_fixed_term_at_end=0,
+        notes=("ground-truth recovery profile: the model is correctly specified on this world",),
+    )
+
+
+RECOVERY = recovery_profile()
+
+PROFILES: dict[str, Profile] = {"canonical": CANONICAL, "small": SMALL, "recovery": RECOVERY}

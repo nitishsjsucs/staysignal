@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { loadReports } from "../../scripts/results-to-readme.ts";
-import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, renderActionAudit, renderBacktest, renderModelComparison, renderOracleCoverage, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
+import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, type RecoveryReport, renderActionAudit, renderBacktest, renderModelComparison, renderOracleCoverage, renderRecovery, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
 
 describe("README Results generation", () => {
   it("replaces only the marked section", () => {
@@ -17,6 +17,31 @@ describe("README Results generation", () => {
   it("keeps the committed README in sync with the committed results", () => {
     const readme = readFileSync("README.md", "utf8");
     expect(replaceSection(readme, renderResults(loadReports(process.cwd())))).toBe(readme);
+  });
+
+  it("renders ground-truth recovery with the three checks and their rules", () => {
+    const r: RecoveryReport = {
+      kind: "recovery",
+      command: "uv run --project engine staysignal eval recovery",
+      date: "2026-10-12",
+      profile: "recovery",
+      seed: 1011,
+      baseline_headcount: 40040,
+      months: 42,
+      rows: 1856314,
+      events: { voluntary: 15080, involuntary: 3754, retirement: 1110 },
+      clusters: 2400,
+      wald: { statistic: 20.5, df: 29, p_value: 0.876, alpha: 0.01 },
+      coverage_95: { inside: 33, slopes: 34, share: 0.9706 },
+      signs: { checked: 28, correct: 28 },
+      passed: { wald: true, coverage: true, signs: false },
+    };
+    const md = renderRecovery("results/recovery.json", r);
+    expect(md).toContain("40,040 employees at the start, 42 months");
+    expect(md).toContain("| Joint Wald test of the 29 voluntary slopes against the truth | p = 0.876 (passed) | p of at least 0.01 |");
+    expect(md).toContain("| Slopes inside their 95% intervals | 33 of 34, 97.1% (passed) | at least 85% |");
+    expect(md).toContain("28 of 28 (failed)");
+    expect(md).toContain("Synthetic world");
   });
 
   it("renders oracle coverage with its command, date, target and per-cause table", () => {

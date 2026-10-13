@@ -18,7 +18,7 @@ from staysignal.runner.jobs import EngineState
 from staysignal.service import memory_api, warehouse_shim
 
 
-def create_app(st: EngineState) -> FastAPI:
+def create_app(st: EngineState, writer_token: str | None = None) -> FastAPI:
     app = FastAPI(title="StaySignal engine (synthetic)", docs_url=None, redoc_url=None, openapi_url=None)
 
     def doc(*parts: str) -> JSONResponse:
@@ -67,7 +67,7 @@ def create_app(st: EngineState) -> FastAPI:
     def lineage() -> JSONResponse:
         return doc("lineage.json")
 
-    memory_api.register(app, st.memory_dir or st.db_path.parent / "memory")
+    memory_api.register(app, st.memory_dir or st.db_path.parent / "memory", writer_token)
 
     @app.post("/catalog/{key}")
     def catalog(key: str, body: dict = Body(default_factory=dict)) -> JSONResponse:  # noqa: B008

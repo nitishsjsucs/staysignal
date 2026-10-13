@@ -307,7 +307,7 @@ interface RoutineResp {
   steps: { step: string; outcome: string; at: string; [k: string]: unknown }[];
 }
 
-const STEP_ORDER = ["ingest", "checks", "features_and_score", "gate", "investigate", "draft", "publish_or_approve", "repair", "what_changed", "replay"];
+const STEP_ORDER = ["ingest", "checks", "features_and_score", "gate", "investigate", "draft", "publish_or_approve", "repair", "what_changed", "replay", "memory_note"];
 const STEP_LABEL: Record<string, string> = { ingest: "Ingest", checks: "Checks", features_and_score: "Score", gate: "Gate", investigate: "Investigate", draft: "Draft fix", publish_or_approve: "Approve or publish", repair: "Repair", what_changed: "Compare", replay: "Replay", memory_note: "Memory" };
 
 export function RoutineSteps({ routineId }: { routineId: string }) {

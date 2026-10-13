@@ -342,6 +342,17 @@ export interface MemoryFileInfo {
   date: string;
 }
 
+/** The agent's memory write (SPEC 14.10): cohort-level bullets citing result IDs, runs or action sequence numbers. */
+export interface MemoryNoteInput {
+  kind: "timeline" | "investigation" | "decision";
+  title?: string;
+  bullets: string[];
+  links?: string[];
+  aliases?: string[];
+}
+
+export type MemoryWriteOutcome = { written: true; id: string | null; commit: string | null; files: string[] } | { written: false; reason: string };
+
 export interface MemoryCommit {
   commit: string;
   date: string;

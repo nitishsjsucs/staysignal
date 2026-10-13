@@ -291,19 +291,28 @@ export function buildApp() {
     const body = (await c.req.json().catch(() => ({}))) as { reason?: string };
     const ws = await workspace(c.env);
     const out = await ws.approve(c.var.principal, c.req.param("id"), body.reason ?? null);
-    if (out.ok) await ws.wakeApproval(c.req.param("id"));
+    if (out.ok) {
+      await ws.wakeApproval(c.req.param("id"));
+      await ws.rememberAction(out.value.action_seq, c.var.principal.role);
+    }
     return c.json(out);
   });
   app.post("/api/approvals/:id/reject", async (c) => {
     const body = (await c.req.json().catch(() => ({}))) as { reason?: string };
     const ws = await workspace(c.env);
     const out = await ws.reject(c.var.principal, c.req.param("id"), body.reason ?? null);
-    if (out.ok) await ws.wakeApproval(c.req.param("id"));
+    if (out.ok) {
+      await ws.wakeApproval(c.req.param("id"));
+      await ws.rememberAction(out.value.action_seq, c.var.principal.role);
+    }
     return c.json(out);
   });
   app.post("/api/actions/:seq/rollback", async (c) => {
     const body = (await c.req.json().catch(() => ({}))) as { reason?: string };
-    return c.json(await (await workspace(c.env)).rollback(c.var.principal, Number(c.req.param("seq")), body.reason ?? ""));
+    const ws = await workspace(c.env);
+    const out = await ws.rollback(c.var.principal, Number(c.req.param("seq")), body.reason ?? "");
+    if (out.ok) await ws.rememberAction(out.value.action_seq, c.var.principal.role);
+    return c.json(out);
   });
   app.get("/api/audit", async (c) => c.json({ label: "synthetic", actions: await (await workspace(c.env)).auditLog(Number(c.req.query("since") ?? 0)), approvals: await (await workspace(c.env)).approvalAuditLog() }));
   // the action audit (SPEC 17.7): proxy screens (tenure band, location) for leads and the auditor, the audit-only age

@@ -63,5 +63,13 @@ describe("source arrival routine", () => {
     expect((await json<{ ok: boolean }>("/api/audit/verify", { as: P.auditor })).ok).toBe(true);
     const forecast = await json<{ data: { run_id: string } }>("/api/forecast?cohort=Engineering&horizon=3", { as: P.analyst });
     expect(forecast.data.run_id).toBe("R-2026-10-01#3");
+    // the routine ends by recording itself in memory; fixtures mode has no writable memory, so it says why it skipped
+    type Routine = { status: string; steps: { step: string; outcome: string; reason?: string }[] };
+    let routine: Routine | undefined;
+    await runJobs(async () => {
+      routine = ((await (await ws()).listRoutines()) as unknown as Routine[])[0];
+      return routine?.status === "done";
+    });
+    expect(routine!.steps.at(-1)).toMatchObject({ step: "memory_note", outcome: "skipped", reason: "fixtures mode serves the committed memory read-only" });
   });
 });

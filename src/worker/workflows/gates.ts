@@ -4,7 +4,7 @@
 // throws, so it is caught and recorded in a following step. waitForApproval and approveWorkflow are not used.
 import type { AgentWorkflowStep } from "agents/workflows";
 import { NonRetryableError } from "cloudflare:workflows";
-import type { RunBrief } from "../../shared/contracts";
+import type { MemoryNoteInput, MemoryWriteOutcome, RunBrief } from "../../shared/contracts";
 import type { JobSpec } from "../../shared/routines/definitions";
 
 /** The WorkspaceAgent methods a workflow calls over RPC (every call is I/O; the CPU stays in the agent). */
@@ -23,6 +23,7 @@ export interface WorkspaceRpc {
   publishedRunId(): Promise<string | null>;
   publishRun(runId: string, actor: string, actorKind: "human" | "routine", policy: string, routineId: string | null): Promise<number>;
   recordReplay(runId: string, r: { replay_hash: string; equal: boolean; duration_ms: number; detail: unknown }): Promise<void>;
+  memoryNote(note: MemoryNoteInput): Promise<MemoryWriteOutcome>;
 }
 
 export interface GateCtx {

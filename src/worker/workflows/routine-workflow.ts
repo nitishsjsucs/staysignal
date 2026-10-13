@@ -1,11 +1,12 @@
 // RoutineWorkflow `source_arrival_refresh` (SPEC 4.4, 14.7): ingest, checks, features and score, gate, investigate,
 // draft, then wait for the mapping approval and repair: activate the mapping, rescore, re-check, compare with the
-// published run, publish under publish.auto@1 when the change is within tolerance, and replay in a fresh warehouse.
+// published run, publish under publish.auto@1 when the change is within tolerance, replay in a fresh warehouse, and
+// commit what happened to the agent's memory (an investigation note for a held run, a timeline bullet otherwise).
 // Every step does I/O only (10 ms of CPU per step on Workers Free): it calls the WorkspaceAgent and waits on gates
 // (ADR 0016) while the runner does the numeric work. Steps from an older demo epoch become no-ops.
 import { AgentWorkflow, type AgentWorkflowEvent, type AgentWorkflowStep } from "agents/workflows";
 import { NonRetryableError } from "cloudflare:workflows";
-import type { RunBrief } from "../../shared/contracts";
+import type { MemoryNoteInput, RunBrief } from "../../shared/contracts";
 import { DEMO, jobs, TOLERANCE } from "../../shared/routines/definitions";
 import type { WorkspaceAgent } from "../agents/workspace-agent";
 import { awaitApproval, awaitJob, type GateCtx, stepJson, type WorkspaceRpc } from "./gates";
@@ -49,6 +50,32 @@ interface ReplayResult {
   detail: unknown;
 }
 
+interface Published {
+  run_id: string;
+  published: boolean;
+  seq: number | null;
+  replay_equal: boolean | null;
+}
+
+/** What the routine commits to memory (SPEC 14.10): cohort-level bullets citing the run, incident, proposal and the
+ * action sequence number of the publish; never a person. A held run gets an investigation note. */
+export function routineMemoryNote(r: { routineId: string; failing: string[]; incidentId: string | null; lineage: string[]; proposalId: string | null; decision: string | null; out: Published | null }): MemoryNoteInput {
+  const publishedLine = (o: Published) =>
+    o.published
+      ? `Published run ${o.run_id} under ${TOLERANCE.policy} (action ${o.seq}); replay ${o.replay_equal ? "matched the stored business-result hash" : "did NOT match the stored hash"}.`
+      : `Run ${o.run_id} changed beyond tolerance and waits for a publish approval.`;
+  if (!r.incidentId) {
+    return { kind: "timeline", bullets: [`Routine ${r.routineId}: checks passed. ${r.out ? publishedLine(r.out) : ""}`.trim()] };
+  }
+  const bullets = [
+    `Routine ${r.routineId} held its run: check${r.failing.length > 1 ? "s" : ""} ${r.failing.join(", ")} failed (incident ${r.incidentId}).`,
+    `Lineage traced the failure along ${r.lineage.join(" > ")}.`,
+  ];
+  if (r.proposalId) bullets.push(`Drafted mapping proposal ${r.proposalId}; decision: ${r.decision ?? "pending"}.`);
+  if (r.out) bullets.push(`After the repair: ${publishedLine(r.out)}`);
+  return { kind: "investigation", title: `Run held by check${r.failing.length > 1 ? "s" : ""} ${r.failing.join(", ")}`, bullets };
+}
+
 export function withinTolerance(c: ChangeSummary): { ok: boolean; company: number; worstOrg: number } {
   const rel = (from: number, to: number) => (from > 0 ? Math.abs(to - from) / from : 0);
   const company = rel(c.company.from, c.company.to);
@@ -66,6 +93,11 @@ export class RoutineWorkflow extends AgentWorkflow<WorkspaceAgent, RoutineParams
       if (!ok) throw new NonRetryableError(`demo epoch changed; routine ${p.routine_id} stops`);
     };
     const note = (name: string, outcome: string, detail: Record<string, unknown> = {}, status?: string) => stepJson(step, `${name}.log`, async () => ws.routineStep(p.routine_id, name, outcome, detail, status));
+    const remember = async (m: MemoryNoteInput, status: string) => {
+      const out = await stepJson(step, "memory.write", async () => ws.memoryNote(m));
+      if (out.written) await note("memory_note", out.commit ? "written" : "unchanged", { note_id: out.id, commit: out.commit, files: out.files }, status);
+      else await note("memory_note", "skipped", { reason: out.reason }, status);
+    };
 
     await live("ingest");
     const landed = await awaitJob(ctx, "ingest", jobs.ingest(p.source, p.period));
@@ -84,7 +116,8 @@ export class RoutineWorkflow extends AgentWorkflow<WorkspaceAgent, RoutineParams
 
     if (checks.failing.length === 0) {
       await note("gate", "passed", { run_id: runId });
-      await this.compareAndPublish(ctx, runId, note);
+      const out = await this.compareAndPublish(ctx, runId, note);
+      await remember(routineMemoryNote({ routineId: p.routine_id, failing: [], incidentId: null, lineage: [], proposalId: null, decision: null, out }), out.published ? "done" : "waiting_for_approval");
       return { routine_id: p.routine_id, held: false };
     }
 
@@ -103,8 +136,10 @@ export class RoutineWorkflow extends AgentWorkflow<WorkspaceAgent, RoutineParams
     await note("draft", "mapping proposed", { proposal_id: proposal.proposal_id }, "waiting_for_approval");
 
     const decision = await awaitApproval(ctx, "publish_or_approve", "mapping", proposal.proposal_id);
+    const held = { routineId: p.routine_id, failing: checks.failing, incidentId, lineage: probe.path, proposalId: proposal.proposal_id, decision };
     if (decision !== "approved") {
       await note("publish_or_approve", decision, { proposal_id: proposal.proposal_id }, decision === "expired" ? "expired" : "closed");
+      await remember(routineMemoryNote({ ...held, out: null }), decision === "expired" ? "expired" : "closed");
       return { routine_id: p.routine_id, held: true, decision };
     }
     await note("publish_or_approve", "mapping approved", { proposal_id: proposal.proposal_id }, "running");
@@ -121,26 +156,26 @@ export class RoutineWorkflow extends AgentWorkflow<WorkspaceAgent, RoutineParams
       return { routine_id: p.routine_id, held: true };
     }
     await stepJson(step, "incident.resolve", async () => ws.updateIncident(incidentId, { resolved_by_run: repairedId }));
-    await this.compareAndPublish(ctx, repairedId, note);
-    await note("memory_note", "skipped", { note: "git memory arrives in M6" }, "done");
+    const out = await this.compareAndPublish(ctx, repairedId, note);
+    await remember(routineMemoryNote({ ...held, out }), out.published ? "done" : "waiting_for_approval");
     return { routine_id: p.routine_id, held: false, published: repairedId };
   }
 
-  private async compareAndPublish(ctx: GateCtx, runId: string, note: (n: string, o: string, d?: Record<string, unknown>, s?: string) => Promise<void>): Promise<void> {
+  private async compareAndPublish(ctx: GateCtx, runId: string, note: (n: string, o: string, d?: Record<string, unknown>, s?: string) => Promise<void>): Promise<Published> {
     const { step, ws } = ctx;
     const published = await stepJson(step, "published.read", async () => ws.publishedRunId());
     const change = (await awaitJob(ctx, "what_changed", jobs.whatChanged(published ?? DEMO.previousPublished, runId))) as ChangeSummary;
     const tol = withinTolerance(change);
     await note("what_changed", tol.ok ? "within tolerance" : "beyond tolerance", { company_change: Math.round(tol.company * 1000) / 1000, worst_org_change: Math.round(tol.worstOrg * 1000) / 1000 });
-    if (tol.ok) {
-      await stepJson(step, "publish", async () => ws.publishRun(runId, "routine", "routine", TOLERANCE.policy, ctx.routineId));
-      await note("publish_or_approve", "published", { run_id: runId, policy: TOLERANCE.policy });
-    } else {
+    if (!tol.ok) {
       await note("publish_or_approve", "waiting for publish approval", { run_id: runId }, "waiting_for_approval");
-      return;
+      return { run_id: runId, published: false, seq: null, replay_equal: null };
     }
+    const seq = await stepJson(step, "publish", async () => ws.publishRun(runId, "routine", "routine", TOLERANCE.policy, ctx.routineId));
+    await note("publish_or_approve", "published", { run_id: runId, policy: TOLERANCE.policy });
     const replay = (await awaitJob(ctx, "replay", jobs.replay(runId))) as ReplayResult;
     await stepJson(step, "replay.record", async () => ws.recordReplay(runId, replay));
     await note("replay", replay.equal ? "identical business result" : "MISMATCH", { run_id: runId, replay_hash: replay.replay_hash });
+    return { run_id: runId, published: true, seq, replay_equal: replay.equal };
   }
 }

@@ -4,9 +4,9 @@
 // in the same synchronous block. The Worker calls these methods over Durable Object RPC after authenticating; browser
 // connections call the @callable wrappers, which read the principal the Worker verified at connect time.
 import { Agent, type Connection, type ConnectionContext, callable, getCurrentAgent } from "agents";
-import type { RunBrief } from "../../shared/contracts";
+import type { MemoryNoteInput, MemoryWriteOutcome, RunBrief } from "../../shared/contracts";
 import { syntheticNow } from "../../shared/clock";
-import { isReadOnly, type Principal } from "../../shared/policy/roles";
+import { isReadOnly, type Principal, ROLES, type Role } from "../../shared/policy/roles";
 import { hasScope } from "../../shared/policy/roles";
 import { DEMO, jobKeyInput, type JobSpec, runIdFor } from "../../shared/routines/definitions";
 import type { ReviewDraft, ToolResult } from "../../shared/tools/registry";
@@ -17,6 +17,8 @@ import { GENESIS_HASH, WORKSPACE_DDL } from "../store/schema.sql";
 import { parseConfig } from "../config";
 import { warehouseFor } from "../warehouse/client";
 import { FixturesWarehouse } from "../warehouse/fixtures";
+import { decisionMemoryNote } from "../memory/notes";
+import { writeMemoryNote } from "../memory/writer";
 
 export interface RunBriefState {
   runId: string;
@@ -340,6 +342,18 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     this.refreshState();
   }
 
+  /** The agent's memory write (SPEC 14.10), committed at the synthetic time; never throws (see memory/writer.ts). */
+  async memoryNote(note: MemoryNoteInput): Promise<MemoryWriteOutcome> {
+    return writeMemoryNote(this.env, note, this.now());
+  }
+
+  /** Records a human decision or rollback in memory after it is written (see memory/notes.ts). */
+  async rememberAction(seq: number, role: Role): Promise<MemoryWriteOutcome> {
+    const a = this.sql<ActionRow>`SELECT * FROM action_log WHERE seq = ${seq}`[0];
+    const note = a ? decisionMemoryNote({ seq: a.seq, kind: a.kind, actor_kind: a.actor_kind, payload: JSON.parse(a.payload_json) as Record<string, unknown>, reverses_seq: a.reverses_seq }, ROLES[role]?.label ?? role) : null;
+    return note ? this.memoryNote(note) : { written: false, reason: "nothing to record for this action" };
+  }
+
   listReplays(runId: string): Record<string, unknown>[] {
     return this.sql<{ replay_hash: string; equal: number; duration_ms: number; detail_json: string; created_at: string }>`SELECT replay_hash, equal, duration_ms, detail_json, created_at FROM replays WHERE run_id = ${runId} ORDER BY created_at`.map((r) => ({
       run_id: runId,
@@ -446,7 +460,7 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     }
   }
 
-  reject(p: Principal, subjectId: string, reason: string | null): ActionOutcome<{ subject_id: string }> {
+  reject(p: Principal, subjectId: string, reason: string | null): ActionOutcome<{ subject_id: string; action_seq: number }> {
     const a = this.getApproval(subjectId);
     if (!a) return { ok: false, code: "NOT_FOUND", message: "No such subject.", auditHead: this.state.auditHead };
     const refusal = approvalRefusal(p, a, this.currentSubjectHash(a));
@@ -454,9 +468,9 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     this.appendApprovalAudit({ subject_kind: a.subject_kind, subject_id: subjectId, proposer: a.proposer, decision: "rejected", refusal_code: null, decided_by: p.id, decided_role: p.role, reason, workflow_instance_id: a.workflow_instance_id ?? null });
     this.sql`UPDATE approvals SET status = 'rejected', decided_at = ${this.now()} WHERE subject_id = ${subjectId}`;
     if (a.subject_kind === "review") this.sql`UPDATE reviews SET state = 'rejected' WHERE review_id = ${subjectId}`;
-    this.appendAction({ kind: `${a.subject_kind}.reject`, actor: p.id, actor_kind: "human", payload: { subject_id: subjectId }, reason, reversible: "none" });
+    const seq = this.appendAction({ kind: `${a.subject_kind}.reject`, actor: p.id, actor_kind: "human", payload: { subject_id: subjectId }, reason, reversible: "none" });
     this.refreshState();
-    return { ok: true, value: { subject_id: subjectId }, auditHead: this.state.auditHead };
+    return { ok: true, value: { subject_id: subjectId, action_seq: seq }, auditHead: this.state.auditHead };
   }
 
   private refuseApproval(p: Principal, a: PendingApproval, code: ApprovalRefusalCode, reason: string | null): ActionOutcome<never> {
@@ -688,21 +702,32 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
 
   @callable()
   async approveCallable(subjectId: string, reason: string | null) {
-    const out = this.approve(this.callerPrincipal(), subjectId, reason);
-    if (out.ok) await this.wakeApproval(subjectId);
+    const p = this.callerPrincipal();
+    const out = this.approve(p, subjectId, reason);
+    if (out.ok) {
+      await this.wakeApproval(subjectId);
+      await this.rememberAction(out.value.action_seq, p.role);
+    }
     return out;
   }
 
   @callable()
   async rejectCallable(subjectId: string, reason: string | null) {
-    const out = this.reject(this.callerPrincipal(), subjectId, reason);
-    if (out.ok) await this.wakeApproval(subjectId);
+    const p = this.callerPrincipal();
+    const out = this.reject(p, subjectId, reason);
+    if (out.ok) {
+      await this.wakeApproval(subjectId);
+      await this.rememberAction(out.value.action_seq, p.role);
+    }
     return out;
   }
 
   @callable()
   async rollbackCallable(seq: number, reason: string) {
-    return this.rollback(this.callerPrincipal(), seq, reason);
+    const p = this.callerPrincipal();
+    const out = this.rollback(p, seq, reason);
+    if (out.ok) await this.rememberAction(out.value.action_seq, p.role);
+    return out;
   }
 }
 

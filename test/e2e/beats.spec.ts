@@ -88,6 +88,8 @@ test("beats 1 to 5 click through", async ({ page }) => {
     await expect(repaired).toContainText("Repaired: R-2026-10-01#3 replaced the held R-2026-10-01#2");
     await expect(page.getByTestId("replay")).toContainText("Identical business-result hash", { timeout: 60_000 });
     await expect(page.getByTestId("replay")).toContainText("Forced to payroll@1, the hash differs");
+    // the routine records itself in the agent's memory (engine mode); a fixtures deployment says why it skipped
+    await expect(page.getByTestId("routine-steps")).toContainText(process.env.SS_E2E_DATA_MODE === "engine" ? "written" : "skipped", { timeout: 30_000 });
   });
 
   await test.step("beat 5: an approved review, a refused self-approval and a rollback", async () => {

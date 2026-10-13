@@ -36,5 +36,13 @@ describe("inline job completion (fixtures deployment)", () => {
     expect(jobs.every((j) => j.status === "done" && j.attempt === 1)).toBe(true);
     // nothing is left to lease
     expect(((await (await ws()).leaseJob("nobody")) as unknown as { job: unknown }).job).toBeNull();
+    // the routine ends by recording itself in memory; fixtures mode has no writable memory, so it says why it skipped
+    type Routine = { status: string; steps: { step: string; outcome: string; reason?: string }[] };
+    let routine: Routine | undefined;
+    await until(async () => {
+      routine = ((await (await ws()).listRoutines()) as unknown as Routine[])[0];
+      return routine?.status === "done";
+    });
+    expect(routine!.steps.at(-1)).toMatchObject({ step: "memory_note", outcome: "skipped", reason: "fixtures mode serves the committed memory read-only" });
   });
 });

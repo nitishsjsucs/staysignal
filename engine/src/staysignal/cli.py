@@ -247,14 +247,14 @@ def cmd_serve(args: argparse.Namespace) -> int:
         print("no published state: run `staysignal engine prepare` first")
         return 1
     stop = threading.Event()
+    token = runner_token(repo)
     if args.worker:
-        token = runner_token(repo)
         if not token:
             print("SS_RUNNER_TOKEN missing (npm run dev:keys)")
             return 1
         threading.Thread(target=run_forever, args=(st, args.worker, token, stop), daemon=True).start()
     try:
-        uvicorn.run(create_app(st), host=args.host, port=args.port, log_level="warning")
+        uvicorn.run(create_app(st, writer_token=token), host=args.host, port=args.port, log_level="warning")
     finally:
         stop.set()
         st.con.close()

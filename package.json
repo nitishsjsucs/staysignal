@@ -52,7 +52,8 @@
     "runner:prod": "uv run --project engine staysignal runner prod",
     "prod:smoke": "node scripts/prod-smoke.ts",
     "lab:record": "uv run --project sim python -m staysignal_sim.cli record",
-    "lab:replay": "uv run --project sim python -m staysignal_sim.cli replay"
+    "lab:replay": "uv run --project sim python -m staysignal_sim.cli replay",
+    "lab:interviews": "node scripts/lab-interviews.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "3.0.57",

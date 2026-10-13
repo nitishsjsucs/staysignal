@@ -174,6 +174,7 @@ export const PINNED_PREFIXES: readonly string[] = ["data/", "models/", "lab/", "
 /** Paths that hold LLM-generated or generated data text. */
 export const GENERATED_PREFIXES: readonly string[] = [
   "lab/recordings/",
+  "lab/interviews.json",
   "demo/recordings/",
   "evals/",
   "engine/tests/fixtures/memory_seed/",

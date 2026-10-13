@@ -269,7 +269,7 @@ Proxy strength for the audit-only age-40-or-over flag (AUC, 0.5 means none): ten
 
 wired memory added by the load: 2.51 GB; swap used before and after: 14.08 GB and 14.01 GB; stopped by: measurement finished; tool calls through `@ai-sdk/openai-compatible`: forecast_departures; explain_change; prepare_review; trace_lineage.
 
-**Local model measurement: mlx-community/Qwen3.6-27B-4bit** (`npm run llm:measure`, 2026-10-12, [results/llm-measure-2026-10-12.json](results/llm-measure-2026-10-12.json)). Status: stopped by the memory guard. Agent-shaped prompts: the system prompt plus the 13 tool schemas, and prior tool-result digests (synthetic placeholders).
+**Local model measurement: mlx-community/Qwen3.6-27B-4bit** (`npm run llm:measure`, 2026-10-12, [results/llm-measure-2026-10-12.json](results/llm-measure-2026-10-12.json)). Status: stopped by the memory guard (No output generated. Check the stream for errors.). Agent-shaped prompts: the system prompt plus the 13 tool schemas, and prior tool-result digests (synthetic placeholders).
 
 | Probe | Prompt tokens | Time to first token | Prefill rate (new tokens) | Decode rate |
 |---|---|---|---|---|
@@ -280,6 +280,18 @@ wired memory added by the load: 2.51 GB; swap used before and after: 14.08 GB an
 | history plus an answer of up to 200 tokens | 6,483 (0 cached) | 36.5 s | 177.7 tok/s | 7.56 tok/s |
 
 wired memory added by the load: 15.69 GB; swap used before and after: 13.86 GB and 15.92 GB; stopped by: guard: swap grew by 2.01 GB (limit 2 GB).
+
+**Local model measurement: mlx-community/Qwen3.6-27B-4bit** (`npm run llm:measure`, 2026-10-13, [results/llm-measure-2026-10-13.json](results/llm-measure-2026-10-13.json)). Status: aborted (mlx request failed: 404 generation thread died). Agent-shaped prompts: the system prompt plus the 13 tool schemas, and prior tool-result digests (synthetic placeholders).
+
+| Probe | Prompt tokens | Time to first token | Prefill rate (new tokens) | Decode rate |
+|---|---|---|---|---|
+| system prompt and 13 tools (cold) | 3,724 (0 cached) | 33.7 s | 110.5 tok/s | 7.15 tok/s |
+| prior exchanges with digests | 4,343 (3,712 cached) | 5.4 s | 116 tok/s | n/a |
+| same history, new question | n/a (n/a cached) | 16.1 s | n/a | n/a |
+| longer history | not reached | | | |
+| history plus an answer of up to 200 tokens | not reached | | | |
+
+wired memory added by the load: 16.89 GB; swap used before and after: 1.88 GB and 3.40 GB; stopped by: measurement finished.
 
 **Model comparison** (`uv run --project engine staysignal eval backtest --futures 2000`, 2026-10-12, [results/model-comparison-2026-10-12.json](results/model-comparison-2026-10-12.json)): the same 6 quarterly origins (2024-10-01 to 2026-01-01) for every model, mature windows only; the oracle knows the latent propensities and the generator, which no model can. Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy.
 

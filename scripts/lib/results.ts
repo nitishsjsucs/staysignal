@@ -18,6 +18,7 @@ export interface LlmMeasureReport {
   command: string;
   date: string;
   status: string;
+  error?: string;
   model: string;
   w_gb_after_load: number | null;
   load_ms_to_health: number | null;
@@ -179,7 +180,7 @@ function probeRow(name: string, m: StreamMeasure | undefined): string {
 
 export function renderLlmMeasure(file: string, r: LlmMeasureReport): string {
   const lines: string[] = [];
-  lines.push(`**Local model measurement: ${r.model}** (\`${r.command}${r.model.includes("1.7B") ? " -- --model 1.7b" : ""}\`, ${r.date}, [${file}](${file})). Status: ${r.status}. Agent-shaped prompts: the system prompt plus the 13 tool schemas, and prior tool-result digests (synthetic placeholders).`);
+  lines.push(`**Local model measurement: ${r.model}** (\`${r.command}${r.model.includes("1.7B") ? " -- --model 1.7b" : ""}\`, ${r.date}, [${file}](${file})). Status: ${r.status}${r.error ? ` (${r.error.replace(/\{"error": "(.*)"\}/, "$1")})` : ""}. Agent-shaped prompts: the system prompt plus the 13 tool schemas, and prior tool-result digests (synthetic placeholders).`);
   lines.push("");
   lines.push("| Probe | Prompt tokens | Time to first token | Prefill rate (new tokens) | Decode rate |");
   lines.push("|---|---|---|---|---|");

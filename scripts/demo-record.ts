@@ -10,6 +10,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { recordedProvenance } from "../src/shared/provenance.ts";
 
 export interface DemoQuestion {
   id: string;
@@ -42,8 +43,9 @@ export function localDate(d = new Date()): string {
   return d.toLocaleDateString("en-CA");
 }
 
+/** The chat's provenance line for a replayed turn, the same one the Worker shows (src/shared/provenance.ts). */
 export function labelFor(provider: RecordProvider, date: string): string {
-  return `Model text replayed from a recorded ${MODELS[provider].short} turn (${date}); tools ran live`;
+  return recordedProvenance(MODELS[provider].model, date, "chat");
 }
 
 /** What to write for one question, or why nothing is written. A recording needs the model's steps and text that

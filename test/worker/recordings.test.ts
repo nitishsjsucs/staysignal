@@ -53,7 +53,7 @@ describe("committed recorded turns (demo/recordings)", () => {
       expect(rec.id).toMatch(/^[a-z0-9-]+$/);
       expect(rec.recorded_at).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(rec.label).toContain(rec.recorded_at);
-      expect(rec.label).toMatch(/^Model text replayed from a recorded .+ turn/);
+      expect(rec.label).toMatch(/^Recorded from .+ on this laptop, \d{4}-\d{2}-\d{2}; replayed\. Numbers compute live from the warehouse\.$/);
       expect(rec.model.length).toBeGreaterThan(0);
       expect(rec.steps[rec.steps.length - 1]?.text?.length ?? 0).toBeGreaterThan(0);
     }

@@ -6,7 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { parseConfig } from "../../src/worker/config";
 import { LAB_LABEL } from "../../src/worker/lab-interview";
 import { UNRECORDED_CHAT, UNRECORDED_CHAT_NONE, UNRECORDED_INTERVIEW } from "../../src/shared/provenance";
-import { recordedQuestions } from "../../src/worker/agents/recorded-provider";
+import { type RecordedTurn, recordedQuestions, replayLabel } from "../../src/worker/agents/recorded-provider";
+import { RECORDINGS } from "../../src/worker/generated/recordings-index";
 import { call, json, P } from "../helpers/api";
 
 const live: string[] = [];
@@ -55,6 +56,18 @@ describe("the chat in demo mode", () => {
       expect(t.tool_calls).toEqual([]);
       expect(t.spans.some((s) => s.kind === "model_call" || s.kind === "template")).toBe(false);
       expect(t.text).not.toMatch(/stub|template/i);
+    }
+    expect(live).toEqual([]);
+  });
+
+  it("replays every recorded question with its provenance line, even when a live provider is requested", async () => {
+    for (const rec of RECORDINGS as RecordedTurn[]) {
+      const t = await json<Turn>("/api/dev/agent/turn", { as: rec.principal ?? P.lead, body: { question: rec.question, provider: "mlx" } });
+      expect(t.provider).toBe("recorded");
+      expect(t.recorded).toBe(true);
+      expect(t.label).toBe(replayLabel(rec));
+      expect(t.label).toMatch(/^Recorded from .+ on this laptop, \d{4}-\d{2}-\d{2}; replayed\. Numbers compute live from the warehouse\.$/);
+      expect(t.grounding).toBe("passed");
     }
     expect(live).toEqual([]);
   });

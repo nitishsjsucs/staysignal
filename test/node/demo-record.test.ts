@@ -18,7 +18,7 @@ describe("demo:record", () => {
     if (!r.ok) return;
     expect(r.recording).toMatchObject({ id: "beat-1-forecast", question: q.question, recorded_at: "2026-10-14", provider: "mlx", steps });
     expect(r.recording.model).toMatch(/Qwen3\.6-27B/);
-    expect(r.recording.label).toBe("Model text replayed from a recorded 27B turn (2026-10-14); tools ran live");
+    expect(r.recording.label).toBe("Recorded from Qwen3.6-27B on this laptop, 2026-10-14; replayed. Numbers compute live from the warehouse.");
     expect(labelFor("llama", "2026-10-13")).toContain("Qwen3-1.7B");
   });
 

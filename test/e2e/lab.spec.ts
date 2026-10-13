@@ -28,5 +28,6 @@ test("the Lab page fits a phone screen", async ({ page }) => {
   await page.goto("/lab");
   await page.getByLabel("Acting as (local role switcher)").selectOption("pa-analyst@larkspur.example");
   await expect(page.getByTestId("lab-personas")).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  const overflow = await page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth");
+  expect(overflow).toBe(0);
 });

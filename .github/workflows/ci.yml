@@ -89,6 +89,22 @@ jobs:
             playwright-report
             test-results
           retention-days: 7
+  sim:
+    # the Scenario Lab's OASIS project (SPEC 15.1, Python 3.11): the stubs guard, no GPL distribution, the forum's
+    # determinism and, once recordings exist, their replay hashes; no model server
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.17"
+          python-version: "3.11"
+          enable-cache: true
+      - run: uv sync --locked --project sim
+      - run: uvx ruff@0.17.0 check sim/src sim/tests
+      - run: uvx ruff@0.17.0 format --check sim/src sim/tests
+      - run: uv run --locked --project sim pytest sim/tests -q
   agent-eval-stub:
     # the 200-item agent eval with the scripted stub model against the built app under wrangler dev: proves the
     # harness, the pre-router and the refusal codes, and that no injected request gets through (SPEC 14.12)

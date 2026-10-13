@@ -1,0 +1,56 @@
+[project]
+name = "staysignal-sim"
+version = "0.1.0"
+description = "StaySignal Scenario Lab: hypothesis generation with synthetic personas on an OASIS forum. Not a forecast, not a survey, not validated."
+requires-python = ">=3.11,<3.12"
+license = "MIT"
+dependencies = [
+  "camel-oasis==0.2.5",
+  "camel-ai==0.2.78",
+  "mcp==1.29.0",
+  "pandas==2.2.2",
+  "httpx==0.28.1",
+]
+
+[dependency-groups]
+dev = ["pytest==8.2.0", "pytest-asyncio==0.23.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/staysignal_sim"]
+
+[tool.uv]
+required-version = ">=0.12.17,<0.13"
+# SPEC 15.1: OASIS's heavy and GPL-licensed dependencies are never installed; stubs.py and igraph_shim.py stand in for
+# the few names it imports. The impossible marker keeps each one out of the lock.
+override-dependencies = [
+  "torch; sys_platform == 'never'",
+  "transformers; sys_platform == 'never'",
+  "sentence-transformers; sys_platform == 'never'",
+  "igraph; sys_platform == 'never'",
+  "python-igraph; sys_platform == 'never'",
+  "neo4j; sys_platform == 'never'",
+  "unstructured; sys_platform == 'never'",
+  "slack-sdk; sys_platform == 'never'",
+  "cairocffi; sys_platform == 'never'",
+  "pre-commit; sys_platform == 'never'",
+  "prance; sys_platform == 'never'",
+  "openapi-spec-validator; sys_platform == 'never'",
+  "requests-oauthlib; sys_platform == 'never'",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]

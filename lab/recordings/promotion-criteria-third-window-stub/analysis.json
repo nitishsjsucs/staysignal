@@ -1,0 +1,924 @@
+{
+ "controls": {
+  "facts_removed": {
+   "acquiescence_index": {
+    "max": 0.1562,
+    "mean": 0.1562,
+    "min": 0.1562
+   },
+   "items": {
+    "career": {
+     "post": {
+      "max": 2.75,
+      "mean": 2.75,
+      "min": 2.75
+     },
+     "pre": {
+      "max": 2.75,
+      "mean": 2.75,
+      "min": 2.75
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "clarity": {
+     "post": {
+      "max": 2.9375,
+      "mean": 2.9375,
+      "min": 2.9375
+     },
+     "pre": {
+      "max": 2.9375,
+      "mean": 2.9375,
+      "min": 2.9375
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "clarity_rev": {
+     "post": {
+      "max": 3.375,
+      "mean": 3.375,
+      "min": 3.375
+     },
+     "pre": {
+      "max": 3.375,
+      "mean": 3.375,
+      "min": 3.375
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "fairness": {
+     "post": {
+      "max": 2.5,
+      "mean": 2.5,
+      "min": 2.5
+     },
+     "pre": {
+      "max": 2.5,
+      "mean": 2.5,
+      "min": 2.5
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "support": {
+     "post": {
+      "max": 3.1875,
+      "mean": 3.1875,
+      "min": 3.1875
+     },
+     "pre": {
+      "max": 3.1875,
+      "mean": 3.1875,
+      "min": 3.1875
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    }
+   },
+   "note": "internal measures of synthetic personas, not survey results"
+  },
+  "facts_shuffled": {
+   "acquiescence_index": {
+    "max": -0.0938,
+    "mean": -0.0938,
+    "min": -0.0938
+   },
+   "items": {
+    "career": {
+     "post": {
+      "max": 2.75,
+      "mean": 2.75,
+      "min": 2.75
+     },
+     "pre": {
+      "max": 2.75,
+      "mean": 2.75,
+      "min": 2.75
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "clarity": {
+     "post": {
+      "max": 2.5,
+      "mean": 2.5,
+      "min": 2.5
+     },
+     "pre": {
+      "max": 2.5,
+      "mean": 2.5,
+      "min": 2.5
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "clarity_rev": {
+     "post": {
+      "max": 3.3125,
+      "mean": 3.3125,
+      "min": 3.3125
+     },
+     "pre": {
+      "max": 3.3125,
+      "mean": 3.3125,
+      "min": 3.3125
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "fairness": {
+     "post": {
+      "max": 2.9375,
+      "mean": 2.9375,
+      "min": 2.9375
+     },
+     "pre": {
+      "max": 2.9375,
+      "mean": 2.9375,
+      "min": 2.9375
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "support": {
+     "post": {
+      "max": 3.125,
+      "mean": 3.125,
+      "min": 3.125
+     },
+     "pre": {
+      "max": 3.125,
+      "mean": 3.125,
+      "min": 3.125
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    }
+   },
+   "note": "internal measures of synthetic personas, not survey results"
+  }
+ },
+ "items": {
+  "acquiescence_index": {
+   "max": 0.3125,
+   "mean": 0.1458,
+   "min": -0.0312
+  },
+  "items": {
+   "career": {
+    "post": {
+     "max": 2.875,
+     "mean": 2.7292,
+     "min": 2.5625
+    },
+    "pre": {
+     "max": 2.875,
+     "mean": 2.7292,
+     "min": 2.5625
+    },
+    "shift": {
+     "max": 0.0,
+     "mean": 0.0,
+     "min": 0.0
+    }
+   },
+   "clarity": {
+    "post": {
+     "max": 3.3125,
+     "mean": 3.1458,
+     "min": 2.875
+    },
+    "pre": {
+     "max": 3.3125,
+     "mean": 3.1458,
+     "min": 2.875
+    },
+    "shift": {
+     "max": 0.0,
+     "mean": 0.0,
+     "min": 0.0
+    }
+   },
+   "clarity_rev": {
+    "post": {
+     "max": 3.75,
+     "mean": 3.1458,
+     "min": 2.6875
+    },
+    "pre": {
+     "max": 3.75,
+     "mean": 3.1458,
+     "min": 2.6875
+    },
+    "shift": {
+     "max": 0.0,
+     "mean": 0.0,
+     "min": 0.0
+    }
+   },
+   "fairness": {
+    "post": {
+     "max": 3.3125,
+     "mean": 3.1667,
+     "min": 3.0625
+    },
+    "pre": {
+     "max": 3.3125,
+     "mean": 3.1667,
+     "min": 3.0625
+    },
+    "shift": {
+     "max": 0.0,
+     "mean": 0.0,
+     "min": 0.0
+    }
+   },
+   "support": {
+    "post": {
+     "max": 3.4375,
+     "mean": 3.0625,
+     "min": 2.625
+    },
+    "pre": {
+     "max": 3.4375,
+     "mean": 3.0625,
+     "min": 2.625
+    },
+    "shift": {
+     "max": 0.0,
+     "mean": 0.0,
+     "min": 0.0
+    }
+   }
+  },
+  "note": "internal measures of synthetic personas, not survey results"
+ },
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "network": {
+  "edges": [
+   {
+    "source": "N1",
+    "target": "N5",
+    "weight": 1.0
+   },
+   {
+    "source": "N2",
+    "target": "N3",
+    "weight": 1.0
+   },
+   {
+    "source": "N3",
+    "target": "N16",
+    "weight": 1.0
+   },
+   {
+    "source": "N3",
+    "target": "PO",
+    "weight": 1.0
+   },
+   {
+    "source": "N4",
+    "target": "N6",
+    "weight": 2.0
+   },
+   {
+    "source": "N4",
+    "target": "N7",
+    "weight": 1.0
+   },
+   {
+    "source": "N4",
+    "target": "N15",
+    "weight": 1.0
+   },
+   {
+    "source": "N5",
+    "target": "N3",
+    "weight": 1.0
+   },
+   {
+    "source": "N5",
+    "target": "N15",
+    "weight": 1.0
+   },
+   {
+    "source": "N6",
+    "target": "N11",
+    "weight": 1.0
+   },
+   {
+    "source": "N6",
+    "target": "N12",
+    "weight": 1.0
+   },
+   {
+    "source": "N6",
+    "target": "N13",
+    "weight": 1.0
+   },
+   {
+    "source": "N7",
+    "target": "N6",
+    "weight": 1.0
+   },
+   {
+    "source": "N7",
+    "target": "PO",
+    "weight": 1.0
+   },
+   {
+    "source": "N9",
+    "target": "N16",
+    "weight": 2.0
+   },
+   {
+    "source": "N10",
+    "target": "N4",
+    "weight": 1.0
+   },
+   {
+    "source": "N12",
+    "target": "N10",
+    "weight": 1.0
+   },
+   {
+    "source": "N12",
+    "target": "N11",
+    "weight": 1.0
+   },
+   {
+    "source": "N12",
+    "target": "N15",
+    "weight": 1.0
+   },
+   {
+    "source": "N13",
+    "target": "N6",
+    "weight": 1.0
+   },
+   {
+    "source": "N13",
+    "target": "N14",
+    "weight": 1.0
+   },
+   {
+    "source": "N13",
+    "target": "N16",
+    "weight": 1.0
+   },
+   {
+    "source": "N13",
+    "target": "PO",
+    "weight": 1.0
+   },
+   {
+    "source": "N14",
+    "target": "N13",
+    "weight": 1.0
+   },
+   {
+    "source": "N16",
+    "target": "N3",
+    "weight": 2.0
+   }
+  ],
+  "label": "Simulated, not organizational network analysis",
+  "nodes": [
+   {
+    "cohort": "under 1 year",
+    "id": "N1",
+    "pagerank": 0.021791,
+    "x": 0.0,
+    "y": 0.529
+   },
+   {
+    "cohort": "other",
+    "id": "N2",
+    "pagerank": 0.021791,
+    "x": 0.8667,
+    "y": 0.0
+   },
+   {
+    "cohort": "other",
+    "id": "N3",
+    "pagerank": 0.164623,
+    "x": 0.4812,
+    "y": 0.2312
+   },
+   {
+    "cohort": "other",
+    "id": "N4",
+    "pagerank": 0.050536,
+    "x": 1.0,
+    "y": 0.6126
+   },
+   {
+    "cohort": "other",
+    "id": "N5",
+    "pagerank": 0.040313,
+    "x": 0.3434,
+    "y": 0.6079
+   },
+   {
+    "cohort": "under 1 year",
+    "id": "N6",
+    "pagerank": 0.072906,
+    "x": 0.7765,
+    "y": 0.4474
+   },
+   {
+    "cohort": "1 to 3 years",
+    "id": "N7",
+    "pagerank": 0.03253,
+    "x": 1.0,
+    "y": 0.2413
+   },
+   {
+    "cohort": "3 years or more",
+    "id": "N8",
+    "pagerank": 0.021791,
+    "x": 0.0,
+    "y": 1.0
+   },
+   {
+    "cohort": "3 years or more",
+    "id": "N9",
+    "pagerank": 0.021791,
+    "x": 0.0,
+    "y": 0.6839
+   },
+   {
+    "cohort": "under 1 year",
+    "id": "N10",
+    "pagerank": 0.033818,
+    "x": 1.0,
+    "y": 1.0
+   },
+   {
+    "cohort": "other",
+    "id": "N11",
+    "pagerank": 0.054475,
+    "x": 0.859,
+    "y": 0.9033
+   },
+   {
+    "cohort": "other",
+    "id": "N12",
+    "pagerank": 0.042448,
+    "x": 1.0,
+    "y": 0.8007
+   },
+   {
+    "cohort": "under 1 year",
+    "id": "N13",
+    "pagerank": 0.07441,
+    "x": 0.433,
+    "y": 0.116
+   },
+   {
+    "cohort": "other",
+    "id": "N14",
+    "pagerank": 0.037603,
+    "x": 0.1054,
+    "y": 0.0
+   },
+   {
+    "cohort": "other",
+    "id": "N15",
+    "pagerank": 0.06169,
+    "x": 0.6899,
+    "y": 0.7983
+   },
+   {
+    "cohort": "other",
+    "id": "N16",
+    "pagerank": 0.12609,
+    "x": 0.1809,
+    "y": 0.2947
+   },
+   {
+    "cohort": "program office",
+    "id": "PO",
+    "pagerank": 0.121393,
+    "x": 0.6913,
+    "y": 0.0
+   }
+  ]
+ },
+ "pilot_items": [
+  {
+   "construct": "criteria_clarity",
+   "construct_label": "Clarity of promotion criteria",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "1 to 3 years",
+     "replicate": 1,
+     "text": "[stub] More windows could mean more preparation work for everyone."
+    },
+    {
+     "cohort": "under 1 year",
+     "replicate": 1,
+     "text": "[stub] Who decides, and how would the decision be explained?"
+    },
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "[stub] More windows could mean more preparation work for everyone."
+    }
+   ],
+   "quotes_span_cohorts": true,
+   "rationale": "67 of 199 theme codes (34%) across the main replicates",
+   "recommendation": "Use the validated measure (Role ambiguity (Rizzo, House and Lirtzman 1970)) instead of this draft wording.",
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": "Role ambiguity (Rizzo, House and Lirtzman 1970)",
+   "wording": "I understand what is required to be promoted to the next level."
+  },
+  {
+   "construct": "manager_support",
+   "construct_label": "Support from one's manager",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "[stub] I would like to know how this changes what my manager can do."
+    },
+    {
+     "cohort": "1 to 3 years",
+     "replicate": 1,
+     "text": "[stub] What exactly would the published criteria say for moving up a level?"
+    },
+    {
+     "cohort": "under 1 year",
+     "replicate": 1,
+     "text": "[stub] What exactly would the published criteria say for moving up a level?"
+    }
+   ],
+   "quotes_span_cohorts": true,
+   "rationale": "52 of 199 theme codes (26%) across the main replicates",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "My manager helps me understand my path to the next level."
+  },
+  {
+   "construct": "change_uncertainty",
+   "construct_label": "Uncertainty about the change",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "under 1 year",
+     "replicate": 1,
+     "text": "[stub] Not sure this changes much for people already close to the next level."
+    },
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "[stub] Who decides, and how would the decision be explained?"
+    },
+    {
+     "cohort": "3 years or more",
+     "replicate": 1,
+     "text": "[stub] Who decides, and how would the decision be explained?"
+    }
+   ],
+   "quotes_span_cohorts": true,
+   "rationale": "50 of 199 theme codes (25%) across the main replicates",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "I understand how the proposed change would affect me."
+  },
+  {
+   "construct": "process_fairness",
+   "construct_label": "Fairness of how promotion decisions are made",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "[stub] What exactly would the published criteria say for moving up a level?"
+    },
+    {
+     "cohort": "1 to 3 years",
+     "replicate": 1,
+     "text": "[stub] What exactly would the published criteria say for moving up a level?"
+    },
+    {
+     "cohort": "under 1 year",
+     "replicate": 1,
+     "text": "[stub] What exactly would the published criteria say for moving up a level?"
+    }
+   ],
+   "quotes_span_cohorts": true,
+   "rationale": "30 of 199 theme codes (15%) across the main replicates",
+   "recommendation": "Use the validated measure (Procedural justice (Colquitt 2001)) instead of this draft wording.",
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": "Procedural justice (Colquitt 2001)",
+   "wording": "Promotion decisions are made using consistent criteria."
+  },
+  {
+   "construct": "career_future",
+   "construct_label": "Seeing a future for one's career here",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [],
+   "quotes_span_cohorts": false,
+   "rationale": "measured in every session (no coded theme)",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "I can see a future for my career here."
+  }
+ ],
+ "placeholder": true,
+ "proposal": "promotion-criteria-third-window",
+ "replicates": {
+  "facts_removed": [
+   1
+  ],
+  "facts_shuffled": [
+   1
+  ],
+  "main": [
+   1,
+   2,
+   3
+  ]
+ },
+ "themes": {
+  "replicates": 3,
+  "shares": [
+   {
+    "max": 0.3538,
+    "mean": 0.3361,
+    "min": 0.3167,
+    "theme": "criteria_clarity"
+   },
+   {
+    "max": 0.3,
+    "mean": 0.2631,
+    "min": 0.2432,
+    "theme": "manager_support"
+   },
+   {
+    "max": 0.2769,
+    "mean": 0.2501,
+    "min": 0.2167,
+    "theme": "change_uncertainty"
+   },
+   {
+    "max": 0.1667,
+    "mean": 0.1506,
+    "min": 0.1231,
+    "theme": "process_fairness"
+   }
+  ],
+  "top_by_round": {
+   "change_uncertainty": [
+    3.333,
+    1.667,
+    2.0,
+    3.0,
+    1.333,
+    2.333,
+    1.667,
+    1.333
+   ],
+   "criteria_clarity": [
+    3.333,
+    2.667,
+    3.333,
+    3.0,
+    3.667,
+    1.333,
+    2.333,
+    2.667
+   ],
+   "manager_support": [
+    3.333,
+    2.333,
+    1.0,
+    1.333,
+    2.333,
+    3.0,
+    2.0,
+    2.0
+   ],
+   "process_fairness": [
+    2.333,
+    1.667,
+    1.0,
+    0.333,
+    1.333,
+    1.333,
+    0.667,
+    1.333
+   ]
+  }
+ },
+ "trajectories": {
+  "scale": "-2 strongly against the proposal to 2 strongly for",
+  "stance_by_round": {
+   "1 to 3 years": [
+    {
+     "max": 1.0,
+     "mean": 1.0,
+     "min": 1.0
+    },
+    {
+     "max": -2.0,
+     "mean": -2.0,
+     "min": -2.0
+    },
+    {
+     "max": 1.0,
+     "mean": 1.0,
+     "min": 1.0
+    },
+    {
+     "max": 2.0,
+     "mean": 2.0,
+     "min": 2.0
+    },
+    {
+     "max": 0.0,
+     "mean": -1.0,
+     "min": -2.0
+    },
+    {
+     "max": -1.0,
+     "mean": -1.0,
+     "min": -1.0
+    },
+    {
+     "max": 1.0,
+     "mean": 0.5,
+     "min": 0.0
+    },
+    {
+     "max": -2.0,
+     "mean": -2.0,
+     "min": -2.0
+    }
+   ],
+   "3 years or more": [
+    {
+     "max": 1.0,
+     "mean": 1.0,
+     "min": 1.0
+    },
+    {
+     "max": 1.0,
+     "mean": 1.0,
+     "min": 1.0
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": -1.0,
+     "mean": -1.0,
+     "min": -1.0
+    },
+    {
+     "max": -1.0,
+     "mean": -1.0,
+     "min": -1.0
+    },
+    {
+     "max": -1.0,
+     "mean": -1.0,
+     "min": -1.0
+    },
+    {
+     "max": 2.0,
+     "mean": 1.6667,
+     "min": 1.0
+    }
+   ],
+   "under 1 year": [
+    {
+     "max": -1.5,
+     "mean": -1.6667,
+     "min": -2.0
+    },
+    {
+     "max": 1.0,
+     "mean": 0.5,
+     "min": -0.5
+    },
+    {
+     "max": 0.5,
+     "mean": -0.0556,
+     "min": -1.0
+    },
+    {
+     "max": -1.0,
+     "mean": -1.5,
+     "min": -2.0
+    },
+    {
+     "max": 2.0,
+     "mean": 0.0,
+     "min": -2.0
+    },
+    {
+     "max": 2.0,
+     "mean": 0.8889,
+     "min": -1.3333
+    },
+    {
+     "max": 1.0,
+     "mean": 0.6667,
+     "min": 0.5
+    },
+    {
+     "max": 1.0,
+     "mean": 0.5,
+     "min": 0.0
+    }
+   ]
+  }
+ }
+}

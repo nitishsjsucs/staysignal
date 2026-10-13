@@ -197,8 +197,8 @@ class StubProvider:
     @staticmethod
     def _text(user: str, rng: random.Random) -> str:
         if '"items"' in user:
-            return json.dumps({"items": [rng.randint(1, 5) for _ in range(4)]})
-        if '"themes"' in user:
+            return json.dumps({"items": [rng.randint(1, 5) for _ in range(5)]})
+        if user.startswith("Codebook:"):
             return json.dumps(
                 {
                     "themes": rng.sample(
@@ -294,15 +294,16 @@ class Recorder:
     async def gather(self, reqs: list[tuple[dict, str, str | None, int | None]]) -> list[tuple[dict, int]]:
         return list(await asyncio.gather(*(self.call(*r) for r in reqs)))
 
-    def write(self, run_dir: Path) -> None:
+    def write(self, run_dir: Path, name: str = "calls.jsonl.gz", systems: bool = True) -> None:
         # mtime 0 keeps the gzip header, and so the committed file, identical for identical calls
         with (
-            gzip.GzipFile(run_dir / "calls.jsonl.gz", "wb", compresslevel=9, mtime=0) as raw,
+            gzip.GzipFile(run_dir / name, "wb", compresslevel=9, mtime=0) as raw,
             io.TextIOWrapper(raw, encoding="utf-8") as fh,
         ):
             for c in self.calls:
                 fh.write(json.dumps(c, sort_keys=True, ensure_ascii=False) + "\n")
-        (run_dir / "systems.json").write_text(json.dumps(self.systems, indent=1, sort_keys=True) + "\n")
+        if systems:
+            (run_dir / "systems.json").write_text(json.dumps(self.systems, indent=1, sort_keys=True) + "\n")
 
 
 __all__ = [

@@ -50,6 +50,8 @@ jobs:
       - run: uv run --locked --project engine staysignal world verify --manifest data/world/manifest.json --dir var/world
       # the Scenario Lab's cohort cells (SPEC 15.2) are current with the canonical world
       - run: uv run --locked --project engine staysignal lab cells --check
+      # the Lab's API documents (analysis, sanity panel) are current with the recordings and the published model
+      - run: uv run --locked --project engine staysignal lab export --check
   challenger:
     # C15: the optional SurvivalBoost extra (about 1 GB) and a smoke fit with n_iter=3 on the small world; the full
     # recorded run is results/challenger-*.json (uv run --project engine staysignal eval challenger)

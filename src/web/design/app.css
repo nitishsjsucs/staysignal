@@ -1140,3 +1140,33 @@
   font-size: 13px;
   color: var(--ink-2);
 }
+
+/* Scenario Lab (pages/Lab.tsx): draft pilot items with their quotes */
+.lab-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--s4);
+}
+
+.lab-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--s4);
+  background: var(--surface-2);
+}
+
+.lab-wording {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 6px 0;
+}
+
+.lab-quote {
+  margin: 8px 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--border-strong);
+  font-size: 13px;
+  color: var(--ink-2);
+}
+

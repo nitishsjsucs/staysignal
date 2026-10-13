@@ -9,6 +9,7 @@ import { AskPage } from "./pages/Ask";
 import { ChangesPage } from "./pages/Changes";
 import { ForecastPage } from "./pages/Forecast";
 import { GovernancePage } from "./pages/Governance";
+import { LabPage } from "./pages/Lab";
 import { MemoryPage } from "./pages/Memory";
 import { QualityPage } from "./pages/Quality";
 import { ResultPage } from "./pages/ResultDetail";
@@ -57,6 +58,7 @@ export function App() {
         {route.page === "reviews" ? <ReviewsPage me={me} /> : null}
         {route.page === "trust" ? <TrustPage me={me} /> : null}
         {route.page === "workforce" ? <WorkforcePage me={me} /> : null}
+        {route.page === "lab" ? <LabPage me={me} /> : null}
         {route.page === "memory" ? <MemoryPage me={me} /> : null}
         {route.page === "traces" ? <TracesPage me={me} /> : null}
         {route.page === "governance" ? <GovernancePage me={me} /> : null}

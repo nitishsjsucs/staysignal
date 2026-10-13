@@ -26,6 +26,7 @@ export const IconSun = (p: P) => svg(<><circle cx="8" cy="8" r="3" /><path d="M8
 export const IconMoon = (p: P) => svg(<path d="M13 9.6A5.5 5.5 0 0 1 6.4 3 5.5 5.5 0 1 0 13 9.6z" />, p);
 export const IconClose = (p: P) => svg(<path d="M4 4l8 8M12 4l-8 8" />, p);
 export const IconSend = (p: P) => svg(<><path d="M2.5 8 13.5 2.5 10 13.5 7.5 9z" /><path d="m7.5 9 6-6.5" /></>, p);
+export const IconLab = (p: P) => svg(<><path d="M2 3.5a1.5 1.5 0 0 1 1.5-1.5h5A1.5 1.5 0 0 1 10 3.5v3A1.5 1.5 0 0 1 8.5 8H5l-2 1.6V8A1.5 1.5 0 0 1 2 6.5z" /><path d="M10 5.5h2.5A1.5 1.5 0 0 1 14 7v3a1.5 1.5 0 0 1-1.5 1.5H12v1.6L10 11.5H7.5A1.5 1.5 0 0 1 6 10V8" /></>, p);
 export const IconFlask = (p: P) => svg(<><path d="M6 2h4M6.5 2v4L3 13a1 1 0 0 0 .9 1.4h8.2A1 1 0 0 0 13 13L9.5 6V2" /><path d="M4.6 10.5h6.8" /></>, p);
 export const IconCheck = (p: P) => svg(<><circle cx="8" cy="8" r="6.2" /><path d="m5.4 8.1 1.8 1.8 3.4-3.6" /></>, p);
 export const IconAlert = (p: P) => svg(<><path d="M8 2 14.5 13.5h-13z" /><path d="M8 6.5v3M8 11.6v.1" /></>, p);

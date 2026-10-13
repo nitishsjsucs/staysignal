@@ -8,6 +8,7 @@ values are ever served. Synthetic world only."""
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from fastapi import Body, FastAPI, HTTPException
@@ -62,6 +63,13 @@ def create_app(st: EngineState, writer_token: str | None = None) -> FastAPI:
     @app.get("/published/action-audit")
     def action_audit() -> JSONResponse:
         return doc("action-audit.json")
+
+    @app.get("/published/lab/{name}")
+    def lab(name: str) -> JSONResponse:
+        # the Scenario Lab's documents (SPEC 15): hypothesis generation with synthetic personas, never a forecast
+        if not re.fullmatch(r"[a-z0-9-]{3,60}", name):
+            return JSONResponse({"error": "not found"}, status_code=404)
+        return doc(f"lab/{name}.json")
 
     @app.get("/published/lineage")
     def lineage() -> JSONResponse:

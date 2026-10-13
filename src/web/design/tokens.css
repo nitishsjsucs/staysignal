@@ -31,6 +31,10 @@
   --series-like: #e87ba4;
   --series-other: #898781;
   --series-other-band: rgba(137, 135, 129, 0.16);
+  /* the Scenario Lab's three tenure bands: the validated categorical hues, by reference so dark mode follows */
+  --lab-a: var(--series-vol);
+  --lab-b: var(--series-inv);
+  --lab-c: var(--series-ret);
   --good: #0ca30c;
   --warning: #fab219;
   --serious: #ec835a;

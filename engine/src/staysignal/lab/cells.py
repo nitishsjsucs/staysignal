@@ -47,39 +47,50 @@ def _facts(rows: list[FeatureRow]) -> dict:
     }
 
 
-def build_cells(rows: list[FeatureRow]) -> tuple[list[dict], int]:
-    """Cells of at least MIN_CELL people and the number withheld, in a stable order."""
-    groups: dict[tuple, list[FeatureRow]] = defaultdict(list)
+def groups(rows: list[FeatureRow]) -> dict[tuple, list[FeatureRow]]:
+    """The cell key of every group after coarsening, with its members (the engine's view; never exported)."""
+    out: dict[tuple, list[FeatureRow]] = defaultdict(list)
     for r in rows:
-        groups[_key(r)].append(r)
+        out[_key(r)].append(r)
     for coarsen in (2, 3):  # tenure, then time since promotion
         merged: dict[tuple, list[FeatureRow]] = defaultdict(list)
-        for k, members in groups.items():
+        for k, members in out.items():
             if len(members) >= MIN_CELL:
                 merged[k] += members
             else:
                 merged[k[:coarsen] + (OTHER,) + k[coarsen + 1 :]] += members
-        groups = merged
+        out = merged
+    return out
+
+
+def cells_with_members(rows: list[FeatureRow]) -> tuple[list[tuple[dict, list[FeatureRow]]], int]:
+    """Cells of at least MIN_CELL people in a stable order, each with its members, and the number withheld."""
+    g = groups(rows)
     cells, withheld = [], 0
-    for k in sorted(groups, key=lambda k: tuple(str(x) for x in k)):
-        members = groups[k]
+    for k in sorted(g, key=lambda k: tuple(str(x) for x in k)):
+        members = g[k]
         if len(members) < MIN_CELL:
             withheld += len(members)
             continue
         family, level, tenure, promo, reorg = k
-        cells.append(
-            {
-                "cell_id": f"C{len(cells) + 1:03d}",
-                "job_family": family,
-                "level_band": level,
-                "tenure_band": tenure,
-                "promotion_band": promo,
-                "reorg_90d": reorg,
-                "n": len(members),
-                "facts": _facts(members),
-            }
-        )
+        cell = {
+            "cell_id": f"C{len(cells) + 1:03d}",
+            "job_family": family,
+            "level_band": level,
+            "tenure_band": tenure,
+            "promotion_band": promo,
+            "reorg_90d": reorg,
+            "n": len(members),
+            "facts": _facts(members),
+        }
+        cells.append((cell, members))
     return cells, withheld
+
+
+def build_cells(rows: list[FeatureRow]) -> tuple[list[dict], int]:
+    """Cells of at least MIN_CELL people and the number withheld, in a stable order."""
+    cells, withheld = cells_with_members(rows)
+    return [c for c, _ in cells], withheld
 
 
 def export(rows: list[FeatureRow], run_id: str, cutoff: date) -> dict:
@@ -93,4 +104,4 @@ def export(rows: list[FeatureRow], run_id: str, cutoff: date) -> dict:
     }
 
 
-__all__ = ["MIN_CELL", "OTHER", "PROMO_BANDS", "build_cells", "export", "promo_band"]
+__all__ = ["MIN_CELL", "OTHER", "PROMO_BANDS", "build_cells", "cells_with_members", "export", "groups", "promo_band"]

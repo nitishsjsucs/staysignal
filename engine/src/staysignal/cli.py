@@ -196,6 +196,9 @@ def cmd_engine_prepare(args: argparse.Namespace) -> int:
     audits = sorted((repo / "results").glob("action-audit-*.json"))
     if audits:  # the recorded action audit, served at /published/action-audit
         write_json(published / "action-audit.json", json.loads(audits[-1].read_text()), compact=True)
+    lab_docs = repo / "test" / "fixtures" / "api" / "lab"
+    for f in sorted(lab_docs.glob("*.json")):  # the Scenario Lab's exported documents, served at /published/lab/<name>
+        write_json(published / "lab" / f.name, json.loads(f.read_text()), compact=True)
     for doc in sorted((published / "forecast").glob("*.json")):
         write_run(con, json.loads(doc.read_text()))
     con.close()
@@ -516,6 +519,78 @@ def cmd_lab_cells(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_lab_export(args: argparse.Namespace) -> int:
+    """The Scenario Lab's API documents (SPEC 15.6, 15.7): for each recorded session, its analysis, the sanity panel
+    computed here with the published model (the sim never sees model outputs) and a summary of the session, written to
+    test/fixtures/api/lab/<proposal>.json with an index. `--check` fails when a committed document is stale."""
+    from datetime import date
+
+    from staysignal.clock import as_cutoff_datetime
+    from staysignal.features.reference import Vintage, features_at
+    from staysignal.fixtures.export_api import write_json
+    from staysignal.ingest.landing import load_world_sources
+    from staysignal.lab.sanity import cell_rates, panel
+    from staysignal.model import artifact as artifact_io
+
+    repo, _ = _repo_var()
+    cutoff = date.fromisoformat(args.cutoff)
+    rows = features_at(Vintage(load_world_sources(Path(args.world)), as_cutoff_datetime(cutoff)), cutoff)
+    rates, facts, tenure = cell_rates(artifact_io.load(repo / "models" / args.model / "model.json"), rows, cutoff)
+    out_dir = repo / "test" / "fixtures" / "api" / "lab"
+    docs: dict[str, dict] = {}
+    for session in sorted(p for p in (repo / "lab" / "recordings").iterdir() if (p / "analysis.json").exists()):
+        analysis = json.loads((session / "analysis.json").read_text())
+        manifests = [
+            json.loads((d / "manifest.json").read_text())
+            for d in sorted(session.iterdir())
+            if (d / "manifest.json").exists()
+        ]
+        main = next(m for m in manifests if m["card_variant"] == "main")
+        docs[analysis["proposal"]] = {
+            "label": analysis["label"],
+            "proposal": analysis["proposal"],
+            "session": session.name,
+            "placeholder": analysis["placeholder"],
+            "provider": main["provider"],
+            "personas": [
+                {"persona_id": p["persona_id"], "handle": p["handle"], "tenure_band": p["tenure_band"]}
+                for p in main["personas"]
+            ],
+            "replicates": [
+                {
+                    "run": f"{m['card_variant']}-s{m['seed']}",
+                    "card_variant": m["card_variant"],
+                    "seed": m["seed"],
+                    "rounds": m["config"]["rounds"],
+                    "calls": m["calls"],
+                    "db_sha256": m["db_sha256"],
+                }
+                for m in manifests
+            ],
+            "analysis": analysis,
+            "sanity": panel(session, rates, facts, tenure),
+        }
+    index = {
+        "label": next(iter(docs.values()))["label"] if docs else None,
+        "proposals": [
+            {"id": k, "session": v["session"], "placeholder": v["placeholder"]} for k, v in sorted(docs.items())
+        ],
+    }
+    targets = {out_dir / "index.json": index} | {out_dir / f"{k}.json": v for k, v in docs.items()}
+    if args.check:
+        stale = [
+            str(p.relative_to(repo))
+            for p, d in targets.items()
+            if not p.exists() or json.loads(p.read_text()) != json.loads(json.dumps(d))
+        ]
+        print("Lab documents are current" if not stale else f"stale: {stale}; run `staysignal lab export`")
+        return 0 if not stale else 1
+    for p, d in targets.items():
+        write_json(p, d, compact=True)
+    print(json.dumps({"written": [str(p.relative_to(repo)) for p in targets]}))
+    return 0
+
+
 def cmd_prod_validate(args: argparse.Namespace) -> int:
     """prod:validate (SPEC 23.2): the offline BigQuery compile, then one free dry run per compiled file. Prints the plan
     unless --execute; --execute needs the project ID and application default credentials (the operator's Mac)."""
@@ -830,6 +905,12 @@ def build_parser() -> argparse.ArgumentParser:
     lc.add_argument("--cutoff", default="2026-10-01")
     lc.add_argument("--check", action="store_true", help="fail when the committed file differs")
     lc.set_defaults(func=cmd_lab_cells)
+    le = labsub.add_parser("export", help="the Lab's API documents: analysis, sanity panel and session summary")
+    le.add_argument("--world", default="var/world")
+    le.add_argument("--cutoff", default="2026-10-01")
+    le.add_argument("--model", default="m2026.09")
+    le.add_argument("--check", action="store_true", help="fail when a committed document is stale")
+    le.set_defaults(func=cmd_lab_export)
     prod = sub.add_parser("prod", help="the production path (operator only; plan-only unless --execute)")
     psub = prod.add_subparsers(dest="prod_command", required=True)
     pv = psub.add_parser("validate", help="BigQuery dry runs of every compiled model and test (free)")

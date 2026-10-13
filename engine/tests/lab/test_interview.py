@@ -71,3 +71,17 @@ def test_no_model_server_is_a_503_and_bad_input_a_400(tmp_path):
         == 400
     )
     assert not (tmp_path / "work" / "lab" / "interviews.jsonl").exists()
+
+
+def test_the_27b_request_bans_dash_tokens():
+    # the same list as the Lab recorder's; the engine never imports the sim, so it keeps a copy
+    import re
+
+    sim = (REPO_ROOT / "sim" / "src" / "staysignal_sim" / "client.py").read_text(encoding="utf-8")
+    block = re.search(r"NO_DASH_TOKEN_IDS = \((.*?)\)", sim, re.S)
+    assert block is not None
+    assert tuple(int(x) for x in re.findall(r"\d+", block.group(1))) == interview.NO_DASH_TOKEN_IDS
+    body = interview.mlx_body([{"role": "user", "content": "Why?"}])
+    assert len(body["logit_bias"]) == len(interview.NO_DASH_TOKEN_IDS)
+    assert set(body["logit_bias"].values()) == {-100.0}
+    assert body["max_tokens"] == interview.MAX_TOKENS and body["stream"] is True

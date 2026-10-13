@@ -30,6 +30,16 @@ STUB_ANSWER = (
     "[stub] Speaking only for this synthetic persona: I would want to see the published criteria before deciding, "
     "and I would ask how the June window works for people who just missed March."
 )
+# Every token of the Qwen3.6-27B tokenizer (mlx-community/Qwen3.6-27B-4bit, snapshot c000ac2c) whose text holds an en
+# or em dash, the same list as the Lab recorder's (sim/src/staysignal_sim/client.py; the engine never imports the sim).
+# The public hygiene tier rejects those characters in committed answers and a recorded answer is never hand-edited, so
+# the interview bans them at sampling time with a logit bias of -100.
+NO_DASH_TOKEN_IDS = (
+    1317, 1892, 2218, 4006, 8283, 15744, 16312, 21010, 27090, 28630, 32963, 36203, 38697, 42064, 46812, 47267, 47853,
+    48944, 48952, 50649, 52510, 57541, 58180, 60537, 60723, 62804, 65467, 67728, 67999, 68801, 72418, 73238, 76273,
+    78015, 79916, 80950, 81357, 82280, 82957, 83173, 83581, 84830, 86674, 89534, 91814, 92933, 95060, 177177, 180201,
+    184142, 197005, 200228, 211741, 216119, 216120, 230118, 236392, 242602,
+)  # fmt: skip
 PROPOSAL_ID = re.compile(r"[a-z0-9-]{3,60}")
 PERSONA_ID = re.compile(r"P\d{2}")
 
@@ -105,9 +115,9 @@ def stream_stub() -> Iterator[str]:
         yield word + " "
 
 
-def stream_mlx(msgs: list[dict], url: str = MLX_URL, timeout: float = 60.0) -> Iterator[str]:
-    """Streams the answer's text from an OpenAI-compatible server (server-sent events)."""
-    body = {
+def mlx_body(msgs: list[dict]) -> dict:
+    """The streaming request for the 27B, with the dash ban (`NO_DASH_TOKEN_IDS`)."""
+    return {
         "model": "default_model",
         "messages": msgs,
         "max_tokens": MAX_TOKENS,
@@ -115,7 +125,13 @@ def stream_mlx(msgs: list[dict], url: str = MLX_URL, timeout: float = 60.0) -> I
         "stream": True,
         # the 27B server already starts with thinking off; servers that read it per request get the same setting
         "chat_template_kwargs": {"enable_thinking": False},
+        "logit_bias": {str(i): -100.0 for i in NO_DASH_TOKEN_IDS},
     }
+
+
+def stream_mlx(msgs: list[dict], url: str = MLX_URL, timeout: float = 60.0) -> Iterator[str]:
+    """Streams the answer's text from an OpenAI-compatible server (server-sent events)."""
+    body = mlx_body(msgs)
     req = urllib.request.Request(url, data=json.dumps(body).encode(), headers={"content-type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as res:  # noqa: S310 (a fixed local URL)
         for raw in res:

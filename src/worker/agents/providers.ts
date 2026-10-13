@@ -106,8 +106,24 @@ export function recordedModel(turn: RecordedTurn): LanguageModelV4 {
   });
 }
 
-export function openAiCompatible(name: "llama" | "mlx", baseURL: string): LanguageModel {
-  const provider = createOpenAICompatible({ name, baseURL, includeUsage: true });
+/** Every token of the Qwen3.6-27B tokenizer (mlx-community/Qwen3.6-27B-4bit, snapshot c000ac2c) whose text holds an
+ * en or em dash: the Lab recorder's list (sim/src/staysignal_sim/client.py). The public hygiene tier rejects those
+ * characters in committed text and a recorded turn is never hand-edited, so the mlx provider bans them at sampling
+ * time with a logit bias of -100. */
+export const NO_DASH_TOKEN_IDS: readonly number[] = [
+  1317, 1892, 2218, 4006, 8283, 15744, 16312, 21010, 27090, 28630, 32963, 36203, 38697, 42064, 46812, 47267, 47853,
+  48944, 48952, 50649, 52510, 57541, 58180, 60537, 60723, 62804, 65467, 67728, 67999, 68801, 72418, 73238, 76273,
+  78015, 79916, 80950, 81357, 82280, 82957, 83173, 83581, 84830, 86674, 89534, 91814, 92933, 95060, 177177, 180201,
+  184142, 197005, 200228, 211741, 216119, 216120, 230118, 236392, 242602,
+];
+
+/** The request body the mlx provider sends: the SDK's body plus the dash ban (mlx_lm.server 0.32.0 takes string keys). */
+export function withDashBan(body: Record<string, unknown>): Record<string, unknown> {
+  return { ...body, logit_bias: Object.fromEntries(NO_DASH_TOKEN_IDS.map((id) => [String(id), -100])) };
+}
+
+export function openAiCompatible(name: "llama" | "mlx", baseURL: string, fetchFn?: typeof fetch): LanguageModel {
+  const provider = createOpenAICompatible({ name, baseURL, includeUsage: true, ...(fetchFn ? { fetch: fetchFn } : {}), ...(name === "mlx" ? { transformRequestBody: withDashBan } : {}) });
   return provider(name === "mlx" ? "default_model" : "qwen3-1.7b");
 }
 

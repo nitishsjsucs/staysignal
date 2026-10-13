@@ -9,10 +9,12 @@ export function useWidth<T extends HTMLElement>(fallback = 640): [React.RefObjec
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    setW(Math.max(240, Math.floor(el.getBoundingClientRect().width)));
+    // The floor stays below the narrowest card (a span-4 card beside the open chat is about 200 px wide), so a chart
+    // is never wider than its card; each chart keeps its own minimum plot width.
+    setW(Math.max(160, Math.floor(el.getBoundingClientRect().width)));
     const ro = new ResizeObserver((entries) => {
       const cw = entries[0]?.contentRect.width;
-      if (cw) setW(Math.max(240, Math.floor(cw)));
+      if (cw) setW(Math.max(160, Math.floor(cw)));
     });
     ro.observe(el);
     return () => ro.disconnect();

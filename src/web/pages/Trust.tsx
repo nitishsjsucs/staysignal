@@ -3,7 +3,7 @@
 // model comparison on the same six quarterly origins, and the count PIT histogram. Everything is a cohort aggregate.
 import type { ComparisonMetrics, EvaluationFixture, EvaluationLevel } from "../../shared/contracts";
 import { useQuery, type Me } from "../api";
-import { BacktestTimeline, type CoverageRow, CoverageDots, EffectLine, HOLLOW, MetricDots, MODEL_COLORS, MODEL_LABELS, PitHistogram, ReliabilityDiagram } from "../charts/trust";
+import { BacktestTimeline, type CoverageRow, CoverageDots, EffectLine, HOLLOW, MetricDots, MODEL_COLORS, MODEL_LABELS, MODEL_SHORT, PitHistogram, ReliabilityDiagram } from "../charts/trust";
 import { ChartCard } from "../components/ChartCard";
 import { EmptyState, ErrorState, Skeleton, StatusPill, SyntheticChip } from "../components/ui";
 import { useView } from "../router";
@@ -29,17 +29,17 @@ function Tile({ label, value, note, status }: { label: string; value: string; no
 
 function coverageRows(ev: EvaluationFixture, h: number): CoverageRow[] {
   const rows: CoverageRow[] = [];
+  // One block per level (the monthly backtest, then every model on the quarterly origins), so each level has one
+  // heading in the chart.
   for (const level of ["company", "organization"]) {
     const l = ev.backtest.levels[`${level}|${h}`];
-    if (l) rows.push({ key: `bt-${level}`, label: `Model, ${level === "company" ? "company" : "organizations"} (monthly)`, model: "dtcr-mnl", coverage80: l.coverage80, coverage95: l.coverage95, ci80: l.coverage80_block_i80, note: `${l.windows} mature windows from ${l.origins} monthly origins; about ${l.effective_windows} independent` });
-  }
-  for (const level of ["company", "organization"]) {
+    if (l) rows.push({ key: `bt-${level}`, label: `Model, ${level === "company" ? "company" : "organizations"} (monthly)`, short: "Model, monthly", group: level === "company" ? "Company" : "Organizations", model: "dtcr-mnl", coverage80: l.coverage80, coverage95: l.coverage95, ci80: l.coverage80_block_i80, note: `${l.windows} mature windows from ${l.origins} monthly origins; about ${l.effective_windows} independent` });
     const s = ev.comparison?.summary[`${level}|${h}`];
     if (!s) continue;
     for (const model of ev.comparison.models) {
       const v = s[model];
       if (!v || typeof v !== "object") continue;
-      rows.push({ key: `cmp-${level}-${model}`, label: `${MODEL_LABELS[model]}, ${level === "company" ? "company" : "organizations"} (quarterly)`, model, coverage80: v.coverage80, coverage95: v.coverage95, note: `the same ${ev.comparison.origins.length} quarterly origins for every model` });
+      rows.push({ key: `cmp-${level}-${model}`, label: `${MODEL_LABELS[model]}, ${level === "company" ? "company" : "organizations"} (quarterly)`, short: model === "dtcr-mnl" ? "Model, quarterly" : (MODEL_SHORT[model] ?? model), group: level === "company" ? "Company" : "Organizations", model, coverage80: v.coverage80, coverage95: v.coverage95, note: `the same ${ev.comparison.origins.length} quarterly origins for every model` });
     }
   }
   return rows;
@@ -160,16 +160,16 @@ export function TrustPage(_: { me: Me }) {
               <div className="label-sm" style={{ margin: "4px 0" }}>Company</div>
               <div className="multiples">
                 <MetricDots title="Mean absolute error" dots={metricDots(cmp, "mae")} format={(v) => v.toFixed(1)} labels />
-                <MetricDots title="Observed over expected" dots={metricDots(cmp, "observed_over_expected")} reference={1} format={(v) => v.toFixed(2)} />
-                <MetricDots title="80% range held" dots={metricDots(cmp, "coverage80")} reference={0.8} format={(v) => pct(v)} />
+                <MetricDots title="Observed over expected" dots={metricDots(cmp, "observed_over_expected")} reference={1} format={(v) => v.toFixed(2)} labels />
+                <MetricDots title="80% range held" dots={metricDots(cmp, "coverage80")} reference={0.8} format={(v) => pct(v)} labels />
               </div>
               {cmpOrg ? (
                 <>
                   <div className="label-sm" style={{ margin: "12px 0 4px" }}>Organizations</div>
                   <div className="multiples">
                     <MetricDots title="Mean absolute error" dots={metricDots(cmpOrg, "mae")} format={(v) => v.toFixed(1)} labels />
-                    <MetricDots title="Observed over expected" dots={metricDots(cmpOrg, "observed_over_expected")} reference={1} format={(v) => v.toFixed(2)} />
-                    <MetricDots title="80% range held" dots={metricDots(cmpOrg, "coverage80")} reference={0.8} format={(v) => pct(v)} />
+                    <MetricDots title="Observed over expected" dots={metricDots(cmpOrg, "observed_over_expected")} reference={1} format={(v) => v.toFixed(2)} labels />
+                    <MetricDots title="80% range held" dots={metricDots(cmpOrg, "coverage80")} reference={0.8} format={(v) => pct(v)} labels />
                   </div>
                 </>
               ) : null}

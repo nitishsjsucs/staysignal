@@ -1,5 +1,6 @@
 // Forecast page (SPEC 16.1, beat 1): the hero number with its ranges and the status-quo trailing-rate number, the fan
 // chart, the trust strip, the pseudo-real-time backtest strip, the variance decomposition and the cohort breakdown.
+import type { ReactNode } from "react";
 import type { BreakdownData, ForecastData } from "../../shared/contracts";
 import { hasScope, isRefusal, type Me, type Refusal, useQuery } from "../api";
 import { BreakdownBars, BreakdownTable, VarianceBar } from "../charts/bars";
@@ -31,7 +32,7 @@ interface Trust {
   checks: { passing: number; total: number; failing: string[] };
 }
 
-function TrustTile({ label, value, note, status }: { label: string; value: string; note: string; status: "good" | "warning" | "critical" | "info" }) {
+function TrustTile({ label, value, note, status }: { label: string; value: string; note: ReactNode; status: "good" | "warning" | "critical" | "info" }) {
   return (
     <div className="stat">
       <div className="stat-label">{label}</div>
@@ -53,7 +54,7 @@ function TrustStrip({ cohort, horizon }: { cohort: string; horizon: number }) {
     <div className="stat-row" data-testid="trust-strip">
       <TrustTile label="Backtest observed over expected" value={bt?.oe != null ? bt.oe.toFixed(2) : "n/a"} note={bt ? (bt.oe != null && bt.oe < 1 ? "forecasts ran high" : "on target") : "not evaluated at this level"} status={oeStatus} />
       <TrustTile label="80% range held" value={cov ? `${cov.held} of ${cov.windows}` : "n/a"} note={cov ? `about ${bt?.effective_windows} independent windows` : "organization level and above"} status={cov ? (cov.held / cov.windows >= 0.65 ? "good" : "warning") : "info"} />
-      <TrustTile label="Data freshness" value={data.freshness.status === "pass" ? "Fresh" : "Stale"} note={`HRIS checked ${data.freshness.date}`} status={data.freshness.status === "pass" ? "good" : "critical"} />
+      <TrustTile label="Data freshness" value={data.freshness.status === "pass" ? "Fresh" : "Stale"} note={<>HRIS checked <span style={{ whiteSpace: "nowrap" }}>{data.freshness.date}</span></>} status={data.freshness.status === "pass" ? "good" : "critical"} />
       <TrustTile label="Checks passing" value={`${data.checks.passing} of ${data.checks.total}`} note={data.checks.failing.length ? `failing: ${data.checks.failing.join(", ")}` : "no failures"} status={data.checks.failing.length ? "critical" : "good"} />
     </div>
   );

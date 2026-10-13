@@ -199,6 +199,8 @@
   color: var(--accent);
   font-size: 12px;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .link-btn:hover {
@@ -324,10 +326,21 @@
   flex: none;
 }
 
+/* In a stat tile the status is a line of text with its icon, not a bordered pill: notes there run to two lines and a
+   wrapped pill reads as a broken shape. */
 .stat .pill {
   white-space: normal;
   max-width: 100%;
-  line-height: 1.3;
+  line-height: 1.35;
+  align-items: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-2);
+}
+
+.stat .pill svg {
+  margin-top: 1px;
 }
 
 .hero {
@@ -990,6 +1003,22 @@
 
 /* Trust: model comparison small multiples, one metric per panel on its own axis */
 /* small multiples wrap by the card's own width (the chat dock can make a card narrow on a wide screen) */
+/* A direct label that sits over limit curves or grid lines keeps a surface-colored halo, so lines never cross the text */
+.chart text.halo {
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.multiple-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  min-height: 2.6em;
+}
+
 .multiples {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));

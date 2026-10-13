@@ -87,7 +87,7 @@ export function FunnelPlot({ points, height = 300 }: { points: FunnelPoint[]; he
                 <circle cx={cx} cy={cy} r={12} fill="transparent" />
                 <circle cx={cx} cy={cy} r={p.level === "group" ? 4.5 : 5.5} fill={p.level === "group" ? "var(--surface)" : "var(--series-vol)"} stroke={p.level === "group" ? "var(--series-vol)" : "var(--surface)"} strokeWidth={2} />
                 {v !== "inside" && labels.get(p.cohort) ? (
-                  <text x={labels.get(p.cohort)!.x} y={labels.get(p.cohort)!.y} dy="0.32em" textAnchor={labels.get(p.cohort)!.anchor} style={{ fill: "var(--ink-2)" }}>
+                  <text x={labels.get(p.cohort)!.x} y={labels.get(p.cohort)!.y} dy="0.32em" textAnchor={labels.get(p.cohort)!.anchor} className="halo" style={{ fill: "var(--ink-2)" }}>
                     {p.name}
                   </text>
                 ) : null}

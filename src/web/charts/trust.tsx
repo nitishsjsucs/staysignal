@@ -154,7 +154,11 @@ export function ReliabilityDiagram({ bins, height = 280 }: { bins: Bin[]; height
 
 export interface CoverageRow {
   key: string;
+  /** Full label for the tooltip and the table view. */
   label: string;
+  /** Row label inside the chart, under its group heading. */
+  short: string;
+  group: string;
   model: string;
   coverage80: number;
   coverage95: number;
@@ -162,30 +166,53 @@ export interface CoverageRow {
   note: string;
 }
 
-/** Question: do our ranges contain the truth as often as they claim? */
+/** Question: do our ranges contain the truth as often as they claim? Rows sit under a heading per level, with short
+ * model names, so no label is wider than its gutter; the full label is in the tooltip and the table view. */
 export function CoverageDots({ rows }: { rows: CoverageRow[] }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const { tip, show, hide } = useTooltip();
-  const labelW = Math.min(240, Math.max(130, width * 0.38));
-  const rowH = 30;
-  const height = rows.length * rowH + 30;
+  const labelW = Math.min(170, Math.max(112, width * 0.36));
+  const rowH = 26;
+  const headH = 24;
+  const layout: ({ kind: "head"; group: string; y: number } | { kind: "row"; row: CoverageRow; y: number })[] = [];
+  let yy = 0;
+  for (const r of rows) {
+    const prev = layout.length ? layout[layout.length - 1] : undefined;
+    const prevGroup = prev ? (prev.kind === "row" ? prev.row.group : prev.group) : undefined;
+    if (r.group !== prevGroup) {
+      layout.push({ kind: "head", group: r.group, y: yy + (prev ? 8 : 0) });
+      yy += headH + (prev ? 8 : 0);
+    }
+    layout.push({ kind: "row", row: r, y: yy });
+    yy += rowH;
+  }
+  const plotH = yy;
+  const height = plotH + 30;
   const iw = Math.max(80, width - labelW - 20);
   const x = scaleLinear().domain([0.4, 1]).range([0, iw]);
   return (
     <div ref={ref}>
       <svg className="chart" width={width} height={height} role="img" aria-label="Interval coverage against nominal 80% and 95%">
         <g transform={`translate(${labelW},6)`}>
-          {[0.5, 0.6, 0.7, 0.8, 0.9, 1].map((t) => (
+          {[0.4, 0.6, 0.8, 1].map((t) => (
             <g key={t}>
-              <line className="grid-line" x1={x(t)} x2={x(t)} y1={0} y2={rows.length * rowH} />
-              <text x={x(t)} y={rows.length * rowH + 16} textAnchor="middle">{pct(t)}</text>
+              <line className="grid-line" x1={x(t)} x2={x(t)} y1={0} y2={plotH} />
+              <text x={x(t)} y={plotH + 16} textAnchor="middle">{pct(t)}</text>
             </g>
           ))}
           {[0.8, 0.95].map((t) => (
-            <line key={t} x1={x(t)} x2={x(t)} y1={0} y2={rows.length * rowH} stroke="var(--axis)" strokeDasharray="4 3" />
+            <line key={t} x1={x(t)} x2={x(t)} y1={0} y2={plotH} stroke="var(--axis)" strokeDasharray="4 3" />
           ))}
-          {rows.map((r, i) => {
-            const cy = i * rowH + rowH / 2;
+          {layout.map((item) => {
+            if (item.kind === "head") {
+              return (
+                <text key={`h-${item.group}`} x={-labelW} y={item.y + headH / 2 + 2} dy="0.32em" style={{ fill: "var(--ink)", fontWeight: 600 }}>
+                  {item.group}
+                </text>
+              );
+            }
+            const r = item.row;
+            const cy = item.y + rowH / 2;
             return (
               <g key={r.key} onPointerMove={(e) => show(e, (
                 <>
@@ -196,8 +223,8 @@ export function CoverageDots({ rows }: { rows: CoverageRow[] }) {
                   <div style={{ marginTop: 4, color: "var(--muted)" }}>{r.note}</div>
                 </>
               ))} onPointerLeave={hide}>
-                <rect x={-labelW} y={cy - rowH / 2} width={labelW + iw} height={rowH} fill="transparent" />
-                <text x={-10} y={cy} dy="0.32em" textAnchor="end" style={{ fill: "var(--ink-2)" }}>{r.label}</text>
+                <rect x={-labelW} y={item.y} width={labelW + iw} height={rowH} fill="transparent" />
+                <text x={-10} y={cy} dy="0.32em" textAnchor="end" style={{ fill: "var(--ink-2)" }}>{r.short}</text>
                 {r.ci80 ? <line x1={x(Math.max(0.4, r.ci80[0]))} x2={x(r.ci80[1])} y1={cy} y2={cy} stroke={MODEL_COLORS[r.model]} strokeWidth={2} strokeOpacity={0.5} /> : null}
                 <rect x={x(Math.max(0.4, r.coverage95)) - 5.5} y={cy - 5.5} width={11} height={11} fill="var(--surface)" stroke={MODEL_COLORS[r.model]} strokeWidth={2} />
                 <circle cx={x(Math.max(0.4, r.coverage80))} cy={cy} r={4} fill={MODEL_COLORS[r.model]} />
@@ -250,7 +277,7 @@ export function MetricDots({ title, dots, reference, format, height, labels = fa
             ))
           : null}
         <g transform={`translate(${12 + labelW},0)`}>
-          {x.ticks(3).map((t) => (
+          {x.ticks(Math.max(2, Math.min(4, Math.floor(x.range()[1]! / 44)))).map((t) => (
             <g key={t}>
               <line className="grid-line" x1={x(t)} x2={x(t)} y1={18} y2={h - 26} />
               <text x={x(t)} y={h - 10} textAnchor="middle">{format(t)}</text>
@@ -308,10 +335,10 @@ export function PitHistogram({ bins, height = 160 }: { bins: number[]; height?: 
 }
 
 /** Question: which conditions are associated with higher predicted risk (not causes)? One feature per panel. */
-export function EffectLine({ label, points, binary = false, height = 170 }: { label: string; points: { x: number; cif: number; lo: number; hi: number }[]; binary?: boolean; height?: number }) {
+export function EffectLine({ label, points, binary = false, height = 150 }: { label: string; points: { x: number; cif: number; lo: number; hi: number }[]; binary?: boolean; height?: number }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const { tip, show, hide } = useTooltip();
-  const m = { top: 22, right: 12, bottom: 24, left: 44 };
+  const m = { top: 6, right: 12, bottom: 24, left: 44 };
   const iw = Math.max(80, width - m.left - m.right);
   const ih = height - m.top - m.bottom;
   const xs = points.map((p) => p.x);
@@ -323,10 +350,13 @@ export function EffectLine({ label, points, binary = false, height = 170 }: { la
   const bandPath = area<{ x: number; lo: number; hi: number }>().x((p) => px(p.x)).y0((p) => y(p.lo)).y1((p) => y(p.hi)).curve(curveMonotoneX)(points) ?? "";
   const linePath = line<{ x: number; cif: number }>().x((p) => px(p.x)).y((p) => y(p.cif)).curve(curveMonotoneX)(points) ?? "";
   const fmtX = (v: number) => (binary ? (v ? "Yes" : "No") : Number.isInteger(v) ? String(v) : v.toFixed(2));
+  // Evaluated values can sit closer than a label is wide (0.80, 0.85, ...): label round ticks of the scale instead,
+  // about one per 56 px; the hover layer still covers every evaluated value.
+  const xTicks = binary ? xs : xl.ticks(Math.max(2, Math.floor(iw / 56)));
   return (
     <div ref={ref}>
+      <div className="multiple-title">{label}</div>
       <svg className="chart" width={width} height={height} role="img" aria-label={`${label}: predicted 3-month departure probability from ${pct(points[0]!.cif, 1)} to ${pct(points[points.length - 1]!.cif, 1)}`}>
-        <text x={0} y={12} style={{ fill: "var(--ink)", fontWeight: 600 }}>{label}</text>
         <g transform={`translate(${m.left},${m.top})`}>
           {y.ticks(3).map((t) => (
             <g key={t}>
@@ -356,8 +386,10 @@ export function EffectLine({ label, points, binary = false, height = 170 }: { la
               </>
             ))} onPointerLeave={hide}>
               <rect x={px(p.x) - 10} y={0} width={20} height={ih} fill="transparent" />
-              <text x={px(p.x)} y={ih + 16} textAnchor="middle">{fmtX(p.x)}</text>
             </g>
+          ))}
+          {xTicks.map((t) => (
+            <text key={`x${t}`} x={px(t)} y={ih + 16} textAnchor="middle">{fmtX(t)}</text>
           ))}
           <line className="axis-line" x1={0} x2={iw} y1={ih} y2={ih} />
         </g>

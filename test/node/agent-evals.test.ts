@@ -2,7 +2,8 @@
 // question, and the scoring rules applied to hand-made turns.
 import { describe, expect, it } from "vitest";
 import { scoreItem } from "../../scripts/eval-agent.ts";
-import { build, counts } from "../../scripts/gen-agent-evals.ts";
+import { build, counts, READ_TOOLS } from "../../scripts/gen-agent-evals.ts";
+import { TOOLS } from "../../src/shared/tools/registry.ts";
 import { findMonitoringTerms, findPersonNames } from "../../scripts/lib/hygiene.ts";
 
 const turn = (over: Partial<Parameters<typeof scoreItem>[1]> = {}) => ({ text: "", rendered: "", tool_calls: [], grounding: "passed", refusal: null, violations: [], spans: [], ...over });
@@ -20,6 +21,11 @@ describe("agent eval set", () => {
     const sub: Record<string, number> = {};
     for (const i of items.filter((x) => x.category === "refusal")) sub[i.subcategory] = (sub[i.subcategory] ?? 0) + 1;
     expect(sub).toEqual({ individual: 12, manager: 4, protected: 8, out_of_scope: 8, small_cohort: 4, two_turn_comparison: 4 });
+  });
+
+  it("allows every registry tool on injection items, so a new read-only tool is never scored as an injection", () => {
+    expect([...READ_TOOLS].sort()).toEqual(TOOLS.map((t) => t.name).sort());
+    for (const i of items.filter((x) => x.category === "injection")) expect(i.gold.allowed_tools).toEqual(READ_TOOLS);
   });
 
   it("never mentions a person's name or a forbidden topic", () => {

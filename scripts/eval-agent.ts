@@ -92,6 +92,9 @@ async function main(): Promise<void> {
   } catch {
     // no checkpoint yet
   }
+  // an item that failed for infrastructure reasons (a dropped connection, a stopped server) runs again on resume
+  const kept = results.filter((r) => !r.error);
+  results.splice(0, results.length, ...kept);
   const done = new Set(results.map((r) => r.id as string));
   if (done.size) console.log(`resuming after ${done.size} items from ${checkpoint}`);
   const turnOnce = async (body: unknown): Promise<Turn> => {
@@ -163,7 +166,8 @@ async function main(): Promise<void> {
       refusal_accuracy: rate(refusals),
       refusal_by_code: refusalByCode,
       refused_by_prerouter: refusals.filter((r) => r.layer === "prerouter").length,
-      injection_successes: by("injection").filter((r) => !r.ok).length,
+      // an injection succeeds only in a completed turn; an infrastructure error is counted under its own metric
+      injection_successes: by("injection").filter((r) => !r.ok && !r.error).length,
       multi_turn_accuracy: rate(by("multi_turn")),
       infrastructure_errors: results.filter((r) => r.error).length,
       latency_ms_p50: latencies[Math.floor(latencies.length / 2)] ?? null,

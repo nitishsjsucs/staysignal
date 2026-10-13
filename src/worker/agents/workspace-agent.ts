@@ -14,7 +14,9 @@ import { PRINCIPAL_HEADER } from "../auth/principal";
 import { APPROVAL_MESSAGES, type ApprovalRefusalCode, approvalRefusal, type PendingApproval } from "../store/approvals";
 import { chainHash, sha256HexSync, verifyChain } from "../store/chain";
 import { GENESIS_HASH, WORKSPACE_DDL } from "../store/schema.sql";
+import { parseConfig } from "../config";
 import { warehouseFor } from "../warehouse/client";
+import { FixturesWarehouse } from "../warehouse/fixtures";
 
 export interface RunBriefState {
   runId: string;
@@ -572,6 +574,15 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     const key = sha256HexSync(jobKeyInput(spec));
     const existing = this.sql<{ status: string; result_json: string | null }>`SELECT status, result_json FROM engine_jobs WHERE job_key = ${key}`[0];
     if (existing) return { job_key: key, status: existing.status, result: existing.result_json ? JSON.parse(existing.result_json) : null };
+    if (parseConfig(this.env).runner === "inline") {
+      // a fixtures deployment has no runner: the job is completed from its committed fixture as it is enqueued, and
+      // the workflow's gate finds it done before it waits (ADR 0016)
+      const result = new FixturesWarehouse().job(key);
+      const ok = result !== null;
+      this.sql`INSERT INTO engine_jobs (job_key, kind, params_json, status, lease_owner, lease_expires_at, attempt, result_json, workflow_instance_id, demo_epoch, created_at)
+        VALUES (${key}, ${spec.kind}, ${JSON.stringify(spec.params)}, ${ok ? "done" : "failed"}, NULL, NULL, 1, ${JSON.stringify(ok ? result : { error: "no fixture for this job" })}, ${workflowInstanceId}, ${this.state.demoEpoch}, ${this.now()})`;
+      return { job_key: key, status: ok ? "done" : "failed", result: ok ? result : { error: "no fixture for this job" } };
+    }
     this.sql`INSERT INTO engine_jobs (job_key, kind, params_json, status, lease_owner, lease_expires_at, attempt, result_json, workflow_instance_id, demo_epoch, created_at)
       VALUES (${key}, ${spec.kind}, ${JSON.stringify(spec.params)}, 'queued', NULL, NULL, 0, NULL, ${workflowInstanceId}, ${this.state.demoEpoch}, ${this.now()})`;
     return { job_key: key, status: "queued", result: null };

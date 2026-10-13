@@ -21,6 +21,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      # the fixtures deployment: Workers Free rules, a production build and wrangler deploy --dry-run with the 8 MiB check
+      - run: npm run deploy:dry-run
       - run: npm run check:prose
       - run: npm run check:hygiene # public tier; the private tier runs only in the pre-commit hook
   engine:

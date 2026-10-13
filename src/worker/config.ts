@@ -3,6 +3,9 @@ export interface AppConfig {
   authMode: "dev" | "access";
   dataMode: "fixtures" | "engine" | "bigquery";
   llm: "stub" | "recorded" | "llama" | "mlx" | "workers-ai";
+  /** "external": a runner leases engine jobs (the local engine or the fixture runner); "inline": a fixtures
+   * deployment completes each job from the committed job fixtures as it is enqueued (no runner). */
+  runner: "external" | "inline";
   demo: boolean;
   engineUrl: string;
   devJwks: string | null;
@@ -29,6 +32,7 @@ export function parseConfig(env: Env): AppConfig {
     authMode,
     dataMode,
     llm,
+    runner: e.SS_RUNNER === "inline" && dataMode === "fixtures" ? "inline" : "external",
     demo: e.SS_DEMO === "1",
     engineUrl: e.SS_ENGINE_URL ?? "http://127.0.0.1:8196",
     devJwks: e.SS_DEV_JWKS ?? null,

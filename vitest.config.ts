@@ -21,6 +21,16 @@ export default defineConfig(async () => {
           },
         },
         {
+          // the fixtures deployment's configuration: no runner, engine jobs completed inline from the fixtures
+          plugins: [agents(), cloudflareTest({ wrangler: { configPath: "./wrangler.jsonc" }, miniflare: { bindings: { ...secrets, SS_AUTH_MODE: "dev", SS_DATA_MODE: "fixtures", SS_LLM: "stub", SS_DEMO: "1", SS_RUNNER: "inline" } } })],
+          test: {
+            name: "worker-inline",
+            include: ["test/worker-inline/**/*.test.ts"],
+            fileParallelism: false,
+            testTimeout: 60_000,
+          },
+        },
+        {
           test: { name: "node", include: ["test/node/**/*.test.ts"], environment: "node" },
         },
         {

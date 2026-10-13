@@ -46,6 +46,20 @@ jobs:
       # C1 across platforms: regenerate the canonical world on Linux and compare every macOS-made pin
       - run: uv run --locked --project engine staysignal world generate --profile canonical --out var/world
       - run: uv run --locked --project engine staysignal world verify --manifest data/world/manifest.json --dir var/world
+  challenger:
+    # C15: the optional SurvivalBoost extra (about 1 GB) and a smoke fit with n_iter=3 on the small world; the full
+    # recorded run is results/challenger-*.json (uv run --project engine staysignal eval challenger)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.17"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --locked --project engine --extra challenger
+      - run: uv run --locked --project engine --extra challenger pytest engine/tests/baselines/test_survivalboost.py -q
   agent-eval-stub:
     # the 200-item agent eval with the scripted stub model against the built app under wrangler dev: proves the
     # harness, the pre-router and the refusal codes, and that no injected request gets through (SPEC 14.12)

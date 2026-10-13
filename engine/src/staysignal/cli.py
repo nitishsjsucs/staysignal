@@ -299,6 +299,59 @@ def cmd_eval_export(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_eval_challenger(args: argparse.Namespace) -> int:
+    """C15: SurvivalBoost and the like-for-like 12,000-row model on the comparison's origins (needs the extra)."""
+    import datetime as dt
+
+    from staysignal.baselines import survivalboost as sb
+
+    if not sb.available():
+        print("the challenger needs the uv extra: uv sync --project engine --extra challenger")
+        return 1
+    from staysignal.evaluate.challenger import run_challenger
+    from staysignal.evaluate.comparison import COMPARISON_ORIGINS
+    from staysignal.evaluate.report import comparison_summary
+    from staysignal.ingest.landing import load_world_sources
+    from staysignal.world.spec import PROFILES
+
+    repo, var = _repo_var()
+    world = var / "world"
+    sha = json.loads((world / "manifest.json").read_text())["world_sha256"]
+    t0 = time.perf_counter()
+    origins = COMPARISON_ORIGINS[: args.origins] if args.origins else COMPARISON_ORIGINS
+    out = run_challenger(
+        load_world_sources(world), PROFILES["canonical"].start, var / "cache", sha, origins, args.n_iter, args.cap
+    )
+    flags = "" if args.n_iter == sb.N_ITER else f" --n-iter {args.n_iter}"
+    flags += "" if args.cap == sb.ROW_CAP else f" --cap {args.cap}"
+    flags += f" --origins {args.origins}" if args.origins else ""
+    doc = {
+        "kind": "challenger",
+        "command": f"uv run --project engine staysignal eval challenger{flags}",
+        "date": dt.date.today().isoformat(),
+        "label": "synthetic",
+        "world_sha256": sha,
+        "design": (
+            f"challenger: hazardous 0.2.0 SurvivalBoost (n_iter {args.n_iter}, Kaplan-Meier IPCW) on at most "
+            f"{args.cap:,} person-landmarks from quarterly landmarks, followed up to 180 days; Poisson-binomial "
+            "intervals and a shock-aware variant with the main model's sigma draws; dtcr-mnl-12k is the main model "
+            "fitted on the same sampled people (the row cap is a handicap both carry)"
+        ),
+        "n_iter": args.n_iter,
+        "row_cap": args.cap,
+        "origins": out["origins"],
+        "models": out["models"],
+        "fits": out["fits"],
+        "summary": comparison_summary(out, out["models"]),
+        "seconds": round(time.perf_counter() - t0, 1),
+        "entries": out["entries"],
+    }
+    path = repo / "results" / f"challenger-{doc['date']}.json"
+    path.write_text(json.dumps(doc, indent=1) + "\n")
+    print(json.dumps({"written": str(path.relative_to(repo)), "seconds": doc["seconds"]}))
+    return 0
+
+
 def cmd_eval_recovery(args: argparse.Namespace) -> int:
     """C6: the recovery profile's fit against the generator's truth, recorded in results/ (about a minute)."""
     import datetime as dt
@@ -468,6 +521,11 @@ def build_parser() -> argparse.ArgumentParser:
     ef.set_defaults(func=cmd_eval_effects)
     ex = esub.add_parser("export", help="the Trust page's data from the latest recorded results")
     ex.set_defaults(func=cmd_eval_export)
+    ch = esub.add_parser("challenger", help="C15: SurvivalBoost and a like-for-like model on the comparison origins")
+    ch.add_argument("--n-iter", type=int, default=100)
+    ch.add_argument("--cap", type=int, default=12_000)
+    ch.add_argument("--origins", type=int, default=None, help="only the first N comparison origins")
+    ch.set_defaults(func=cmd_eval_challenger)
     rc = esub.add_parser("recovery", help="C6: the fit on the recovery world against the generator's truth")
     rc.set_defaults(func=cmd_eval_recovery)
     oc = esub.add_parser("oracle-coverage", help="C5: oracle 90% intervals against realized counts")

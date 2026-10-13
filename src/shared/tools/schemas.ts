@@ -45,7 +45,7 @@ export const toolInputs = {
     level: z.enum(["company", "organization", "group"]).optional(),
     horizon_months: horizonMonths,
     horizon_days: horizonDays,
-    model: z.enum(["dtcr-mnl", "hist", "aj", "oracle"]).optional(),
+    model: z.enum(["dtcr-mnl", "hist", "aj", "oracle", "survivalboost", "survivalboost-shock", "dtcr-mnl-12k"]).optional(),
   }),
   data_quality_status: z.object({
     source: z.enum(["hris", "payroll", "ats", "all"]).optional(),

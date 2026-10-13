@@ -22,7 +22,7 @@ from staysignal.world.spec import PROFILES
 LABEL = "synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy"
 
 
-def comparison_summary(cmp: dict) -> dict:
+def comparison_summary(cmp: dict, models: tuple[str, ...] | list[str] = MODELS) -> dict:
     by: dict[tuple[str, int], list[dict]] = defaultdict(list)
     for e in cmp["entries"]:
         if e["status"] == "mature":
@@ -30,8 +30,8 @@ def comparison_summary(cmp: dict) -> dict:
     out = {}
     for (level, h), es in sorted(by.items()):
         row = {"level": level, "horizon_months": h, "windows": len(es)}
-        for model in MODELS:
-            fs = [(e[model], e["actual"]) for e in es if e[model] is not None]
+        for model in models:
+            fs = [(e[model], e["actual"]) for e in es if e.get(model) is not None]
             if not fs:
                 continue
             err = [f["expected"] - a for f, a in fs]
@@ -162,10 +162,28 @@ def latest(results: Path, kind: str) -> dict | None:
     return json.loads(files[-1].read_text()) if files else None
 
 
+def with_challenger(comparison: dict, ch: dict | None) -> dict:
+    """Adds the recorded challenger run (`results/challenger-*.json`) to the comparison when it scored the same
+    origins: its models after the main ones, its summary rows merged per level and horizon."""
+    if ch is None or ch["origins"] != comparison["origins"]:
+        return comparison
+    summary = {key: dict(row) for key, row in comparison["summary"].items()}
+    for key, row in ch["summary"].items():
+        summary.setdefault(key, {k: row[k] for k in ("level", "horizon_months", "windows")})
+        summary[key].update({m: row[m] for m in ch["models"] if m in row})
+    return {
+        **comparison,
+        "design": f"{comparison['design']}; {ch['design']}",
+        "models": [*comparison["models"], *ch["models"]],
+        "summary": summary,
+    }
+
+
 def evaluation_fixture(results: Path) -> dict | None:
     """The Trust page's data (the API's `evaluation.json`), assembled from the latest recorded results."""
     bt, cal, cmp = latest(results, "backtest"), latest(results, "calibration"), latest(results, "model-comparison")
     eff = latest(results, "effects")
+    ch = latest(results, "challenger")
     if bt is None or cmp is None:
         return None
     keep = (
@@ -188,6 +206,7 @@ def evaluation_fixture(results: Path) -> dict | None:
             {bt["command"], cmp["command"]}
             | ({cal["command"]} if cal else set())
             | ({eff["command"]} if eff else set())
+            | ({ch["command"]} if ch else set())
         ),
         "world_sha256": bt["world_sha256"],
         "backtest": {
@@ -199,9 +218,9 @@ def evaluation_fixture(results: Path) -> dict | None:
         "calibration": None
         if cal is None
         else {k: cal[k] for k in ("design", "n", "ici", "e50", "e90", "reliability")},
-        "comparison": {k: cmp[k] for k in ("design", "origins", "models", "summary")},
+        "comparison": with_challenger({k: cmp[k] for k in ("design", "origins", "models", "summary")}, ch),
         "effects": None if eff is None else {k: eff[k] for k in ("design", "population", "effects")},
     }
 
 
-__all__ = ["comparison_summary", "evaluation_fixture", "latest", "run_all", "run_effects"]
+__all__ = ["comparison_summary", "evaluation_fixture", "latest", "run_all", "run_effects", "with_challenger"]

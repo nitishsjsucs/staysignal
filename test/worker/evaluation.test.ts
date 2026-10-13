@@ -10,7 +10,9 @@ describe("GET /api/evaluation", () => {
     expect(Object.keys(ev.backtest.levels)).toContain("company|3");
     expect(Object.keys(ev.backtest.levels)).toContain("organization|3");
     expect(ev.calibration?.reliability.every((b) => b.n >= 10)).toBe(true);
-    expect(ev.comparison.models).toEqual(["dtcr-mnl", "hist", "aj", "oracle"]);
+    expect(ev.comparison.models).toEqual(["dtcr-mnl", "hist", "aj", "oracle", "survivalboost", "survivalboost-shock", "dtcr-mnl-12k"]);
+    // the challenger (C15) is scored on the same origins and merged into the same summary rows
+    expect(ev.comparison.summary["company|3"]?.survivalboost).toMatchObject({ coverage80: expect.any(Number) });
     expect(new Set(ev.backtest.entries.map((e) => e.cohort)).has("company")).toBe(true);
   });
 

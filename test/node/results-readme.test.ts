@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { loadReports } from "../../scripts/results-to-readme.ts";
-import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, type RecoveryReport, renderActionAudit, renderBacktest, renderModelComparison, renderOracleCoverage, renderRecovery, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
+import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type RecoveryReport, renderActionAudit, renderChallenger, renderBacktest, renderModelComparison, renderOracleCoverage, renderRecovery, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
 
 describe("README Results generation", () => {
   it("replaces only the marked section", () => {
@@ -17,6 +17,27 @@ describe("README Results generation", () => {
   it("keeps the committed README in sync with the committed results", () => {
     const readme = readFileSync("README.md", "utf8");
     expect(replaceSection(readme, renderResults(loadReports(process.cwd())))).toBe(readme);
+  });
+
+  it("renders the challenger with its row cap and the like-for-like model", () => {
+    const r: ChallengerReport = {
+      kind: "challenger",
+      command: "uv run --project engine staysignal eval challenger",
+      date: "2026-10-12",
+      n_iter: 100,
+      row_cap: 12000,
+      origins: ["2024-10-01", "2025-01-01"],
+      models: ["survivalboost", "survivalboost-shock", "dtcr-mnl-12k"],
+      fits: [
+        { origin: "2024-10-01", rows: 9800, eligible_person_landmarks: 9800, survivalboost_fit_seconds: 40.2 },
+        { origin: "2025-01-01", rows: 12000, eligible_person_landmarks: 13500, survivalboost_fit_seconds: 51.7 },
+      ],
+      summary: { "company|3": { level: "company", horizon_months: 3, windows: 2, survivalboost: { mae: 4.25, observed_over_expected: 1.1, coverage80: 0.5, coverage95: 1 } } },
+    };
+    const md = renderChallenger("results/challenger.json", r);
+    expect(md).toContain("fitted on 9,800 to 12,000 sampled person-landmarks per origin (cap 12,000; 40.2 to 51.7 s per fit)");
+    expect(md).toContain("| company | 3 months | survivalboost | 4.3 | 1.10 | 50.0% | 100.0% |");
+    expect(md).not.toContain("dtcr-mnl-12k |");
   });
 
   it("renders ground-truth recovery with the three checks and their rules", () => {

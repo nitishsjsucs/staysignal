@@ -3,7 +3,7 @@
 // model comparison on the same six quarterly origins, and the count PIT histogram. Everything is a cohort aggregate.
 import type { ComparisonMetrics, EvaluationFixture, EvaluationLevel } from "../../shared/contracts";
 import { useQuery, type Me } from "../api";
-import { BacktestTimeline, type CoverageRow, CoverageDots, EffectLine, MetricDots, MODEL_COLORS, MODEL_LABELS, PitHistogram, ReliabilityDiagram } from "../charts/trust";
+import { BacktestTimeline, type CoverageRow, CoverageDots, EffectLine, HOLLOW, MetricDots, MODEL_COLORS, MODEL_LABELS, PitHistogram, ReliabilityDiagram } from "../charts/trust";
 import { ChartCard } from "../components/ChartCard";
 import { EmptyState, ErrorState, Skeleton, StatusPill, SyntheticChip } from "../components/ui";
 import { useView } from "../router";
@@ -150,7 +150,7 @@ export function TrustPage(_: { me: Me }) {
           id="comparison"
           className="span-8"
           title="Is the competing-risks model better than the status quo?"
-          subtitle={`The same ${ev.comparison?.origins.length ?? 6} quarterly origins for every model, next ${h} month${h > 1 ? "s" : ""}; the oracle knows the latent propensities and the generator, which no model can`}
+          subtitle={`The same ${ev.comparison?.origins.length ?? 6} quarterly origins for every model, next ${h} month${h > 1 ? "s" : ""}; the oracle knows the latent propensities and the generator, which no model can${ev.comparison?.models.includes("survivalboost") ? "; the SurvivalBoost challenger is capped at 12,000 person-landmarks, a handicap the competing-risks model fitted on the same rows shares" : ""}`}
           empty={!cmp}
           emptyText="The comparison is a company-level view."
           height={260}
@@ -175,7 +175,7 @@ export function TrustPage(_: { me: Me }) {
               ) : null}
               <div className="chart-legend">
                 {ev.comparison.models.map((m) => (
-                  <span key={m} className="legend-key"><svg width="12" height="12"><circle cx="6" cy="6" r="4" fill={MODEL_COLORS[m]} /></svg>{MODEL_LABELS[m]}</span>
+                  <span key={m} className="legend-key"><svg width="12" height="12">{HOLLOW.has(m) ? <circle cx="6" cy="6" r="3.5" fill="none" stroke={MODEL_COLORS[m]} strokeWidth={2} /> : <circle cx="6" cy="6" r="4" fill={MODEL_COLORS[m]} />}</svg>{MODEL_LABELS[m]}</span>
                 ))}
               </div>
             </>

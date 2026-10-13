@@ -834,7 +834,12 @@ const backtestSummary: ToolDef<typeof toolInputs.backtest_summary, BacktestSumma
         skill_vs_hist: null,
         recorded: ev.date,
         label: "synthetic",
-        note: model === "oracle" ? "The oracle knows the latent propensities and the generator; no model can." : "The same origins for every model.",
+        note:
+          model === "oracle"
+            ? "The oracle knows the latent propensities and the generator; no model can."
+            : model.startsWith("survivalboost") || model === "dtcr-mnl-12k"
+              ? "The same origins for every model; the challenger and its like-for-like model are fitted on at most 12,000 person-landmarks."
+              : "The same origins for every model.",
       };
     }
     const fargs = { level, horizon_months: h, model };

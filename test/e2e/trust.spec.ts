@@ -14,6 +14,9 @@ test("the Trust page shows backtests, calibration, coverage and the model compar
   await expect(page.getByTestId("reliability").locator("svg.chart")).toBeVisible();
   await expect(page.getByTestId("coverage")).toContainText("Model, company (monthly)");
   await expect(page.getByTestId("comparison")).toContainText("Oracle (knows the truth)");
+  // C15: the challenger and the like-for-like model on the same origins, with the row cap stated
+  await expect(page.getByTestId("comparison")).toContainText("SurvivalBoost challenger (12,000 rows)");
+  await expect(page.getByTestId("comparison")).toContainText("capped at 12,000 person-landmarks");
   await page.getByTestId("backtest").getByRole("button", { name: "View as table" }).click();
   await expect(page.getByTestId("backtest").locator("table tbody tr")).toHaveCount(24);
   await expect(page.getByTestId("effects")).toContainText("Associational, not causal");

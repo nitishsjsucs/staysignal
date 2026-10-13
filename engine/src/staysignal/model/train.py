@@ -69,18 +69,28 @@ def landmark_dates(start: date, T: date, buffer_days: int = REPORTING_BUFFER_DAY
     return out
 
 
-def build_training(
+@dataclass
+class Collected:
+    """One landmark's eligible people before assembly: rows, matured periods per person, and per-period causes
+    (-1 for a stay)."""
+
+    s: date
+    rows: list[FeatureRow]
+    periods: list[int]
+    causes: list[list[int]]
+
+
+def collect_landmarks(
     src: Sources,
     start: date,
     T: date,
     vintage_T: datetime,
     buffer_days: int = REPORTING_BUFFER_DAYS,
     landmarks: list[date] | None = None,
-) -> TrainingSet:
+) -> list[Collected]:
     vin_T = Vintage(src, vintage_T)
     lms = landmarks if landmarks is not None else landmark_dates(start, T, buffer_days)
-    lm_rows: list[Landmark] = []
-    per_lm: list[tuple[list[FeatureRow], list[int], list[list[int]]]] = []
+    out: list[Collected] = []
     for s in lms:
         vin_s = Vintage(src, as_cutoff_datetime(s))
         rows = features_at(vin_s, s)
@@ -106,8 +116,27 @@ def build_training(
                 kept.append(r)
                 periods.append(len(ps))
                 causes.append(cs)
-        lm_rows.append(Landmark(s, kept))
-        per_lm.append((kept, periods, causes))
+        out.append(Collected(s, kept, periods, causes))
+    return out
+
+
+def build_training(
+    src: Sources,
+    start: date,
+    T: date,
+    vintage_T: datetime,
+    buffer_days: int = REPORTING_BUFFER_DAYS,
+    landmarks: list[date] | None = None,
+) -> TrainingSet:
+    return assemble(collect_landmarks(src, start, T, vintage_T, buffer_days, landmarks))
+
+
+def assemble(collected: list[Collected]) -> TrainingSet:
+    """The person-period training set from collected landmarks (a subset of people is fine: the design spec, knots
+    and standardization come from the rows given)."""
+    lms = [c.s for c in collected]
+    lm_rows = [Landmark(c.s, c.rows) for c in collected]
+    per_lm = [(c.rows, c.periods, c.causes) for c in collected]
     all_rows = [r for lm in lm_rows for r in lm.rows]
     spec = DesignSpec.build(all_rows)
     blocks, fts, per, mon, ys, cl, lmi, pidx = [], [], [], [], [], [], [], []
@@ -169,7 +198,14 @@ def _round(x: float, digits: int = 12) -> float:
 
 def train(src: Sources, start: date, T: date, vintage_T: datetime, version: str, mapping: str = "payroll@1") -> dict:
     t0 = time.perf_counter()
-    ts = build_training(src, start, T, vintage_T)
+    return fit_artifact(build_training(src, start, T, vintage_T), T, vintage_T, version, mapping, t0)
+
+
+def fit_artifact(
+    ts: TrainingSet, T: date, vintage_T: datetime, version: str, mapping: str = "payroll@1", t0: float | None = None
+) -> dict:
+    """Fits the model on a training set and returns the artifact (SPEC 9.6)."""
+    t0 = time.perf_counter() if t0 is None else t0
     Xs = standardize(ts.X, ts.spec)
     pk = packing(ts.spec)
     res = mnl.fit(Xs, ts.Y, pk, lam=LAMBDA)

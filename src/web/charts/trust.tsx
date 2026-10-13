@@ -11,12 +11,18 @@ export const MODEL_COLORS: Record<string, string> = {
   hist: "var(--series-other)",
   aj: "var(--series-inv)",
   oracle: "var(--series-ret)",
+  survivalboost: "var(--series-challenger)",
+  "survivalboost-shock": "var(--series-challenger)",
+  "dtcr-mnl-12k": "var(--series-like)",
 };
 export const MODEL_LABELS: Record<string, string> = {
   "dtcr-mnl": "Competing-risks model",
   hist: "Trailing rate (status quo)",
   aj: "Aalen-Johansen marginal",
   oracle: "Oracle (knows the truth)",
+  survivalboost: "SurvivalBoost challenger (12,000 rows)",
+  "survivalboost-shock": "SurvivalBoost with shared shocks",
+  "dtcr-mnl-12k": "Competing-risks model on the same 12,000 rows",
 };
 
 const pct = (v: number, d = 0) => `${(v * 100).toFixed(d)}%`;
@@ -216,7 +222,10 @@ export interface MetricDot {
 }
 
 /** One small multiple of the model comparison: a dot per model on a shared metric axis (never a dual axis). */
-export const MODEL_SHORT: Record<string, string> = { "dtcr-mnl": "Model", hist: "Trailing rate", aj: "Aalen-Johansen", oracle: "Oracle" };
+/** Variants drawn hollow in their model's color (same model, different intervals), so color is never the only cue. */
+export const HOLLOW = new Set(["survivalboost-shock"]);
+
+export const MODEL_SHORT: Record<string, string> = { "dtcr-mnl": "Model", hist: "Trailing rate", aj: "Aalen-Johansen", oracle: "Oracle", survivalboost: "SurvivalBoost", "survivalboost-shock": "SB + shocks", "dtcr-mnl-12k": "Model, 12k rows" };
 
 export function MetricDots({ title, dots, reference, format, height, labels = false }: { title: string; dots: MetricDot[]; reference?: number; format: (v: number) => string; height?: number; labels?: boolean }) {
   const [ref, width] = useWidth<HTMLDivElement>();
@@ -251,7 +260,11 @@ export function MetricDots({ title, dots, reference, format, height, labels = fa
           {dots.map((d) => (
             <g key={d.model} onPointerMove={(e) => show(e, <TipRow name={MODEL_LABELS[d.model] ?? d.model} value={format(d.value)} swatch={MODEL_COLORS[d.model]} />)} onPointerLeave={hide}>
               <rect x={0} y={yb(d.model)} width={x.range()[1]} height={yb.bandwidth()} fill="transparent" />
-              <circle cx={x(d.value)} cy={(yb(d.model) ?? 0) + yb.bandwidth() / 2} r={5.5} fill={MODEL_COLORS[d.model]} stroke="var(--surface)" strokeWidth={2} />
+              {HOLLOW.has(d.model) ? (
+                <circle cx={x(d.value)} cy={(yb(d.model) ?? 0) + yb.bandwidth() / 2} r={4.5} fill="var(--surface)" stroke={MODEL_COLORS[d.model]} strokeWidth={2} />
+              ) : (
+                <circle cx={x(d.value)} cy={(yb(d.model) ?? 0) + yb.bandwidth() / 2} r={5.5} fill={MODEL_COLORS[d.model]} stroke="var(--surface)" strokeWidth={2} />
+              )}
             </g>
           ))}
         </g>

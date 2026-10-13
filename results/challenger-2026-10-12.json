@@ -1,0 +1,7701 @@
+{
+ "kind": "challenger",
+ "command": "uv run --project engine staysignal eval challenger",
+ "date": "2026-10-12",
+ "label": "synthetic",
+ "world_sha256": "ff27c141906c4303195270900d84411c019599d980ea1cd1ca5d4bb3990fe8ed",
+ "design": "challenger: hazardous 0.2.0 SurvivalBoost (n_iter 100, Kaplan-Meier IPCW) on at most 12,000 person-landmarks from quarterly landmarks, followed up to 180 days; Poisson-binomial intervals and a shock-aware variant with the main model's sigma draws; dtcr-mnl-12k is the main model fitted on the same sampled people (the row cap is a handicap both carry)",
+ "n_iter": 100,
+ "row_cap": 12000,
+ "origins": [
+  "2024-10-01",
+  "2025-01-01",
+  "2025-04-01",
+  "2025-07-01",
+  "2025-10-01",
+  "2026-01-01"
+ ],
+ "models": [
+  "survivalboost",
+  "survivalboost-shock",
+  "dtcr-mnl-12k"
+ ],
+ "fits": [
+  {
+   "origin": "2024-10-01",
+   "landmarks": [
+    "2023-10-01",
+    "2024-01-01",
+    "2024-04-01"
+   ],
+   "eligible_person_landmarks": 5612,
+   "rows": 5612,
+   "events": {
+    "voluntary": 332,
+    "involuntary": 113,
+    "retirement": 14
+   },
+   "survivalboost_fit_seconds": 34.5,
+   "seconds": 36.3
+  },
+  {
+   "origin": "2025-01-01",
+   "landmarks": [
+    "2023-10-01",
+    "2024-01-01",
+    "2024-04-01",
+    "2024-07-01"
+   ],
+   "eligible_person_landmarks": 7477,
+   "rows": 7477,
+   "events": {
+    "voluntary": 467,
+    "involuntary": 152,
+    "retirement": 25
+   },
+   "survivalboost_fit_seconds": 37.9,
+   "seconds": 40.1
+  },
+  {
+   "origin": "2025-04-01",
+   "landmarks": [
+    "2023-10-01",
+    "2024-01-01",
+    "2024-04-01",
+    "2024-07-01",
+    "2024-10-01"
+   ],
+   "eligible_person_landmarks": 9341,
+   "rows": 9341,
+   "events": {
+    "voluntary": 573,
+    "involuntary": 183,
+    "retirement": 28
+   },
+   "survivalboost_fit_seconds": 48.9,
+   "seconds": 51.8
+  },
+  {
+   "origin": "2025-07-01",
+   "landmarks": [
+    "2023-10-01",
+    "2024-01-01",
+    "2024-04-01",
+    "2024-07-01",
+    "2024-10-01",
+    "2025-01-01"
+   ],
+   "eligible_person_landmarks": 11227,
+   "rows": 11227,
+   "events": {
+    "voluntary": 726,
+    "involuntary": 221,
+    "retirement": 32
+   },
+   "survivalboost_fit_seconds": 71.2,
+   "seconds": 75.4
+  },
+  {
+   "origin": "2025-10-01",
+   "landmarks": [
+    "2023-10-01",
+    "2024-01-01",
+    "2024-04-01",
+    "2024-07-01",
+    "2024-10-01",
+    "2025-01-01",
+    "2025-04-01"
+   ],
+   "eligible_person_landmarks": 13107,
+   "rows": 12000,
+   "events": {
+    "voluntary": 772,
+    "involuntary": 227,
+    "retirement": 32
+   },
+   "survivalboost_fit_seconds": 74.1,
+   "seconds": 78.6
+  },
+  {
+   "origin": "2026-01-01",
+   "landmarks": [
+    "2023-10-01",
+    "2024-01-01",
+    "2024-04-01",
+    "2024-07-01",
+    "2024-10-01",
+    "2025-01-01",
+    "2025-04-01",
+    "2025-07-01"
+   ],
+   "eligible_person_landmarks": 15009,
+   "rows": 12000,
+   "events": {
+    "voluntary": 726,
+    "involuntary": 198,
+    "retirement": 34
+   },
+   "survivalboost_fit_seconds": 79.4,
+   "seconds": 84.4
+  }
+ ],
+ "summary": {
+  "company|1": {
+   "level": "company",
+   "horizon_months": 1,
+   "windows": 6,
+   "survivalboost": {
+    "mae": 1.9959751846873839,
+    "rmse": 2.527782338892098,
+    "observed_over_expected": 1.0752630381578925,
+    "coverage80": 0.8333333333333334,
+    "coverage95": 1.0,
+    "interval_score80": 11.5
+   },
+   "survivalboost-shock": {
+    "mae": 1.9959751846873839,
+    "rmse": 2.527782338892098,
+    "observed_over_expected": 1.0752630381578925,
+    "coverage80": 0.8333333333333334,
+    "coverage95": 1.0,
+    "interval_score80": 12.166666666666666
+   },
+   "dtcr-mnl-12k": {
+    "mae": 4.49080562470019,
+    "rmse": 5.233939618215228,
+    "observed_over_expected": 0.9741318662659085,
+    "coverage80": 0.8333333333333334,
+    "coverage95": 1.0,
+    "interval_score80": 18.833333333333332
+   }
+  },
+  "company|3": {
+   "level": "company",
+   "horizon_months": 3,
+   "windows": 6,
+   "survivalboost": {
+    "mae": 14.100282762263888,
+    "rmse": 16.36271784620126,
+    "observed_over_expected": 1.0481125394074602,
+    "coverage80": 0.3333333333333333,
+    "coverage95": 0.5,
+    "interval_score80": 83.16666666666669
+   },
+   "survivalboost-shock": {
+    "mae": 14.100282762263888,
+    "rmse": 16.36271784620126,
+    "observed_over_expected": 1.0481125394074602,
+    "coverage80": 0.5,
+    "coverage95": 0.5,
+    "interval_score80": 82.66666666666669
+   },
+   "dtcr-mnl-12k": {
+    "mae": 13.06545272156544,
+    "rmse": 16.308085108680697,
+    "observed_over_expected": 0.8993964933266453,
+    "coverage80": 0.5,
+    "coverage95": 0.6666666666666666,
+    "interval_score80": 70.33333333333334
+   }
+  },
+  "company|6": {
+   "level": "company",
+   "horizon_months": 6,
+   "windows": 6,
+   "survivalboost": {
+    "mae": 25.005244500965734,
+    "rmse": 27.23421779652572,
+    "observed_over_expected": 0.9322285811627233,
+    "coverage80": 0.16666666666666666,
+    "coverage95": 0.3333333333333333,
+    "interval_score80": 152.50000000000003
+   },
+   "survivalboost-shock": {
+    "mae": 25.005244500965734,
+    "rmse": 27.23421779652572,
+    "observed_over_expected": 0.9322285811627233,
+    "coverage80": 0.3333333333333333,
+    "coverage95": 0.3333333333333333,
+    "interval_score80": 140.16666666666669
+   },
+   "dtcr-mnl-12k": {
+    "mae": 20.89533094187775,
+    "rmse": 25.750675397672214,
+    "observed_over_expected": 0.8542145600281089,
+    "coverage80": 0.3333333333333333,
+    "coverage95": 0.6666666666666666,
+    "interval_score80": 119.33333333333336
+   }
+  },
+  "organization|1": {
+   "level": "organization",
+   "horizon_months": 1,
+   "windows": 54,
+   "survivalboost": {
+    "mae": 1.0316560866441902,
+    "rmse": 1.4433018104753648,
+    "observed_over_expected": 1.0752630381578925,
+    "coverage80": 0.9074074074074074,
+    "coverage95": 0.9814814814814815,
+    "interval_score80": 4.296296296296297
+   },
+   "survivalboost-shock": {
+    "mae": 1.0316560866441902,
+    "rmse": 1.4433018104753648,
+    "observed_over_expected": 1.0752630381578925,
+    "coverage80": 0.9074074074074074,
+    "coverage95": 0.9814814814814815,
+    "interval_score80": 4.111111111111111
+   },
+   "dtcr-mnl-12k": {
+    "mae": 1.029853609858011,
+    "rmse": 1.5663464202982293,
+    "observed_over_expected": 0.9741318662659082,
+    "coverage80": 0.9259259259259259,
+    "coverage95": 0.9814814814814815,
+    "interval_score80": 4.7407407407407405
+   }
+  },
+  "organization|3": {
+   "level": "organization",
+   "horizon_months": 3,
+   "windows": 54,
+   "survivalboost": {
+    "mae": 2.589717464562572,
+    "rmse": 3.6504886935679473,
+    "observed_over_expected": 1.0481125394074602,
+    "coverage80": 0.7407407407407407,
+    "coverage95": 0.8888888888888888,
+    "interval_score80": 11.851851851851851
+   },
+   "survivalboost-shock": {
+    "mae": 2.589717464562572,
+    "rmse": 3.6504886935679473,
+    "observed_over_expected": 1.0481125394074602,
+    "coverage80": 0.7592592592592593,
+    "coverage95": 0.9074074074074074,
+    "interval_score80": 11.851851851851851
+   },
+   "dtcr-mnl-12k": {
+    "mae": 2.445681730909223,
+    "rmse": 3.464400966539543,
+    "observed_over_expected": 0.8993964933266448,
+    "coverage80": 0.8333333333333334,
+    "coverage95": 0.9629629629629629,
+    "interval_score80": 10.703703703703704
+   }
+  },
+  "organization|6": {
+   "level": "organization",
+   "horizon_months": 6,
+   "windows": 54,
+   "survivalboost": {
+    "mae": 3.959115964127396,
+    "rmse": 6.025525485266331,
+    "observed_over_expected": 0.9322285811627233,
+    "coverage80": 0.7037037037037037,
+    "coverage95": 0.8333333333333334,
+    "interval_score80": 21.25925925925926
+   },
+   "survivalboost-shock": {
+    "mae": 3.959115964127396,
+    "rmse": 6.025525485266331,
+    "observed_over_expected": 0.9322285811627233,
+    "coverage80": 0.7222222222222222,
+    "coverage95": 0.8518518518518519,
+    "interval_score80": 20.166666666666668
+   },
+   "dtcr-mnl-12k": {
+    "mae": 3.7571152028325696,
+    "rmse": 5.977727093018813,
+    "observed_over_expected": 0.854214560028109,
+    "coverage80": 0.7592592592592593,
+    "coverage95": 0.9074074074074074,
+    "interval_score80": 19.74074074074074
+   }
+  }
+ },
+ "seconds": 366.9,
+ "entries": [
+  {
+   "origin": "2024-10-01",
+   "cohort": "company",
+   "n": 1830,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 17,
+   "survivalboost": {
+    "expected": 11.766522926001763,
+    "i80": [
+     8.0,
+     16.0
+    ],
+    "i95": [
+     6.0,
+     19.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 11.766522926001763,
+    "i80": [
+     7.0,
+     16.0
+    ],
+    "i95": [
+     5.0,
+     19.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 14.142540633813523,
+    "i80": [
+     9,
+     22
+    ],
+    "i95": [
+     7,
+     26
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "company",
+   "n": 1830,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 54,
+   "survivalboost": {
+    "expected": 29.732340304588902,
+    "i80": [
+     23.0,
+     37.0
+    ],
+    "i95": [
+     20.0,
+     40.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 29.732340304588902,
+    "i80": [
+     23.0,
+     36.0
+    ],
+    "i95": [
+     20.0,
+     40.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 38.90837812606559,
+    "i80": [
+     34,
+     53
+    ],
+    "i95": [
+     29,
+     58
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "company",
+   "n": 1830,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 127,
+   "survivalboost": {
+    "expected": 101.61634031868302,
+    "i80": [
+     90.0,
+     113.0
+    ],
+    "i95": [
+     84.0,
+     120.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 101.61634031868302,
+    "i80": [
+     89.0,
+     115.0
+    ],
+    "i95": [
+     82.0,
+     122.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 122.59646930983138,
+    "i80": [
+     113,
+     147
+    ],
+    "i95": [
+     105,
+     156
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 304,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 1.9200064413532436,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.9200064413532436,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.250728922833557,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 304,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 10,
+   "survivalboost": {
+    "expected": 5.374941714853712,
+    "i80": [
+     3.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 5.374941714853712,
+    "i80": [
+     3.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 8.926440803651948,
+    "i80": [
+     6,
+     15
+    ],
+    "i95": [
+     3,
+     19
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 304,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 24,
+   "survivalboost": {
+    "expected": 20.641563227608856,
+    "i80": [
+     15.0,
+     26.0
+    ],
+    "i95": [
+     13.0,
+     29.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 20.641563227608856,
+    "i80": [
+     15.0,
+     27.0
+    ],
+    "i95": [
+     12.0,
+     31.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 27.883535855849125,
+    "i80": [
+     20,
+     38
+    ],
+    "i95": [
+     17,
+     44
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Engineering",
+   "n": 550,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 6,
+   "survivalboost": {
+    "expected": 2.878355008864953,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.878355008864953,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.053074225593927,
+    "i80": [
+     1,
+     7
+    ],
+    "i95": [
+     1,
+     10
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Engineering",
+   "n": 550,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 14,
+   "survivalboost": {
+    "expected": 7.359242010385781,
+    "i80": [
+     4.0,
+     11.0
+    ],
+    "i95": [
+     3.0,
+     13.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 7.359242010385781,
+    "i80": [
+     4.0,
+     11.0
+    ],
+    "i95": [
+     3.0,
+     13.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 11.16394584726345,
+    "i80": [
+     7,
+     18
+    ],
+    "i95": [
+     5,
+     20
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Engineering",
+   "n": 550,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 35,
+   "survivalboost": {
+    "expected": 26.19487719736796,
+    "i80": [
+     20.0,
+     32.0
+    ],
+    "i95": [
+     17.0,
+     36.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 26.19487719736796,
+    "i80": [
+     20.0,
+     33.0
+    ],
+    "i95": [
+     16.0,
+     37.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 35.356865492453004,
+    "i80": [
+     25,
+     46
+    ],
+    "i95": [
+     22,
+     51
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Finance",
+   "n": 86,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 1.2564814996445428,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.2564814996445428,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.3466274499955497,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Finance",
+   "n": 86,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 3.4025899264374586,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.4025899264374586,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.679847011238485,
+    "i80": [
+     1,
+     7
+    ],
+    "i95": [
+     0,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Finance",
+   "n": 86,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 11.413694149493104,
+    "i80": [
+     8.0,
+     15.0
+    ],
+    "i95": [
+     6.0,
+     17.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 11.413694149493104,
+    "i80": [
+     8.0,
+     16.0
+    ],
+    "i95": [
+     6.0,
+     18.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 11.273156741489947,
+    "i80": [
+     5,
+     17
+    ],
+    "i95": [
+     3,
+     21
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:IT & Operations",
+   "n": 116,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 0.4859002027346339,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.4859002027346339,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.4558907143429848,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:IT & Operations",
+   "n": 116,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 1.15459663802481,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.15459663802481,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.2587496104612899,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:IT & Operations",
+   "n": 116,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 3.564517347781751,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.564517347781751,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.02924685936716,
+    "i80": [
+     2,
+     7
+    ],
+    "i95": [
+     1,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.3304139911677183,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.3304139911677183,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.2448899004866064,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.9628425348441041,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.9628425348441041,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.6762154574850119,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 2.200879848792694,
+    "i80": [
+     1.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.200879848792694,
+    "i80": [
+     1.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.1631685941546945,
+    "i80": [
+     0,
+     6
+    ],
+    "i95": [
+     0,
+     10
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Marketing",
+   "n": 110,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.44279355058405845,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.44279355058405845,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.4668307715317367,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Marketing",
+   "n": 110,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 0.7110391096687178,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7110391096687178,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.2882472590759122,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Marketing",
+   "n": 110,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 2.101588559368649,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.101588559368649,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.122655263664435,
+    "i80": [
+     1,
+     7
+    ],
+    "i95": [
+     1,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:People",
+   "n": 79,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.4025064839316822,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.4025064839316822,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.5885111748641518,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:People",
+   "n": 79,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 0.8498030524267591,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.8498030524267591,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.6212191385621448,
+    "i80": [
+     0,
+     4
+    ],
+    "i95": [
+     0,
+     5
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:People",
+   "n": 79,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 2.1994339577011637,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.1994339577011637,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.137406218593045,
+    "i80": [
+     2,
+     9
+    ],
+    "i95": [
+     1,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Product & Design",
+   "n": 138,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 1.4029276783628366,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.4029276783628366,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.6876971962125751,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Product & Design",
+   "n": 138,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 3.2030407395575393,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.2030407395575393,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.899142703014638,
+    "i80": [
+     0,
+     4
+    ],
+    "i95": [
+     0,
+     6
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Product & Design",
+   "n": 138,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 8.208279641073592,
+    "i80": [
+     5.0,
+     11.0
+    ],
+    "i95": [
+     4.0,
+     13.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 8.208279641073592,
+    "i80": [
+     5.0,
+     12.0
+    ],
+    "i95": [
+     3.0,
+     14.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 6.076359412095623,
+    "i80": [
+     3,
+     10
+    ],
+    "i95": [
+     2,
+     12
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Sales",
+   "n": 403,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 2.6471380693580935,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.6471380693580935,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.0482902779524332,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     1,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Sales",
+   "n": 403,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 13,
+   "survivalboost": {
+    "expected": 6.7142445783900175,
+    "i80": [
+     4.0,
+     10.0
+    ],
+    "i95": [
+     2.0,
+     12.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 6.7142445783900175,
+    "i80": [
+     4.0,
+     10.0
+    ],
+    "i95": [
+     2.0,
+     12.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 8.394570295312704,
+    "i80": [
+     6,
+     15
+    ],
+    "i95": [
+     4,
+     18
+    ]
+   }
+  },
+  {
+   "origin": "2024-10-01",
+   "cohort": "org:Sales",
+   "n": 403,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 35,
+   "survivalboost": {
+    "expected": 25.091506389495244,
+    "i80": [
+     19.0,
+     31.0
+    ],
+    "i95": [
+     16.0,
+     34.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 25.091506389495244,
+    "i80": [
+     19.0,
+     31.0
+    ],
+    "i95": [
+     16.0,
+     35.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 26.55407487216429,
+    "i80": [
+     23,
+     40
+    ],
+    "i95": [
+     18,
+     47
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "company",
+   "n": 1858,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 19,
+   "survivalboost": {
+    "expected": 17.096414689751985,
+    "i80": [
+     12.0,
+     22.0
+    ],
+    "i95": [
+     10.0,
+     26.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 17.096414689751985,
+    "i80": [
+     12.0,
+     23.0
+    ],
+    "i95": [
+     10.0,
+     26.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 14.35711092940828,
+    "i80": [
+     11,
+     26
+    ],
+    "i95": [
+     8,
+     32
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "company",
+   "n": 1858,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 76,
+   "survivalboost": {
+    "expected": 58.43496573091291,
+    "i80": [
+     49.0,
+     68.0
+    ],
+    "i95": [
+     45.0,
+     73.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 58.43496573091291,
+    "i80": [
+     48.0,
+     68.0
+    ],
+    "i95": [
+     44.0,
+     73.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 75.45879771549488,
+    "i80": [
+     70,
+     103
+    ],
+    "i95": [
+     62,
+     111
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "company",
+   "n": 1858,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 130,
+   "survivalboost": {
+    "expected": 145.13110621708006,
+    "i80": [
+     131.0,
+     159.0
+    ],
+    "i95": [
+     124.0,
+     167.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 145.13110621708006,
+    "i80": [
+     127.0,
+     160.0
+    ],
+    "i95": [
+     119.0,
+     170.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 149.30005630941054,
+    "i80": [
+     137,
+     188
+    ],
+    "i95": [
+     129,
+     199
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 305,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 3.2673145112340016,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.2673145112340016,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.5150004284289036,
+    "i80": [
+     1,
+     7
+    ],
+    "i95": [
+     0,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 305,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 17,
+   "survivalboost": {
+    "expected": 10.551221671315629,
+    "i80": [
+     7.0,
+     15.0
+    ],
+    "i95": [
+     5.0,
+     17.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 10.551221671315629,
+    "i80": [
+     6.0,
+     15.0
+    ],
+    "i95": [
+     4.0,
+     18.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 13.24049803978292,
+    "i80": [
+     9,
+     25
+    ],
+    "i95": [
+     7,
+     30
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 305,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 30,
+   "survivalboost": {
+    "expected": 25.549842940994612,
+    "i80": [
+     20.0,
+     32.0
+    ],
+    "i95": [
+     17.0,
+     35.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 25.549842940994612,
+    "i80": [
+     18.0,
+     32.0
+    ],
+    "i95": [
+     15.0,
+     36.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 26.244501595203914,
+    "i80": [
+     20,
+     43
+    ],
+    "i95": [
+     16,
+     49
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Engineering",
+   "n": 562,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 7,
+   "survivalboost": {
+    "expected": 5.530070229315822,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     2.0,
+     10.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 5.530070229315822,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.338937176833203,
+    "i80": [
+     2,
+     10
+    ],
+    "i95": [
+     1,
+     13
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Engineering",
+   "n": 562,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 21,
+   "survivalboost": {
+    "expected": 18.14033374696681,
+    "i80": [
+     13.0,
+     23.0
+    ],
+    "i95": [
+     11.0,
+     27.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 18.14033374696681,
+    "i80": [
+     13.0,
+     24.0
+    ],
+    "i95": [
+     10.0,
+     27.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 22.810494100736587,
+    "i80": [
+     17,
+     36
+    ],
+    "i95": [
+     14,
+     40
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Engineering",
+   "n": 562,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 39,
+   "survivalboost": {
+    "expected": 44.79963577418279,
+    "i80": [
+     37.0,
+     53.0
+    ],
+    "i95": [
+     33.0,
+     57.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 44.79963577418279,
+    "i80": [
+     36.0,
+     54.0
+    ],
+    "i95": [
+     31.0,
+     60.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 45.13630145683571,
+    "i80": [
+     37,
+     63
+    ],
+    "i95": [
+     32,
+     74
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Finance",
+   "n": 86,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 1.2152331291518075,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.2152331291518075,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.267719871661237,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     5
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Finance",
+   "n": 86,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 6.156647243129091,
+    "i80": [
+     4.0,
+     9.0
+    ],
+    "i95": [
+     2.0,
+     11.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 6.156647243129091,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     2.0,
+     11.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 6.5452612278661135,
+    "i80": [
+     2,
+     12
+    ],
+    "i95": [
+     1,
+     15
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Finance",
+   "n": 86,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 14.873082935802602,
+    "i80": [
+     12.0,
+     18.0
+    ],
+    "i95": [
+     10.0,
+     20.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 14.873082935802602,
+    "i80": [
+     9.0,
+     19.0
+    ],
+    "i95": [
+     6.0,
+     21.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 12.726382436402218,
+    "i80": [
+     6,
+     20
+    ],
+    "i95": [
+     3,
+     27
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:IT & Operations",
+   "n": 116,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 0.8276919086723213,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.8276919086723213,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.48441649151202876,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:IT & Operations",
+   "n": 116,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 2.8968476647974417,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.8968476647974417,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.580262453711925,
+    "i80": [
+     1,
+     5
+    ],
+    "i95": [
+     0,
+     7
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:IT & Operations",
+   "n": 116,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 6.236756874199096,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     2.0,
+     11.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 6.236756874199096,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     2.0,
+     12.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.171518210056608,
+    "i80": [
+     3,
+     9
+    ],
+    "i95": [
+     1,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Legal",
+   "n": 45,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.22574293526775488,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     1.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.22574293526775488,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     1.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.1487488548457217,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Legal",
+   "n": 45,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.5404331885757047,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.5404331885757047,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.7954349960429127,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     5
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Legal",
+   "n": 45,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.8555383297374366,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.8555383297374366,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.6013089493887505,
+    "i80": [
+     0,
+     5
+    ],
+    "i95": [
+     0,
+     7
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Marketing",
+   "n": 107,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.5669776067969516,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.5669776067969516,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.3907590550813854,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Marketing",
+   "n": 107,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 1.4021491491832667,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.4021491491832667,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.08390890987937,
+    "i80": [
+     0,
+     4
+    ],
+    "i95": [
+     0,
+     6
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Marketing",
+   "n": 107,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 2.8929285472596913,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.8929285472596913,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.1808932052335885,
+    "i80": [
+     2,
+     7
+    ],
+    "i95": [
+     1,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:People",
+   "n": 81,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.74163723593646,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.74163723593646,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.610803040273439,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:People",
+   "n": 81,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 2.8307435643093655,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.8307435643093655,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.2239388930431696,
+    "i80": [
+     1,
+     7
+    ],
+    "i95": [
+     0,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:People",
+   "n": 81,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 8.262011015308795,
+    "i80": [
+     5.0,
+     12.0
+    ],
+    "i95": [
+     4.0,
+     14.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 8.262011015308795,
+    "i80": [
+     4.0,
+     12.0
+    ],
+    "i95": [
+     3.0,
+     15.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 6.40515141993138,
+    "i80": [
+     3,
+     11
+    ],
+    "i95": [
+     1,
+     15
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Product & Design",
+   "n": 150,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 1.2048298828753272,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.2048298828753272,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.0955787519272158,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Product & Design",
+   "n": 150,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 3.547004683974607,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.547004683974607,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.768400017568254,
+    "i80": [
+     3,
+     10
+    ],
+    "i95": [
+     2,
+     12
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Product & Design",
+   "n": 150,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 9.32374158243599,
+    "i80": [
+     6.0,
+     13.0
+    ],
+    "i95": [
+     4.0,
+     15.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 9.32374158243599,
+    "i80": [
+     5.0,
+     13.0
+    ],
+    "i95": [
+     3.0,
+     16.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 11.432704092532992,
+    "i80": [
+     6,
+     16
+    ],
+    "i95": [
+     4,
+     20
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Sales",
+   "n": 406,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 3.516917250501538,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.516917250501538,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     8.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.505147258845146,
+    "i80": [
+     2,
+     7
+    ],
+    "i95": [
+     0,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Sales",
+   "n": 406,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 23,
+   "survivalboost": {
+    "expected": 12.369584818660996,
+    "i80": [
+     8.0,
+     17.0
+    ],
+    "i95": [
+     6.0,
+     19.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 12.369584818660996,
+    "i80": [
+     8.0,
+     17.0
+    ],
+    "i95": [
+     6.0,
+     19.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 18.410599076863786,
+    "i80": [
+     14,
+     27
+    ],
+    "i95": [
+     10,
+     32
+    ]
+   }
+  },
+  {
+   "origin": "2025-01-01",
+   "cohort": "org:Sales",
+   "n": 406,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 34,
+   "survivalboost": {
+    "expected": 32.33756821715903,
+    "i80": [
+     26.0,
+     39.0
+    ],
+    "i95": [
+     23.0,
+     43.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 32.33756821715903,
+    "i80": [
+     25.0,
+     40.0
+    ],
+    "i95": [
+     21.0,
+     45.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 36.40129494382544,
+    "i80": [
+     28,
+     49
+    ],
+    "i95": [
+     23,
+     55
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "company",
+   "n": 1859,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 19,
+   "survivalboost": {
+    "expected": 19.388214238361975,
+    "i80": [
+     14.0,
+     25.0
+    ],
+    "i95": [
+     11.0,
+     28.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 19.388214238361975,
+    "i80": [
+     14.0,
+     25.0
+    ],
+    "i95": [
+     12.0,
+     28.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 28.709038059239308,
+    "i80": [
+     22,
+     41
+    ],
+    "i95": [
+     18,
+     47
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "company",
+   "n": 1859,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 56,
+   "survivalboost": {
+    "expected": 67.20089780040558,
+    "i80": [
+     57.0,
+     77.0
+    ],
+    "i95": [
+     52.0,
+     83.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 67.20089780040558,
+    "i80": [
+     56.0,
+     78.0
+    ],
+    "i95": [
+     51.0,
+     84.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 82.99893399828466,
+    "i80": [
+     68,
+     100
+    ],
+    "i95": [
+     62,
+     110
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "company",
+   "n": 1859,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 100,
+   "survivalboost": {
+    "expected": 144.5863540480026,
+    "i80": [
+     131.0,
+     159.0
+    ],
+    "i95": [
+     124.0,
+     166.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 144.5863540480026,
+    "i80": [
+     128.0,
+     161.0
+    ],
+    "i95": [
+     120.0,
+     169.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 150.95607771021167,
+    "i80": [
+     125,
+     173
+    ],
+    "i95": [
+     115,
+     181
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 308,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 3.3392242656639137,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.3392242656639137,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.458987543760842,
+    "i80": [
+     3,
+     9
+    ],
+    "i95": [
+     1,
+     12
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 308,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 14,
+   "survivalboost": {
+    "expected": 11.566059517945966,
+    "i80": [
+     8.0,
+     16.0
+    ],
+    "i95": [
+     6.0,
+     18.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 11.566059517945966,
+    "i80": [
+     7.0,
+     16.0
+    ],
+    "i95": [
+     5.0,
+     19.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 15.734493478352844,
+    "i80": [
+     9,
+     21
+    ],
+    "i95": [
+     7,
+     26
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 308,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 27,
+   "survivalboost": {
+    "expected": 25.982184467639208,
+    "i80": [
+     20.0,
+     32.0
+    ],
+    "i95": [
+     17.0,
+     35.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 25.982184467639208,
+    "i80": [
+     19.0,
+     33.0
+    ],
+    "i95": [
+     15.0,
+     38.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 28.515243513115248,
+    "i80": [
+     19,
+     36
+    ],
+    "i95": [
+     15,
+     40
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Engineering",
+   "n": 558,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 5.481739881036575,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 5.481739881036575,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     1.0,
+     11.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 8.450216387858635,
+    "i80": [
+     5,
+     14
+    ],
+    "i95": [
+     3,
+     18
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Engineering",
+   "n": 558,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 18,
+   "survivalboost": {
+    "expected": 19.370012043806426,
+    "i80": [
+     14.0,
+     25.0
+    ],
+    "i95": [
+     12.0,
+     28.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 19.370012043806426,
+    "i80": [
+     14.0,
+     25.0
+    ],
+    "i95": [
+     11.0,
+     28.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 24.46446198509704,
+    "i80": [
+     17,
+     33
+    ],
+    "i95": [
+     14,
+     38
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Engineering",
+   "n": 558,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 25,
+   "survivalboost": {
+    "expected": 44.50833210934686,
+    "i80": [
+     37.0,
+     52.0
+    ],
+    "i95": [
+     33.0,
+     57.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 44.50833210934686,
+    "i80": [
+     36.0,
+     54.0
+    ],
+    "i95": [
+     31.0,
+     59.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 44.566260229246836,
+    "i80": [
+     33,
+     57
+    ],
+    "i95": [
+     29,
+     63
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Finance",
+   "n": 91,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.7814772968162462,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7814772968162462,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.402719342745921,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Finance",
+   "n": 91,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 2.8686991635172623,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.8686991635172623,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 6.874602018789322,
+    "i80": [
+     3,
+     12
+    ],
+    "i95": [
+     2,
+     16
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Finance",
+   "n": 91,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 5.503481327394515,
+    "i80": [
+     3.0,
+     8.0
+    ],
+    "i95": [
+     2.0,
+     10.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 5.503481327394515,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     1.0,
+     11.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 12.342442314843584,
+    "i80": [
+     7,
+     20
+    ],
+    "i95": [
+     5,
+     26
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:IT & Operations",
+   "n": 119,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 1.1946758859755853,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.1946758859755853,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.2595890602085233,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:IT & Operations",
+   "n": 119,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 3.6912118776976515,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.6912118776976515,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     8.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.669090444162441,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:IT & Operations",
+   "n": 119,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 6,
+   "survivalboost": {
+    "expected": 7.087735270199389,
+    "i80": [
+     4.0,
+     10.0
+    ],
+    "i95": [
+     3.0,
+     12.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 7.087735270199389,
+    "i80": [
+     4.0,
+     11.0
+    ],
+    "i95": [
+     2.0,
+     13.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 6.736055048248637,
+    "i80": [
+     3,
+     10
+    ],
+    "i95": [
+     2,
+     12
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Legal",
+   "n": 42,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.35640736677631435,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.35640736677631435,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.22274310130770258,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     1
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Legal",
+   "n": 42,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.7458790016542454,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7458790016542454,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.6534348435957292,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Legal",
+   "n": 42,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 1.4379459475935654,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.4379459475935654,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.2110632123489529,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Marketing",
+   "n": 108,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.7616101232330627,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7616101232330627,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.8340659565789779,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Marketing",
+   "n": 108,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 2.2505959316645643,
+    "i80": [
+     1.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.2505959316645643,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.4359879762680436,
+    "i80": [
+     1,
+     4
+    ],
+    "i95": [
+     0,
+     6
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Marketing",
+   "n": 108,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 6,
+   "survivalboost": {
+    "expected": 4.5608344818164355,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.5608344818164355,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.486654737124217,
+    "i80": [
+     2,
+     8
+    ],
+    "i95": [
+     1,
+     10
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:People",
+   "n": 78,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.8064811483856098,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.8064811483856098,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.0185519696129548,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:People",
+   "n": 78,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 2.4660292708057483,
+    "i80": [
+     1.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.4660292708057483,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.962623735258068,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:People",
+   "n": 78,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 4.814449394600325,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.814449394600325,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.430584647136266,
+    "i80": [
+     2,
+     9
+    ],
+    "i95": [
+     1,
+     12
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Product & Design",
+   "n": 148,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 1.3339674374521864,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.3339674374521864,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.0168016085403195,
+    "i80": [
+     0,
+     4
+    ],
+    "i95": [
+     0,
+     6
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Product & Design",
+   "n": 148,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 4.611261168481796,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.611261168481796,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.853712916260436,
+    "i80": [
+     3,
+     10
+    ],
+    "i95": [
+     1,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Product & Design",
+   "n": 148,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 10,
+   "survivalboost": {
+    "expected": 9.963917919846626,
+    "i80": [
+     6.0,
+     14.0
+    ],
+    "i95": [
+     5.0,
+     16.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 9.963917919846626,
+    "i80": [
+     6.0,
+     14.0
+    ],
+    "i95": [
+     4.0,
+     17.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 10.700249825465567,
+    "i80": [
+     6,
+     16
+    ],
+    "i95": [
+     4,
+     18
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Sales",
+   "n": 407,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 5.332630833022481,
+    "i80": [
+     3.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 5.332630833022481,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     11.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 7.045363088625428,
+    "i80": [
+     4,
+     12
+    ],
+    "i95": [
+     2,
+     13
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Sales",
+   "n": 407,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 11,
+   "survivalboost": {
+    "expected": 19.631149824831923,
+    "i80": [
+     14.0,
+     25.0
+    ],
+    "i95": [
+     12.0,
+     28.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 19.631149824831923,
+    "i80": [
+     14.0,
+     26.0
+    ],
+    "i95": [
+     11.0,
+     29.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 20.350526600500682,
+    "i80": [
+     14,
+     27
+    ],
+    "i95": [
+     11,
+     29
+    ]
+   }
+  },
+  {
+   "origin": "2025-04-01",
+   "cohort": "org:Sales",
+   "n": 407,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 22,
+   "survivalboost": {
+    "expected": 40.72747312956569,
+    "i80": [
+     34.0,
+     48.0
+    ],
+    "i95": [
+     30.0,
+     52.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 40.72747312956569,
+    "i80": [
+     32.0,
+     50.0
+    ],
+    "i95": [
+     27.0,
+     54.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 36.96752418268228,
+    "i80": [
+     26,
+     45
+    ],
+    "i95": [
+     23,
+     51
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "company",
+   "n": 1882,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 16,
+   "survivalboost": {
+    "expected": 17.85497872603965,
+    "i80": [
+     13.0,
+     23.0
+    ],
+    "i95": [
+     10.0,
+     26.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 17.85497872603965,
+    "i80": [
+     12.0,
+     23.0
+    ],
+    "i95": [
+     10.0,
+     27.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 21.184074721339417,
+    "i80": [
+     15,
+     28
+    ],
+    "i95": [
+     11,
+     33
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "company",
+   "n": 1882,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 46,
+   "survivalboost": {
+    "expected": 69.15856155672381,
+    "i80": [
+     59.0,
+     79.0
+    ],
+    "i95": [
+     54.0,
+     85.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 69.15856155672381,
+    "i80": [
+     58.0,
+     81.0
+    ],
+    "i95": [
+     52.0,
+     87.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 69.62694881838638,
+    "i80": [
+     59,
+     87
+    ],
+    "i95": [
+     53,
+     98
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "company",
+   "n": 1882,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 93,
+   "survivalboost": {
+    "expected": 122.24595863878994,
+    "i80": [
+     109.0,
+     135.0
+    ],
+    "i95": [
+     103.0,
+     143.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 122.24595863878994,
+    "i80": [
+     106.0,
+     138.0
+    ],
+    "i95": [
+     100.0,
+     147.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 117.2277166723591,
+    "i80": [
+     105,
+     141
+    ],
+    "i95": [
+     97,
+     155
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 304,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 3.4601916182469337,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.4601916182469337,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.177984023918613,
+    "i80": [
+     2,
+     8
+    ],
+    "i95": [
+     1,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 304,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 13,
+   "survivalboost": {
+    "expected": 17.61543737462864,
+    "i80": [
+     13.0,
+     23.0
+    ],
+    "i95": [
+     10.0,
+     25.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 17.61543737462864,
+    "i80": [
+     11.0,
+     24.0
+    ],
+    "i95": [
+     9.0,
+     27.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 13.708398256467001,
+    "i80": [
+     10,
+     21
+    ],
+    "i95": [
+     7,
+     27
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 304,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 23,
+   "survivalboost": {
+    "expected": 29.402294378655103,
+    "i80": [
+     23.0,
+     36.0
+    ],
+    "i95": [
+     20.0,
+     39.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 29.402294378655103,
+    "i80": [
+     21.0,
+     38.0
+    ],
+    "i95": [
+     17.0,
+     44.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 23.051074009887003,
+    "i80": [
+     18,
+     33
+    ],
+    "i95": [
+     15,
+     40
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Engineering",
+   "n": 568,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 4.689867309870442,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.689867309870442,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 6.26827860496593,
+    "i80": [
+     3,
+     10
+    ],
+    "i95": [
+     2,
+     12
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Engineering",
+   "n": 568,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 17.20517790358824,
+    "i80": [
+     12.0,
+     22.0
+    ],
+    "i95": [
+     10.0,
+     26.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 17.20517790358824,
+    "i80": [
+     12.0,
+     23.0
+    ],
+    "i95": [
+     10.0,
+     26.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 20.614247786748148,
+    "i80": [
+     15,
+     28
+    ],
+    "i95": [
+     13,
+     32
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Engineering",
+   "n": 568,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 13,
+   "survivalboost": {
+    "expected": 31.395246833614078,
+    "i80": [
+     25.0,
+     38.0
+    ],
+    "i95": [
+     21.0,
+     42.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 31.395246833614078,
+    "i80": [
+     24.0,
+     39.0
+    ],
+    "i95": [
+     20.0,
+     43.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 34.718291393126904,
+    "i80": [
+     29,
+     44
+    ],
+    "i95": [
+     25,
+     50
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.7683241146635068,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7683241146635068,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.4340591836442145,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 2.429700197469877,
+    "i80": [
+     1.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.429700197469877,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.696655212239239,
+    "i80": [
+     2,
+     8
+    ],
+    "i95": [
+     1,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 4.683599992648654,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.683599992648654,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 7.88422694261392,
+    "i80": [
+     4,
+     13
+    ],
+    "i95": [
+     3,
+     16
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:IT & Operations",
+   "n": 124,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 0.8491688801254914,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.8491688801254914,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.954574410657285,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:IT & Operations",
+   "n": 124,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 2.992990537486388,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.992990537486388,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.1586538827403263,
+    "i80": [
+     1,
+     5
+    ],
+    "i95": [
+     0,
+     7
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:IT & Operations",
+   "n": 124,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 7,
+   "survivalboost": {
+    "expected": 4.7862031760031805,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.7862031760031805,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.350472618334267,
+    "i80": [
+     2,
+     9
+    ],
+    "i95": [
+     1,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.4668943292466447,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.4668943292466447,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.186296195243018,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 1.0693798220020792,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.0693798220020792,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.6191643461317543,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 1.453683239704686,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.453683239704686,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.0526373816980195,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     5
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Marketing",
+   "n": 108,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.7143334514253553,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7143334514253553,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.6891336284854654,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Marketing",
+   "n": 108,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 2.6088234650320983,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.6088234650320983,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.283135295491749,
+    "i80": [
+     1,
+     4
+    ],
+    "i95": [
+     0,
+     6
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Marketing",
+   "n": 108,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 4.810163176042091,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.810163176042091,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.8706970727594507,
+    "i80": [
+     2,
+     7
+    ],
+    "i95": [
+     1,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:People",
+   "n": 78,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.7682627508515667,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7682627508515667,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.6174388044031305,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:People",
+   "n": 78,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 2.1065553104446146,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.1065553104446146,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.0426935103691455,
+    "i80": [
+     0,
+     4
+    ],
+    "i95": [
+     0,
+     6
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:People",
+   "n": 78,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 3.0405784281403667,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.0405784281403667,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.4594389087801933,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Product & Design",
+   "n": 149,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 1.483126007988974,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.483126007988974,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.3967979782074484,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     5
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Product & Design",
+   "n": 149,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 4.752540226817361,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.752540226817361,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.61109550680387,
+    "i80": [
+     2,
+     8
+    ],
+    "i95": [
+     1,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Product & Design",
+   "n": 149,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 7.741217324082502,
+    "i80": [
+     4.0,
+     11.0
+    ],
+    "i95": [
+     3.0,
+     13.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 7.741217324082502,
+    "i80": [
+     4.0,
+     12.0
+    ],
+    "i95": [
+     3.0,
+     15.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 7.796505455493249,
+    "i80": [
+     4,
+     13
+    ],
+    "i95": [
+     3,
+     14
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Sales",
+   "n": 413,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 4.654810263620739,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.654810263620739,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.459511891814301,
+    "i80": [
+     2,
+     9
+    ],
+    "i95": [
+     1,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Sales",
+   "n": 413,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 12,
+   "survivalboost": {
+    "expected": 18.37795671925452,
+    "i80": [
+     13.0,
+     24.0
+    ],
+    "i95": [
+     11.0,
+     27.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 18.37795671925452,
+    "i80": [
+     13.0,
+     24.0
+    ],
+    "i95": [
+     10.0,
+     28.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 17.892905021395215,
+    "i80": [
+     11,
+     26
+    ],
+    "i95": [
+     8,
+     31
+    ]
+   }
+  },
+  {
+   "origin": "2025-07-01",
+   "cohort": "org:Sales",
+   "n": 413,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 30,
+   "survivalboost": {
+    "expected": 34.93297208989928,
+    "i80": [
+     28.0,
+     42.0
+    ],
+    "i95": [
+     25.0,
+     46.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 34.93297208989928,
+    "i80": [
+     27.0,
+     44.0
+    ],
+    "i95": [
+     22.0,
+     49.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 30.044372889665887,
+    "i80": [
+     20,
+     41
+    ],
+    "i95": [
+     17,
+     47
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "company",
+   "n": 1921,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 18,
+   "survivalboost": {
+    "expected": 17.12938297025333,
+    "i80": [
+     12.0,
+     22.0
+    ],
+    "i95": [
+     10.0,
+     26.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 17.12938297025333,
+    "i80": [
+     12.0,
+     23.0
+    ],
+    "i95": [
+     9.0,
+     26.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 14.47017978996481,
+    "i80": [
+     10,
+     21
+    ],
+    "i95": [
+     8,
+     25
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "company",
+   "n": 1921,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 51,
+   "survivalboost": {
+    "expected": 44.36189915719584,
+    "i80": [
+     36.0,
+     53.0
+    ],
+    "i95": [
+     32.0,
+     58.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 44.36189915719584,
+    "i80": [
+     35.0,
+     53.0
+    ],
+    "i95": [
+     32.0,
+     57.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 46.78767181189775,
+    "i80": [
+     40,
+     62
+    ],
+    "i95": [
+     35,
+     69
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "company",
+   "n": 1921,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 108,
+   "survivalboost": {
+    "expected": 83.19439041754846,
+    "i80": [
+     72.0,
+     94.0
+    ],
+    "i95": [
+     66.0,
+     101.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 83.19439041754846,
+    "i80": [
+     71.0,
+     95.0
+    ],
+    "i95": [
+     65.0,
+     103.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 126.36476258442612,
+    "i80": [
+     112,
+     147
+    ],
+    "i95": [
+     104,
+     159
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 303,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 3.8055212816826547,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.8055212816826547,
+    "i80": [
+     2.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.705867500517678,
+    "i80": [
+     1,
+     5
+    ],
+    "i95": [
+     0,
+     6
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 303,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 11,
+   "survivalboost": {
+    "expected": 8.445061887593484,
+    "i80": [
+     5.0,
+     12.0
+    ],
+    "i95": [
+     3.0,
+     14.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 8.445061887593484,
+    "i80": [
+     5.0,
+     12.0
+    ],
+    "i95": [
+     3.0,
+     15.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 8.744629224864157,
+    "i80": [
+     5,
+     14
+    ],
+    "i95": [
+     3,
+     16
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 303,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 18,
+   "survivalboost": {
+    "expected": 13.798902010570885,
+    "i80": [
+     9.0,
+     18.0
+    ],
+    "i95": [
+     7.0,
+     21.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 13.798902010570885,
+    "i80": [
+     9.0,
+     19.0
+    ],
+    "i95": [
+     7.0,
+     22.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 23.58270462856134,
+    "i80": [
+     17,
+     31
+    ],
+    "i95": [
+     14,
+     35
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Engineering",
+   "n": 586,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 4.487731411491466,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.487731411491466,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.236846883021765,
+    "i80": [
+     2,
+     8
+    ],
+    "i95": [
+     1,
+     10
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Engineering",
+   "n": 586,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 7,
+   "survivalboost": {
+    "expected": 12.875953948126902,
+    "i80": [
+     8.0,
+     17.0
+    ],
+    "i95": [
+     6.0,
+     20.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 12.875953948126902,
+    "i80": [
+     8.0,
+     18.0
+    ],
+    "i95": [
+     6.0,
+     21.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 13.704758531459571,
+    "i80": [
+     9,
+     20
+    ],
+    "i95": [
+     7,
+     25
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Engineering",
+   "n": 586,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 23,
+   "survivalboost": {
+    "expected": 21.72499339561825,
+    "i80": [
+     16.0,
+     28.0
+    ],
+    "i95": [
+     13.0,
+     31.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 21.72499339561825,
+    "i80": [
+     15.0,
+     28.0
+    ],
+    "i95": [
+     13.0,
+     32.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 37.055162823320266,
+    "i80": [
+     27,
+     48
+    ],
+    "i95": [
+     24,
+     55
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.7764772484324038,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7764772484324038,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.8944642780116395,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 1.9390594735623856,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.9390594735623856,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.8880759890362744,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 7,
+   "survivalboost": {
+    "expected": 3.8674090093996423,
+    "i80": [
+     2.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.8674090093996423,
+    "i80": [
+     1.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 7.769089800383924,
+    "i80": [
+     3,
+     14
+    ],
+    "i95": [
+     1,
+     18
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:IT & Operations",
+   "n": 124,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.7895410832960643,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.7895410832960643,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.6251411546007337,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:IT & Operations",
+   "n": 124,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 2.142695451231294,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     5.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.142695451231294,
+    "i80": [
+     0.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.0301013263757226,
+    "i80": [
+     0,
+     4
+    ],
+    "i95": [
+     0,
+     7
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:IT & Operations",
+   "n": 124,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 3.7041133806558824,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.7041133806558824,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     8.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.545002335898373,
+    "i80": [
+     2,
+     9
+    ],
+    "i95": [
+     1,
+     13
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.2188153667045024,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     1.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.2188153667045024,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     1.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.13748297530775444,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     1
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.6342821504410283,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.6342821504410283,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.44734227847026076,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Legal",
+   "n": 44,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 1.2114539538883538,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.2114539538883538,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.2285382479394638,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     5
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Marketing",
+   "n": 112,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.9907798417898768,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.9907798417898768,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.6354341952473068,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Marketing",
+   "n": 112,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 2.6836039669909217,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.6836039669909217,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 2.0623747000677404,
+    "i80": [
+     0,
+     4
+    ],
+    "i95": [
+     0,
+     6
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Marketing",
+   "n": 112,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 10,
+   "survivalboost": {
+    "expected": 4.198325374604889,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.198325374604889,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.6266850791812715,
+    "i80": [
+     3,
+     9
+    ],
+    "i95": [
+     1,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:People",
+   "n": 82,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.5603903960211082,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.5603903960211082,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.48049708435146443,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:People",
+   "n": 82,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 1.398815210845929,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.398815210845929,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.558301554095244,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:People",
+   "n": 82,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 2.820715124764928,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.820715124764928,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.242547075988046,
+    "i80": [
+     1,
+     7
+    ],
+    "i95": [
+     0,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Product & Design",
+   "n": 152,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 1.4682788328969858,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.4682788328969858,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.970510497575967,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Product & Design",
+   "n": 152,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 4.024504439897564,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.024504439897564,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.14646789325054,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Product & Design",
+   "n": 152,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 7,
+   "survivalboost": {
+    "expected": 6.683292477357716,
+    "i80": [
+     4.0,
+     10.0
+    ],
+    "i95": [
+     2.0,
+     12.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 6.683292477357716,
+    "i80": [
+     3.0,
+     10.0
+    ],
+    "i95": [
+     2.0,
+     13.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 8.558420353365628,
+    "i80": [
+     5,
+     13
+    ],
+    "i95": [
+     3,
+     16
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Sales",
+   "n": 424,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 7,
+   "survivalboost": {
+    "expected": 4.03184750793827,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.03184750793827,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.783935221330528,
+    "i80": [
+     2,
+     7
+    ],
+    "i95": [
+     1,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Sales",
+   "n": 424,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 19,
+   "survivalboost": {
+    "expected": 10.217922628506333,
+    "i80": [
+     6.0,
+     14.0
+    ],
+    "i95": [
+     5.0,
+     17.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 10.217922628506333,
+    "i80": [
+     6.0,
+     14.0
+    ],
+    "i95": [
+     4.0,
+     17.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 12.205620314278288,
+    "i80": [
+     8,
+     18
+    ],
+    "i95": [
+     6,
+     21
+    ]
+   }
+  },
+  {
+   "origin": "2025-10-01",
+   "cohort": "org:Sales",
+   "n": 424,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 35,
+   "survivalboost": {
+    "expected": 25.18518569068792,
+    "i80": [
+     19.0,
+     31.0
+    ],
+    "i95": [
+     16.0,
+     35.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 25.18518569068792,
+    "i80": [
+     18.0,
+     32.0
+    ],
+    "i95": [
+     15.0,
+     36.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 32.7566122397879,
+    "i80": [
+     25,
+     42
+    ],
+    "i95": [
+     21,
+     49
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "company",
+   "n": 1952,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 18,
+   "survivalboost": {
+    "expected": 16.275021270270244,
+    "i80": [
+     11.0,
+     21.0
+    ],
+    "i95": [
+     9.0,
+     25.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 16.275021270270244,
+    "i80": [
+     11.0,
+     21.0
+    ],
+    "i95": [
+     9.0,
+     24.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 16.97844767919097,
+    "i80": [
+     12,
+     24
+    ],
+    "i95": [
+     10,
+     27
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "company",
+   "n": 1952,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 63,
+   "survivalboost": {
+    "expected": 61.22855759084842,
+    "i80": [
+     52.0,
+     71.0
+    ],
+    "i95": [
+     47.0,
+     76.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 61.22855759084842,
+    "i80": [
+     51.0,
+     71.0
+    ],
+    "i95": [
+     46.0,
+     78.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 70.92168116617984,
+    "i80": [
+     59,
+     87
+    ],
+    "i95": [
+     54,
+     94
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "company",
+   "n": 1952,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 125,
+   "survivalboost": {
+    "expected": 135.8787788381533,
+    "i80": [
+     122.0,
+     150.0
+    ],
+    "i95": [
+     115.0,
+     158.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 135.8787788381533,
+    "i80": [
+     120.0,
+     153.0
+    ],
+    "i95": [
+     111.0,
+     164.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 133.11984168469044,
+    "i80": [
+     119,
+     151
+    ],
+    "i95": [
+     108,
+     161
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 312,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 6,
+   "survivalboost": {
+    "expected": 2.743056107725743,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.743056107725743,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.175522416674621,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 312,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 11,
+   "survivalboost": {
+    "expected": 10.640352523350764,
+    "i80": [
+     7.0,
+     15.0
+    ],
+    "i95": [
+     5.0,
+     17.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 10.640352523350764,
+    "i80": [
+     6.0,
+     15.0
+    ],
+    "i95": [
+     4.0,
+     18.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 13.249140655702563,
+    "i80": [
+     8,
+     19
+    ],
+    "i95": [
+     6,
+     23
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Customer Success & Support",
+   "n": 312,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 22,
+   "survivalboost": {
+    "expected": 23.171231607950403,
+    "i80": [
+     17.0,
+     29.0
+    ],
+    "i95": [
+     15.0,
+     32.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 23.171231607950403,
+    "i80": [
+     16.0,
+     31.0
+    ],
+    "i95": [
+     13.0,
+     36.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 24.84559709213968,
+    "i80": [
+     18,
+     32
+    ],
+    "i95": [
+     15,
+     36
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Engineering",
+   "n": 595,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 5.1177081397969,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 5.1177081397969,
+    "i80": [
+     2.0,
+     8.0
+    ],
+    "i95": [
+     1.0,
+     10.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.83748343889221,
+    "i80": [
+     2,
+     8
+    ],
+    "i95": [
+     1,
+     10
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Engineering",
+   "n": 595,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 17,
+   "survivalboost": {
+    "expected": 19.51515044971336,
+    "i80": [
+     14.0,
+     25.0
+    ],
+    "i95": [
+     12.0,
+     28.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 19.51515044971336,
+    "i80": [
+     13.0,
+     25.0
+    ],
+    "i95": [
+     11.0,
+     29.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 20.231216807630602,
+    "i80": [
+     15,
+     27
+    ],
+    "i95": [
+     13,
+     31
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Engineering",
+   "n": 595,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 35,
+   "survivalboost": {
+    "expected": 41.37549272838912,
+    "i80": [
+     34.0,
+     49.0
+    ],
+    "i95": [
+     30.0,
+     53.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 41.37549272838912,
+    "i80": [
+     32.0,
+     52.0
+    ],
+    "i95": [
+     27.0,
+     57.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 38.01560349059901,
+    "i80": [
+     30,
+     48
+    ],
+    "i95": [
+     27,
+     52
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.6416342344921374,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.6416342344921374,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.0207123123604611,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 4,
+   "survivalboost": {
+    "expected": 2.4956748749317517,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.4956748749317517,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.249019552314802,
+    "i80": [
+     1,
+     8
+    ],
+    "i95": [
+     0,
+     11
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Finance",
+   "n": 94,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 9,
+   "survivalboost": {
+    "expected": 5.658613713925991,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     2.0,
+     10.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 5.658613713925991,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     1.0,
+     11.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 7.947578989040047,
+    "i80": [
+     4,
+     14
+    ],
+    "i95": [
+     2,
+     17
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:IT & Operations",
+   "n": 125,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.8537444191993453,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.8537444191993453,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.8806885868556867,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:IT & Operations",
+   "n": 125,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 3.2879196288375296,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.2879196288375296,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.69447061195144,
+    "i80": [
+     1,
+     7
+    ],
+    "i95": [
+     1,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:IT & Operations",
+   "n": 125,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 7,
+   "survivalboost": {
+    "expected": 6.659161142526749,
+    "i80": [
+     4.0,
+     10.0
+    ],
+    "i95": [
+     2.0,
+     12.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 6.659161142526749,
+    "i80": [
+     3.0,
+     10.0
+    ],
+    "i95": [
+     2.0,
+     13.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 6.962312477514549,
+    "i80": [
+     4,
+     11
+    ],
+    "i95": [
+     3,
+     13
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Legal",
+   "n": 47,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.3575336425517177,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.3575336425517177,
+    "i80": [
+     0.0,
+     1.0
+    ],
+    "i95": [
+     0.0,
+     2.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.19675784447398248,
+    "i80": [
+     0,
+     1
+    ],
+    "i95": [
+     0,
+     1
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Legal",
+   "n": 47,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 1.213099993446633,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.213099993446633,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.8287356270908082,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Legal",
+   "n": 47,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 2.810245972278633,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.810245972278633,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.568276056739631,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     5
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Marketing",
+   "n": 118,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 0,
+   "survivalboost": {
+    "expected": 0.8510683946441242,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.8510683946441242,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.7894247672682811,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     3
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Marketing",
+   "n": 118,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 7,
+   "survivalboost": {
+    "expected": 3.2301091325455262,
+    "i80": [
+     1.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.2301091325455262,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     0.0,
+     7.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.315598341316638,
+    "i80": [
+     1,
+     6
+    ],
+    "i95": [
+     0,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Marketing",
+   "n": 118,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 10,
+   "survivalboost": {
+    "expected": 6.6330175657862815,
+    "i80": [
+     4.0,
+     10.0
+    ],
+    "i95": [
+     2.0,
+     12.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 6.6330175657862815,
+    "i80": [
+     3.0,
+     10.0
+    ],
+    "i95": [
+     2.0,
+     13.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 6.258160465234747,
+    "i80": [
+     3,
+     10
+    ],
+    "i95": [
+     2,
+     12
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:People",
+   "n": 83,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 0.9130886556281673,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 0.9130886556281673,
+    "i80": [
+     0.0,
+     2.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 0.4435060659278513,
+    "i80": [
+     0,
+     2
+    ],
+    "i95": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:People",
+   "n": 83,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 2,
+   "survivalboost": {
+    "expected": 2.389572283841872,
+    "i80": [
+     1.0,
+     4.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 2.389572283841872,
+    "i80": [
+     0.0,
+     5.0
+    ],
+    "i95": [
+     0.0,
+     6.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.8655298413003885,
+    "i80": [
+     0,
+     4
+    ],
+    "i95": [
+     0,
+     5
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:People",
+   "n": 83,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 8,
+   "survivalboost": {
+    "expected": 5.783312378878706,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     2.0,
+     10.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 5.783312378878706,
+    "i80": [
+     3.0,
+     9.0
+    ],
+    "i95": [
+     1.0,
+     11.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 3.5243039350884464,
+    "i80": [
+     1,
+     7
+    ],
+    "i95": [
+     1,
+     8
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Product & Design",
+   "n": 155,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 1,
+   "survivalboost": {
+    "expected": 1.108764252376946,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     4.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 1.108764252376946,
+    "i80": [
+     0.0,
+     3.0
+    ],
+    "i95": [
+     0.0,
+     3.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 1.263061346828324,
+    "i80": [
+     0,
+     3
+    ],
+    "i95": [
+     0,
+     4
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Product & Design",
+   "n": 155,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 3,
+   "survivalboost": {
+    "expected": 4.395841101416125,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 4.395841101416125,
+    "i80": [
+     2.0,
+     7.0
+    ],
+    "i95": [
+     1.0,
+     9.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 5.291941519760743,
+    "i80": [
+     3,
+     9
+    ],
+    "i95": [
+     2,
+     12
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Product & Design",
+   "n": 155,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 10.56217902381013,
+    "i80": [
+     7.0,
+     15.0
+    ],
+    "i95": [
+     5.0,
+     17.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 10.56217902381013,
+    "i80": [
+     6.0,
+     15.0
+    ],
+    "i95": [
+     4.0,
+     19.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 9.967770001918026,
+    "i80": [
+     6,
+     15
+    ],
+    "i95": [
+     5,
+     17
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Sales",
+   "n": 423,
+   "horizon_months": 1,
+   "status": "mature",
+   "actual": 5,
+   "survivalboost": {
+    "expected": 3.688423423855164,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 3.688423423855164,
+    "i80": [
+     1.0,
+     6.0
+    ],
+    "i95": [
+     1.0,
+     8.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 4.371290899909573,
+    "i80": [
+     2,
+     8
+    ],
+    "i95": [
+     1,
+     9
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Sales",
+   "n": 423,
+   "horizon_months": 3,
+   "status": "mature",
+   "actual": 17,
+   "survivalboost": {
+    "expected": 14.06083760276486,
+    "i80": [
+     10.0,
+     19.0
+    ],
+    "i95": [
+     7.0,
+     22.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 14.06083760276486,
+    "i80": [
+     9.0,
+     19.0
+    ],
+    "i95": [
+     7.0,
+     23.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 18.196028209111855,
+    "i80": [
+     12,
+     24
+    ],
+    "i95": [
+     9,
+     29
+    ]
+   }
+  },
+  {
+   "origin": "2026-01-01",
+   "cohort": "org:Sales",
+   "n": 423,
+   "horizon_months": 6,
+   "status": "mature",
+   "actual": 28,
+   "survivalboost": {
+    "expected": 33.22552470460729,
+    "i80": [
+     26.0,
+     40.0
+    ],
+    "i95": [
+     23.0,
+     44.0
+    ]
+   },
+   "survivalboost-shock": {
+    "expected": 33.22552470460729,
+    "i80": [
+     24.0,
+     42.0
+    ],
+    "i95": [
+     20.0,
+     48.0
+    ]
+   },
+   "dtcr-mnl-12k": {
+    "expected": 34.030239176416416,
+    "i80": [
+     25,
+     42
+    ],
+    "i95": [
+     20,
+     48
+    ]
+   }
+  }
+ ]
+}

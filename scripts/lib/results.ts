@@ -153,8 +153,20 @@ export interface RecoveryReport {
   passed: { wald: boolean; coverage: boolean; signs: boolean };
 }
 
-export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport;
-export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery"];
+export interface ChallengerReport {
+  kind: "challenger";
+  command: string;
+  date: string;
+  n_iter: number;
+  row_cap: number;
+  origins: string[];
+  models: string[];
+  fits: { origin: string; rows: number; eligible_person_landmarks: number; survivalboost_fit_seconds: number }[];
+  summary: ModelComparisonReport["summary"];
+}
+
+export type Report = LlmMeasureReport | OracleCoverageReport | DemoResetReport | BacktestReport | CalibrationReport | ModelComparisonReport | AgentEvalReport | EffectsReport | ActionAuditReport | RecoveryReport | ChallengerReport;
+export const REPORT_KINDS: readonly string[] = ["llm-measure", "oracle-coverage", "demo-reset", "backtest", "calibration", "model-comparison", "agent-eval", "effects", "action-audit", "recovery", "challenger"];
 
 const gb = (b: number | null | undefined) => (b === null || b === undefined ? "n/a" : `${(b / 1e9).toFixed(2)} GB`);
 const s = (ms: number | null | undefined) => (ms === null || ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -246,6 +258,26 @@ export function renderModelComparison(file: string, r: ModelComparisonReport): s
   return lines.join("\n");
 }
 
+/** C15: the challenger and the like-for-like main model, on the model comparison's origins. */
+export function renderChallenger(file: string, r: ChallengerReport): string {
+  const rows = r.fits.map((f) => f.rows);
+  const secs = r.fits.map((f) => f.survivalboost_fit_seconds);
+  const lines = [
+    `**Challenger** (\`${r.command}\`, ${r.date}, [${file}](${file})): \`hazardous\` SurvivalBoost (${r.n_iter} iterations) on the same ${r.origins.length} quarterly origins as the model comparison, fitted on ${Math.min(...rows).toLocaleString("en-US")} to ${Math.max(...rows).toLocaleString("en-US")} sampled person-landmarks per origin (cap ${r.row_cap.toLocaleString("en-US")}; ${Math.min(...secs)} to ${Math.max(...secs)} s per fit), with Poisson-binomial intervals and a shock-aware variant; \`dtcr-mnl-12k\` is the competing-risks model fitted on the same sampled people, so the row cap is a handicap both carry. ${SYNTHETIC}`,
+    "",
+    "| Level | Horizon | Model | MAE | Observed over expected | 80% range held | 95% range held |",
+    "|---|---|---|---|---|---|---|",
+  ];
+  for (const s of Object.values(r.summary)) {
+    for (const m of r.models) {
+      const v = s[m] as { mae: number; observed_over_expected: number; coverage80: number; coverage95: number } | undefined;
+      if (!v) continue;
+      lines.push(`| ${s.level} | ${s.horizon_months} month${s.horizon_months > 1 ? "s" : ""} | ${m} | ${v.mae.toFixed(1)} | ${v.observed_over_expected.toFixed(2)} | ${pct(v.coverage80)} | ${pct(v.coverage95)} |`);
+    }
+  }
+  return lines.join("\n");
+}
+
 const MODEL_NAMES: Record<string, string> = { stub: "scripted stub", llama: "Qwen3-1.7B (local)", mlx: "Qwen3.6-27B (local)" };
 
 export function renderAgentEval(file: string, r: AgentEvalReport): string {
@@ -314,7 +346,7 @@ export function renderResults(reports: { file: string; report: Report }[]): stri
   const parts = reports
     .slice()
     .sort((a, b) => a.file.localeCompare(b.file))
-    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : ""))
+    .map(({ file, report }) => (report.kind === "llm-measure" ? renderLlmMeasure(file, report) : report.kind === "oracle-coverage" ? renderOracleCoverage(file, report) : report.kind === "demo-reset" ? renderDemoReset(file, report) : report.kind === "backtest" ? renderBacktest(file, report) : report.kind === "calibration" ? renderCalibration(file, report) : report.kind === "model-comparison" ? renderModelComparison(file, report) : report.kind === "agent-eval" ? renderAgentEval(file, report) : report.kind === "effects" ? renderEffects(file, report) : report.kind === "action-audit" ? renderActionAudit(file, report) : report.kind === "recovery" ? renderRecovery(file, report) : report.kind === "challenger" ? renderChallenger(file, report) : ""))
     .filter(Boolean);
   return parts.join("\n\n");
 }

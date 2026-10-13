@@ -989,16 +989,11 @@
 }
 
 /* Trust: model comparison small multiples, one metric per panel on its own axis */
+/* small multiples wrap by the card's own width (the chat dock can make a card narrow on a wide screen) */
 .multiples {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   gap: 16px;
-}
-
-@media (max-width: 720px) {
-  .multiples {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 /* Workforce flows (charts/FlowSankey.tsx): labels sit in gutters beside the node bars */

@@ -21,7 +21,7 @@ Synthetic HRIS records (bitemporal, with planted duplicates, late terminations, 
 
 ## Evaluation
 
-The recorded numbers are in the README Results section and `results/` (`backtest-*.json`, `calibration-*.json`, `model-comparison-*.json`, `oracle-coverage-*.json`), and on the Trust page.
+The recorded numbers are in the README Results section and `results/` (`backtest-*.json`, `calibration-*.json`, `model-comparison-*.json`, `challenger-*.json`, `recovery-*.json`, `oracle-coverage-*.json`), and on the Trust page.
 
 In short, from the 2026-10-12 recordings:
 
@@ -33,7 +33,7 @@ In short, from the 2026-10-12 recordings:
 | Skill against the trailing rate, 1 / 3 / 6 months | -15% / -10% / -2% | 1% / -1% / 4% |
 | Independent windows behind each number | 21 / 6 / 2 | 21 / 6 / 2 |
 
-Individual 3-month predictions (36,035 person-windows, deciles only): ICI 0.7 percentage points, E50 0.4, E90 1.7; the lowest deciles are under-predicted and the highest over-predicted. On the six mature quarterly origins of the model comparison, the oracle (which knows the true state) has observed over expected of 0.90 to 1.03, against 0.82 to 0.88 for the model.
+Individual 3-month predictions (36,035 person-windows, deciles only): ICI 0.7 percentage points, E50 0.4, E90 1.7; the lowest deciles are under-predicted and the highest over-predicted. On the six mature quarterly origins of the model comparison, the oracle (which knows the true state) has observed over expected of 0.90 to 1.03, against 0.82 to 0.88 for the model. The SurvivalBoost challenger (`results/challenger-2026-10-12.json`, fitted on at most 12,000 person-landmarks) has observed over expected of 0.93 to 1.08 and too-narrow company ranges; the model refitted on the same rows is about as accurate as on all rows.
 
 What this means: organization-level ranges are close to their nominal coverage, but company-level ranges are too narrow, because the organization-wide shock is estimated at 0.06 (from about 11 quarterly windows) against the generator's 0.20; every model, including the baselines, ran high because the generator's drift lowered recent departures. Treat company-level ranges as too optimistic until the shock estimate improves. The intervals use 20 parameter draws per run; re-recording after the parameter draws were made portable across platforms moved some coverage rates by up to 10 points, so single coverage figures carry Monte Carlo noise as well as the few independent windows.
 

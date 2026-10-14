@@ -1,0 +1,27 @@
+{
+  "id": "beat-5-review",
+  "question": "Prepare a People Partner review for Platform Engineering.",
+  "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+  "provider": "mlx",
+  "recorded_at": "2026-10-13",
+  "label": "Recorded from Qwen3.6-27B on this laptop, 2026-10-13; replayed. Numbers compute live from the warehouse.",
+  "principal": "pa-lead@larkspur.example",
+  "grounding": "passed",
+  "note": "Synthetic company. Model text and tool calls from a local model; tool results are recomputed live on replay.",
+  "steps": [
+    {
+      "tool_calls": [
+        {
+          "tool": "prepare_review",
+          "args": {
+            "cohort": "Platform Engineering"
+          },
+          "result_id": "res_3pzovqa65ppzhdtj5nvawmhnlx"
+        }
+      ]
+    },
+    {
+      "text": "Here is the draft People Partner review for Platform Engineering (draft ID: drf_3pzovqa65ppzhdtj). It covers three checks: compensation position against band midpoints, career progression, and hiring coverage. A pay-equity check by Compensation is required before any cohort pay changes. This is a draft; a human must submit it and a different human must approve it."
+    }
+  ]
+}

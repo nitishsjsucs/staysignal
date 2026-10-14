@@ -1,0 +1,28 @@
+{
+  "id": "optional-coverage",
+  "question": "How often did the 80% range hold in backtests at company level over 90 days (coverage)?",
+  "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+  "provider": "mlx",
+  "recorded_at": "2026-10-13",
+  "label": "Recorded from Qwen3.6-27B on this laptop, 2026-10-13; replayed. Numbers compute live from the warehouse.",
+  "principal": "pa-lead@larkspur.example",
+  "grounding": "passed",
+  "note": "Synthetic company. Model text and tool calls from a local model; tool results are recomputed live on replay.",
+  "steps": [
+    {
+      "tool_calls": [
+        {
+          "tool": "backtest_summary",
+          "args": {
+            "level": "company",
+            "horizon_days": 90
+          },
+          "result_id": "res_tqfp4kj5msmox4em3ssa7obfn7"
+        }
+      ]
+    },
+    {
+      "text": "The 80% range held in {{r1.coverage80|pct}} of the backtest windows at the company level over a 90-day horizon."
+    }
+  ]
+}

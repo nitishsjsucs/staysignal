@@ -1,0 +1,27 @@
+{
+  "id": "beat-2-what-changed",
+  "question": "What changed in Engineering since the previous forecast?",
+  "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+  "provider": "mlx",
+  "recorded_at": "2026-10-13",
+  "label": "Recorded from Qwen3.6-27B on this laptop, 2026-10-13; replayed. Numbers compute live from the warehouse.",
+  "principal": "pa-lead@larkspur.example",
+  "grounding": "passed",
+  "note": "Synthetic company. Model text and tool calls from a local model; tool results are recomputed live on replay.",
+  "steps": [
+    {
+      "tool_calls": [
+        {
+          "tool": "explain_change",
+          "args": {
+            "cohort": "Engineering"
+          },
+          "result_id": "res_7vktytuiep7eqbdid2euzg5ufy"
+        }
+      ]
+    },
+    {
+      "text": "This synthetic forecast for Engineering shows expected voluntary departures over 3 months fell by {{r1.delta|1dp}} people, from {{r1.from_value|1dp}} to {{r1.to_value|1dp}}. The 80% range width is {{r1.interval80_width|1dp}} people.\n\nThe largest single factor was calendar effects (season and aging), which reduced the forecast by {{r1.factors.0.phi|1dp}} people. Composition changes added {{r1.factors.1.phi|1dp}} people, input data updates added {{r1.factors.2.phi|1dp}} people, model retraining added {{r1.factors.3.phi|1dp}} people, and metric definition changes subtracted {{r1.factors.4.phi|1dp}} people."
+    }
+  ]
+}

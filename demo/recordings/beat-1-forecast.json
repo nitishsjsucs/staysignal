@@ -1,0 +1,28 @@
+{
+  "id": "beat-1-forecast",
+  "question": "Forecast voluntary departures in Engineering over the next 90 days.",
+  "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+  "provider": "mlx",
+  "recorded_at": "2026-10-13",
+  "label": "Recorded from Qwen3.6-27B on this laptop, 2026-10-13; replayed. Numbers compute live from the warehouse.",
+  "principal": "pa-lead@larkspur.example",
+  "grounding": "passed",
+  "note": "Synthetic company. Model text and tool calls from a local model; tool results are recomputed live on replay.",
+  "steps": [
+    {
+      "tool_calls": [
+        {
+          "tool": "forecast_departures",
+          "args": {
+            "cohort": "Engineering",
+            "horizon_days": 90
+          },
+          "result_id": "res_lbapds5u76ecvtnp3kbffdvlqd"
+        }
+      ]
+    },
+    {
+      "text": "This synthetic forecast for the Engineering cohort expects {{r1.expected|1dp}} voluntary departures over the next 3 months. The 80% prediction range is {{r1.i80|range}} people, and the 95% range is {{r1.i95|range}} people. For context, the trailing-rate status quo (based on last year's rate) would yield {{r1.hist.expected|1dp}} departures. The forecast corresponds to an annualized voluntary departure rate of {{r1.annual_rate|pct}}."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "optional-profile",
+  "question": "Show the cohort profile for Platform Engineering.",
+  "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+  "provider": "mlx",
+  "recorded_at": "2026-10-13",
+  "label": "Recorded from Qwen3.6-27B on this laptop, 2026-10-13; replayed. Numbers compute live from the warehouse.",
+  "principal": "pa-lead@larkspur.example",
+  "grounding": "passed",
+  "note": "Synthetic company. Model text and tool calls from a local model; tool results are recomputed live on replay.",
+  "steps": [
+    {
+      "tool_calls": [
+        {
+          "tool": "cohort_profile",
+          "args": {
+            "cohort": "Platform Engineering"
+          },
+          "result_id": "res_dm5ci6v6gqkm3ooz2gpzoadwza"
+        }
+      ]
+    },
+    {
+      "text": "This is synthetic data for Platform Engineering. The cohort has {{r1.share_below_midpoint|pct}} of its members paid below the band midpoint, a median of {{r1.median_months_since_promotion|int}} months since the last promotion, a 12-month promotion rate of {{r1.promotion_rate_12m|pct}}, and {{r1.open_backfill_reqs|int}} open backfill requisitions."
+    }
+  ]
+}

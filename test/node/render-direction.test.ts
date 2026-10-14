@@ -1,6 +1,6 @@
 // "fell by -0.4" reads as a double negative: after a downward word the renderer shows the size of a negative value.
 import { describe, expect, it } from "vitest";
-import { renderPlaceholders, type AliasMap } from "../../src/shared/grounding/aliases";
+import { renderPlaceholders, shownValue, type AliasMap } from "../../src/shared/grounding/aliases";
 
 const aliases: AliasMap = new Map([["r1", { alias: "r1", result_id: "res_x", tool: "explain_change", step: 0.1, values: { delta: -0.4, up: 0.2, factors: [{ phi: -0.7 }, { phi: 0.3 }] } }]]);
 const render = (t: string) => renderPlaceholders(t, aliases).text;
@@ -18,5 +18,10 @@ describe("downward words carry the sign", () => {
   });
   it("still records the true value as used", () => {
     expect(renderPlaceholders("It fell by {{r1.delta|1dp}}.", aliases).used[0]!.value).toBe(-0.4);
+  });
+  it("gives the chat dock the same value the server renders", () => {
+    const text = "It fell by {{r1.delta|1dp}} people; the change was {{r1.delta|1dp}}.";
+    expect(shownValue(-0.4, text, text.indexOf("{{"))).toBe(0.4);
+    expect(shownValue(-0.4, text, text.lastIndexOf("{{"))).toBe(-0.4);
   });
 });

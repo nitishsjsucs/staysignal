@@ -49,13 +49,19 @@ export interface RenderResult {
  * sign, so nothing is lost, and "fell by -0.4" never reaches a reader. */
 const DOWN_BEFORE = /\b(fell|falls|dropped|drops|declined|declines|decreased|decreases|reduced|reduces|reducing|lowered|lowers|cut|cuts|subtracted|subtracts|removed|removes|shrank|lost|down)\b[^.{}\n]{0,30}$/i;
 
+/** The value a reader sees for a placeholder at `offset` in `text`: after a downward word, a negative value's size. The
+ * server's renderer and the chat dock both use it, so the dock never shows "fell by -0.4". */
+export function shownValue(v: unknown, text: string, offset: number): unknown {
+  return typeof v === "number" && v < 0 && DOWN_BEFORE.test(text.slice(Math.max(0, offset - 48), offset)) ? -v : v;
+}
+
 export function renderPlaceholders(text: string, aliases: AliasMap): RenderResult {
   const unresolved: string[] = [];
   const used: RenderResult["used"] = [];
   const out = text.replace(PLACEHOLDER, (whole, alias: string, path: string, fmt: Fmt | undefined, offset: number, all: string) => {
     const entry = aliases.get(alias);
     const v = entry ? resolvePath(entry.values, path) : undefined;
-    const shown = typeof v === "number" && v < 0 && DOWN_BEFORE.test(all.slice(Math.max(0, offset - 48), offset)) ? -v : v;
+    const shown = shownValue(v, all, offset);
     const s = entry ? fmtValue(shown, fmt, entry.step) : null;
     if (!entry || s === null) {
       unresolved.push(whole);

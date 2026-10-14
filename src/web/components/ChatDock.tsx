@@ -5,7 +5,7 @@ import { useAgentChat } from "@cloudflare/ai-chat/react";
 import { useAgent } from "agents/react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { type Fmt, fmtNumber, fmtRange } from "../../shared/format";
-import { PLACEHOLDER, resolvePath } from "../../shared/grounding/aliases";
+import { PLACEHOLDER, resolvePath, shownValue } from "../../shared/grounding/aliases";
 import { getJSON, type Me } from "../api";
 import { navigate, setView } from "../router";
 import { IconClose, IconSend } from "./icons";
@@ -59,7 +59,7 @@ export function Answer({ text, aliases }: { text: string; aliases: Record<string
     const alias = m[1] ?? "";
     const r = results[alias];
     const id = aliases[alias] ?? "";
-    parts.push({ key: `${m.index}`, label: r ? formatValue(resolvePath(r.data, m[2] ?? ""), m[3] as Fmt | undefined, r.rounding?.step ?? null) : "...", id });
+    parts.push({ key: `${m.index}`, label: r ? formatValue(shownValue(resolvePath(r.data, m[2] ?? ""), text, m.index ?? 0), m[3] as Fmt | undefined, r.rounding?.step ?? null) : "...", id });
     last = (m.index ?? 0) + m[0].length;
   }
   parts.push(text.slice(last));

@@ -1,16 +1,17 @@
-// The Scenario Lab page (SPEC 15, 16.4): the label, the placeholder banner, the synthetic persona chips on quotes and
-// the persona handles, both proposals and the persona interview (a labeled placeholder in fixtures mode); it fits a
-// phone screen.
+// The Scenario Lab page (SPEC 15, 16.4): the label, the recorded-session banner (the committed sessions are recorded
+// from Qwen3.6-27B; no placeholder session remains), the synthetic persona chips on quotes and the persona handles, both
+// proposals and the persona interview (a labeled placeholder answer in fixtures mode); it fits a phone screen.
 import { expect, test } from "@playwright/test";
 
 const LABEL = "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.";
 
-test("the Lab shows its label, the placeholder banner and the persona chips", async ({ page }) => {
+test("the Lab shows its label, the recorded-session banner and the persona chips", async ({ page }) => {
   await page.goto("/lab");
   await page.getByLabel("Acting as (local role switcher)").selectOption("pa-analyst@larkspur.example");
   await expect(page.locator("h1")).toHaveText("Scenario Lab");
   await expect(page.getByText(LABEL).first()).toBeVisible();
-  await expect(page.getByTestId("lab-placeholder")).toContainText("scripted stub provider");
+  await expect(page.getByTestId("lab-recorded")).toContainText("Recorded from Qwen3.6-27B on this laptop");
+  await expect(page.getByTestId("lab-placeholder")).toHaveCount(0);
   await expect(page.getByTestId("lab-sanity")).toContainText("A consistency check, not validation");
   await expect(page.getByTestId("lab-pilot").getByText("Synthetic persona").first()).toBeVisible();
   await expect(page.getByTestId("lab-personas")).toContainText("P01 ·");

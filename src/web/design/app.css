@@ -783,6 +783,12 @@
   margin-top: 8px;
 }
 
+/* the recorded-turn provenance line is long: let it wrap inside the dock instead of running past its edge */
+.msg-meta .chip {
+  white-space: normal;
+  max-width: 100%;
+}
+
 .tool-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);

@@ -13,12 +13,12 @@ npm run demo:snapshots                                      # the per-beat snaps
 npm run demo:reset -- --beat 1                              # about 3 seconds: restore the start of beat 1 and start the demo profile
 ```
 
-`npm run demo` and `npm run demo:reset` start the demo profile with `SS_DEMO=1`: the built app under wrangler dev with the local engine on 8196, and the recorded provider only, whatever `SS_LLM` says. They print what can be replayed, for example `chat turns 6 of 6 demo questions; Lab sessions from the 27B: infra-data-merge, promotion-criteria-third-window; interview answers: 2`. Open `http://127.0.0.1:8795` in a browser at 1440 x 900 and sign in with the role switcher as **People Analytics Lead (pa-lead)**.
+`npm run demo` and `npm run demo:reset` start the demo profile with `SS_DEMO=1`: the built app under wrangler dev with the local engine on 8196, and the recorded provider only, whatever `SS_LLM` says. They print what can be replayed, for example `chat turns 5 of 6 demo questions; Lab sessions from the 27B: infra-data-merge, promotion-criteria-third-window; interview answers: 4` (the group-breakdown answer was deleted: it named groups as literal text instead of citing them). Open `http://127.0.0.1:8795` in a browser at 1440 x 900 and sign in with the role switcher as **People Analytics Lead (pa-lead)**.
 
 In demo mode:
 
 - The chat dock offers the recorded questions as chips. A question with no recording gets a short message saying the demo replays recorded answers, with the recorded questions as chips; it never falls back to a stub or template answer. The boundary question is refused before any model call, so it needs no recording.
-- The Scenario Lab lists only sessions recorded from the 27B; the stub placeholder sessions used by CI are hidden. With none recorded, the page says so.
+- The Scenario Lab lists only sessions recorded from the 27B (both are, since 2026-10-13; the stub placeholder sessions were deleted).
 - The persona interview answers only the recorded questions (shown as chips); any other question gets a short message pointing at them.
 
 To reset during the demo: `npm run demo:reset -- --beat N` (beats 1 to 3 start from the same state, beat 4 with the run held, beat 5 after the repair). A reset also copies the current Lab sessions, research run and action audit into the restored state, so snapshots built before a new recording still show it.
@@ -37,9 +37,11 @@ npm run dev:wrangler                         # fixtures mode on 8795, not demo m
 npm run demo:record -- --provider mlx        # --only beat-2-what-changed re-asks one; a turn that fails grounding is not written
 npm run stop                                 # stops wrangler and the 27B; start the 27B again for step 2
 
-# 2. the Scenario Lab sessions (about 300 calls each; a rerun after an interruption resumes from var/lab/cache)
-npm run lab:record -- --proposal promotion-criteria-third-window --provider openai
-npm run lab:record -- --proposal infra-data-merge --provider openai
+# 2. the Scenario Lab sessions, as recorded on 2026-10-13: the compact plan (8 personas x 4 rounds, one main replicate and
+#    both controls, about 150 calls and 45 to 50 minutes each) on the low-memory profile; a rerun resumes from var/lab/cache
+SS_SWAP_GROWTH_LIMIT_GB=6 npm run llm -- start 27b --profile lab-lowmem --allow-swap
+npm run lab:record -- --proposal promotion-criteria-third-window --provider openai --compact
+npm run lab:record -- --proposal infra-data-merge --provider openai --compact
 uv run --project engine staysignal lab export && npm run fixtures:index
 
 # 3. the persona interview answers (lab/interview-questions.json), through the engine's interview with the 27B
@@ -75,14 +77,14 @@ Honest note if asked: on this world the Calendar factor is smaller than the desi
 ## Beat 3, inject a failure (1:30 to 2:05)
 
 1. Click **Data health** in the left navigation, then **Simulate payroll arrival (synthetic)**.
-2. Within a few seconds: the banner **Held for review: R-2026-10-01#2** with C01, C02 and C03 failing (C04 warns), the routine stepper stopping at the gate, the check heatmap, the lineage path from `stg_payroll__lines.pay_basis_code` to the candidate run, the root-cause ranking with the pay-basis mapping first, and the mapping change waiting for a data engineer.
+2. After 9 to 15 seconds (talk while it runs): the banner **Held for review: R-2026-10-01#2** with C01, C02 and C03 failing (C04 warns), the routine stepper stopping at the gate, the check heatmap, the lineage path from `stg_payroll__lines.pay_basis_code` to the candidate run, the root-cause ranking with the pay-basis mapping first, and the mapping change waiting for a data engineer.
 
 Key point: "A vendor code change never reached a People Partner." The published forecast did not move.
 
 ## Beat 4, repair and replay (2:05 to 2:35)
 
-1. Switch the role to **Data Engineer (data-eng)**. On Data health, the mapping card shows the diff (`ANN` means annual; unknown codes are rejected), generated deterministically from the vendor code dictionary and the probe that puts the Vancouver entity's amounts about 12 times their band midpoints.
-2. Click **Approve** on the mapping card. The routine rebuilds the warehouse under the approved mapping (payroll@2: every feature recomputed from the landed sources, not only the affected models), rescores and re-checks, the banner turns to **Repaired: R-2026-10-01#3 replaced the held R-2026-10-01#2**, and the replay card shows **Identical business-result hash** with the forced payroll@1 replay differing, as it must. The live replay takes about 15 seconds; if it is still running, talk through the diff first.
+1. Switch the role to **Data Engineer (data-eng)**. On Data health, the mapping card shows the diff (`ANN` means annual; unknown codes are rejected), generated deterministically from the vendor code dictionary and the probe that puts the Vancouver entity's (CA-ENT on screen) 353 ANN lines at a median 12.2 times their band midpoints.
+2. Click **Approve** on the mapping card. The routine rebuilds the warehouse under the approved mapping (payroll@2: every feature recomputed from the landed sources, not only the affected models), rescores and re-checks, the banner turns to **Repaired: R-2026-10-01#3 replaced the held R-2026-10-01#2**, and the replay card shows **Identical business-result hash** with the forced payroll@1 replay differing, as it must. The banner turns about 8 seconds after Approve and the replay card appears after about 27 seconds (up to 40 on a fresh build); if it is still running, talk through the diff first.
 
 Key point: "The corrected number is reproducible for Compensation and Finance."
 
@@ -109,12 +111,12 @@ Key point: "Three of the six pre-registered verdicts count against the predictio
 
 Skip this beat if `npm run demo` printed "Lab sessions from the 27B: none". Click **Scenario Lab**. Read the label first: "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated." Personas built from cohort-level facts (cells of at least 10 people) react to a proposal on a simulated forum; nothing here feeds a forecast or a review.
 
-1. Pick a proposal (promotion criteria with a June window, or the infrastructure and data merge).
+1. Pick the promotion criteria proposal (the June window). The infrastructure and data merge session is thinner: its sanity panel pools into one cell and is not testable.
 2. Point at the banner: "Recorded from Qwen3.6-27B on this laptop, <date>; replayed. No model runs here; the charts are computed from the recorded posts." Every replicate replays to its database hash with no model (CI checks it).
-3. Walk the views: theme bars with replicate ranges, attitude trajectories by tenure band, the influence network (simulated, colored by cohort only, not organizational network analysis), draft pilot items with the wording linter's findings, and the sanity panel, whose facts-only baseline and two negative controls show how much agreement is prompt echo.
+3. Walk the views: theme bars (one main replicate under the compact plan, so no ranges), attitude trajectories by tenure band (4 rounds; an FAQ in round 3), the influence network (simulated, colored by cohort only, not organizational network analysis), draft pilot items with the wording linter's findings, and the sanity panel, whose facts-only baseline and two negative controls show how much agreement is prompt echo.
 4. Interview one persona: in **Ask one persona a question**, click one of the recorded questions. The answer carries the "Synthetic persona" chip, the same recorded-from line and the Lab label. A typed question that was not recorded gets a short message pointing at the recorded ones.
 
-Key point: "This generates questions to test with real people; the sanity panel shows how much of it is prompt echo."
+Key point: "This generates questions to test with real people; the sanity panel shows how much of it is prompt echo." Be explicit about power: with 8 personas the persona agreement is 0.20 with a 95% interval of -1.00 to 0.87 over 4 cells, and the facts-shuffled control (0.78) is higher, so this session cannot tell agreement from echo. Why compact: the 27B was recorded on this 24 GB laptop in low-memory mode, where the full design (3 replicates at 16 personas x 8 rounds) would take about 5 hours per proposal.
 
 ## Q&A crib
 

@@ -91,7 +91,8 @@ describe("the Scenario Lab in demo mode", () => {
       const doc = (await r.json()) as { placeholder?: boolean; provenance?: string | null };
       expect(r.status).toBe(200);
       expect(doc.placeholder).toBe(false);
-      expect(doc.provenance).toMatch(/^Recorded from Qwen3\.6-27B on this laptop, \d{4}-\d{2}-\d{2}; replayed\./);
+      // the Lab's manifests carry UTC timestamps, shown with their zone (src/shared/provenance.ts)
+      expect(doc.provenance).toMatch(/^Recorded from Qwen3\.6-27B on this laptop, \d{4}-\d{2}-\d{2}( \d{2}:\d{2} UTC)?; replayed\./);
     }
   });
 

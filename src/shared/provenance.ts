@@ -13,7 +13,11 @@ export function modelName(model: string | null | undefined): string {
 
 /** The recording date (YYYY-MM-DD) from a date or a timestamp, or null. */
 export function recordedDate(at: string | null | undefined): string | null {
-  return at && /^\d{4}-\d{2}-\d{2}/.test(at) ? at.slice(0, 10) : null;
+  if (!at || !/^\d{4}-\d{2}-\d{2}/.test(at)) return null;
+  // A full UTC timestamp (the Lab's manifests) names its zone, so an evening recording in California is not read as
+  // the next day; a bare date (the chat recorder's local date) stays as it is.
+  const t = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?Z$/.exec(at);
+  return t ? `${t[1]} ${t[2]}:${t[3]} UTC` : at.slice(0, 10);
 }
 
 const TAIL: Record<ProvenanceWhere, string> = {

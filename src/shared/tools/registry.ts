@@ -330,14 +330,15 @@ const forecastDepartures: ToolDef<typeof toolInputs.forecast_departures, Forecas
       expected: v.expected,
       i80: v.i80,
       i95: v.i95,
-      hist_expected: v.hist.expected,
+      // shaped like the stored result, so the key a model reads is the path a placeholder resolves
+      hist: { expected: v.hist.expected },
       units: "expected and the ranges are counts of people (expected voluntary departures), never percentages; annual_rate is a percentage",
       // each citation says what its value means, so a model cannot put one value in another's place
       cite: [
         `{{${alias}.expected|1dp}} (expected voluntary departures, people)`,
         `{{${alias}.i80|range}} (80% range of departures, people)`,
         `{{${alias}.i95|range}} (95% range of departures, people)`,
-        `{{${alias}.hist.expected|1dp}} (trailing-rate status quo: departures expected at the last 12 months' rate, people)`,
+        `{{${alias}.hist.expected|1dp}} (trailing-rate status quo: departures expected at last year's rate, people)`,
         `{{${alias}.annual_rate|pct}} (the forecast as an annualized voluntary departure rate)`,
       ],
     };
@@ -660,7 +661,8 @@ const cohortProfile: ToolDef<typeof toolInputs.cohort_profile, CohortProfile & {
       provenance: { run_id: fx.run.run_id, catalog_entry: "sem_cohort_profile.by_cohort", computed_by: "warehouse", tool: "cohort_profile", args: { cohort: c.cohort_id } },
       suppressed_cells: 0,
       rounding: roundingFor(c.n),
-      values: { ...p, name: meta.name },
+      // the promotion rate's window, so a sentence that names it ("a 12-month promotion rate") cites a value
+      values: { ...p, name: meta.name, promotion_window_months: 12 },
     });
   },
   digest(r, alias) {
@@ -675,7 +677,13 @@ const cohortProfile: ToolDef<typeof toolInputs.cohort_profile, CohortProfile & {
       promotion_rate_12m: v.promotion_rate_12m,
       open_backfill_reqs: v.open_backfill_reqs,
       company: v.company,
-      cite: [`{{${alias}.share_below_midpoint|pct}}`, `{{${alias}.median_months_since_promotion|int}}`, `{{${alias}.promotion_rate_12m|pct}}`, `{{${alias}.open_backfill_reqs|int}}`],
+      note: "this cohort only; the result has no company-wide comparison",
+      cite: [
+        `{{${alias}.share_below_midpoint|pct}} (share of the cohort paid below its band midpoint)`,
+        `{{${alias}.median_months_since_promotion|int}} (median months since last promotion)`,
+        `{{${alias}.promotion_rate_12m|pct}} (share of the cohort promoted in the past year)`,
+        `{{${alias}.open_backfill_reqs|int}} (open backfill requisitions)`,
+      ],
     };
   },
 };

@@ -36,7 +36,12 @@ export function checkBudget(c: LlmConfig): { ok: boolean; estimateGb: number; li
  * sequences of about 2,300 tokens with a 512 MB prompt cache, 17.12 GB (4 sequences estimate 17.42 GB with the
  * measured W and are refused, so SPEC 15.10's fallback of 3 applies). */
 export const PROFILES = {
-  agent: { nSeq: 1, ctxTokens: 8704, promptCacheBytes: 512e6, promptCacheSize: 2 },
-  lab: { nSeq: 3, ctxTokens: 2300, promptCacheBytes: 512e6, promptCacheSize: 4 },
+  agent: { nSeq: 1, ctxTokens: 8704, promptCacheBytes: 512e6, promptCacheSize: 2, prefillStepSize: null, kvBits: null },
+  lab: { nSeq: 3, ctxTokens: 2300, promptCacheBytes: 512e6, promptCacheSize: 4, prefillStepSize: null, kvBits: null },
+  // Low-memory variants (2026-10-13): with about 12 to 16 GB available, the agent profile's 3,700-token prefill ran
+  // the GPU out of memory (Metal kIOGPUCommandBufferCallbackErrorOutOfMemory, var/logs/llm-27b.log). These drop the
+  // prompt cache, prefill in 512-token steps and keep the KV cache in 8 bits, trading speed for headroom.
+  "agent-lowmem": { nSeq: 1, ctxTokens: 8704, promptCacheBytes: 0, promptCacheSize: 1, prefillStepSize: 512, kvBits: 8 },
+  "lab-lowmem": { nSeq: 1, ctxTokens: 2300, promptCacheBytes: 0, promptCacheSize: 1, prefillStepSize: 512, kvBits: 8 },
 } as const;
 export type ProfileName = keyof typeof PROFILES;

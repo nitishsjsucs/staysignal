@@ -31,6 +31,7 @@ export interface TurnReply {
   refusal: { code: string; layer: string } | null;
   tool_calls: { tool: string; result_id: string | null; refused: { code: string } | null }[];
   model_steps?: Step[];
+  violations?: string[];
 }
 
 export const MODELS = {
@@ -58,7 +59,11 @@ export function toRecording(q: DemoQuestion, reply: TurnReply, provider: RecordP
   }
   if (q.expect === "refusal") return { ok: false, reason: "expected a refusal but the turn answered" };
   if (!reply.model_steps?.length) return { ok: false, reason: "the turn returned no model steps (is the server current?)" };
-  if (reply.grounding !== "passed" && reply.grounding !== "repaired") return { ok: false, reason: `grounding ${reply.grounding}: the model's text did not pass the check; ask again` };
+  if (reply.grounding !== "passed" && reply.grounding !== "repaired") {
+    const said = (reply.model_steps?.map((s) => s.text ?? "").join(" ").trim() || reply.text).replace(/\s+/g, " ").slice(0, 400);
+    const why = (reply.violations ?? []).join("; ").slice(0, 400);
+    return { ok: false, reason: `grounding ${reply.grounding}: the model's text did not pass the check; ask again. Violations: ${why || "none reported"}. The model wrote: "${said}"` };
+  }
   const last = reply.model_steps[reply.model_steps.length - 1];
   if (!last?.text) return { ok: false, reason: "the model wrote no final text" };
   return {

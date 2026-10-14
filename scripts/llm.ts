@@ -52,6 +52,8 @@ export function mlxArgs(profile: ProfileName, nSeq: number = PROFILES[profile].n
     "--decode-concurrency", String(nSeq), "--prompt-concurrency", "1",
     "--prompt-cache-size", String(p.promptCacheSize), "--prompt-cache-bytes", String(p.promptCacheBytes),
     "--chat-template-args", JSON.stringify({ enable_thinking: false }),
+    ...(p.prefillStepSize ? ["--prefill-step-size", String(p.prefillStepSize)] : []),
+    ...(p.kvBits ? ["--kv-bits", String(p.kvBits)] : []),
   ];
 }
 

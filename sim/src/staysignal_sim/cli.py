@@ -36,6 +36,15 @@ PLAN = [
     ("facts_shuffled", "control", 1),
 ]
 
+# The compact plan (2026-10-13) keeps the design's shape at rehearsal size: one main replicate and both negative
+# controls, 8 personas x 4 rounds each. It exists for a 27B run in low-memory mode, where the full plan's roughly
+# 900 calls per proposal would take about 5 hours; the session's manifest records which plan made it.
+COMPACT_PLAN = [
+    ("main", "rehearsal", 1),
+    ("facts_removed", "rehearsal", 1),
+    ("facts_shuffled", "rehearsal", 1),
+]
+
 
 def provider_for(name: str, run_dir: Path | None = None):
     if name == "stub":
@@ -53,16 +62,18 @@ def cache_path(proposal_id: str, provider: str, rehearsal: bool = False) -> Path
     return repo_root() / "var" / "lab" / "cache" / f"{proposal_id}-{provider}{suffix}.jsonl"
 
 
-async def record(proposal_id: str, provider: str, out: Path, rehearsal: bool = False, fresh: bool = False) -> dict:
+async def record(
+    proposal_id: str, provider: str, out: Path, rehearsal: bool = False, fresh: bool = False, compact: bool = False
+) -> dict:
     proposal = load_proposals()[proposal_id]
     cells = load_cells()
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
-    plan = [("main", "rehearsal", 1)] if rehearsal else PLAN
+    plan = [("main", "rehearsal", 1)] if rehearsal else COMPACT_PLAN if compact else PLAN
     live = provider_for(provider)
     if provider == "openai":
-        cache = cache_path(proposal_id, provider, rehearsal)
+        cache = cache_path(proposal_id, provider, rehearsal or compact)
         if fresh and cache.exists():
             cache.unlink()
         live = CachedProvider(live, cache)
@@ -93,6 +104,9 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--proposal", required=True)
     r.add_argument("--provider", default="stub", choices=["stub", "openai"])
     r.add_argument("--rehearsal", action="store_true", help="8 personas x 4 rounds, one replicate")
+    r.add_argument(
+        "--compact", action="store_true", help="one main replicate and both controls, 8 personas x 4 rounds each"
+    )
     r.add_argument("--out", default=None)
     r.add_argument("--fresh", action="store_true", help="discard the live provider's request cache first")
     v = sub.add_parser("replay")
@@ -100,7 +114,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     if args.cmd == "record":
         out = Path(args.out) if args.out else repo_root() / "lab" / "recordings" / f"{args.proposal}-{args.provider}"
-        doc = asyncio.run(record(args.proposal, args.provider, out, args.rehearsal, args.fresh))
+        doc = asyncio.run(record(args.proposal, args.provider, out, args.rehearsal, args.fresh, args.compact))
         print(
             json.dumps(
                 {

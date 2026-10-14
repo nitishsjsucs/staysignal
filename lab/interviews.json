@@ -1,4 +1,37 @@
 {
-  "note": "Recorded persona interview answers (SPEC 15.8), the fallback when the live interview cannot run (production, or no local 27B). Synthetic personas only; hypothesis generation, not a forecast, not a survey, not validated. Each entry is copied from the engine's local log (var/engine/work/lab/interviews.jsonl) after both hygiene tiers pass. None recorded yet.",
-  "answers": []
+  "note": "Recorded persona interview answers (SPEC 15.8), written by npm run lab:interviews from the engine's interview with Qwen3.6-27B on this laptop; the demo replays them. Synthetic personas only; hypothesis generation, not a forecast, not a survey, not validated.",
+  "answers": [
+    {
+      "proposal": "promotion-criteria-third-window",
+      "persona_id": "P07",
+      "question": "What would you want to know before this change starts?",
+      "answer": "I’d want to know if the new June window triggers a full evaluation cycle or relies on existing performance data, as that impacts our workload. I also need clarity on whether the published criteria will be rigid checklists or flexible guidelines, so I can plan my contributions effectively.",
+      "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+      "recorded_at": "2026-10-13"
+    },
+    {
+      "proposal": "promotion-criteria-third-window",
+      "persona_id": "P04",
+      "question": "Which part of this proposal is least clear to you?",
+      "answer": "While the June window and IC3-to-IC4 criteria are well-defined, it remains unclear how this transparency will extend to other levels, particularly IC1 and IC2 where I operate. Without a roadmap for publishing criteria across the entire individual contributor ladder, the proposal feels like a partial solution that may leave most of my cohort in the dark. I need to know if this is a pilot for full-scale transparency or just a targeted fix for senior roles.",
+      "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+      "recorded_at": "2026-10-13"
+    },
+    {
+      "proposal": "infra-data-merge",
+      "persona_id": "P03",
+      "question": "What would you want to know before this change starts?",
+      "answer": "I need to see a concrete career progression framework that explicitly addresses how ICs will navigate promotions without getting lost in the merged hierarchy. Specifically, how will the new director ensure that the 70% of us below midpoint get equitable access to growth opportunities rather than facing further stagnation? Without defined paths for advancement, I fear this consolidation will just bury our career trajectories under administrative complexity.",
+      "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+      "recorded_at": "2026-10-13"
+    },
+    {
+      "proposal": "infra-data-merge",
+      "persona_id": "P06",
+      "question": "Which part of this proposal is least clear to you?",
+      "answer": "I am unclear on how the new directive will balance the distinct operational priorities of infrastructure scalability with data governance requirements. Specifically, I want to know if there will be dedicated ownership for data integrity standards or if they will be subsumed under general platform concerns. Without clarity on this split, I worry about the potential dilution of specialized focus.",
+      "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+      "recorded_at": "2026-10-13"
+    }
+  ]
 }

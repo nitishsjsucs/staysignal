@@ -1,0 +1,9 @@
+{"action": 4, "call": 5, "persona": "P03", "round": 1, "themes": ["change_uncertainty"]}
+{"action": 6, "call": 4, "persona": "P07", "round": 1, "themes": ["change_uncertainty", "team_identity", "manager_support"]}
+{"action": 14, "call": 0, "persona": "P01", "round": 2, "themes": ["change_uncertainty"]}
+{"action": 15, "call": 3, "persona": "P02", "round": 2, "themes": ["career_mobility", "criteria_clarity", "change_uncertainty"]}
+{"action": 16, "call": 2, "persona": "P03", "round": 2, "themes": ["pay_fairness", "workload", "change_uncertainty"]}
+{"action": 17, "call": 8, "persona": "P06", "round": 2, "themes": ["change_uncertainty", "process_fairness", "other"]}
+{"action": 18, "call": 1, "persona": "P08", "round": 2, "themes": ["pay_fairness", "workload", "change_uncertainty"]}
+{"action": 28, "call": 6, "persona": "P01", "round": 3, "themes": ["change_uncertainty", "process_overhead", "team_identity"]}
+{"action": 45, "call": 7, "persona": "P06", "round": 4, "themes": ["process_overhead"]}

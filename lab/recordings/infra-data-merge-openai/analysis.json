@@ -1,0 +1,657 @@
+{
+ "controls": {
+  "facts_removed": {
+   "acquiescence_index": {
+    "max": 0.125,
+    "mean": 0.125,
+    "min": 0.125
+   },
+   "items": {
+    "career": {
+     "post": {
+      "max": 3.0,
+      "mean": 3.0,
+      "min": 3.0
+     },
+     "pre": {
+      "max": 2.25,
+      "mean": 2.25,
+      "min": 2.25
+     },
+     "shift": {
+      "max": 0.75,
+      "mean": 0.75,
+      "min": 0.75
+     }
+    },
+    "clarity": {
+     "post": {
+      "max": 3.0,
+      "mean": 3.0,
+      "min": 3.0
+     },
+     "pre": {
+      "max": 2.625,
+      "mean": 2.625,
+      "min": 2.625
+     },
+     "shift": {
+      "max": 0.375,
+      "mean": 0.375,
+      "min": 0.375
+     }
+    },
+    "clarity_rev": {
+     "post": {
+      "max": 3.25,
+      "mean": 3.25,
+      "min": 3.25
+     },
+     "pre": {
+      "max": 3.625,
+      "mean": 3.625,
+      "min": 3.625
+     },
+     "shift": {
+      "max": -0.375,
+      "mean": -0.375,
+      "min": -0.375
+     }
+    },
+    "fairness": {
+     "post": {
+      "max": 3.375,
+      "mean": 3.375,
+      "min": 3.375
+     },
+     "pre": {
+      "max": 2.625,
+      "mean": 2.625,
+      "min": 2.625
+     },
+     "shift": {
+      "max": 0.75,
+      "mean": 0.75,
+      "min": 0.75
+     }
+    },
+    "support": {
+     "post": {
+      "max": 1.5,
+      "mean": 1.5,
+      "min": 1.5
+     },
+     "pre": {
+      "max": 2.25,
+      "mean": 2.25,
+      "min": 2.25
+     },
+     "shift": {
+      "max": -0.75,
+      "mean": -0.75,
+      "min": -0.75
+     }
+    }
+   },
+   "note": "internal measures of synthetic personas, not survey results"
+  },
+  "facts_shuffled": {
+   "acquiescence_index": {
+    "max": -0.0625,
+    "mean": -0.0625,
+    "min": -0.0625
+   },
+   "items": {
+    "career": {
+     "post": {
+      "max": 3.0,
+      "mean": 3.0,
+      "min": 3.0
+     },
+     "pre": {
+      "max": 2.75,
+      "mean": 2.75,
+      "min": 2.75
+     },
+     "shift": {
+      "max": 0.25,
+      "mean": 0.25,
+      "min": 0.25
+     }
+    },
+    "clarity": {
+     "post": {
+      "max": 2.5,
+      "mean": 2.5,
+      "min": 2.5
+     },
+     "pre": {
+      "max": 2.0,
+      "mean": 2.0,
+      "min": 2.0
+     },
+     "shift": {
+      "max": 0.5,
+      "mean": 0.5,
+      "min": 0.5
+     }
+    },
+    "clarity_rev": {
+     "post": {
+      "max": 3.375,
+      "mean": 3.375,
+      "min": 3.375
+     },
+     "pre": {
+      "max": 3.875,
+      "mean": 3.875,
+      "min": 3.875
+     },
+     "shift": {
+      "max": -0.5,
+      "mean": -0.5,
+      "min": -0.5
+     }
+    },
+    "fairness": {
+     "post": {
+      "max": 2.5,
+      "mean": 2.5,
+      "min": 2.5
+     },
+     "pre": {
+      "max": 2.25,
+      "mean": 2.25,
+      "min": 2.25
+     },
+     "shift": {
+      "max": 0.25,
+      "mean": 0.25,
+      "min": 0.25
+     }
+    },
+    "support": {
+     "post": {
+      "max": 3.125,
+      "mean": 3.125,
+      "min": 3.125
+     },
+     "pre": {
+      "max": 2.875,
+      "mean": 2.875,
+      "min": 2.875
+     },
+     "shift": {
+      "max": 0.25,
+      "mean": 0.25,
+      "min": 0.25
+     }
+    }
+   },
+   "note": "internal measures of synthetic personas, not survey results"
+  }
+ },
+ "items": {
+  "acquiescence_index": {
+   "max": -0.0625,
+   "mean": -0.0625,
+   "min": -0.0625
+  },
+  "items": {
+   "career": {
+    "post": {
+     "max": 1.75,
+     "mean": 1.75,
+     "min": 1.75
+    },
+    "pre": {
+     "max": 2.125,
+     "mean": 2.125,
+     "min": 2.125
+    },
+    "shift": {
+     "max": -0.375,
+     "mean": -0.375,
+     "min": -0.375
+    }
+   },
+   "clarity": {
+    "post": {
+     "max": 1.375,
+     "mean": 1.375,
+     "min": 1.375
+    },
+    "pre": {
+     "max": 2.125,
+     "mean": 2.125,
+     "min": 2.125
+    },
+    "shift": {
+     "max": -0.75,
+     "mean": -0.75,
+     "min": -0.75
+    }
+   },
+   "clarity_rev": {
+    "post": {
+     "max": 4.625,
+     "mean": 4.625,
+     "min": 4.625
+    },
+    "pre": {
+     "max": 3.75,
+     "mean": 3.75,
+     "min": 3.75
+    },
+    "shift": {
+     "max": 0.875,
+     "mean": 0.875,
+     "min": 0.875
+    }
+   },
+   "fairness": {
+    "post": {
+     "max": 2.0,
+     "mean": 2.0,
+     "min": 2.0
+    },
+    "pre": {
+     "max": 2.5,
+     "mean": 2.5,
+     "min": 2.5
+    },
+    "shift": {
+     "max": -0.5,
+     "mean": -0.5,
+     "min": -0.5
+    }
+   },
+   "support": {
+    "post": {
+     "max": 1.25,
+     "mean": 1.25,
+     "min": 1.25
+    },
+    "pre": {
+     "max": 2.25,
+     "mean": 2.25,
+     "min": 2.25
+    },
+    "shift": {
+     "max": -1.0,
+     "mean": -1.0,
+     "min": -1.0
+    }
+   }
+  },
+  "note": "internal measures of synthetic personas, not survey results"
+ },
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "network": {
+  "edges": [
+   {
+    "source": "N5",
+    "target": "PO",
+    "weight": 1.0
+   },
+   {
+    "source": "N6",
+    "target": "N1",
+    "weight": 1.0
+   }
+  ],
+  "label": "Simulated, not organizational network analysis",
+  "nodes": [
+   {
+    "cohort": "other",
+    "id": "N1",
+    "pagerank": 0.172897,
+    "x": 0.7521,
+    "y": 1.0
+   },
+   {
+    "cohort": "other",
+    "id": "N2",
+    "pagerank": 0.093458,
+    "x": 1.0,
+    "y": 0.0
+   },
+   {
+    "cohort": "other",
+    "id": "N3",
+    "pagerank": 0.093458,
+    "x": 0.0,
+    "y": 0.0
+   },
+   {
+    "cohort": "other",
+    "id": "N4",
+    "pagerank": 0.093458,
+    "x": 1.0,
+    "y": 1.0
+   },
+   {
+    "cohort": "other",
+    "id": "N5",
+    "pagerank": 0.093458,
+    "x": 0.0,
+    "y": 0.3351
+   },
+   {
+    "cohort": "other",
+    "id": "N6",
+    "pagerank": 0.093458,
+    "x": 1.0,
+    "y": 0.7343
+   },
+   {
+    "cohort": "other",
+    "id": "N7",
+    "pagerank": 0.093458,
+    "x": 0.6717,
+    "y": 0.0
+   },
+   {
+    "cohort": "other",
+    "id": "N8",
+    "pagerank": 0.093458,
+    "x": 0.0,
+    "y": 1.0
+   },
+   {
+    "cohort": "program office",
+    "id": "PO",
+    "pagerank": 0.172897,
+    "x": 0.0,
+    "y": 0.6348
+   }
+  ]
+ },
+ "pilot_items": [
+  {
+   "construct": "change_uncertainty",
+   "construct_label": "Uncertainty about the change",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "Merging Infra and Data Eng risks diluting focus for ICs already stuck below midpoint with 31-month promotion gaps. Without clear career paths, this structural change could stall progression further. We need equity and growth plans, not just a new org chart."
+    },
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "Merging Infra and Data Engineering under one director risks diluting specialized focus. Data integrity requires dedicated governance, not just pipeline throughput. Our current structure offers stability; consolidating might introduce systemic friction before delivering clear bene"
+    },
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "Consolidation assumes shared objectives, but Infra prioritizes uptime while Data prioritizes fidelity. Merging creates a governance conflict: who wins when reliability clashes with transformation speed? Without decoupling these mandates, a single director forces arbitrary trade-o"
+    }
+   ],
+   "quotes_span_cohorts": false,
+   "rationale": "4 of 11 theme codes (36%) across the main replicates",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "I understand how the proposed change would affect me."
+  },
+  {
+   "construct": "criteria_clarity",
+   "construct_label": "Clarity of promotion criteria",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "Merging Infra and Data Eng risks diluting focus for ICs already stuck below midpoint with 31-month promotion gaps. Without clear career paths, this structural change could stall progression further. We need equity and growth plans, not just a new org chart."
+    }
+   ],
+   "quotes_span_cohorts": false,
+   "rationale": "1 of 11 theme codes (9%) across the main replicates",
+   "recommendation": "Use the validated measure (Role ambiguity (Rizzo, House and Lirtzman 1970)) instead of this draft wording.",
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": "Role ambiguity (Rizzo, House and Lirtzman 1970)",
+   "wording": "I understand what is required to be promoted to the next level."
+  },
+  {
+   "construct": "team_identity",
+   "construct_label": "Identification with the team",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "Merging Infra and Data Engineering under one director risks diluting specialized focus. Data integrity requires dedicated governance, not just pipeline throughput. Our current structure offers stability; consolidating might introduce systemic friction before delivering clear bene"
+    }
+   ],
+   "quotes_span_cohorts": false,
+   "rationale": "1 of 11 theme codes (9%) across the main replicates",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "I feel part of my team."
+  },
+  {
+   "construct": "process_fairness",
+   "construct_label": "Fairness of how promotion decisions are made",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "Consolidation assumes shared objectives, but Infra prioritizes uptime while Data prioritizes fidelity. Merging creates a governance conflict: who wins when reliability clashes with transformation speed? Without decoupling these mandates, a single director forces arbitrary trade-o"
+    }
+   ],
+   "quotes_span_cohorts": false,
+   "rationale": "1 of 11 theme codes (9%) across the main replicates",
+   "recommendation": "Use the validated measure (Procedural justice (Colquitt 2001)) instead of this draft wording.",
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": "Procedural justice (Colquitt 2001)",
+   "wording": "Promotion decisions are made using consistent criteria."
+  },
+  {
+   "construct": "career_future",
+   "construct_label": "Seeing a future for one's career here",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [],
+   "quotes_span_cohorts": false,
+   "rationale": "measured in every session (no coded theme)",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "I can see a future for my career here."
+  }
+ ],
+ "placeholder": false,
+ "proposal": "infra-data-merge",
+ "replicates": {
+  "facts_removed": [
+   1
+  ],
+  "facts_shuffled": [
+   1
+  ],
+  "main": [
+   1
+  ]
+ },
+ "themes": {
+  "replicates": 1,
+  "shares": [
+   {
+    "max": 0.3636,
+    "mean": 0.3636,
+    "min": 0.3636,
+    "theme": "change_uncertainty"
+   },
+   {
+    "max": 0.1818,
+    "mean": 0.1818,
+    "min": 0.1818,
+    "theme": "career_mobility"
+   },
+   {
+    "max": 0.1818,
+    "mean": 0.1818,
+    "min": 0.1818,
+    "theme": "process_overhead"
+   },
+   {
+    "max": 0.0909,
+    "mean": 0.0909,
+    "min": 0.0909,
+    "theme": "criteria_clarity"
+   },
+   {
+    "max": 0.0909,
+    "mean": 0.0909,
+    "min": 0.0909,
+    "theme": "process_fairness"
+   },
+   {
+    "max": 0.0909,
+    "mean": 0.0909,
+    "min": 0.0909,
+    "theme": "team_identity"
+   }
+  ],
+  "top_by_round": {
+   "career_mobility": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "change_uncertainty": [
+    2.0,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "criteria_clarity": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "process_overhead": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  }
+ },
+ "trajectories": {
+  "scale": "-2 strongly against the proposal to 2 strongly for",
+  "stance_by_round": {
+   "1 to 3 years": [
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    }
+   ],
+   "3 years or more": [
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    }
+   ],
+   "under 1 year": [
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    }
+   ]
+  }
+ }
+}

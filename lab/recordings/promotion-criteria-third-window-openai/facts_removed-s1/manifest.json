@@ -1,0 +1,94 @@
+{
+ "calls": 44,
+ "card_variant": "facts_removed",
+ "config": {
+  "ama_round": 5,
+  "faq_round": 3,
+  "name": "rehearsal",
+  "personas": 8,
+  "rounds": 4
+ },
+ "db_sha256": "6d72b8f75b532f7355849b3413d2ccaa80aa196e979748ff0723abd2b42498d5",
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+ "personas": [
+  {
+   "cell_id": "C010",
+   "handle": "P01 \u00b7 Account Executive \u00b7 IC3-IC4 \u00b7 <1y",
+   "level_band": "mid",
+   "persona_id": "P01",
+   "tenure_band": "<1y",
+   "voice": "I speak with urgent, sales-driven pragmatism, focusing on how clarity and speed directly impact quota attainment and career momentum."
+  },
+  {
+   "cell_id": "C020",
+   "handle": "P02 \u00b7 Customer Success \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P02",
+   "tenure_band": "other",
+   "voice": "I speak with pragmatic, data-driven clarity, focusing on removing ambiguity for customers and teams."
+  },
+  {
+   "cell_id": "C022",
+   "handle": "P03 \u00b7 Customer Success \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P03",
+   "tenure_band": "other",
+   "voice": "I speak with pragmatic urgency, focusing on how opaque criteria and rigid timelines create friction for my customers and stall their growth."
+  },
+  {
+   "cell_id": "C075",
+   "handle": "P04 \u00b7 Product Management \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P04",
+   "tenure_band": "other",
+   "voice": "I speak with focused, process-oriented brevity, prioritizing transparency and operational efficiency in short, direct statements."
+  },
+  {
+   "cell_id": "C088",
+   "handle": "P05 \u00b7 Sales Development \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P05",
+   "tenure_band": "other",
+   "voice": "P05 talks with energetic, quota-driven pragmatism, using short, punchy sentences focused on speed-to-market and clear metrics to reduce ambiguity in sales compe"
+  },
+  {
+   "cell_id": "C103",
+   "handle": "P06 \u00b7 Software Engineering \u00b7 IC1-IC2 \u00b7 <1y",
+   "level_band": "early",
+   "persona_id": "P06",
+   "tenure_band": "<1y",
+   "voice": "I speak with eager, slightly naive enthusiasm, focusing on transparency and fairness while overlooking higher-level nuances."
+  },
+  {
+   "cell_id": "C106",
+   "handle": "P07 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 1-3y",
+   "level_band": "mid",
+   "persona_id": "P07",
+   "tenure_band": "1-3y",
+   "voice": "I speak with cautious optimism, focusing on clarity and fairness, often asking how changes will impact my immediate team's workload and morale."
+  },
+  {
+   "cell_id": "C108",
+   "handle": "P08 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 3-5y",
+   "level_band": "mid",
+   "persona_id": "P08",
+   "tenure_band": "3-5y",
+   "voice": "Direct, data-driven, and skeptical of vague promises, I prioritize clear, actionable metrics over procedural changes."
+  }
+ ],
+ "placeholder": false,
+ "proposal": "promotion-criteria-third-window",
+ "provider": "openai",
+ "recorded_at": "2026-10-14T00:32:46Z",
+ "sampling": {
+  "logit_bias": {
+   "bias": -100,
+   "tokens": 58,
+   "why": "en and em dash tokens banned at sampling time (public hygiene tier)"
+  },
+  "temperature": 0.7,
+  "top_p": 0.95
+ },
+ "seed": 1
+}

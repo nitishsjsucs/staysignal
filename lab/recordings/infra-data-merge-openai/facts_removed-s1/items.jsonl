@@ -1,0 +1,16 @@
+{"call": 8, "cell_id": "C025", "persona": "P01", "phase": "pre", "tenure_band": "other", "values": [4, 2, 4, 3, 3]}
+{"call": 9, "cell_id": "C026", "persona": "P02", "phase": "pre", "tenure_band": "other", "values": [1, 3, 4, 3, 2]}
+{"call": 10, "cell_id": "C027", "persona": "P03", "phase": "pre", "tenure_band": "other", "values": [2, 3, 3, 3, 2]}
+{"call": 11, "cell_id": "C028", "persona": "P04", "phase": "pre", "tenure_band": "other", "values": [2, 2, 4, 2, 2]}
+{"call": 12, "cell_id": "C029", "persona": "P05", "phase": "pre", "tenure_band": "other", "values": [2, 2, 4, 2, 2]}
+{"call": 13, "cell_id": "C030", "persona": "P06", "phase": "pre", "tenure_band": "other", "values": [4, 3, 3, 2, 2]}
+{"call": 14, "cell_id": "C042", "persona": "P07", "phase": "pre", "tenure_band": "other", "values": [2, 3, 3, 3, 3]}
+{"call": 15, "cell_id": "C043", "persona": "P08", "phase": "pre", "tenure_band": "other", "values": [1, 3, 4, 3, 2]}
+{"call": 37, "cell_id": "C025", "persona": "P01", "phase": "post", "tenure_band": "other", "values": [5, 3, 3, 3, 5]}
+{"call": 38, "cell_id": "C026", "persona": "P02", "phase": "post", "tenure_band": "other", "values": [1, 3, 4, 4, 3]}
+{"call": 36, "cell_id": "C027", "persona": "P03", "phase": "post", "tenure_band": "other", "values": [1, 3, 3, 3, 3]}
+{"call": 39, "cell_id": "C028", "persona": "P04", "phase": "post", "tenure_band": "other", "values": [1, 3, 3, 3, 2]}
+{"call": 40, "cell_id": "C029", "persona": "P05", "phase": "post", "tenure_band": "other", "values": [1, 3, 4, 3, 2]}
+{"call": 41, "cell_id": "C030", "persona": "P06", "phase": "post", "tenure_band": "other", "values": [1, 3, 3, 4, 2]}
+{"call": 43, "cell_id": "C042", "persona": "P07", "phase": "post", "tenure_band": "other", "values": [1, 3, 3, 4, 4]}
+{"call": 42, "cell_id": "C043", "persona": "P08", "phase": "post", "tenure_band": "other", "values": [1, 3, 3, 3, 3]}

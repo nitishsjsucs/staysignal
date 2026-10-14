@@ -1,0 +1,47 @@
+{"action": "seed", "args": {"value": "1:1"}, "call": null, "invalid": null, "persona": null, "round": 1, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P03", "round": 1, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P07", "round": 1, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P06", "round": 1, "stance": null}
+{"action": "create_post", "args": {"content": "Clear IC3-IC4 criteria end the guessing game for clients who need senior expertise. We can\u2019t advocate effectively in the dark. A June window also stops talent from stagnating while we wait six months. Transparency isn\u2019t just HR policy; it\u2019s a retention and service quality imperat"}, "call": 16, "invalid": null, "persona": "P03", "round": 1, "stance": 2}
+{"action": "create_post", "args": {"content": "I love the idea of adding a June window! More chances to grow are awesome. But honestly, I\u2019m an IC1/2. I really just want clear criteria for my level. It feels a bit unfair that we get nothing while IC3s get their roadmap published. Can we please get clarity for junior devs too?"}, "call": 18, "invalid": null, "persona": "P06", "round": 1, "stance": 0}
+{"action": "create_post", "args": {"content": "Clear IC3-IC4 criteria would finally give us a concrete roadmap, especially for those of us below midpoint. A June window helps too, though I worry it might dilute the impact of the main cycles. Still, transparency is a step in the right direction."}, "call": 17, "invalid": null, "persona": "P07", "round": 1, "stance": 1}
+{"action": "end_round", "args": {}, "call": null, "invalid": null, "persona": null, "round": 1, "stance": null}
+{"action": "seed", "args": {"value": "1:2"}, "call": null, "invalid": null, "persona": null, "round": 2, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P01", "round": 2, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P02", "round": 2, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P03", "round": 2, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P08", "round": 2, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P06", "round": 2, "stance": null}
+{"action": "do_nothing", "args": {}, "call": 19, "invalid": "no tool call", "persona": "P01", "round": 2, "stance": null}
+{"action": "do_nothing", "args": {}, "call": 23, "invalid": "no tool call", "persona": "P02", "round": 2, "stance": null}
+{"action": "do_nothing", "args": {}, "call": 20, "invalid": "no tool call", "persona": "P03", "round": 2, "stance": null}
+{"action": "create_comment", "args": {"content": "I get the senior focus, but as an IC1/2, I still feel left out! Adding a June window is super exciting for growth, but can we please publish junior criteria too? It feels unfair to leave us guessing while seniors get a roadmap. Let's make everyone's path clear!", "post_id": 1}, "call": 22, "invalid": null, "persona": "P06", "round": 2, "stance": 1}
+{"action": "do_nothing", "args": {}, "call": 21, "invalid": "no tool call", "persona": "P08", "round": 2, "stance": null}
+{"action": "end_round", "args": {}, "call": null, "invalid": null, "persona": null, "round": 2, "stance": null}
+{"action": "seed", "args": {"value": "1:3"}, "call": null, "invalid": null, "persona": null, "round": 3, "stance": null}
+{"action": "create_post", "args": {"content": "Program office FAQ: FAQ: We\u2019re publishing IC3-4 criteria and a June window to address senior retention. Junior criteria follow in Q4. The June cycle won\u2019t dilute main windows; it prevents stagnation. Transparency is phased but comprehensive. Your feedback on junior paths is noted"}, "call": 24, "invalid": null, "persona": "Program office", "round": 3, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P01", "round": 3, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P03", "round": 3, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P05", "round": 3, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P07", "round": 3, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P04", "round": 3, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P06", "round": 3, "stance": null}
+{"action": "do_nothing", "args": {}, "call": 26, "invalid": "no tool call", "persona": "P01", "round": 3, "stance": null}
+{"action": "create_comment", "args": {"content": "Fair point on junior clarity, but IC3-IC4 is the bottleneck for client trust. We lose deals when seniors are ambiguous. June window prevents stagnation for those ready to step up. Let's fix the critical path first, then expand.", "post_id": 2}, "call": 25, "invalid": null, "persona": "P03", "round": 3, "stance": 1}
+{"action": "do_nothing", "args": {}, "call": 29, "invalid": "no tool call", "persona": "P04", "round": 3, "stance": null}
+{"action": "do_nothing", "args": {}, "call": 27, "invalid": "no tool call", "persona": "P05", "round": 3, "stance": null}
+{"action": "do_nothing", "args": {}, "call": 30, "invalid": "no tool call", "persona": "P06", "round": 3, "stance": null}
+{"action": "like_post", "args": {"post_id": 1}, "call": 28, "invalid": null, "persona": "P07", "round": 3, "stance": null}
+{"action": "end_round", "args": {}, "call": null, "invalid": null, "persona": null, "round": 3, "stance": null}
+{"action": "seed", "args": {"value": "1:4"}, "call": null, "invalid": null, "persona": null, "round": 4, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P02", "round": 4, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P03", "round": 4, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P05", "round": 4, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P04", "round": 4, "stance": null}
+{"action": "refresh", "args": {}, "call": null, "invalid": null, "persona": "P06", "round": 4, "stance": null}
+{"action": "do_nothing", "args": {}, "call": 31, "invalid": "no tool call", "persona": "P02", "round": 4, "stance": null}
+{"action": "do_nothing", "args": {}, "call": 32, "invalid": "no tool call", "persona": "P03", "round": 4, "stance": null}
+{"action": "create_post", "args": {"content": "Our cohort median time since promotion is 16 months. A June window cuts that structural lag by half, directly addressing stagnation. While IC3-IC4 criteria help seniors, our data shows juniors are the primary bottleneck. We need published IC1-IC2 criteria now to align expectation"}, "call": 34, "invalid": null, "persona": "P04", "round": 4, "stance": 1}
+{"action": "create_post", "args": {"content": "As a quota-driven hunter, I need clear IC3-IC4 criteria to signal seniority and close complex deals. Ambiguity kills deals. A June window prevents top performers from leaving for competitors during the long March-September gap. Transparency accelerates our ability to deliver valu"}, "call": 33, "invalid": null, "persona": "P05", "round": 4, "stance": 2}
+{"action": "do_nothing", "args": {}, "call": 35, "invalid": "no tool call", "persona": "P06", "round": 4, "stance": null}
+{"action": "end_round", "args": {}, "call": null, "invalid": null, "persona": null, "round": 4, "stance": null}

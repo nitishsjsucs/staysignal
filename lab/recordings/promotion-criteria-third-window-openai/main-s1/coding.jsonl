@@ -1,0 +1,7 @@
+{"action": 4, "call": 3, "persona": "P03", "round": 1, "themes": ["criteria_clarity", "pay_fairness", "career_mobility"]}
+{"action": 5, "call": 2, "persona": "P06", "round": 1, "themes": ["criteria_clarity", "career_mobility"]}
+{"action": 6, "call": 1, "persona": "P07", "round": 1, "themes": ["criteria_clarity", "career_mobility", "process_overhead"]}
+{"action": 14, "call": 4, "persona": "P01", "round": 2, "themes": ["criteria_clarity", "pay_fairness", "career_mobility"]}
+{"action": 30, "call": 0, "persona": "P04", "round": 3, "themes": ["criteria_clarity", "career_mobility", "process_fairness"]}
+{"action": 31, "call": 6, "persona": "P05", "round": 3, "themes": ["criteria_clarity", "career_mobility"]}
+{"action": 43, "call": 5, "persona": "P04", "round": 4, "themes": ["criteria_clarity", "career_mobility", "process_overhead"]}

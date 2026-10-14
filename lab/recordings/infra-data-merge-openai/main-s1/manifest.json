@@ -1,0 +1,94 @@
+{
+ "calls": 44,
+ "card_variant": "main",
+ "config": {
+  "ama_round": 5,
+  "faq_round": 3,
+  "name": "rehearsal",
+  "personas": 8,
+  "rounds": 4
+ },
+ "db_sha256": "3c258bc6bf6d4a0c0cdf4d7ab4d0541da5021bf4b71cb2a5e99cc34600ea7cf6",
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+ "personas": [
+  {
+   "cell_id": "C025",
+   "handle": "P01 \u00b7 Data Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P01",
+   "tenure_band": "other",
+   "voice": "I speak with technical precision and cautious skepticism, focusing on systemic alignment rather than individual metrics."
+  },
+  {
+   "cell_id": "C026",
+   "handle": "P02 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P02",
+   "tenure_band": "other",
+   "voice": "Speaks with pragmatic, metrics-driven skepticism, prioritizing career stability and clear reporting lines over structural efficiency."
+  },
+  {
+   "cell_id": "C027",
+   "handle": "P03 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P03",
+   "tenure_band": "other",
+   "voice": "I speak with pragmatic caution, focusing on how structural merges might stall career progression and compensation equity for under-midpoint ICs in stagnant repo"
+  },
+  {
+   "cell_id": "C028",
+   "handle": "P04 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P04",
+   "tenure_band": "other",
+   "voice": "Speaks with concise, metrics-driven skepticism, focusing on operational friction and role clarity."
+  },
+  {
+   "cell_id": "C029",
+   "handle": "P05 \u00b7 Data Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P05",
+   "tenure_band": "other",
+   "voice": "Speaks with pragmatic, data-centric brevity, focusing on technical alignment and career trajectory risks rather than organizational politics."
+  },
+  {
+   "cell_id": "C030",
+   "handle": "P06 \u00b7 Data Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P06",
+   "tenure_band": "other",
+   "voice": "P06 speaks with technical precision and quiet resilience, focusing on system stability and data integrity while subtly acknowledging the stability of their curr"
+  },
+  {
+   "cell_id": "C042",
+   "handle": "P07 \u00b7 Infrastructure Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P07",
+   "tenure_band": "other",
+   "voice": "Speaks with the pragmatic, slightly weary tone of a mid-level engineer focused on technical stability and career stagnation."
+  },
+  {
+   "cell_id": "C043",
+   "handle": "P08 \u00b7 Infrastructure Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P08",
+   "tenure_band": "other",
+   "voice": "P08 speaks with terse, pragmatic brevity, focusing strictly on technical scope and operational clarity while ignoring political or personnel implications."
+  }
+ ],
+ "placeholder": false,
+ "proposal": "infra-data-merge",
+ "provider": "openai",
+ "recorded_at": "2026-10-14T01:03:02Z",
+ "sampling": {
+  "logit_bias": {
+   "bias": -100,
+   "tokens": 58,
+   "why": "en and em dash tokens banned at sampling time (public hygiene tier)"
+  },
+  "temperature": 0.7,
+  "top_p": 0.95
+ },
+ "seed": 1
+}

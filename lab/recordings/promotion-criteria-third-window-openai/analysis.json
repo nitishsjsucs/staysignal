@@ -1,0 +1,659 @@
+{
+ "controls": {
+  "facts_removed": {
+   "acquiescence_index": {
+    "max": 0.0,
+    "mean": 0.0,
+    "min": 0.0
+   },
+   "items": {
+    "career": {
+     "post": {
+      "max": 4.5,
+      "mean": 4.5,
+      "min": 4.5
+     },
+     "pre": {
+      "max": 4.25,
+      "mean": 4.25,
+      "min": 4.25
+     },
+     "shift": {
+      "max": 0.25,
+      "mean": 0.25,
+      "min": 0.25
+     }
+    },
+    "clarity": {
+     "post": {
+      "max": 1.125,
+      "mean": 1.125,
+      "min": 1.125
+     },
+     "pre": {
+      "max": 1.125,
+      "mean": 1.125,
+      "min": 1.125
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "clarity_rev": {
+     "post": {
+      "max": 4.875,
+      "mean": 4.875,
+      "min": 4.875
+     },
+     "pre": {
+      "max": 4.875,
+      "mean": 4.875,
+      "min": 4.875
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "fairness": {
+     "post": {
+      "max": 2.375,
+      "mean": 2.375,
+      "min": 2.375
+     },
+     "pre": {
+      "max": 2.25,
+      "mean": 2.25,
+      "min": 2.25
+     },
+     "shift": {
+      "max": 0.125,
+      "mean": 0.125,
+      "min": 0.125
+     }
+    },
+    "support": {
+     "post": {
+      "max": 4.75,
+      "mean": 4.75,
+      "min": 4.75
+     },
+     "pre": {
+      "max": 4.5,
+      "mean": 4.5,
+      "min": 4.5
+     },
+     "shift": {
+      "max": 0.25,
+      "mean": 0.25,
+      "min": 0.25
+     }
+    }
+   },
+   "note": "internal measures of synthetic personas, not survey results"
+  },
+  "facts_shuffled": {
+   "acquiescence_index": {
+    "max": 0.0,
+    "mean": 0.0,
+    "min": 0.0
+   },
+   "items": {
+    "career": {
+     "post": {
+      "max": 3.875,
+      "mean": 3.875,
+      "min": 3.875
+     },
+     "pre": {
+      "max": 3.875,
+      "mean": 3.875,
+      "min": 3.875
+     },
+     "shift": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+     }
+    },
+    "clarity": {
+     "post": {
+      "max": 1.375,
+      "mean": 1.375,
+      "min": 1.375
+     },
+     "pre": {
+      "max": 1.125,
+      "mean": 1.125,
+      "min": 1.125
+     },
+     "shift": {
+      "max": 0.25,
+      "mean": 0.25,
+      "min": 0.25
+     }
+    },
+    "clarity_rev": {
+     "post": {
+      "max": 4.625,
+      "mean": 4.625,
+      "min": 4.625
+     },
+     "pre": {
+      "max": 4.875,
+      "mean": 4.875,
+      "min": 4.875
+     },
+     "shift": {
+      "max": -0.25,
+      "mean": -0.25,
+      "min": -0.25
+     }
+    },
+    "fairness": {
+     "post": {
+      "max": 2.375,
+      "mean": 2.375,
+      "min": 2.375
+     },
+     "pre": {
+      "max": 2.125,
+      "mean": 2.125,
+      "min": 2.125
+     },
+     "shift": {
+      "max": 0.25,
+      "mean": 0.25,
+      "min": 0.25
+     }
+    },
+    "support": {
+     "post": {
+      "max": 3.75,
+      "mean": 3.75,
+      "min": 3.75
+     },
+     "pre": {
+      "max": 4.75,
+      "mean": 4.75,
+      "min": 4.75
+     },
+     "shift": {
+      "max": -1.0,
+      "mean": -1.0,
+      "min": -1.0
+     }
+    }
+   },
+   "note": "internal measures of synthetic personas, not survey results"
+  }
+ },
+ "items": {
+  "acquiescence_index": {
+   "max": 0.0625,
+   "mean": 0.0625,
+   "min": 0.0625
+  },
+  "items": {
+   "career": {
+    "post": {
+     "max": 3.75,
+     "mean": 3.75,
+     "min": 3.75
+    },
+    "pre": {
+     "max": 3.5,
+     "mean": 3.5,
+     "min": 3.5
+    },
+    "shift": {
+     "max": 0.25,
+     "mean": 0.25,
+     "min": 0.25
+    }
+   },
+   "clarity": {
+    "post": {
+     "max": 1.0,
+     "mean": 1.0,
+     "min": 1.0
+    },
+    "pre": {
+     "max": 1.125,
+     "mean": 1.125,
+     "min": 1.125
+    },
+    "shift": {
+     "max": -0.125,
+     "mean": -0.125,
+     "min": -0.125
+    }
+   },
+   "clarity_rev": {
+    "post": {
+     "max": 5.0,
+     "mean": 5.0,
+     "min": 5.0
+    },
+    "pre": {
+     "max": 5.0,
+     "mean": 5.0,
+     "min": 5.0
+    },
+    "shift": {
+     "max": 0.0,
+     "mean": 0.0,
+     "min": 0.0
+    }
+   },
+   "fairness": {
+    "post": {
+     "max": 2.125,
+     "mean": 2.125,
+     "min": 2.125
+    },
+    "pre": {
+     "max": 2.125,
+     "mean": 2.125,
+     "min": 2.125
+    },
+    "shift": {
+     "max": 0.0,
+     "mean": 0.0,
+     "min": 0.0
+    }
+   },
+   "support": {
+    "post": {
+     "max": 4.625,
+     "mean": 4.625,
+     "min": 4.625
+    },
+    "pre": {
+     "max": 3.875,
+     "mean": 3.875,
+     "min": 3.875
+    },
+    "shift": {
+     "max": 0.75,
+     "mean": 0.75,
+     "min": 0.75
+    }
+   }
+  },
+  "note": "internal measures of synthetic personas, not survey results"
+ },
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "network": {
+  "edges": [
+   {
+    "source": "N1",
+    "target": "N3",
+    "weight": 1.0
+   },
+   {
+    "source": "N3",
+    "target": "N7",
+    "weight": 3.0
+   },
+   {
+    "source": "N4",
+    "target": "N7",
+    "weight": 1.0
+   },
+   {
+    "source": "N5",
+    "target": "N7",
+    "weight": 1.0
+   },
+   {
+    "source": "N6",
+    "target": "N3",
+    "weight": 2.0
+   },
+   {
+    "source": "N7",
+    "target": "N3",
+    "weight": 1.0
+   }
+  ],
+  "label": "Simulated, not organizational network analysis",
+  "nodes": [
+   {
+    "cohort": "under 1 year",
+    "id": "N1",
+    "pagerank": 0.023256,
+    "x": 0.0,
+    "y": 0.6544
+   },
+   {
+    "cohort": "other",
+    "id": "N2",
+    "pagerank": 0.023256,
+    "x": 1.0,
+    "y": 0.0
+   },
+   {
+    "cohort": "other",
+    "id": "N3",
+    "pagerank": 0.418605,
+    "x": 0.3303,
+    "y": 0.5632
+   },
+   {
+    "cohort": "other",
+    "id": "N4",
+    "pagerank": 0.023256,
+    "x": 0.6204,
+    "y": 0.0
+   },
+   {
+    "cohort": "other",
+    "id": "N5",
+    "pagerank": 0.023256,
+    "x": 0.0,
+    "y": 0.0
+   },
+   {
+    "cohort": "under 1 year",
+    "id": "N6",
+    "pagerank": 0.023256,
+    "x": 0.5046,
+    "y": 1.0
+   },
+   {
+    "cohort": "1 to 3 years",
+    "id": "N7",
+    "pagerank": 0.418605,
+    "x": 0.2992,
+    "y": 0.1887
+   },
+   {
+    "cohort": "3 years or more",
+    "id": "N8",
+    "pagerank": 0.023256,
+    "x": 1.0,
+    "y": 1.0
+   },
+   {
+    "cohort": "program office",
+    "id": "PO",
+    "pagerank": 0.023256,
+    "x": 0.0,
+    "y": 1.0
+   }
+  ]
+ },
+ "pilot_items": [
+  {
+   "construct": "criteria_clarity",
+   "construct_label": "Clarity of promotion criteria",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "We need this clarity now. With 85% of us paid below midpoint, ambiguity is costing us retention. Publishing IC3-IC4 criteria removes guesswork, and a June window accelerates progression for those currently stalled. Let\u2019s stop leaving career growth to chance."
+    },
+    {
+     "cohort": "under 1 year",
+     "replicate": 1,
+     "text": "This is huge! Clear criteria would help us understand exactly what we need to hit for our next step. And a June window? Yes please! Two promotions a year feels like too long of a wait when we\u2019re eager to grow. Can\u2019t wait to get started!"
+    },
+    {
+     "cohort": "1 to 3 years",
+     "replicate": 1,
+     "text": "With 60% of us below band midpoint and median time-to-promotion at 19 months, opacity is costing us velocity. Publishing IC3\u2192IC4 criteria creates a clear target. Adding a June window cuts the wait, keeping top talent engaged. We need transparency to fix the stagnation."
+    }
+   ],
+   "quotes_span_cohorts": true,
+   "rationale": "7 of 19 theme codes (37%) across the main replicates",
+   "recommendation": "Use the validated measure (Role ambiguity (Rizzo, House and Lirtzman 1970)) instead of this draft wording.",
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": "Role ambiguity (Rizzo, House and Lirtzman 1970)",
+   "wording": "I understand what is required to be promoted to the next level."
+  },
+  {
+   "construct": "process_fairness",
+   "construct_label": "Fairness of how promotion decisions are made",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [
+    {
+     "cohort": "other",
+     "replicate": 1,
+     "text": "- 50% of my cohort is below band midpoint; opacity correlates with stagnation.\n- Median time since promotion is 21 months; a June window reduces this latency by ~50%.\n- Publishing IC3\u2192IC4 criteria standardizes expectations, reducing subjective bias in evaluations.\n- Process clari"
+    }
+   ],
+   "quotes_span_cohorts": false,
+   "rationale": "1 of 19 theme codes (5%) across the main replicates",
+   "recommendation": "Use the validated measure (Procedural justice (Colquitt 2001)) instead of this draft wording.",
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": "Procedural justice (Colquitt 2001)",
+   "wording": "Promotion decisions are made using consistent criteria."
+  },
+  {
+   "construct": "career_future",
+   "construct_label": "Seeing a future for one's career here",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [],
+   "quotes_span_cohorts": false,
+   "rationale": "measured in every session (no coded theme)",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "I can see a future for my career here."
+  },
+  {
+   "construct": "change_uncertainty",
+   "construct_label": "Uncertainty about the change",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [],
+   "quotes_span_cohorts": false,
+   "rationale": "measured in every session (no coded theme)",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "I understand how the proposed change would affect me."
+  },
+  {
+   "construct": "team_identity",
+   "construct_label": "Identification with the team",
+   "label": "Draft item: needs cognitive pretesting and a properly sampled, consented pilot",
+   "lint": [],
+   "quotes": [],
+   "quotes_span_cohorts": false,
+   "rationale": "measured in every session (no coded theme)",
+   "recommendation": null,
+   "scale": [
+    "Strongly disagree",
+    "Disagree",
+    "Neither agree nor disagree",
+    "Agree",
+    "Strongly agree"
+   ],
+   "source": "template",
+   "validated_measure": null,
+   "wording": "I feel part of my team."
+  }
+ ],
+ "placeholder": false,
+ "proposal": "promotion-criteria-third-window",
+ "replicates": {
+  "facts_removed": [
+   1
+  ],
+  "facts_shuffled": [
+   1
+  ],
+  "main": [
+   1
+  ]
+ },
+ "themes": {
+  "replicates": 1,
+  "shares": [
+   {
+    "max": 0.3684,
+    "mean": 0.3684,
+    "min": 0.3684,
+    "theme": "career_mobility"
+   },
+   {
+    "max": 0.3684,
+    "mean": 0.3684,
+    "min": 0.3684,
+    "theme": "criteria_clarity"
+   },
+   {
+    "max": 0.1053,
+    "mean": 0.1053,
+    "min": 0.1053,
+    "theme": "pay_fairness"
+   },
+   {
+    "max": 0.1053,
+    "mean": 0.1053,
+    "min": 0.1053,
+    "theme": "process_overhead"
+   },
+   {
+    "max": 0.0526,
+    "mean": 0.0526,
+    "min": 0.0526,
+    "theme": "process_fairness"
+   }
+  ],
+  "top_by_round": {
+   "career_mobility": [
+    3.0,
+    1.0,
+    2.0,
+    1.0
+   ],
+   "criteria_clarity": [
+    3.0,
+    1.0,
+    2.0,
+    1.0
+   ],
+   "pay_fairness": [
+    1.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   "process_overhead": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  }
+ },
+ "trajectories": {
+  "scale": "-2 strongly against the proposal to 2 strongly for",
+  "stance_by_round": {
+   "1 to 3 years": [
+    {
+     "max": 2.0,
+     "mean": 2.0,
+     "min": 2.0
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    }
+   ],
+   "3 years or more": [
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    }
+   ],
+   "under 1 year": [
+    {
+     "max": 2.0,
+     "mean": 2.0,
+     "min": 2.0
+    },
+    {
+     "max": 1.0,
+     "mean": 1.0,
+     "min": 1.0
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    },
+    {
+     "max": null,
+     "mean": null,
+     "min": null
+    }
+   ]
+  }
+ }
+}

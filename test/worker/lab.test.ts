@@ -8,11 +8,11 @@ const LABEL = "Hypothesis generation with synthetic personas. Not a forecast, no
 type LabDoc = { label: string; proposal: string; placeholder: boolean; personas: { handle: string }[]; analysis: { label: string; network: { nodes: { id: string }[] } }; sanity: { label: string; persona_agreement: { n_cells: number } } };
 
 describe("Scenario Lab API", () => {
-  it("lists the recorded sessions, both marked placeholder until the 27B recordings exist", async () => {
+  it("lists the recorded sessions, both recorded from the 27B (no placeholders)", async () => {
     const idx = await json<{ label: string; proposals: { id: string; placeholder: boolean }[] }>("/api/lab", { as: P.analyst });
     expect(idx.label).toBe(LABEL);
     expect(idx.proposals.map((p) => p.id)).toEqual(["infra-data-merge", "promotion-criteria-third-window"]);
-    expect(idx.proposals.every((p) => p.placeholder)).toBe(true);
+    expect(idx.proposals.every((p) => !p.placeholder)).toBe(true);
   });
 
   it("serves a session with its analysis and sanity panel, labeled, with anonymous network nodes", async () => {
@@ -20,7 +20,8 @@ describe("Scenario Lab API", () => {
     expect(doc.label).toBe(LABEL);
     expect(doc.analysis.label).toBe(LABEL);
     expect(doc.sanity.label).toBe("A consistency check, not validation");
-    expect(doc.personas).toHaveLength(16);
+    // the compact plan: one main replicate and both controls at 8 personas x 4 rounds (sim/src/staysignal_sim/cli.py)
+    expect(doc.personas).toHaveLength(8);
     expect(doc.analysis.network.nodes.every((n) => /^(N\d+|PO)$/.test(n.id))).toBe(true);
   });
 

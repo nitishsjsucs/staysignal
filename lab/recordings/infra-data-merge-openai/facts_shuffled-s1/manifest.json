@@ -1,0 +1,94 @@
+{
+ "calls": 44,
+ "card_variant": "facts_shuffled",
+ "config": {
+  "ama_round": 5,
+  "faq_round": 3,
+  "name": "rehearsal",
+  "personas": 8,
+  "rounds": 4
+ },
+ "db_sha256": "d94d3063ce536aac884a0f1ce68ebb25396efe26f2a993e2d7e6ae6c4f060ca5",
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+ "personas": [
+  {
+   "cell_id": "C025",
+   "handle": "P01 \u00b7 Data Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P01",
+   "tenure_band": "other",
+   "voice": "Speak analytically, focusing on data pipeline efficiency and technical alignment while avoiding HR or compensation topics."
+  },
+  {
+   "cell_id": "C026",
+   "handle": "P02 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P02",
+   "tenure_band": "other",
+   "voice": "I speak with cautious optimism, focusing on strategic alignment and career growth opportunities while subtly acknowledging the current team's recent stability a"
+  },
+  {
+   "cell_id": "C027",
+   "handle": "P03 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P03",
+   "tenure_band": "other",
+   "voice": "Data engineers are pragmatic, data-driven, and bluntly focused on systemic efficiency and resource allocation, often bypassing organizational politics to highli"
+  },
+  {
+   "cell_id": "C028",
+   "handle": "P04 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P04",
+   "tenure_band": "other",
+   "voice": "Speaks with technical precision, focusing on data pipeline reliability and architectural scalability."
+  },
+  {
+   "cell_id": "C029",
+   "handle": "P05 \u00b7 Data Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P05",
+   "tenure_band": "other",
+   "voice": "Data-focused, pragmatic, and quietly skeptical of org chart gymnastics that don't solve promotion bottlenecks or pay disparities."
+  },
+  {
+   "cell_id": "C030",
+   "handle": "P06 \u00b7 Data Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P06",
+   "tenure_band": "other",
+   "voice": "Speaks with focused pragmatism, prioritizing technical clarity and data pipeline stability over organizational politics or career progression metrics."
+  },
+  {
+   "cell_id": "C042",
+   "handle": "P07 \u00b7 Infrastructure Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P07",
+   "tenure_band": "other",
+   "voice": "I speak with the pragmatic, slightly weary precision of a mid-level engineer, focusing strictly on technical cohesion and operational clarity while remaining de"
+  },
+  {
+   "cell_id": "C043",
+   "handle": "P08 \u00b7 Infrastructure Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P08",
+   "tenure_band": "other",
+   "voice": "P08 speaks with the weary, data-driven caution of an under-promoted engineer, focusing on operational friction and resource scarcity rather than org chart aesth"
+  }
+ ],
+ "placeholder": false,
+ "proposal": "infra-data-merge",
+ "provider": "openai",
+ "recorded_at": "2026-10-14T01:38:02Z",
+ "sampling": {
+  "logit_bias": {
+   "bias": -100,
+   "tokens": 58,
+   "why": "en and em dash tokens banned at sampling time (public hygiene tier)"
+  },
+  "temperature": 0.7,
+  "top_p": 0.95
+ },
+ "seed": 1
+}

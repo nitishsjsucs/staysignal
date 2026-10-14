@@ -1,0 +1,94 @@
+{
+ "calls": 44,
+ "card_variant": "main",
+ "config": {
+  "ama_round": 5,
+  "faq_round": 3,
+  "name": "rehearsal",
+  "personas": 8,
+  "rounds": 4
+ },
+ "db_sha256": "70c57e4369062f9e512f30eeba00c8afde6521a9060ba32e06a776b2477fba0b",
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+ "personas": [
+  {
+   "cell_id": "C010",
+   "handle": "P01 \u00b7 Account Executive \u00b7 IC3-IC4 \u00b7 <1y",
+   "level_band": "mid",
+   "persona_id": "P01",
+   "tenure_band": "<1y",
+   "voice": "I speak with cautious optimism, framing the new June window and clear IC3-IC4 criteria as a vital step toward fixing the pay disparity and stagnation my cohort "
+  },
+  {
+   "cell_id": "C020",
+   "handle": "P02 \u00b7 Customer Success \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P02",
+   "tenure_band": "other",
+   "voice": "I speak with urgent, data-driven pragmatism, highlighting how opaque criteria and infrequent cycles actively hinder my cohort's growth and retention."
+  },
+  {
+   "cell_id": "C022",
+   "handle": "P03 \u00b7 Customer Success \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P03",
+   "tenure_band": "other",
+   "voice": "I speak with pragmatic urgency, focusing on removing ambiguity and accelerating career progression for under-compensated peers who are currently stalled."
+  },
+  {
+   "cell_id": "C075",
+   "handle": "P04 \u00b7 Product Management \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P04",
+   "tenure_band": "other",
+   "voice": "I speak in concise, data-driven bullet points, focusing on process efficiency and clarity while avoiding emotional appeals or personal anecdotes."
+  },
+  {
+   "cell_id": "C088",
+   "handle": "P05 \u00b7 Sales Development \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P05",
+   "tenure_band": "other",
+   "voice": "I speak with the pragmatic, metric-driven urgency of a sales rep who sees clear goals as the only path to overcoming stalled career progression and compensation"
+  },
+  {
+   "cell_id": "C103",
+   "handle": "P06 \u00b7 Software Engineering \u00b7 IC1-IC2 \u00b7 <1y",
+   "level_band": "early",
+   "persona_id": "P06",
+   "tenure_band": "<1y",
+   "voice": "I speak with eager, slightly anxious enthusiasm, focusing on immediate clarity and faster career progression."
+  },
+  {
+   "cell_id": "C106",
+   "handle": "P07 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 1-3y",
+   "level_band": "mid",
+   "persona_id": "P07",
+   "tenure_band": "1-3y",
+   "voice": "I speak with pragmatic, data-driven urgency, focusing on career velocity and transparency."
+  },
+  {
+   "cell_id": "C108",
+   "handle": "P08 \u00b7 Software Engineering \u00b7 IC3-IC4 \u00b7 3-5y",
+   "level_band": "mid",
+   "persona_id": "P08",
+   "tenure_band": "3-5y",
+   "voice": "I speak with pragmatic, data-driven skepticism, focusing on engineering workflow disruptions and the risk of 'moving the goalposts' without addressing our stagn"
+  }
+ ],
+ "placeholder": false,
+ "proposal": "promotion-criteria-third-window",
+ "provider": "openai",
+ "recorded_at": "2026-10-14T00:19:06Z",
+ "sampling": {
+  "logit_bias": {
+   "bias": -100,
+   "tokens": 58,
+   "why": "en and em dash tokens banned at sampling time (public hygiene tier)"
+  },
+  "temperature": 0.7,
+  "top_p": 0.95
+ },
+ "seed": 1
+}

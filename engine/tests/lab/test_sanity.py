@@ -11,7 +11,7 @@ from staysignal.lab.sanity import BOOTSTRAP, LIMITS, concern_rows, panel, ranks,
 
 ROOT = Path(__file__).resolve().parents[3]
 ENGINE = ROOT / "engine" / "src" / "staysignal"
-SESSION = ROOT / "lab" / "recordings" / "promotion-criteria-third-window-stub"
+SESSION = ROOT / "lab" / "recordings" / "promotion-criteria-third-window-openai"
 
 
 def test_ranks_share_ties_and_spearman_matches_known_values():
@@ -39,7 +39,9 @@ def test_the_panel_on_a_recorded_session():
         c: {"share_below_midpoint": 0.5, "median_months_since_promotion": i, "share_manager_change_180d": 0.1}
         for i, c in enumerate(cells)
     }
-    doc = panel(SESSION, rates, facts, {c: "1-3y" for c in cells})
+    # the compact session has 8 personas, one per cell, so cells pool by tenure band: give them four bands
+    bands = ["<1y", "1-3y", "3-5y", "5y+"]
+    doc = panel(SESSION, rates, facts, {c: bands[i % 4] for i, c in enumerate(cells)})
     assert doc["label"] == "A consistency check, not validation" and doc["limits"] == LIMITS
     pa = doc["persona_agreement"]
     assert pa["bootstrap"] == BOOTSTRAP and pa["n_cells"] >= 3

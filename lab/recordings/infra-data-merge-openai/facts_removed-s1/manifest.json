@@ -1,0 +1,94 @@
+{
+ "calls": 44,
+ "card_variant": "facts_removed",
+ "config": {
+  "ama_round": 5,
+  "faq_round": 3,
+  "name": "rehearsal",
+  "personas": 8,
+  "rounds": 4
+ },
+ "db_sha256": "579c9ec20b9cb195dde71d0f5263e9494a8a1d59368366754e85c214c7632538",
+ "label": "Hypothesis generation with synthetic personas. Not a forecast, not a survey, not validated.",
+ "model": "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)",
+ "personas": [
+  {
+   "cell_id": "C025",
+   "handle": "P01 \u00b7 Data Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P01",
+   "tenure_band": "other",
+   "voice": "P01 speaks with pragmatic, tool-focused brevity, prioritizing technical efficiency and data pipeline reliability over organizational hierarchy."
+  },
+  {
+   "cell_id": "C026",
+   "handle": "P02 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P02",
+   "tenure_band": "other",
+   "voice": "I speak with technical precision, prioritizing data pipeline reliability and advocating for clear boundaries to prevent infrastructure noise from drowning out c"
+  },
+  {
+   "cell_id": "C027",
+   "handle": "P03 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P03",
+   "tenure_band": "other",
+   "voice": "Technical and process-oriented, focusing on system reliability and data pipeline integrity with a pragmatic, no-nonsense tone."
+  },
+  {
+   "cell_id": "C028",
+   "handle": "P04 \u00b7 Data Engineering \u00b7 IC3-IC4 \u00b7 other",
+   "level_band": "mid",
+   "persona_id": "P04",
+   "tenure_band": "other",
+   "voice": "Writes in dense, technical shorthand focused on pipeline latency and schema drift, often expressing skepticism toward organizational overhead."
+  },
+  {
+   "cell_id": "C029",
+   "handle": "P05 \u00b7 Data Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P05",
+   "tenure_band": "other",
+   "voice": "Speaks with pragmatic, slightly skeptical precision, focusing on technical alignment and fearing bureaucratic overhead."
+  },
+  {
+   "cell_id": "C030",
+   "handle": "P06 \u00b7 Data Engineering \u00b7 IC5-IC6 \u00b7 other",
+   "level_band": "senior",
+   "persona_id": "P06",
+   "tenure_band": "other",
+   "voice": "Analytical and data-centric, I speak with precise technical rigor, focusing on system reliability, pipeline efficiency, and the tangible impact of architectural"
+  },
+  {
+   "cell_id": "C042",
+   "handle": "P07 \u00b7 Infrastructure Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P07",
+   "tenure_band": "other",
+   "voice": "Speak with terse, pragmatic clarity, focusing on technical trade-offs and operational stability while avoiding organizational politics."
+  },
+  {
+   "cell_id": "C043",
+   "handle": "P08 \u00b7 Infrastructure Engineering \u00b7 IC1-IC2 \u00b7 other",
+   "level_band": "early",
+   "persona_id": "P08",
+   "tenure_band": "other",
+   "voice": "Direct and technical, prioritizing system stability and clear ownership boundaries over organizational reshuffling."
+  }
+ ],
+ "placeholder": false,
+ "proposal": "infra-data-merge",
+ "provider": "openai",
+ "recorded_at": "2026-10-14T01:17:52Z",
+ "sampling": {
+  "logit_bias": {
+   "bias": -100,
+   "tokens": 58,
+   "why": "en and em dash tokens banned at sampling time (public hygiene tier)"
+  },
+  "temperature": 0.7,
+  "top_p": 0.95
+ },
+ "seed": 1
+}

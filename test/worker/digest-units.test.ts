@@ -22,7 +22,7 @@ describe("tool digests carry meanings and units", () => {
         expected: 13.1, i80: [8, 18], i95: [6, 22], annual_rate: 0.088, hist: { expected: 15.4 },
       },
     };
-    const d = getTool("forecast_departures")!.digest(r as never, "r1") as { cite: string[]; units: string };
+    const d = getTool("forecast_departures")!.digest(r as never, "r1") as unknown as { cite: string[]; units: string };
     expect(d.cite.every((c) => /\}\} \(.+\)$/.test(c))).toBe(true);
     expect(d.cite.find((c) => c.startsWith("{{r1.hist.expected"))).toMatch(/trailing-rate status quo/);
     expect(d.cite.find((c) => c.startsWith("{{r1.expected"))).toMatch(/people/);
@@ -37,7 +37,7 @@ describe("tool digests carry meanings and units", () => {
         from_value: 13.5, to_value: 13.1, delta: -0.4, interval80_width: 10, factors, largest: "Calendar",
       },
     };
-    const d = getTool("explain_change")!.digest(r as never, "r1") as { cite: string[]; units: string; largest_factor_share: number };
+    const d = getTool("explain_change")!.digest(r as never, "r1") as unknown as { cite: string[]; units: string; largest_factor_share: number };
     expect(d.units).toMatch(/counts of people/);
     expect(d.units).toMatch(/never percentages or percentage points/);
     for (const field of ["delta", "from_value", "to_value", "interval80_width"]) {

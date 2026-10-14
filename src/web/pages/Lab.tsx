@@ -57,6 +57,7 @@ const ITEM_LABEL: Record<string, [string, string]> = {
 };
 const pct = (v: number | null) => (v === null ? "n/a" : `${Math.round(v * 100)}%`);
 const num = (v: number | null, d = 2) => (v === null ? "n/a" : v.toFixed(d));
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 function PersonaChip() {
   return <Chip title="Written by a synthetic persona built from cohort-level facts, not by a person">Synthetic persona</Chip>;
@@ -172,12 +173,12 @@ function SanityPanel({ s, placeholder }: { s: Sanity; placeholder: boolean }) {
   const pa = s.persona_agreement;
   return (
     <section className="card span-12" data-testid="lab-sanity">
-      <div className="card-head"><div><h2 className="card-title">Do persona concerns line up with the model's cohort rates, beyond what the cards already say?</h2><div className="card-sub">{s.label}. Spearman correlations over cohort cells; the interval is as prominent as the estimate.{placeholder ? " Placeholder session: these correlations come from scripted stub answers and mean nothing." : ""}</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">Do persona concerns line up with the model's cohort rates, beyond what the cards already say?</h2><div className="card-sub">{s.label}. Spearman correlations over cohort cells; the interval is as prominent as the estimate.{placeholder ? " Placeholder session: these correlations come from scripted stub answers and mean nothing." : ""}{!placeholder && pa.n_cells < 3 ? ` Only ${plural(pa.n_cells, "cell")} after pooling, too few for a rank correlation: not testable in this session.` : ""}{!placeholder && pa.n_cells >= 3 && pa.n_cells < 6 ? " Few cells, so the interval is very wide: underpowered, not evidence." : ""}</div></div></div>
       <div className="stat-row">
-        <div className="stat"><div className="stat-label">Persona agreement</div><div className="stat-value">{num(pa.spearman)}</div><div className="stat-note">95% interval {pa.ci95 ? `${num(pa.ci95[0])} to ${num(pa.ci95[1])}` : "n/a"} · {pa.n_cells} cells · {pa.bootstrap.toLocaleString("en-US")} resamples</div></div>
-        <div className="stat"><div className="stat-label">Facts-only baseline</div><div className="stat-value">{num(s.facts_only_baseline.spearman)}</div><div className="stat-note">the card facts alone, {s.facts_only_baseline.n_cells} cells</div></div>
-        <div className="stat"><div className="stat-label">Facts removed (control)</div><div className="stat-value">{num(s.negative_controls.facts_removed?.spearman ?? null)}</div><div className="stat-note">what the tenure and level labels alone give; {s.negative_controls.facts_removed?.n_cells ?? 0} groups</div></div>
-        <div className="stat"><div className="stat-label">Facts shuffled (control)</div><div className="stat-value">{num(s.negative_controls.facts_shuffled?.spearman ?? null)}</div><div className="stat-note">if concern follows shuffled facts, agreement is prompt-driven; {s.negative_controls.facts_shuffled?.n_cells ?? 0} groups</div></div>
+        <div className="stat"><div className="stat-label">Persona agreement</div><div className="stat-value">{num(pa.spearman)}</div><div className="stat-note">95% interval {pa.ci95 ? `${num(pa.ci95[0])} to ${num(pa.ci95[1])}` : "n/a"} · {plural(pa.n_cells, "cell")} · {pa.bootstrap.toLocaleString("en-US")} resamples</div></div>
+        <div className="stat"><div className="stat-label">Facts-only baseline</div><div className="stat-value">{num(s.facts_only_baseline.spearman)}</div><div className="stat-note">the card facts alone, {plural(s.facts_only_baseline.n_cells, "cell")}</div></div>
+        <div className="stat"><div className="stat-label">Facts removed (control)</div><div className="stat-value">{num(s.negative_controls.facts_removed?.spearman ?? null)}</div><div className="stat-note">what the tenure and level labels alone give; {plural(s.negative_controls.facts_removed?.n_cells ?? 0, "group")}</div></div>
+        <div className="stat"><div className="stat-label">Facts shuffled (control)</div><div className="stat-value">{num(s.negative_controls.facts_shuffled?.spearman ?? null)}</div><div className="stat-note">if concern follows shuffled facts, agreement is prompt-driven; {plural(s.negative_controls.facts_shuffled?.n_cells ?? 0, "group")}</div></div>
       </div>
       <p className="card-sub" style={{ marginTop: 12 }}>{s.construct_note}</p>
       <details style={{ marginTop: 8 }}><summary className="card-sub">Known limits of LLM personas</summary><ul className="card-sub">{s.limits.map((l) => <li key={l}>{l}</li>)}</ul></details>
@@ -208,13 +209,13 @@ function Session({ id, demo }: { id: string; demo: boolean }) {
         </div>
       )}
       <div className="grid">
-        <ChartCard id="lab-themes" className="span-7" title="What did the personas talk about?" subtitle={`Share of coded posts by theme, mean across ${doc.replicates.filter((r) => r.card_variant === "main").length} replicates with their range; coded by a separate call that never saw the persona prompts`} height={300} table={<table className="table"><thead><tr><th>Theme</th><th className="num">Mean</th><th className="num">Range</th></tr></thead><tbody>{a.themes.shares.map((t) => <tr key={t.theme}><td>{THEME_LABEL[t.theme] ?? t.theme}</td><td className="num">{pct(t.mean)}</td><td className="num">{pct(t.min)} to {pct(t.max)}</td></tr>)}</tbody></table>}>
+        <ChartCard id="lab-themes" className="span-7" title="What did the personas talk about?" subtitle={`Share of coded posts by theme, ${doc.replicates.filter((r) => r.card_variant === "main").length === 1 ? "one replicate, so no range" : `mean across ${doc.replicates.filter((r) => r.card_variant === "main").length} replicates with their range`}; coded by a separate call that never saw the persona prompts`} height={300} table={<table className="table"><thead><tr><th>Theme</th><th className="num">Mean</th><th className="num">Range</th></tr></thead><tbody>{a.themes.shares.map((t) => <tr key={t.theme}><td>{THEME_LABEL[t.theme] ?? t.theme}</td><td className="num">{pct(t.mean)}</td><td className="num">{pct(t.min)} to {pct(t.max)}</td></tr>)}</tbody></table>}>
           <ThemeBars shares={a.themes.shares} />
         </ChartCard>
         <ChartCard id="lab-network" className="span-5" title="Who replied to and reacted to whom?" subtitle={`${a.network.label}. One replicate; nodes are cohorts, never people`} height={300} table={<table className="table"><thead><tr><th>Node</th><th>Cohort</th><th className="num">PageRank</th></tr></thead><tbody>{a.network.nodes.map((n) => <tr key={n.id}><td>{n.id}</td><td>{n.cohort}</td><td className="num">{n.pagerank.toFixed(3)}</td></tr>)}</tbody></table>}>
           <Network net={a.network} />
         </ChartCard>
-        <ChartCard id="lab-trajectories" className="span-6" title="How did stance toward the proposal move over the rounds?" subtitle={`Mean stance per round by tenure band (${a.trajectories.scale}); the program office posted an FAQ in round 3 and opened an AMA in round 5`} height={260} table={<table className="table"><thead><tr><th>Round</th>{POOLS.map((p) => <th key={p} className="num">{p}</th>)}</tr></thead><tbody>{(a.trajectories.stance_by_round[POOLS[0]] ?? []).map((_, i) => <tr key={i}><td>{i + 1}</td>{POOLS.map((p) => <td key={p} className="num">{num(a.trajectories.stance_by_round[p]?.[i]?.mean ?? null)}</td>)}</tr>)}</tbody></table>}>
+        <ChartCard id="lab-trajectories" className="span-6" title="How did stance toward the proposal move over the rounds?" subtitle={`Mean stance per round by tenure band (${a.trajectories.scale}); the program office posted an FAQ in round 3${Math.max(0, ...doc.replicates.filter((r) => r.card_variant === "main").map((r) => r.rounds ?? 0)) >= 5 ? " and opened an AMA in round 5" : ""}`} height={260} table={<table className="table"><thead><tr><th>Round</th>{POOLS.map((p) => <th key={p} className="num">{p}</th>)}</tr></thead><tbody>{(a.trajectories.stance_by_round[POOLS[0]] ?? []).map((_, i) => <tr key={i}><td>{i + 1}</td>{POOLS.map((p) => <td key={p} className="num">{num(a.trajectories.stance_by_round[p]?.[i]?.mean ?? null)}</td>)}</tr>)}</tbody></table>}>
           <Trajectories data={a.trajectories.stance_by_round} />
         </ChartCard>
         <section className="card span-6" data-testid="lab-items">

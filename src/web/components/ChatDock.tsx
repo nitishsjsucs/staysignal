@@ -274,7 +274,9 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
         <button type="submit" className="btn btn-primary" aria-label="Send" disabled={!input.trim()}>
           <IconSend size={14} />
         </button>
-        {messages.length ? (
+        {/* the public demo keeps the conversation the sandbox paid for: its frame guard drops a clear (ADR 0018), and
+            "Reset my sandbox" starts everything afresh */}
+        {messages.length && !publicDemo ? (
           <button type="button" className="btn btn-sm" onClick={() => clearHistory()} title="Clear this conversation">
             Clear
           </button>

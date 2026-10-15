@@ -173,6 +173,11 @@ export function QualityPage({ me }: { me: Me }) {
             </div>
             <SyntheticChip label="Simulated arrival" />
           </div>
+          {me.public_demo ? (
+            <p className="demo-recorded-note" data-testid="routine-recorded-note">
+              In this public demo the engine's jobs (ingest, checks, scoring, the rebuild under the approved mapping and the replay in a fresh warehouse) return results recorded from the engine on {me.public_demo.recorded_on}; the workflow, its gates, the approval and the audit chain run live in your sandbox. The three specialist reports are templates filled from their tool results; no model runs.
+            </p>
+          ) : null}
           <RoutineSteps routineId={routine.routineId} />
         </section>
       ) : null}

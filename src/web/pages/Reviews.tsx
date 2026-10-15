@@ -60,17 +60,20 @@ const KIND_LABEL: Record<string, string> = {
 function ReviewStepper({ reviewId }: { reviewId: string }) {
   const { data } = useQuery<{ transitions: { from: string; to: string; by: string; at: string; code: string | null }[] }>(`/api/reviews/${encodeURIComponent(reviewId)}`);
   const ts = data?.transitions ?? [];
-  const states = ["draft", "submitted", ...ts.map((t) => t.to).filter((s) => s !== "submitted")];
+  // a refused approval attempt leaves the review where it was (submitted): it is a note on that stage, not a stage
+  const refused = ts.filter((t) => t.to === "refused");
+  const states = ["draft", "submitted", ...ts.map((t) => t.to).filter((s) => s !== "submitted" && s !== "refused")];
   return (
     <div className="stepper" data-testid="review-stepper">
       {states.map((s, i) => {
-        const t = ts.find((x) => x.to === s && (s !== "refused" || true));
-        const cls = s === "refused" ? "failed" : s === "rolled_back" ? "held" : "done";
+        const t = ts.find((x) => x.to === s);
+        const cls = s === "rolled_back" ? "held" : "done";
+        const attempts = s === "submitted" && refused.length ? ` · approval attempt refused: ${[...new Set(refused.map((r) => r.code ?? "refused"))].join(", ")}` : "";
         return (
           <div key={`${s}${i}`} className={`step ${cls}`}>
             <span className="step-dot" aria-hidden="true" />
             <span className="step-label">{s.replace("_", " ")}</span>
-            <span className="step-note">{t ? `${t.by.split("@")[0]}${t.code ? ` · ${t.code}` : ""}` : s === "draft" ? "agent draft" : ""}</span>
+            <span className="step-note">{t ? `${t.by.split("@")[0]}${t.code ? ` · ${t.code}` : ""}${attempts}` : s === "draft" ? "agent draft" : ""}</span>
           </div>
         );
       })}

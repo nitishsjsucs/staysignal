@@ -84,7 +84,7 @@ export function TracesPage(_: { me: Me }) {
                         </button>
                       </td>
                       <td style={{ whiteSpace: "normal" }}>{t.question ?? "(metadata only)"}</td>
-                      <td>{t.recorded ? `${t.provider ?? ""} (recorded)` : (t.provider ?? "")}</td>
+                      <td>{t.recorded ? (t.provider === "recorded" ? "recorded turn, replayed" : `${t.provider ?? ""} (recorded)`) : (t.provider ?? "")}</td>
                       <td>{t.grounding ?? ""}</td>
                       <td className="num">{total(t)}</td>
                     </tr>

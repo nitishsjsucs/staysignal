@@ -32,10 +32,16 @@ interface CohortList {
   cohorts: { id: string; name: string; kind: string; n: number; parent: string | null }[];
 }
 
-function CohortPicker() {
+function CohortPicker({ fit = false }: { fit?: boolean }) {
   const view = useView();
   const { data } = useQuery<CohortList>("/api/cohorts");
   const list = data?.cohorts ?? [];
+  // the public demo: a URL naming a cohort the visitor's role may not see moves to one it may (an organization, else
+  // the company), rather than leaving the page on a refusal
+  const outside = fit && list.length > 0 && !list.some((c) => c.id === view.cohort);
+  useEffect(() => {
+    if (outside) setView({ cohort: (list.find((c) => c.kind === "organization") ?? list[0])!.id });
+  }, [outside, list]);
   const order = ["company", "organization", "group", "team"];
   const groups = order.map((k) => ({ kind: k, items: list.filter((c) => c.kind === k) })).filter((g) => g.items.length);
   const label: Record<string, string> = { company: "Company", organization: "Organizations", group: "Groups", team: "Teams (analysts only; not an evaluation of a manager)" };
@@ -64,6 +70,14 @@ export function AppShell({ route, me, children }: { route: Route; me: Me; childr
   const [theme, setTheme] = useState<Theme>(readTheme());
   const [dock, setDock] = useState<boolean>(() => window.matchMedia("(min-width: 1100px)").matches && route.page !== "ask");
   useEffect(() => applyTheme(theme), [theme]);
+  useEffect(() => {
+    // the guided tour asks for the chat on beats that suggest a question; on a phone the visitor opens it themselves
+    const open = () => {
+      if (window.matchMedia("(min-width: 1100px)").matches) setDock(true);
+    };
+    window.addEventListener("ss-open-dock", open);
+    return () => window.removeEventListener("ss-open-dock", open);
+  }, []);
   const dark = effectiveDark(theme);
   const showDock = dock && route.page !== "ask";
   const link = (href: string) => (e: React.MouseEvent) => {
@@ -72,7 +86,7 @@ export function AppShell({ route, me, children }: { route: Route; me: Me; childr
   };
   const header = (
     <header className="topbar">
-      <CohortPicker />
+      <CohortPicker fit={Boolean(me.public_demo)} />
       <Segmented label="Horizon" value={view.horizon} onChange={(h) => setView({ horizon: h })} options={[{ value: 1, label: "1 month" }, { value: 3, label: "3 months" }, { value: 6, label: "6 months" }]} />
       <span className="spacer" />
       <span className="hide-mobile">

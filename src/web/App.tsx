@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { ApiError, getJSON, type Me } from "./api";
 import { AppShell } from "./components/AppShell";
-import { DemoLanding, DemoMisconfigured } from "./components/DemoLanding";
-import { type DemoSessionInfo, demoSessionInfo, setRecordedPlace } from "./demo";
+import { DemoLanding, DemoMisconfigured, SandboxSpent } from "./components/DemoLanding";
+import { type DemoSessionInfo, demoSessionInfo, homeCohort, setRecordedPlace } from "./demo";
+import { setDefaultCohort } from "./router";
 import { RoleSwitcher } from "./components/RoleSwitcher";
 import { SyntheticChip } from "./components/ui";
 import { WorkspaceProvider } from "./live";
@@ -22,24 +23,43 @@ import { TrustPage } from "./pages/Trust";
 import { WorkforcePage } from "./pages/Workforce";
 import { parseRoute, useLocation } from "./router";
 
-function useMe(): { me: Me | null; ready: boolean } {
-  const [state, setState] = useState<{ me: Me | null; ready: boolean }>({ me: null, ready: false });
+interface MeState {
+  me: Me | null;
+  ready: boolean;
+  /** The public demo: the sandbox has used its units; the server's message, shown with a way to start afresh. */
+  spent: string | null;
+}
+
+function useMe(): MeState {
+  const [state, setState] = useState<MeState>({ me: null, ready: false, spent: null });
   useEffect(() => {
-    // a busy public demo (429) keeps the visitor signed in and asks again shortly; only a refusal signs them out
-    const load = (): Promise<void> =>
-      getJSON<Me>("/api/me").then(
-        (me) => setState({ me, ready: true }),
+    let timer: number | null = null;
+    // a rate-limited public demo (429) keeps the visitor signed in and asks again after Retry-After; a spent sandbox
+    // stops asking (every request would cost the account one) and offers a fresh sandbox; only a refusal signs out
+    const load = (): Promise<void> => {
+      if (timer !== null) window.clearTimeout(timer);
+      timer = null;
+      return getJSON<Me>("/api/me").then(
+        (me) => setState({ me, ready: true, spent: null }),
         (e: unknown) => {
           if (e instanceof ApiError && e.status === 429) {
-            window.setTimeout(() => void load(), 5000);
+            if (e.code === "SANDBOX_SPENT") return setState({ me: null, ready: true, spent: e.message });
+            timer = window.setTimeout(() => void load(), Math.max(5, e.retryAfterSeconds ?? 5) * 1000);
             return;
           }
-          setState({ me: null, ready: true });
+          setState({ me: null, ready: true, spent: null });
         },
       );
-    load();
+    };
+    const spent = (e: Event) => setState((s) => ({ ...s, ready: true, spent: (e as CustomEvent<string>).detail || "This sandbox has used its request allowance." }));
+    void load();
     window.addEventListener("ss-principal", load);
-    return () => window.removeEventListener("ss-principal", load);
+    window.addEventListener("ss-sandbox-spent", spent);
+    return () => {
+      if (timer !== null) window.clearTimeout(timer);
+      window.removeEventListener("ss-principal", load);
+      window.removeEventListener("ss-sandbox-spent", spent);
+    };
   }, []);
   return state;
 }
@@ -56,9 +76,12 @@ function useDemoInfo(probe: boolean): DemoSessionInfo | "misconfigured" | null |
 export function App() {
   const { pathname } = useLocation();
   const route = parseRoute(pathname);
-  const { me, ready } = useMe();
-  const demoInfo = useDemoInfo(ready && !me);
+  const { me, ready, spent } = useMe();
+  const demoInfo = useDemoInfo(ready && !me && !spent);
   setRecordedPlace(me?.public_demo?.recorded_on);
+  // the public demo: a page opened without a cohort shows one the visitor's role may see
+  setDefaultCohort(me?.public_demo ? homeCohort(me.principal) : null);
+  if (spent) return <SandboxSpent message={spent} />;
   if (!ready) return null;
   if (!me) {
     if (demoInfo === undefined) return null;

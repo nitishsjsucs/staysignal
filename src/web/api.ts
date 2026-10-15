@@ -6,9 +6,22 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** The public demo's refusal code on a 429 (RATE_LIMITED, SANDBOX_SPENT), when the server sent one. */
+    readonly code: string | null = null,
+    readonly retryAfterSeconds: number | null = null,
   ) {
     super(message);
   }
+}
+
+/** The public demo's "busy" answer, with the server's own code and message kept (ADR 0018). A spent sandbox tells the
+ * app once, so it can offer a fresh sandbox instead of retrying. */
+async function busyError(r: Response): Promise<ApiError> {
+  const body = (await r.clone().json().catch(() => null)) as { code?: string; message?: string; retry_after_seconds?: number } | null;
+  const retry = Number(r.headers.get("Retry-After")) || body?.retry_after_seconds || null;
+  const e = new ApiError(429, body?.message ?? "The demo is busy, try again later.", body?.code ?? null, retry);
+  if (e.code === "SANDBOX_SPENT") window.dispatchEvent(new CustomEvent("ss-sandbox-spent", { detail: e.message }));
+  return e;
 }
 
 export interface Refusal {
@@ -42,7 +55,7 @@ async function sandboxEnded(r: Response): Promise<boolean> {
 export async function getJSON<T>(url: string): Promise<T> {
   const r = await fetch(url, { credentials: "same-origin" });
   if (r.status === 401) throw new ApiError(401, (await sandboxEnded(r)) ? "Your sandbox has ended" : "Sign in with the role switcher");
-  if (r.status === 429) throw new ApiError(429, "The demo is busy, try again later.");
+  if (r.status === 429) throw await busyError(r);
   if (!r.ok) throw new ApiError(r.status, `${r.status} ${r.statusText}`);
   return (await r.json()) as T;
 }
@@ -50,7 +63,7 @@ export async function getJSON<T>(url: string): Promise<T> {
 export async function postJSON<T>(url: string, body: unknown = {}): Promise<T> {
   const r = await fetch(url, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   if (r.status === 401) await sandboxEnded(r);
-  if (r.status === 429) throw new ApiError(429, "The demo is busy, try again later.");
+  if (r.status === 429) throw await busyError(r);
   if (!r.ok && r.status !== 200) throw new ApiError(r.status, `${r.status} ${r.statusText}`);
   return (await r.json()) as T;
 }
@@ -102,7 +115,7 @@ export interface Me {
   /** Demo mode (npm run demo): recorded model output only; the chat offers the recorded questions. */
   demo?: { recorded_questions: string[] } | null;
   /** The public demo (ADR 0018): the sandbox's expiry, the principals to switch between, the stub's label. */
-  public_demo?: { expires_at: number | null; principals: { id: string; role: string; display: string }[]; recorded_on: string; stub_label: string; limits: { question_chars: number; reason_chars: number } } | null;
+  public_demo?: { expires_at: number | null; principals: { id: string; role: string; display: string; assigned_orgs?: string[] }[]; recorded_on: string; stub_label: string; limits: { question_chars: number; reason_chars: number }; source_url?: string } | null;
 }
 
 export function hasScope(me: Me | null, scope: string): boolean {

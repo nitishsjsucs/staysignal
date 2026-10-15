@@ -2,7 +2,7 @@
 // Analytics Lead by default) and the button that starts a private sandbox. When a cap stops a new sandbox, it says the
 // demo is busy and when to try again.
 import { type FormEvent, useState } from "react";
-import { type DemoSessionInfo, retryIn, startDemo } from "../demo";
+import { type DemoSessionInfo, resetDemo, retryIn, SOURCE_URL, startDemo, WALKTHROUGH_URL } from "../demo";
 import { BrandMark } from "./icons";
 import { SyntheticChip } from "./ui";
 
@@ -15,12 +15,13 @@ export function DemoLanding({ info }: { info: DemoSessionInfo }) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const out = await startDemo(principal);
+    const out = await startDemo(principal, info.principals);
     if (!out.ok) {
       setError(out.status === 429 || out.status === 503 ? `The demo is busy, try again later${retryIn(out.retryAfterSeconds)}.` : out.message);
       setBusy(false);
     }
   };
+  const busyNow = error?.startsWith("The demo is busy") ?? false;
   return (
     <main className="demo-landing">
       <section className="card demo-landing-card" data-testid="demo-landing">
@@ -54,10 +55,21 @@ export function DemoLanding({ info }: { info: DemoSessionInfo }) {
         </form>
         {error ? (
           <div className="banner warning" role="alert" style={{ marginTop: 12 }} data-testid="demo-busy">
-            <div className="banner-body">{error}</div>
+            <div className="banner-body">
+              {error}
+              {busyNow ? (
+                <>
+                  {" "}
+                  Meanwhile, the <a href={WALKTHROUGH_URL} target="_blank" rel="noopener noreferrer">walkthrough in screenshots</a> shows every beat.
+                </>
+              ) : null}
+            </div>
           </div>
         ) : null}
         <p className="demo-landing-note">You can switch roles at any time inside the same sandbox; separation of duties is enforced between roles, so one visitor can show both sides of an approval. Nothing you do is visible to anyone else.</p>
+        <p className="demo-landing-note" data-testid="demo-source">
+          <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">Source and write-up on GitHub</a>: the code, the design decisions, the research basis and a walkthrough in screenshots.
+        </p>
         <div style={{ marginTop: 12 }}>
           <SyntheticChip />
         </div>
@@ -72,6 +84,43 @@ export function DemoMisconfigured() {
       <section className="card demo-landing-card" role="alert">
         <h1 className="demo-landing-title">This demo is not available right now</h1>
         <p className="demo-landing-text">The deployment is not configured correctly. Please try again later.</p>
+      </section>
+    </main>
+  );
+}
+
+/** The public demo: the sandbox has used its request allowance. It stops asking the server and offers a fresh sandbox
+ * (a reset spends no units), or the walkthrough in screenshots when the demo is busy. */
+export function SandboxSpent({ message }: { message: string }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fresh = async () => {
+    setBusy(true);
+    setError(null);
+    const out = await resetDemo();
+    if (!out.ok) {
+      setError(out.status === 429 || out.status === 503 ? `The demo is busy, try again later${retryIn(out.retryAfterSeconds)}.` : out.message);
+      setBusy(false);
+    }
+  };
+  return (
+    <main className="demo-landing">
+      <section className="card demo-landing-card" role="alert" data-testid="sandbox-spent">
+        <h1 className="demo-landing-title">This sandbox is used up</h1>
+        <p className="demo-landing-text">{message} Each sandbox has a fixed allowance of requests so that the demo stays free to run. A fresh sandbox starts from the beginning.</p>
+        <button type="button" className="btn btn-primary" onClick={() => void fresh()} disabled={busy} data-testid="sandbox-fresh">
+          {busy ? "Starting a fresh sandbox..." : "Start a fresh sandbox"}
+        </button>
+        {error ? (
+          <div className="banner warning" role="alert" style={{ marginTop: 12 }}>
+            <div className="banner-body">
+              {error} Meanwhile, the <a href={WALKTHROUGH_URL} target="_blank" rel="noopener noreferrer">walkthrough in screenshots</a> shows every beat.
+            </div>
+          </div>
+        ) : null}
+        <p className="demo-landing-note">
+          <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">Source and write-up on GitHub</a>
+        </p>
       </section>
     </main>
   );

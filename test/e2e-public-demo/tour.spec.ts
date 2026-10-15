@@ -47,13 +47,26 @@ async function closeTour(page: Page): Promise<void> {
   await expect(page.getByTestId("tour-panel")).toBeHidden();
 }
 
-/** Opens a beat from the guided tour, in its first role or (then) its second, and closes the panel. */
+/** The beats whose line suggests a question for the chat (src/web/demo.ts TOUR). */
+const ASKS = new Set(["Forecast", "What changed", "Reviews", "Trust"]);
+
+/** Opens a beat from the guided tour, in its first role or (then) its second, as a visitor does: the panel closes
+ * itself, and on a beat that suggests a question the chat is open and nothing covers its input. */
 async function beat(page: Page, title: string, as: string, then = false): Promise<void> {
   if (!(await page.getByTestId("tour-panel").isVisible())) await page.getByTestId("tour-toggle").click();
   const item = page.getByTestId("tour-panel").locator("li", { has: page.locator(".tour-beat-title", { hasText: new RegExp(`^\\d+${title}$`) }) });
   await item.getByRole("button", { name: then ? /^Then as/ : /^Open as/ }).click();
+  await expect(page.getByTestId("tour-panel")).toBeHidden();
   await expect(page.getByLabel("Acting as (demo role)")).toHaveValue(as);
-  await closeTour(page);
+  if (ASKS.has(title) && !then) {
+    const box = page.locator("#ask-dock");
+    await expect(box).toBeVisible();
+    const top = await box.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return (globalThis as unknown as { document: { elementFromPoint(x: number, y: number): unknown } }).document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === el;
+    });
+    expect(top, `${title}: the chat input is the topmost element`).toBe(true);
+  }
 }
 
 async function ask(page: Page, question: string): Promise<void> {
@@ -95,7 +108,8 @@ test("a visitor clicks through the guided tour in a private sandbox", async ({ p
     expect(await status("/dev/principals")).toBe(404);
     expect(await status("/mcp", "POST")).toBe(404);
     await page.getByTestId("demo-start").click();
-    await expect(page.getByTestId("demo-banner")).toContainText(/Public demo: synthetic company, recorded model output, your sandbox resets in [34] h \d+ min/);
+    await expect(page.getByTestId("demo-banner")).toContainText(/Public demo: synthetic company, recorded model and engine output, your sandbox resets in [34] h \d+ min/);
+    await expect(page.getByTestId("demo-source-link")).toHaveAttribute("href", "https://github.com/nitishsjsucs/staysignal");
     const cookie = (await page.context().cookies()).find((c) => c.name === "ss_demo")!;
     expect(cookie).toMatchObject({ httpOnly: true, secure: true, sameSite: "Lax" });
   });
@@ -128,6 +142,8 @@ test("a visitor clicks through the guided tour in a private sandbox", async ({ p
     await expect(held).toBeVisible({ timeout: 60_000 });
     await expect(held).toContainText("Held for review: R-2026-10-01#2");
     await expect(page.getByTestId("investigation")).toContainText("Data-quality investigator");
+    // the page says which parts ran live in the sandbox and which were recorded
+    await expect(page.getByTestId("routine-recorded-note")).toContainText("return results recorded from the engine on the author's laptop");
     await beat(page, "Data health", DATA_ENG, true);
     await page.getByTestId("mapping").getByTestId("mapping-approve").getByRole("button", { name: "Approve" }).click();
     await expect(page.getByTestId("repaired-banner")).toContainText("Repaired: R-2026-10-01#3 replaced the held R-2026-10-01#2", { timeout: 60_000 });
@@ -222,7 +238,64 @@ test("the landing page, the banner and the guided tour fit a phone screen", asyn
   await expect(page.getByTestId("tour-panel")).toBeHidden();
   await expect(page.getByTestId("waterfall")).toBeVisible();
   await noSideScroll();
+  // the last beat, scrolled to the bottom of the panel, sits above the tab bar and the Ask button and can be clicked
+  await page.getByTestId("tour-toggle").click();
+  const last = page.getByTestId("tour-traces").getByRole("button", { name: /^Open as/ });
+  await last.scrollIntoViewIfNeeded();
+  const onTop = await last.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const hit = (globalThis as unknown as { document: { elementFromPoint(x: number, y: number): unknown } }).document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return hit === el || el.contains(hit as never);
+  });
+  expect(onTop).toBe(true);
+  await last.click();
+  await expect(page.getByTestId("tour-panel")).toBeHidden();
+  await expect(page).toHaveURL(/\/traces$/);
+  await expect(page.locator("h1")).toContainText("Traces");
   await phone.close();
+});
+
+test("a role lands on a cohort it may see", async ({ browser }) => {
+  for (const [n, principal, cohort] of [
+    [15, "audit@larkspur.example", "company"],
+    [16, "hrbp-gtm@larkspur.example", "org:Sales"],
+  ] as const) {
+    const ctx = await browser.newContext(asClient(n));
+    const page = await ctx.newPage();
+    await start(page, principal);
+    await closeTour(page);
+    await expect(page.getByTestId("hero-figure")).toBeVisible();
+    await expect(page.locator("main.content")).not.toContainText("Not shown");
+    expect(new URL(page.url()).searchParams.get("cohort")).toBe(cohort);
+    await ctx.close();
+  }
+});
+
+test("a sandbox that has used its units says so and starts a fresh one", async ({ browser }) => {
+  const ctx = await browser.newContext(asClient(14));
+  const page = await ctx.newPage();
+  await start(page);
+  await closeTour(page);
+  // spend the sandbox's units with writes, as a long session would
+  const statuses = await page.evaluate(async () => {
+    const out: number[] = [];
+    for (let i = 0; i < 60; i++) out.push((await fetch("/api/reviews/draft", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).status);
+    return out;
+  });
+  expect(statuses).toContain(429);
+  await page.reload();
+  await expect(page.getByTestId("sandbox-spent")).toContainText("This sandbox has used its request allowance");
+  // it stops asking: no request goes out while the screen is up
+  let asked = 0;
+  page.on("request", (r) => {
+    if (new URL(r.url()).pathname === "/api/me") asked++;
+  });
+  await page.waitForTimeout(6_000);
+  expect(asked).toBe(0);
+  await page.getByTestId("sandbox-fresh").click();
+  await expect(page.getByTestId("demo-banner")).toBeVisible();
+  await expect(page.getByTestId("demo-remaining")).toContainText(/4 h 0 min|3 h 59 min/);
+  await ctx.close();
 });
 
 test("a client that starts too many sandboxes in an hour is told the demo is busy", async ({ browser }) => {

@@ -62,10 +62,16 @@ export interface ViewState {
   run: string | null;
 }
 
+let defaultCohort: string | null = null;
+/** The cohort a page shows when the URL names none: Engineering, or (the public demo) one the visitor's role may see. */
+export function setDefaultCohort(cohort: string | null): void {
+  defaultCohort = cohort;
+}
+
 export function readView(search: string): ViewState {
   const q = new URLSearchParams(search);
   const h = Number(q.get("h") ?? 3);
-  return { cohort: q.get("cohort") ?? "org:Engineering", horizon: h === 1 || h === 6 ? h : 3, run: q.get("run") };
+  return { cohort: q.get("cohort") ?? defaultCohort ?? "org:Engineering", horizon: h === 1 || h === 6 ? h : 3, run: q.get("run") };
 }
 
 export function viewHref(pathname: string, v: Partial<ViewState>, current: ViewState): string {

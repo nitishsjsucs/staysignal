@@ -33,7 +33,7 @@ function DemoRoleSwitcher({ me }: { me: Me }) {
         disabled={busy}
         onChange={(e) => {
           setBusy(true);
-          void switchDemoRole(e.target.value).finally(() => setBusy(false));
+          void switchDemoRole(e.target.value, me.public_demo!.principals).finally(() => setBusy(false));
         }}
         style={{ maxWidth: 220 }}
       >

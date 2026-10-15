@@ -226,4 +226,16 @@
     border-radius: 14px 14px 0 0;
     z-index: 55;
   }
+
+  .tour-list {
+    padding-bottom: calc(var(--s6) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* The routine card's note in the public demo: what runs live in the sandbox and what was recorded. */
+.demo-recorded-note {
+  margin: 0 0 var(--s3);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
 }

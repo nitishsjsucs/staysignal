@@ -243,7 +243,7 @@ function Session({ id, demo }: { id: string; demo: boolean }) {
         <section className="card span-12" data-testid="lab-personas">
           <div className="card-head"><div><h2 className="card-title">Who are the personas?</h2><div className="card-sub">Templates over cohort cells of at least 10 people: a handle, the cell's facts, the status quo and the proposal. Never an individual, a predicted risk or a protected attribute.</div></div></div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{doc.personas.map((p) => <Chip key={p.persona_id} title="Synthetic persona">{p.handle}</Chip>)}</div>
-          <p className="card-sub" style={{ marginTop: 8 }}>Session {doc.session}: {doc.replicates.length} replicates, {doc.placeholder ? "scripted stub provider (placeholder)" : `recorded from ${modelName(doc.model)}`}; each replays to its database hash with no model.</p>
+          <p className="card-sub" style={{ marginTop: 8 }}><span title={`Recording directory lab/recordings/${doc.session}`}>Session {doc.session.replace(/-openai$/, "")}</span>: {doc.replicates.length} replicates, {doc.placeholder ? "scripted stub provider (placeholder)" : `recorded from ${modelName(doc.model)}`}; each replays to its database hash with no model.</p>
         </section>
         <InterviewCard proposal={doc.proposal} personas={doc.personas} demo={demo} />
       </div>

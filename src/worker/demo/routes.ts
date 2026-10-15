@@ -146,7 +146,7 @@ export function demoRoutes(app: Hono<AppEnv>): void {
     return c.json({
       public_demo: true,
       label: "synthetic",
-      principals: LOCAL_PRINCIPALS.map((p) => ({ id: p.id, role: p.role, display: p.display })),
+      principals: LOCAL_PRINCIPALS.map((p) => ({ id: p.id, role: p.role, display: p.display, assigned_orgs: p.assigned_orgs ?? [] })),
       default_principal: DEFAULT_DEMO_PRINCIPAL,
       lifetime_seconds: MAX_SESSION_SECONDS,
       session: v.ok ? { principal: v.session.principal, expires_at: v.session.exp } : null,

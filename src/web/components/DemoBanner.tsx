@@ -1,9 +1,12 @@
-// The public demo's persistent banner (ADR 0018): what this is and when the visitor's sandbox resets, the guided tour
-// and the reset action. The tour lists the demo beats in order with one line each; a beat opens its page and, when it
-// is best seen in another role, switches to that role inside the same sandbox.
+// The public demo's persistent banner (ADR 0018): what this is and when the visitor's sandbox resets, the guided tour,
+// the reset action and a link to the source. The tour lists the demo beats in order with one line each; a beat opens
+// its page and, when it is best seen in another role, switches to that role inside the same sandbox, then the panel
+// closes so the page and the chat are visible (a beat that suggests a question opens the chat). The panel is rendered
+// into the document body, so no sticky header's stacking context can put the phone's tab bar above it.
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Me } from "../api";
-import { markBeatDone, markTourSeen, remaining, resetDemo, retryIn, switchDemoRole, TOUR, type TourBeat, tourDone, tourSeen } from "../demo";
+import { markBeatDone, markTourSeen, remaining, resetDemo, retryIn, SOURCE_URL, switchDemoRole, TOUR, type TourBeat, tourDone, tourSeen } from "../demo";
 import { navigate } from "../router";
 import { IconClose } from "./icons";
 
@@ -42,7 +45,7 @@ export function DemoBanner({ me }: { me: Me }) {
     <>
       <div className="demo-banner" role="region" aria-label="Public demo" data-testid="demo-banner">
         <span className="demo-banner-text">
-          Public demo: synthetic company, recorded model output, your sandbox resets in <strong data-testid="demo-remaining">{demo.expires_at ? remaining(demo.expires_at, now) : "4 h"}</strong>
+          Public demo: synthetic company, recorded model and engine output, your sandbox resets in <strong data-testid="demo-remaining">{demo.expires_at ? remaining(demo.expires_at, now) : "4 h"}</strong>
         </span>
         <span className="demo-banner-actions">
           <button
@@ -60,6 +63,9 @@ export function DemoBanner({ me }: { me: Me }) {
           <button type="button" className="btn btn-sm" onClick={() => void reset()} disabled={resetting} data-testid="demo-reset">
             {resetting ? "Resetting..." : "Reset my sandbox"}
           </button>
+          <a className="btn btn-sm" href={SOURCE_URL} target="_blank" rel="noopener noreferrer" data-testid="demo-source-link">
+            Source
+          </a>
         </span>
         {note ? (
           <span className="demo-banner-note" role="alert">
@@ -67,15 +73,18 @@ export function DemoBanner({ me }: { me: Me }) {
           </span>
         ) : null}
       </div>
-      {tour ? (
-        <TourPanel
-          me={me}
-          onClose={() => {
-            markTourSeen();
-            setTour(false);
-          }}
-        />
-      ) : null}
+      {tour
+        ? createPortal(
+            <TourPanel
+              me={me}
+              onClose={() => {
+                markTourSeen();
+                setTour(false);
+              }}
+            />,
+            document.body,
+          )
+        : null}
     </>
   );
 }
@@ -87,17 +96,19 @@ function TourPanel({ me, onClose }: { me: Me; onClose: () => void }) {
   const go = async (beat: TourBeat, as: string) => {
     markBeatDone(beat.id);
     setDone(tourDone());
-    if (as !== me.principal.id) await switchDemoRole(as);
+    // the panel covers the right of the page, where the chat sits on a wide screen: close it so the beat is visible
+    onClose();
+    if (as !== me.principal.id) await switchDemoRole(as, principals);
     navigate(beat.href);
-    // on a narrow screen the panel covers the page: close it so the beat is visible
-    if (window.matchMedia("(max-width: 1099px)").matches) onClose();
+    // a beat that suggests a question opens the chat, where its recorded question waits as a chip
+    if (beat.ask) window.dispatchEvent(new Event("ss-open-dock"));
   };
   return (
     <aside className="tour-panel" aria-label="Guided tour" data-testid="tour-panel">
       <div className="tour-head">
         <div>
           <div style={{ fontWeight: 600 }}>Guided tour</div>
-          <div className="tour-sub">Eleven beats, in the order the demo tells them. Each opens its page, in the role it is best seen as.</div>
+          <div className="tour-sub">Eleven beats, in the order the demo tells them. Each opens its page, in the role it is best seen as; reopen the tour from the banner for the next one.</div>
         </div>
         <button type="button" className="btn btn-sm" onClick={onClose} aria-label="Close the guided tour">
           <IconClose size={14} />

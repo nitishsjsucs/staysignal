@@ -1,6 +1,7 @@
 // npm run docs:screenshots: the README walkthrough's screenshots (docs/screenshots/*.png), taken from the public demo
 // (ADR 0018) as a visitor sees it. It builds the app, serves the public demo over https on 8795 (scripts/serve.ts),
-// walks the guided tour in Chromium at 1440 by 900 in the light theme, writes one PNG per beat, and stops the server.
+// clicks each beat of the guided tour in Chromium at 1440 by 900 in the light theme (the beat's "Open as" or "Then as"
+// button, which switches the role, opens the page and closes the panel), writes one PNG per beat, and stops the server.
 // Every number on screen is synthetic and every model answer is a replayed recording.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
@@ -22,10 +23,14 @@ async function shot(page: Page, name: string): Promise<void> {
   console.log(`[screenshots] ${name}.png`);
 }
 
-async function role(page: Page, principal: string): Promise<void> {
-  const picker = page.getByLabel("Acting as (demo role)");
-  if ((await picker.inputValue()) !== principal) await picker.selectOption(principal);
-  await expect(page.getByLabel("Acting as (demo role)")).toHaveValue(principal, { timeout: 30_000 });
+/** Clicks a beat of the guided tour as a visitor does: its first role, or (then) its second. */
+async function beat(page: Page, title: string, as: string, then = false): Promise<void> {
+  if (!(await page.getByTestId("tour-panel").isVisible())) await page.getByTestId("tour-toggle").click();
+  const item = page.getByTestId("tour-panel").locator("li", { has: page.locator(".tour-beat-title", { hasText: new RegExp(`^\\d+${title}$`) }) });
+  await item.getByRole("button", { name: then ? /^Then as/ : /^Open as/ }).click();
+  await page.getByTestId("tour-panel").waitFor({ state: "hidden" });
+  await expect(page.getByLabel("Acting as (demo role)")).toHaveValue(as, { timeout: 30_000 });
+  await page.locator("main.content h1").first().waitFor();
 }
 
 async function ask(page: Page, question: string): Promise<void> {
@@ -37,11 +42,6 @@ async function ask(page: Page, question: string): Promise<void> {
     await box.press("Enter");
   }
   await page.locator(".dock .msg.assistant .msg-meta").last().waitFor();
-}
-
-async function go(page: Page, href: string): Promise<void> {
-  await page.goto(`${BASE}${href}`);
-  await page.locator("main.content h1").first().waitFor();
 }
 
 async function main(): Promise<void> {
@@ -59,36 +59,34 @@ async function main(): Promise<void> {
 
     await page.getByTestId("demo-start").click();
     await page.getByTestId("demo-banner").waitFor();
-    await go(page, "/?cohort=org%3AEngineering&h=3");
     // the tour opens by itself on a first visit
-    if (!(await page.getByTestId("tour-panel").isVisible())) await page.getByTestId("tour-toggle").click();
     await page.getByTestId("tour-panel").waitFor();
+    await page.getByTestId("hero-figure").waitFor();
     await shot(page, "02-guided-tour");
-    await page.getByRole("button", { name: "Close the guided tour" }).click();
 
+    await beat(page, "Forecast", LEAD);
     await page.getByTestId("hero-figure").waitFor();
     await ask(page, "Forecast voluntary departures in Engineering over the next 90 days.");
     await page.getByTestId("fan").locator("svg.chart").waitFor();
     await shot(page, "03-forecast");
 
-    await go(page, "/changes?cohort=org%3AEngineering&h=3");
+    await beat(page, "What changed", LEAD);
     await page.getByTestId("waterfall").waitFor();
     await shot(page, "04-what-changed");
 
-    await go(page, "/quality");
+    await beat(page, "Data health", LEAD);
     await page.getByTestId("simulate-arrival").click();
     await page.getByTestId("held-banner").waitFor({ timeout: 60_000 });
     await page.getByTestId("investigation").waitFor();
     await shot(page, "05-data-health-held");
 
-    await role(page, "data-eng@larkspur.example");
+    await beat(page, "Data health", "data-eng@larkspur.example", true);
     await page.getByTestId("mapping").getByTestId("mapping-approve").getByRole("button", { name: "Approve" }).click();
     await page.getByTestId("repaired-banner").waitFor({ timeout: 60_000 });
     await page.getByTestId("replay").getByText("Identical business-result hash").waitFor({ timeout: 60_000 });
     await shot(page, "06-data-health-repaired");
 
-    await role(page, LEAD);
-    await go(page, "/reviews");
+    await beat(page, "Reviews", LEAD);
     await ask(page, "Prepare a People Partner review for Platform Engineering.");
     await page.getByTestId("submit-review").click();
     const review = page.getByTestId("review-REV-0001");
@@ -97,7 +95,7 @@ async function main(): Promise<void> {
     await review.getByTestId("approval-refusal").waitFor();
     await shot(page, "07-reviews-self-approval-refused");
 
-    await role(page, "people-ops-director@larkspur.example");
+    await beat(page, "Reviews", "people-ops-director@larkspur.example", true);
     const again = page.getByTestId("review-REV-0001");
     await again.getByTestId("review-approve").getByRole("button", { name: "Approve" }).click();
     await again.getByText("approved", { exact: false }).first().waitFor();
@@ -108,24 +106,21 @@ async function main(): Promise<void> {
     await page.getByTestId("audit").scrollIntoViewIfNeeded();
     await shot(page, "08-reviews-approved-and-rolled-back");
 
-    await role(page, LEAD);
-    for (const [href, name, testId] of [
-      ["/trust?cohort=company&h=3", "09-trust", "trust-summary"],
-      ["/research", "10-research", "research-hypotheses"],
-      ["/lab", "11-scenario-lab", "lab-recorded"],
-      ["/workforce?cohort=org%3AEngineering&h=3", "12-workforce", "flow-tiles"],
-      ["/governance", "13-governance", "action-audit"],
+    for (const [title, name, testId] of [
+      ["Trust", "09-trust", "trust-summary"],
+      ["Research", "10-research", "research-hypotheses"],
+      ["Scenario Lab", "11-scenario-lab", "lab-recorded"],
+      ["Workforce", "12-workforce", "flow-tiles"],
+      ["Governance", "13-governance", "action-audit"],
     ] as const) {
-      await go(page, href);
+      await beat(page, title, LEAD);
       await page.getByTestId(testId).waitFor();
       await shot(page, name);
     }
-    await role(page, "pa-analyst@larkspur.example");
-    await go(page, "/memory");
+    await beat(page, "Memory", "pa-analyst@larkspur.example");
     await page.getByTestId("memory-log").waitFor();
     await shot(page, "14-memory");
-    await role(page, LEAD);
-    await go(page, "/traces");
+    await beat(page, "Traces", LEAD);
     await page.getByTestId("trace-list").waitFor();
     await page.getByTestId("trace").waitFor();
     await shot(page, "15-traces");

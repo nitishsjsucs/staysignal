@@ -27,7 +27,7 @@ describe("the budget arithmetic", () => {
       "Concurrent Workflow instances": 10,
     });
     const adr = readFileSync("docs/adr/0018-public-demo-mode.md", "utf8");
-    for (const s of ["15 sandboxes x 600 units = 9,000", "15 x 600 x 5 = 45,000", "15 x 2 x (300 + 600 x 2) = 45,000", "10 live sandboxes x 4 MiB = 40 MiB", "a read 1, a write (POST) 12, a chat turn 18, the routine 80; a sandbox has 600 units"]) expect(adr).toContain(s);
+    for (const s of ["15 sandboxes x 600 units = 9,000", "15 x 600 x 5 = 45,000", "15 x 2 x (300 + 600 x 2) = 45,000", "10 live sandboxes x 4 MiB = 40 MiB", "15 x (400 + 600 x 50) = 456,000", "15 x 600 x 0.25 s x 3 objects x 0.128 GB = 864 GB-s", "a read 1, a WebSocket upgrade 2, a write (POST) 12, a chat turn 18, the routine 80; a sandbox has 600 units", "20 per minute and 40 in the life of a connection"]) expect(adr).toContain(s);
   });
 
   it("would fail if a cap were raised past the budget", () => {

@@ -3,7 +3,7 @@
 // wording appears on chat answers, Scenario Lab sessions and persona interview answers; only the last sentence says
 // what is computed where.
 
-export type ProvenanceWhere = "chat" | "lab" | "interview";
+export type ProvenanceWhere = "chat" | "chat-public" | "lab" | "interview";
 
 /** The model's display name: "Qwen3.6-27B (mlx-community/Qwen3.6-27B-4bit, mlx_lm.server)" -> "Qwen3.6-27B". */
 export function modelName(model: string | null | undefined): string {
@@ -22,6 +22,8 @@ export function recordedDate(at: string | null | undefined): string | null {
 
 const TAIL: Record<ProvenanceWhere, string> = {
   chat: "Numbers compute live from the warehouse.",
+  // the public demo (ADR 0018) has no warehouse: the tools run live over results exported from it ahead of time
+  "chat-public": "Tools run live in your sandbox; their numbers come from results exported from the synthetic warehouse.",
   lab: "No model runs here; the charts are computed from the recorded posts.",
   interview: "No model runs here.",
 };

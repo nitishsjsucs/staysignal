@@ -44,7 +44,8 @@ export function recordedQuestions(): string[] {
   return (RECORDINGS as RecordedTurn[]).map((r) => r.question).sort((a, b) => rank(a) - rank(b));
 }
 
-/** What the chat shows on a replayed turn: the shared provenance line, from the recording's model and date. */
-export function replayLabel(turn: RecordedTurn, place?: string): string {
-  return recordedProvenance(turn.model, turn.recorded_at, "chat", place);
+/** What the chat shows on a replayed turn: the shared provenance line, from the recording's model and date. The public
+ * demo's variant says where its numbers come from: results exported from the synthetic warehouse. */
+export function replayLabel(turn: RecordedTurn, place?: string, variant: "local" | "public" = "local"): string {
+  return recordedProvenance(turn.model, turn.recorded_at, variant === "public" ? "chat-public" : "chat", place);
 }

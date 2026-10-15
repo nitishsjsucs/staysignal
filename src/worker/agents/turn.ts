@@ -82,7 +82,7 @@ function modelFor(provider: ProviderName, aliases: AliasMap, question: string, o
   if (provider === "recorded") {
     // a question with no recording never reaches here: runTurn answers it with the unrecorded message first
     const rec = findRecording(question);
-    if (rec) return { model: recordedModel(rec), recorded: true, label: replayLabel(rec, opts.recordedOn) };
+    if (rec) return { model: recordedModel(rec), recorded: true, label: replayLabel(rec, opts.recordedOn, opts.unrecorded === "stub" ? "public" : "local") };
   }
   if (provider === "llama" || provider === "mlx") return { model: openAiCompatible(provider, LOCAL_URLS[provider]), recorded: false, label: null };
   return { model: stubModel(aliases), recorded: false, label: provider === "stub" ? "Stub model (deterministic template)" : null };
@@ -188,7 +188,9 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
     const s = at();
     const res = await generateText({ model, system, messages, tools, stopWhen: isStepCount(6), temperature: 0, maxOutputTokens: 400 });
     addUsage(res.totalUsage ?? res.usage);
-    spans.push({ kind: "model_call", name: `generate${attempt ? " (retry)" : ""}`, start_ms: s, dur_ms: at() - s, tokens: { input: res.usage.inputTokens ?? null, output: res.usage.outputTokens ?? null, cached: res.usage.inputTokenDetails?.cacheReadTokens ?? null }, outcome: res.finishReason });
+    // a replayed recording is not a model call: its span says so and carries no token counts
+    if (recorded) spans.push({ kind: "model_call", name: `replay: recorded turn${attempt ? " (retry)" : ""}`, start_ms: s, dur_ms: at() - s, outcome: "replayed" });
+    else spans.push({ kind: "model_call", name: `generate${attempt ? " (retry)" : ""}`, start_ms: s, dur_ms: at() - s, tokens: { input: res.usage.inputTokens ?? null, output: res.usage.outputTokens ?? null, cached: res.usage.inputTokenDetails?.cacheReadTokens ?? null }, outcome: res.finishReason });
     text = production ? stripThink(res.text) : res.text;
     modelText = text;
     lastSteps = res.steps;

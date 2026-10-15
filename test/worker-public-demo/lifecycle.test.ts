@@ -102,8 +102,23 @@ describe("the chat in the public demo", () => {
     const agent = await getAgentByName<Env, AnalystAgent>(env.ANALYST_AGENT, await analystName(parseConfig(env), p));
     const t = await turnOf(agent, p, "Forecast voluntary departures in Engineering over the next 90 days.");
     expect(t).toMatchObject({ provider: "recorded", recorded: true, grounding: "passed" });
-    expect(t.label).toMatch(/^Recorded from Qwen3\.6-27B on the author's laptop, \d{4}-\d{2}-\d{2}; replayed\. Numbers compute live from the warehouse\.$/);
+    expect(t.label).toMatch(/^Recorded from Qwen3\.6-27B on the author's laptop, \d{4}-\d{2}-\d{2}; replayed\. Tools run live in your sandbox; their numbers come from results exported from the synthetic warehouse\.$/);
+    // the trace says the turn was replayed, not generated, and has no token counts
+    const model = t.spans.filter((s) => s.kind === "model_call");
+    expect(model.map((s) => s.name)).toEqual(["replay: recorded turn"]);
+    expect(model[0]).not.toHaveProperty("tokens");
     expect(outbound).toEqual([]);
+  });
+
+  it("offers each role only the recorded questions it may run", async () => {
+    const asked = async (principal: string) => (await demoJson<{ demo: { recorded_questions: string[] } }>("/api/me", { cookie: (await visit(principal)).cookie })).demo.recorded_questions;
+    const lead = await asked(P.lead);
+    expect(lead).toContain("Forecast voluntary departures in Engineering over the next 90 days.");
+    const gtm = await asked("hrbp-gtm@larkspur.example");
+    expect(gtm.length).toBeLessThan(lead.length);
+    expect(gtm.some((q) => /Engineering/.test(q))).toBe(false);
+    expect(await asked(P.auditor)).not.toContain("Forecast voluntary departures in Engineering over the next 90 days.");
+    expect(await asked(P.hrbpEng)).toContain("Forecast voluntary departures in Engineering over the next 90 days.");
   });
 
   it("answers any other question with the labeled deterministic stub: tools run, no model does", async () => {

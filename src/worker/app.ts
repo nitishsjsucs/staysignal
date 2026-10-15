@@ -16,7 +16,7 @@ import { type WorkspaceRef, workspaceRef, workspaceStub } from "./agents/workspa
 import { AuthError } from "./auth/access";
 import { mintDevToken } from "./auth/dev-login";
 import { analystName, authenticate, DEV_COOKIE, runnerId } from "./auth/principal";
-import { recordedQuestions } from "./agents/recorded-provider";
+import { findRecording, recordedQuestions } from "./agents/recorded-provider";
 import { fallbackAnswer, LAB_LABEL, liveAnswer, parseInterview, recordedInterviews, recordedOnlyAnswer } from "./lab-interview";
 import { type AppConfig, isLocalHost, parseConfig } from "./config";
 import { sha256HexSync } from "./store/chain";
@@ -98,6 +98,26 @@ function memoryVisible(p: Principal, path: string): boolean {
   return p.assignedOrgs.map(orgSlug).includes(path.split("/")[1] ?? "");
 }
 
+/** The public demo (ADR 0018) offers a role only the recorded questions whose recorded tool calls that role may run:
+ * the recordings were made as the People Analytics Lead, and their tools run live under the visitor's own role, so
+ * a role that may not read Engineering would get a refusal from a recording. */
+async function recordedFor(env: Env, p: Principal): Promise<string[]> {
+  const wh = warehouseFor(env);
+  const fx = await wh.forecast((await wh.runs()).published);
+  return recordedQuestions().filter((q) =>
+    (findRecording(q)?.steps ?? []).every((step) =>
+      (step.tool_calls ?? []).every((tc) => {
+        const def = getTool(tc.tool);
+        if (!def || !canUseTool(p, def)) return false;
+        const cohort = typeof tc.args.cohort === "string" ? tc.args.cohort : null;
+        if (!cohort) return true;
+        const co = fx ? resolveCohort(cohort, fx.cohorts) : null;
+        return Boolean(co && fx && authorizeCohort(p, tc.tool, cohortMeta(co, fx.cohorts)) === null);
+      }),
+    ),
+  );
+}
+
 export function buildApp() {
   const app = new Hono<AppEnv>();
 
@@ -149,13 +169,13 @@ export function buildApp() {
 
   // demo: recorded model output only (SS_DEMO=1); the chat offers the recorded questions as chips
   // public_demo (ADR 0018): the sandbox's expiry, the principals a visitor may switch between, and what the chat replays
-  app.get("/api/me", (c) =>
+  app.get("/api/me", async (c) =>
     c.json({
       principal: c.var.principal,
       label: "synthetic",
-      demo: c.var.config.demo ? { recorded_questions: recordedQuestions() } : null,
+      demo: c.var.config.demo ? { recorded_questions: c.var.config.publicDemo ? await recordedFor(c.env, c.var.principal) : recordedQuestions() } : null,
       public_demo: c.var.config.publicDemo
-        ? { expires_at: c.var.principal.sandbox?.exp ?? null, principals: LOCAL_PRINCIPALS.map((p) => ({ id: p.id, role: p.role, display: p.display })), recorded_on: c.var.config.recordedOn, stub_label: STUB_LABEL_PUBLIC, limits: { question_chars: CAPS.maxQuestionChars, reason_chars: CAPS.maxReasonChars } }
+        ? { expires_at: c.var.principal.sandbox?.exp ?? null, principals: LOCAL_PRINCIPALS.map((p) => ({ id: p.id, role: p.role, display: p.display, assigned_orgs: p.assigned_orgs ?? [] })), recorded_on: c.var.config.recordedOn, stub_label: STUB_LABEL_PUBLIC, limits: { question_chars: CAPS.maxQuestionChars, reason_chars: CAPS.maxReasonChars } }
         : null,
     }),
   );

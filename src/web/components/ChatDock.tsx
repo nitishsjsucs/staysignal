@@ -176,7 +176,7 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
             </p>
             {publicDemo ? (
               <p style={{ color: "var(--ink-2)", fontSize: 12, marginBottom: 6 }} data-testid="dock-demo-note">
-                No model runs in this demo. The recorded questions replay turns recorded from Qwen3.6-27B on {publicDemo.recorded_on}; any other question gets a labeled deterministic stub. The tools and numbers compute live from the warehouse.
+                No model runs in this demo. The recorded questions replay turns recorded from Qwen3.6-27B on {publicDemo.recorded_on}; any other question gets a labeled deterministic stub. The tools run live in your sandbox; their numbers come from results exported from the synthetic warehouse.
               </p>
             ) : demo ? (
               <p style={{ color: "var(--ink-2)", fontSize: 12, marginBottom: 6 }} data-testid="dock-demo-note">
@@ -235,7 +235,7 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
               <div style={{ marginTop: data?.data.refusal ? 6 : 0 }}>{data ? <Answer text={text} aliases={data.data.aliases} /> : text}</div>
               {data && data.data.grounding !== "unrecorded" ? (
                 <div className="msg-meta">
-                  {data.data.refusal ? <Chip>Refused before any model call: {data.data.refusal.layer}</Chip> : <Chip title="Numeric grounding check">Grounding: {data.data.grounding}</Chip>}
+                  {data.data.refusal ? <Chip>{data.data.refusal.layer === "tool" ? "Refused by the tool's permission check" : `Refused before any model call: ${data.data.refusal.layer}`}</Chip> : <Chip title="Numeric grounding check">Grounding: {data.data.grounding}</Chip>}
                   {data.data.label ? <Chip>{data.data.label}</Chip> : null}
                 </div>
               ) : null}

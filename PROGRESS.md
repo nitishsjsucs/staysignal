@@ -135,6 +135,12 @@ Done on 2026-10-13: both proposals recorded from the 27B with the compact plan (
 - `b794aef` compact Lab plan; `29804e3` both sessions (151 calls in 44 minutes; 152 calls per the run log, 153 records in the files, in 50 minutes) and four interview answers (first token 4.9 to 9.8 s, answers 28 to 38 s).
 - Final evening pass: the stale Lab e2e assertion fixed, the provenance chip wraps, UTC timestamps show their zone, the Lab page's plurals and its AMA subtitle (the compact sessions end at round 4), README and demo script brought up to date.
 
+## 2026-10-15 public demo mode (Mac)
+
+Goal: a public link on the operator's Workers Free account where anyone can click through the whole product, with no model call, no real data path, a private sandbox per visitor and bounded cost (ADR 0018). Builders deploy nothing; the operator runs the steps in README, Public demo.
+
+- `docs(adr)`: ADR 0018, public demo mode: the third auth mode and its refusals, the signed session cookie, per-visitor sandboxes keyed by sandbox ID, the routes that are off, the caps and the budget arithmetic against the Workers Free limits.
+
 ## Next
 
 0. Cloud session handoff tasks 1 to 7 are done (the code paths; what needs the 27B or production access stays on the Mac). Open from them: the other nine phase-2 checks of SPEC 13.1 are not built; the research run suggests looking at why the clean base world's O/E sits at about 0.96 to 0.97 (a follow-up study, not a change to the pre-registration). The 1.7B agent eval was rerun on the Mac with the cohort guard (commit 46: 0 injection successes, refusal accuracy 100%).

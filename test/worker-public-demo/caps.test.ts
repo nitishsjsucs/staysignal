@@ -1,5 +1,5 @@
 // ADR 0018: the caps of the public demo. The gate admits at most 3 new sandboxes per client an hour, 15 a UTC day and
-// 10 live ones; a sandbox spends units per request (240 a minute, 600 in all, the lifetime count surviving eviction);
+// 10 live ones; a sandbox may make 300 requests a minute and spend 600 units in all (the count surviving eviction);
 // one routine per sandbox; over a cap the answer says "The demo is busy, try again later" with Retry-After.
 import { env } from "cloudflare:workers";
 import { evictDurableObject, runInDurableObject } from "cloudflare:test";
@@ -72,7 +72,7 @@ describe("the gate", () => {
 });
 
 describe("a sandbox's units", () => {
-  it("are spent per request: 240 units a minute, then 429 with Retry-After", async () => {
+  it("allow 300 requests a minute, then 429 with Retry-After", async () => {
     const v = await visit();
     let status = 200;
     let n = 0;
@@ -80,7 +80,7 @@ describe("a sandbox's units", () => {
       status = (await demoCall("/api/me", { cookie: v.cookie })).status;
       n++;
     }
-    expect(n - 1).toBe(CAPS.unitsPerSandboxPerMinute);
+    expect(n - 1).toBe(CAPS.requestsPerSandboxPerMinute);
     const r = await demoCall("/api/me", { cookie: v.cookie });
     expect(r.status).toBe(429);
     expect(await r.json()).toMatchObject({ code: "RATE_LIMITED", message: BUSY });

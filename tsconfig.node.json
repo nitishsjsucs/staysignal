@@ -26,8 +26,10 @@
     "scripts",
     "test/node",
     "test/e2e",
+    "test/e2e-public-demo",
     "vite.config.ts",
     "vitest.config.ts",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "playwright.demo.config.ts"
   ]
 }

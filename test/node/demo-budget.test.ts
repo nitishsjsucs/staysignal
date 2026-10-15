@@ -15,7 +15,7 @@ describe("the budget arithmetic", () => {
   it("pins the caps and the table of ADR 0018", () => {
     expect(DEMO_SHARE).toBe(0.5);
     expect(FREE_PLAN).toMatchObject({ workerRequestsPerDay: 100_000, doRequestsPerDay: 100_000, doRowsWrittenPerDay: 100_000, workflowConcurrentInstances: 100 });
-    expect(CAPS).toMatchObject({ sandboxLifetimeMs: 4 * 3600_000, newSandboxesPerClientPerHour: 3, newSandboxesPerDay: 15, liveSandboxes: 10, unitsPerSandbox: 600, routinesPerSandbox: 1, maxBodyBytes: 8192, maxQuestionChars: 500, maxReasonChars: 300 });
+    expect(CAPS).toMatchObject({ requestsPerSandboxPerMinute: 300, sandboxLifetimeMs: 4 * 3600_000, newSandboxesPerClientPerHour: 3, newSandboxesPerDay: 15, liveSandboxes: 10, unitsPerSandbox: 600, routinesPerSandbox: 1, maxBodyBytes: 8192, maxQuestionChars: 500, maxReasonChars: 300 });
     expect(UNITS).toEqual({ read: 1, write: 12, chatTurn: 18, routine: 80 });
     expect(Object.fromEntries(budgetTable().map((l) => [l.quantity, l.bound]))).toEqual({
       "Worker requests per day": 9_045,
@@ -35,11 +35,11 @@ describe("the budget arithmetic", () => {
 });
 
 describe("the unit meter", () => {
-  const caps = { unitsPerSandbox: 600, unitsPerSandboxPerMinute: 240, unitFlushEvery: 25 };
+  const caps = { unitsPerSandbox: 600, requestsPerSandboxPerMinute: 180, unitFlushEvery: 25 };
 
-  it("refuses past 240 units a minute and admits again once the minute passes", () => {
+  it("refuses past 180 requests a minute, whatever their units, and admits again once the minute passes", () => {
     const m = new UnitMeter(0, () => undefined, caps);
-    for (let i = 0; i < 240; i++) expect(m.admit(1, 1_000 + i).ok).toBe(true);
+    for (let i = 0; i < 180; i++) expect(m.admit(i % 2 ? 1 : 2, 1_000 + i).ok).toBe(true);
     expect(m.admit(1, 2_000)).toMatchObject({ ok: false, code: "RATE_LIMITED" });
     expect(m.admit(1, 62_000).ok).toBe(true);
   });

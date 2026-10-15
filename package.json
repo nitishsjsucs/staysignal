@@ -35,6 +35,8 @@
     "fixture-runner": "node scripts/fixture-runner.ts",
     "dev:wrangler": "node scripts/serve.ts",
     "dev:engine": "node scripts/serve.ts --engine",
+    "dev:public-demo": "node scripts/serve.ts --public-demo",
+    "test:e2e:public-demo": "playwright test -c playwright.demo.config.ts",
     "demo": "node scripts/demo.ts start",
     "demo:snapshots": "node scripts/demo.ts snapshots",
     "demo:reset": "node scripts/demo.ts reset",

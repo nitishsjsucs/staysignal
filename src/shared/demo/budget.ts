@@ -21,7 +21,8 @@ export const CAPS = {
   newSandboxesPerClientPerHour: 3,
   newSandboxesPerDay: 15,
   liveSandboxes: 10,
-  unitsPerSandboxPerMinute: 240,
+  /** A burst limit: requests (of any weight) a sandbox may make in a minute. */
+  requestsPerSandboxPerMinute: 300,
   unitsPerSandbox: 600,
   routinesPerSandbox: 1,
   maxBodyBytes: 8 * 1024,

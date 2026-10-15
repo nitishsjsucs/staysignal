@@ -12,23 +12,26 @@ import { isRefusal, type Refusal, refuse } from "../shared/policy/refusals";
 import { hasScope, LOCAL_PRINCIPALS, type Principal } from "../shared/policy/roles";
 import { audienceOf, cohortMeta, getTool, orgSlug, resolveCohort, runTool, type ToolContext, type ToolResult } from "../shared/tools/registry";
 import type { AnalystAgent } from "./agents/analyst-agent";
-import { workspace, workspaceStub } from "./agents/workspace-port";
+import { type WorkspaceRef, workspaceRef, workspaceStub } from "./agents/workspace-port";
 import { AuthError } from "./auth/access";
 import { mintDevToken } from "./auth/dev-login";
-import { agentInstanceName } from "./auth/hmac";
-import { authenticate, DEV_COOKIE, runnerId } from "./auth/principal";
+import { analystName, authenticate, DEV_COOKIE, runnerId } from "./auth/principal";
 import { recordedQuestions } from "./agents/recorded-provider";
 import { fallbackAnswer, LAB_LABEL, liveAnswer, parseInterview, recordedInterviews, recordedOnlyAnswer } from "./lab-interview";
 import { type AppConfig, isLocalHost, parseConfig } from "./config";
 import { sha256HexSync } from "./store/chain";
-import { warehouseFor } from "./warehouse/client";
+import { memoryPort, warehouseFor } from "./warehouse/client";
+import { CAPS } from "../shared/demo/budget";
+import { STUB_LABEL_PUBLIC } from "../shared/provenance";
+import { admitRequest, demoGuard, demoRoutes, readJsonBody, tooLong } from "./demo/routes";
 import { FixturesWarehouse } from "./warehouse/fixtures";
 
-type Vars = { principal: Principal; config: AppConfig };
+type Vars = { principal: Principal; config: AppConfig; ws: WorkspaceRef; bodyText?: string };
 export type AppEnv = { Bindings: Env; Variables: Vars };
 
-export function toolContext(env: Env, p: Principal): ToolContext {
-  return { principal: p, warehouse: warehouseFor(env), workspace: workspaceStub(env), sha256: async (t) => sha256HexSync(t), canonical: canonicalJson };
+/** The tools' context for a principal: its workspace (the visitor's sandbox in the public demo), one stub per request. */
+export function toolContext(env: Env, p: Principal, ref: WorkspaceRef = workspaceRef(env, p)): ToolContext {
+  return { principal: p, warehouse: warehouseFor(env, memoryPort(ref)), workspace: workspaceStub(env, p, ref), sha256: async (t) => sha256HexSync(t), canonical: canonicalJson };
 }
 
 export function envelope<T>(r: ToolResult<T>) {
@@ -37,7 +40,7 @@ export function envelope<T>(r: ToolResult<T>) {
 
 /** A stored result is served only to a principal who could have computed the same output: the tool's scopes, the
  * cohort rules for the cohort it names, and the same audience class (SPEC 17.1). Knowing a result ID grants nothing. */
-async function resultDenied(env: Env, p: Principal, r: ToolResult<unknown>): Promise<Refusal | null> {
+async function resultDenied(env: Env, p: Principal, r: ToolResult<unknown>, ref: WorkspaceRef): Promise<Refusal | null> {
   const prov = r.provenance;
   const def = getTool(prov.tool);
   if (!def || !canUseTool(p, def)) return refuse("NOT_PERMITTED");
@@ -45,8 +48,8 @@ async function resultDenied(env: Env, p: Principal, r: ToolResult<unknown>): Pro
   if (prov.args.by === "team" && !hasScope(p, "forecast:read:team")) return refuse("NOT_PERMITTED", "Team-level values are available to People Analysts only.");
   const cohort = typeof prov.args.cohort === "string" ? prov.args.cohort : null;
   if (!cohort) return null;
-  const wh = warehouseFor(env);
-  const published = (await (await workspace(env)).publishedRunId()) ?? (await wh.runs()).published;
+  const wh = warehouseFor(env, memoryPort(ref));
+  const published = (await (await ref()).publishedRunId()) ?? (await wh.runs()).published;
   const own = prov.run_id ? await wh.forecast(prov.run_id) : null;
   if (own?.run.status === "held" && !hasScope(p, "forecast:read:all") && !hasScope(p, "quality:read")) return refuse("NOT_PERMITTED", "Held runs are visible to analysts and data engineers only.");
   const fx = own ?? (await wh.forecast(published));
@@ -102,6 +105,10 @@ export function buildApp() {
     c.set("config", parseConfig(c.env));
     await next();
   });
+  // the public demo (ADR 0018): dev, runner and internal routes are off, mutating requests come from this origin with
+  // bounded bodies, query values are bounded
+  app.use("*", demoGuard);
+  demoRoutes(app);
 
   app.get("/api/health", (c) => c.json({ ok: true, service: "staysignal", authMode: c.var.config.authMode, dataMode: c.var.config.dataMode, llm: c.var.config.llm, label: "synthetic" }));
 
@@ -125,19 +132,36 @@ export function buildApp() {
   app.use("/api/*", async (c, next) => {
     if (c.req.path === "/api/health") return next();
     try {
-      c.set("principal", await authenticate(c.req.raw, c.var.config));
+      const p = await authenticate(c.req.raw, c.var.config);
+      c.set("principal", p);
+      c.set("ws", workspaceRef(c.env, p));
     } catch (e) {
       const reason = e instanceof AuthError ? e.reason : "invalid";
       return c.json({ error: "unauthenticated", reason }, 401);
+    }
+    // every request of a public-demo sandbox spends its units first (ADR 0018)
+    if (c.var.config.publicDemo) {
+      const denied = await admitRequest(c);
+      if (denied) return denied;
     }
     return next();
   });
 
   // demo: recorded model output only (SS_DEMO=1); the chat offers the recorded questions as chips
-  app.get("/api/me", (c) => c.json({ principal: c.var.principal, label: "synthetic", demo: c.var.config.demo ? { recorded_questions: recordedQuestions() } : null }));
+  // public_demo (ADR 0018): the sandbox's expiry, the principals a visitor may switch between, and what the chat replays
+  app.get("/api/me", (c) =>
+    c.json({
+      principal: c.var.principal,
+      label: "synthetic",
+      demo: c.var.config.demo ? { recorded_questions: recordedQuestions() } : null,
+      public_demo: c.var.config.publicDemo
+        ? { expires_at: c.var.principal.sandbox?.exp ?? null, principals: LOCAL_PRINCIPALS.map((p) => ({ id: p.id, role: p.role, display: p.display })), recorded_on: c.var.config.recordedOn, stub_label: STUB_LABEL_PUBLIC, limits: { question_chars: CAPS.maxQuestionChars, reason_chars: CAPS.maxReasonChars } }
+        : null,
+    }),
+  );
 
   const tool = (name: string, args: Record<string, unknown>) => async (c: { env: Env; var: Vars }) => {
-    const out = await runTool(toolContext(c.env, c.var.principal), name, args);
+    const out = await runTool(toolContext(c.env, c.var.principal, c.var.ws), name, args);
     return out;
   };
 
@@ -158,26 +182,26 @@ export function buildApp() {
   app.get("/api/memory/search", (c) => respond(c, "search_memory", { query: c.req.query("q") ?? "" }));
   app.get("/api/memory/files", async (c) => {
     if (!canUseTool(c.var.principal, getTool("search_memory")!)) return c.json(refuse("NOT_PERMITTED"));
-    const files = (await warehouseFor(c.env).memoryFiles()) ?? [];
+    const files = (await warehouseFor(c.env, memoryPort(c.var.ws)).memoryFiles()) ?? [];
     return c.json({ label: "synthetic", files: files.filter((f) => memoryVisible(c.var.principal, f.path)) });
   });
   app.get("/api/memory/file", async (c) => {
     const path = c.req.query("path") ?? "";
     if (!canUseTool(c.var.principal, getTool("search_memory")!) || !memoryVisible(c.var.principal, path)) return c.json(refuse("NOT_PERMITTED"));
-    const doc = await warehouseFor(c.env).memoryFile(path);
+    const doc = await warehouseFor(c.env, memoryPort(c.var.ws)).memoryFile(path);
     return doc ? c.json({ label: "synthetic", ...doc }) : c.json({ error: "not found" }, 404);
   });
   app.get("/api/memory/log", async (c) => {
     if (!canUseTool(c.var.principal, getTool("search_memory")!)) return c.json(refuse("NOT_PERMITTED"));
-    return c.json({ label: "synthetic", commits: (await warehouseFor(c.env).memoryLog()) ?? [] });
+    return c.json({ label: "synthetic", commits: (await warehouseFor(c.env, memoryPort(c.var.ws)).memoryLog()) ?? [] });
   });
   app.get("/api/workforce/flows", (c) => respond(c, "workforce_flows", { cohort: c.req.query("cohort") ?? "Larkspur", from: c.req.query("from") || undefined, to: c.req.query("to") || undefined }));
   app.get("/api/lineage", (c) => respond(c, "trace_lineage", { check_id: c.req.query("check") || undefined, node: c.req.query("node") || undefined }));
 
   app.get("/api/cohorts", async (c) => {
-    const ws = await workspace(c.env);
-    const runId = (await ws.publishedRunId()) ?? (await warehouseFor(c.env).runs()).published;
-    const fx = await warehouseFor(c.env).forecast(runId);
+    const ws = await c.var.ws();
+    const runId = (await ws.publishedRunId()) ?? (await warehouseFor(c.env, memoryPort(c.var.ws)).runs()).published;
+    const fx = await warehouseFor(c.env, memoryPort(c.var.ws)).forecast(runId);
     const p = c.var.principal;
     const all = fx?.cohorts ?? [];
     const visible = all.filter((co) => {
@@ -191,11 +215,11 @@ export function buildApp() {
   // Recorded evaluation for the Trust page (SPEC 10, 16.1): cohort aggregates only, filtered by the same cohort rules
   // as the forecast tools; summaries that pool organizations are shown only to roles that may read the company.
   app.get("/api/evaluation", async (c) => {
-    const wh = warehouseFor(c.env);
+    const wh = warehouseFor(c.env, memoryPort(c.var.ws));
     const ev = await wh.evaluation();
     if (!ev) return c.json({ error: "no recorded evaluation" }, 404);
     const p = c.var.principal;
-    const ws = await workspace(c.env);
+    const ws = await c.var.ws();
     const runId = (await ws.publishedRunId()) ?? (await wh.runs()).published;
     const all = (await wh.forecast(runId))?.cohorts ?? [];
     const allowed = (cohortId: string): boolean => {
@@ -212,7 +236,7 @@ export function buildApp() {
   // the research benchmark (SPEC 11): pre-registered cells and hypotheses on synthetic research worlds, not Larkspur's
   // cohorts, so every signed-in role may read it
   app.get("/api/research", async (c) => {
-    const doc = await warehouseFor(c.env).research();
+    const doc = await warehouseFor(c.env, memoryPort(c.var.ws)).research();
     return doc ? c.json(doc) : c.json({ error: "no recorded research run" }, 404);
   });
 
@@ -220,11 +244,11 @@ export function buildApp() {
   // against its expected count; groups and above with n >= 50, scoped like every comparison over time (17.5)
   app.get("/api/workforce/funnel", async (c) => {
     const h = ["1", "3", "6"].includes(c.req.query("horizon") ?? "") ? (c.req.query("horizon") as string) : "3";
-    const wh = warehouseFor(c.env);
+    const wh = warehouseFor(c.env, memoryPort(c.var.ws));
     const hist = await wh.history();
     if (!hist) return c.json({ error: "no recorded backtests" }, 404);
     const p = c.var.principal;
-    const runId = (await (await workspace(c.env)).publishedRunId()) ?? (await wh.runs()).published;
+    const runId = (await (await c.var.ws()).publishedRunId()) ?? (await wh.runs()).published;
     const all = (await wh.forecast(runId))?.cohorts ?? [];
     const meta = (id: string) => all.find((x) => x.cohort_id === id);
     const allowed = (id: string): boolean => {
@@ -250,9 +274,9 @@ export function buildApp() {
   app.get("/api/trust", async (c) => {
     const cohortQ = c.req.query("cohort") ?? "company";
     const h = c.req.query("horizon") ?? "3";
-    const wh = warehouseFor(c.env);
+    const wh = warehouseFor(c.env, memoryPort(c.var.ws));
     const hist = (await wh.history()) as (HistoryFixture & { trust?: Record<string, Record<string, { oe: number | null; coverage80: { held: number; windows: number }; effective_windows: number }>> }) | null;
-    const ws = await workspace(c.env);
+    const ws = await c.var.ws();
     const q = await wh.quality();
     const results = q?.results ?? [];
     const lastDay = results.reduce((m, r) => (r.date > m ? r.date : m), "");
@@ -274,37 +298,37 @@ export function buildApp() {
 
   app.get("/api/quality/checks", async (c) => {
     if (!hasScope(c.var.principal, "quality:read")) return c.json({ refused: true, code: "NOT_PERMITTED", message: "Your role does not include data quality." });
-    const q = (await warehouseFor(c.env).quality()) as QualityFixture | null;
-    const ws = await workspace(c.env);
+    const q = (await warehouseFor(c.env, memoryPort(c.var.ws)).quality()) as QualityFixture | null;
+    const ws = await c.var.ws();
     const results = [...(q?.results ?? [])];
     for (const x of (await ws.routineCheckResults()) as QualityFixture["results"]) if (!results.some((y) => y.check_id === x.check_id && y.date === x.date && y.status === x.status)) results.push(x);
     return c.json({ label: "synthetic", checks: q?.checks ?? [], results, incidents: await ws.listIncidents() });
   });
 
-  app.get("/api/quality/incidents/:id", async (c) => c.json((await (await workspace(c.env)).getIncident(c.req.param("id"))) ?? { error: "not found" }));
+  app.get("/api/quality/incidents/:id", async (c) => c.json((await (await c.var.ws()).getIncident(c.req.param("id"))) ?? { error: "not found" }));
 
   // multi-agent investigations (SPEC 14.6): cohort-level findings, each citing the result IDs that back it
   const mayInvestigate = (p: Principal) => hasScope(p, "quality:read") || hasScope(p, "investigate:run");
   app.get("/api/investigations", async (c) => {
     if (!mayInvestigate(c.var.principal)) return c.json(refuse("NOT_PERMITTED", "Investigations are for analysts, leads and data engineers."));
-    return c.json({ label: "synthetic", investigations: await (await workspace(c.env)).listInvestigations() });
+    return c.json({ label: "synthetic", investigations: await (await c.var.ws()).listInvestigations() });
   });
   app.get("/api/investigations/:id", async (c) => {
     if (!mayInvestigate(c.var.principal)) return c.json(refuse("NOT_PERMITTED", "Investigations are for analysts, leads and data engineers."));
-    const inv = await (await workspace(c.env)).getInvestigation(c.req.param("id"));
+    const inv = await (await c.var.ws()).getInvestigation(c.req.param("id"));
     return inv ? c.json(inv) : c.json({ error: "not found" }, 404);
   });
 
   app.get("/api/runs", async (c) => {
-    const ws = await workspace(c.env);
+    const ws = await c.var.ws();
     return c.json({ label: "synthetic", published: await ws.publishedRunId(), runs: await ws.listRuns(), mapping: await ws.activeMapping() });
   });
-  app.get("/api/runs/:id/replays", async (c) => c.json({ label: "synthetic", replays: await (await workspace(c.env)).listReplays(c.req.param("id")) }));
+  app.get("/api/runs/:id/replays", async (c) => c.json({ label: "synthetic", replays: await (await c.var.ws()).listReplays(c.req.param("id")) }));
 
   app.get("/api/results/:id", async (c) => {
-    const r = await (await workspace(c.env)).getResult(c.req.param("id"));
+    const r = await (await c.var.ws()).getResult(c.req.param("id"));
     if (!r) return c.json({ error: "not found" }, 404);
-    const denied = await resultDenied(c.env, c.var.principal, r);
+    const denied = await resultDenied(c.env, c.var.principal, r, c.var.ws);
     if (denied) return c.json(denied, 403);
     return c.json(envelope(r));
   });
@@ -312,33 +336,35 @@ export function buildApp() {
   app.get("/api/traces", async (c) => {
     const p = c.var.principal;
     if (!hasScope(p, "trace:read:all") && !hasScope(p, "trace:read:own")) return c.json(refuse("NOT_PERMITTED"));
-    const rows = await (await workspace(c.env)).listTraces(hasScope(p, "trace:read:all") ? null : p.id, Number(c.req.query("limit") ?? 50));
+    const rows = await (await c.var.ws()).listTraces(hasScope(p, "trace:read:all") ? null : p.id, Number(c.req.query("limit") ?? 50));
     return c.json({ label: "synthetic", traces: rows.map((r) => traceView(p, r)) });
   });
   app.get("/api/traces/:id", async (c) => {
     const p = c.var.principal;
-    const t = await (await workspace(c.env)).getTrace(c.req.param("id"));
+    const t = await (await c.var.ws()).getTrace(c.req.param("id"));
     if (!t) return c.json({ error: "not found" }, 404);
     if (!hasScope(p, "trace:read:all") && !(hasScope(p, "trace:read:own") && t.owner === p.id)) return c.json(refuse("NOT_PERMITTED"));
     return c.json(traceView(p, { trace_id: c.req.param("id"), ...t }));
   });
 
   app.post("/api/reviews/draft", async (c) => {
-    const body = (await c.req.json().catch(() => ({}))) as { cohort?: string; horizon?: number };
+    const body = (await readJsonBody(c)) as { cohort?: string; horizon?: number };
+    if (c.var.config.publicDemo && tooLong(body.cohort, CAPS.maxQueryChars)) return c.json({ error: `cohort names are limited to ${CAPS.maxQueryChars} characters` }, 400);
     return respond(c, "prepare_review", { cohort: body.cohort ?? "Platform Engineering", horizon_months: body.horizon });
   });
-  app.post("/api/reviews/:draftId/submit", async (c) => c.json(await (await workspace(c.env)).submitReview(c.var.principal, c.req.param("draftId"))));
-  app.get("/api/reviews", async (c) => c.json({ label: "synthetic", reviews: await (await workspace(c.env)).listReviews() }));
+  app.post("/api/reviews/:draftId/submit", async (c) => c.json(await (await c.var.ws()).submitReview(c.var.principal, c.req.param("draftId"))));
+  app.get("/api/reviews", async (c) => c.json({ label: "synthetic", reviews: await (await c.var.ws()).listReviews() }));
   app.get("/api/reviews/:id", async (c) => {
-    const ws = await workspace(c.env);
+    const ws = await c.var.ws();
     const reviews = (await ws.listReviews()) as { review_id: string; state: string }[];
     const r = reviews.find((x) => x.review_id === c.req.param("id"));
     return r ? c.json({ ...r, transitions: await ws.reviewTransitions(r.review_id) }) : c.json({ error: "not found" }, 404);
   });
-  app.get("/api/approvals", async (c) => c.json({ label: "synthetic", approvals: await (await workspace(c.env)).listApprovals() }));
+  app.get("/api/approvals", async (c) => c.json({ label: "synthetic", approvals: await (await c.var.ws()).listApprovals() }));
   app.post("/api/approvals/:id/approve", async (c) => {
-    const body = (await c.req.json().catch(() => ({}))) as { reason?: string };
-    const ws = await workspace(c.env);
+    const body = (await readJsonBody(c)) as { reason?: string };
+    if (c.var.config.publicDemo && tooLong(body.reason, CAPS.maxReasonChars)) return c.json({ error: `reasons are limited to ${CAPS.maxReasonChars} characters` }, 400);
+    const ws = await c.var.ws();
     const out = await ws.approve(c.var.principal, c.req.param("id"), body.reason ?? null);
     if (out.ok) {
       await ws.wakeApproval(c.req.param("id"));
@@ -347,8 +373,9 @@ export function buildApp() {
     return c.json(out);
   });
   app.post("/api/approvals/:id/reject", async (c) => {
-    const body = (await c.req.json().catch(() => ({}))) as { reason?: string };
-    const ws = await workspace(c.env);
+    const body = (await readJsonBody(c)) as { reason?: string };
+    if (c.var.config.publicDemo && tooLong(body.reason, CAPS.maxReasonChars)) return c.json({ error: `reasons are limited to ${CAPS.maxReasonChars} characters` }, 400);
+    const ws = await c.var.ws();
     const out = await ws.reject(c.var.principal, c.req.param("id"), body.reason ?? null);
     if (out.ok) {
       await ws.wakeApproval(c.req.param("id"));
@@ -357,20 +384,21 @@ export function buildApp() {
     return c.json(out);
   });
   app.post("/api/actions/:seq/rollback", async (c) => {
-    const body = (await c.req.json().catch(() => ({}))) as { reason?: string };
-    const ws = await workspace(c.env);
+    const body = (await readJsonBody(c)) as { reason?: string };
+    if (c.var.config.publicDemo && tooLong(body.reason, CAPS.maxReasonChars)) return c.json({ error: `reasons are limited to ${CAPS.maxReasonChars} characters` }, 400);
+    const ws = await c.var.ws();
     const out = await ws.rollback(c.var.principal, Number(c.req.param("seq")), body.reason ?? "");
     if (out.ok) await ws.rememberAction(out.value.action_seq, c.var.principal.role);
     return c.json(out);
   });
-  app.get("/api/audit", async (c) => c.json({ label: "synthetic", actions: await (await workspace(c.env)).auditLog(Number(c.req.query("since") ?? 0)), approvals: await (await workspace(c.env)).approvalAuditLog() }));
+  app.get("/api/audit", async (c) => c.json({ label: "synthetic", actions: await (await c.var.ws()).auditLog(Number(c.req.query("since") ?? 0)), approvals: await (await c.var.ws()).approvalAuditLog() }));
   // the action audit (SPEC 17.7): proxy screens (tenure band, location) for leads and the auditor, the audit-only age
   // screen for the auditor only (audit:attributes); everyone else is refused
   app.get("/api/audit/actions", async (c) => {
     const p = c.var.principal;
     const attributes = hasScope(p, "audit:attributes");
     if (!attributes && !hasScope(p, "review:approve")) return c.json(refuse("NOT_PERMITTED", "The action audit is for People Analytics leads and the auditor."));
-    const doc = await warehouseFor(c.env).actionAudit();
+    const doc = await warehouseFor(c.env, memoryPort(c.var.ws)).actionAudit();
     if (!doc) return c.json(refuse("OUT_OF_SCOPE", "No action audit has been recorded."));
     const screens = Object.fromEntries(Object.entries(doc.screens).filter(([, s]) => s.kind === "proxy" || attributes));
     return c.json({ ...doc, screens, proxy_strength: attributes ? doc.proxy_strength : null, audience: attributes ? "auditor" : "lead" });
@@ -380,56 +408,56 @@ export function buildApp() {
   // demo mode lists model-recorded sessions only: the stub's placeholder sessions are hidden
   app.get("/api/lab", async (c) => {
     if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
-    const doc = await warehouseFor(c.env).labIndex();
+    const doc = await warehouseFor(c.env, memoryPort(c.var.ws)).labIndex();
     if (!doc) return c.json(refuse("OUT_OF_SCOPE", "No Lab session has been recorded."));
     return c.json(c.var.config.demo ? { ...doc, proposals: doc.proposals.filter((p) => !p.placeholder), demo: true } : doc);
   });
   app.get("/api/lab/interviews/:proposal", async (c) => {
     if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
-    return c.json({ label: LAB_LABEL, demo: c.var.config.demo, recorded: recordedInterviews(c.req.param("proposal")) });
+    return c.json({ label: LAB_LABEL, demo: c.var.config.demo, recorded: recordedInterviews(c.req.param("proposal"), c.var.config.recordedOn) });
   });
   app.get("/api/lab/:proposal", async (c) => {
     if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
-    const doc = await warehouseFor(c.env).lab(c.req.param("proposal"));
+    const doc = await warehouseFor(c.env, memoryPort(c.var.ws)).lab(c.req.param("proposal"));
     if (!doc || (c.var.config.demo && doc.placeholder)) return c.json({ error: "no recorded session for this proposal" }, 404);
-    return c.json({ ...doc, provenance: doc.placeholder ? null : recordedProvenance(doc.model ?? "Qwen3.6-27B", doc.recorded_at ?? null, "lab") });
+    return c.json({ ...doc, provenance: doc.placeholder ? null : recordedProvenance(doc.model ?? "Qwen3.6-27B", doc.recorded_at ?? null, "lab", c.var.config.recordedOn) });
   });
   // the persona interview (SPEC 15.8): live only on the local machine in engine mode (the engine streams from the local
   // 27B, or its scripted stub under the stub model); anywhere else, or when the live answer does not start within 12
   // seconds, a recorded answer for the same question or a labeled placeholder
   app.post("/api/lab/interview", async (c) => {
     if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
-    const req = parseInterview(await c.req.json().catch(() => null));
+    const req = parseInterview(await readJsonBody<unknown>(c, null));
     if ("error" in req) return c.json({ error: req.error }, 400);
     const cfg = c.var.config;
     // demo mode replays recorded answers only: neither the engine nor a model is called
-    if (cfg.demo) return recordedOnlyAnswer(req);
+    if (cfg.demo) return recordedOnlyAnswer(req, undefined, cfg.recordedOn);
     const local = cfg.authMode === "dev" && isLocalHost(new URL(c.req.url));
     if (local && cfg.dataMode === "engine") return liveAnswer(cfg.engineUrl, req, cfg.llm === "stub" ? "stub" : "mlx");
     return fallbackAnswer(req);
   });
-  app.get("/api/audit/verify", async (c) => c.json(await (await workspace(c.env)).verifyAudit()));
+  app.get("/api/audit/verify", async (c) => c.json(await (await c.var.ws()).verifyAudit()));
 
   // ---------- routines and the demo arrival ----------
   app.post("/api/demo/arrival", async (c) => {
     if (!c.var.config.demo && c.var.config.authMode !== "dev") return c.json({ error: "demo only" }, 404);
     if (!hasScope(c.var.principal, "forecast:read:all") && !hasScope(c.var.principal, "quality:read")) return c.json({ refused: true, code: "NOT_PERMITTED", message: "Your role cannot trigger arrivals." });
-    return c.json(await (await workspace(c.env)).startRoutine(c.var.principal, DEMO.arrival.source, DEMO.arrival.period));
+    return c.json(await (await c.var.ws()).startRoutine(c.var.principal, DEMO.arrival.source, DEMO.arrival.period));
   });
-  app.get("/api/routines", async (c) => c.json({ label: "synthetic", routines: await (await workspace(c.env)).listRoutines() }));
-  app.get("/api/routines/:id", async (c) => c.json((await (await workspace(c.env)).getRoutine(c.req.param("id"))) ?? { error: "not found" }));
+  app.get("/api/routines", async (c) => c.json({ label: "synthetic", routines: await (await c.var.ws()).listRoutines() }));
+  app.get("/api/routines/:id", async (c) => c.json((await (await c.var.ws()).getRoutine(c.req.param("id"))) ?? { error: "not found" }));
   app.get("/api/mappings/payroll", async (c) => {
-    const ws = await workspace(c.env);
+    const ws = await c.var.ws();
     const approvals = ((await ws.listApprovals()) as unknown as ({ subject_kind: string } | null)[]).filter((a) => a?.subject_kind === "mapping");
     return c.json({ label: "synthetic", active: await ws.activeMapping(), proposals: approvals });
   });
-  app.get("/api/jobs", async (c) => c.json({ jobs: await (await workspace(c.env)).listJobs() }));
+  app.get("/api/jobs", async (c) => c.json({ jobs: await (await c.var.ws()).listJobs() }));
 
   // ---------- the agent turn over HTTP (dev and evals, localhost only) ----------
   app.post("/api/dev/agent/turn", async (c) => {
     if (c.var.config.authMode !== "dev" || !isLocalHost(new URL(c.req.url))) return c.json({ error: "not found" }, 404);
     const body = (await c.req.json()) as { question: string; provider?: string; history?: { role: "user" | "assistant"; content: string }[]; capture_steps?: boolean };
-    const name = await agentInstanceName(c.var.config.hmacKey, c.var.principal.id);
+    const name = await analystName(c.var.config, c.var.principal);
     const agent = await getAgentByName<Env, AnalystAgent>(c.env.ANALYST_AGENT, name);
     const history = (body.history ?? []).filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-12);
     // capture_steps returns the model's own steps for npm run demo:record; like the endpoint, dev auth on localhost only
@@ -439,6 +467,7 @@ export function buildApp() {
   // ---------- runner protocol (ADR 0002) ----------
   app.use("/internal/*", async (c, next) => {
     const cfg = c.var.config;
+    c.set("ws", workspaceRef(c.env));
     const auth = c.req.header("Authorization") ?? "";
     if (cfg.runnerToken && auth === `Bearer ${cfg.runnerToken}`) return next();
     try {
@@ -450,28 +479,28 @@ export function buildApp() {
     return c.json({ error: "unauthenticated" }, 401);
   });
   app.post("/internal/runner/lease", async (c) => {
-    const body = (await c.req.json().catch(() => ({}))) as { owner?: string };
-    return c.json(await (await workspace(c.env)).leaseJob(body.owner ?? "runner"));
+    const body = (await readJsonBody(c)) as { owner?: string };
+    return c.json(await (await c.var.ws()).leaseJob(body.owner ?? "runner"));
   });
   app.post("/internal/runner/heartbeat", async (c) => {
     const body = (await c.req.json()) as { job_key: string; owner: string };
-    return c.json({ ok: await (await workspace(c.env)).heartbeat(body.job_key, body.owner) });
+    return c.json({ ok: await (await c.var.ws()).heartbeat(body.job_key, body.owner) });
   });
   app.post("/internal/runner/complete", async (c) => {
     const text = await c.req.text();
     if (text.length > 256 * 1024) return c.json({ error: "result over 256 KiB" }, 413);
     const body = JSON.parse(text) as { job_key: string; result: unknown; ok?: boolean };
-    return c.json(await (await workspace(c.env)).completeJob(body.job_key, body.result, body.ok !== false));
+    return c.json(await (await c.var.ws()).completeJob(body.job_key, body.result, body.ok !== false));
   });
   app.get("/internal/fixtures/job/:key", (c) => {
-    const fx = warehouseFor(c.env);
+    const fx = warehouseFor(c.env, memoryPort(c.var.ws));
     if (!(fx instanceof FixturesWarehouse)) return c.json({ error: "fixtures mode only" }, 404);
     const job = fx.job(c.req.param("key"));
     return job ? c.json(job) : c.json({ error: "no fixture for this job" }, 404);
   });
   app.post("/internal/sources/arrived", async (c) => {
     const body = (await c.req.json()) as { source: string; period: string };
-    return c.json(await (await workspace(c.env)).startRoutine(null, body.source, body.period));
+    return c.json(await (await c.var.ws()).startRoutine(null, body.source, body.period));
   });
 
   return app;

@@ -36,6 +36,8 @@ export interface GateCtx {
   instanceId: string;
   routineId: string;
   epoch: number;
+  /** Overrides APPROVAL_TIMEOUT (a public-demo sandbox's approval wait ends before the sandbox does). */
+  approvalTimeout?: string;
 }
 
 /** step.do with a JSON-serialized result, so any plain value crosses the step boundary with its type. */
@@ -92,7 +94,7 @@ export async function awaitApproval(ctx: GateCtx, label: string, kind: "mapping"
     if (status === "approved" || status === "rejected") return status;
     if (status === "missing") throw new NonRetryableError(`approval subject ${subjectId} missing`);
     try {
-      await step.waitForEvent(`${label}.approval.wait.${k}`, { type, timeout: APPROVAL_TIMEOUT });
+      await step.waitForEvent(`${label}.approval.wait.${k}`, { type, timeout: (ctx.approvalTimeout ?? APPROVAL_TIMEOUT) as typeof APPROVAL_TIMEOUT });
     } catch {
       await stepJson(step, `${label}.approval.expired`, async () => ws.routineStep(ctx.routineId, label, "approval expired", { subject_id: subjectId }, "expired"));
       return "expired";

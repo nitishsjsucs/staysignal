@@ -26,10 +26,15 @@ const TAIL: Record<ProvenanceWhere, string> = {
   interview: "No model runs here.",
 };
 
-export function recordedProvenance(model: string | null | undefined, at: string | null | undefined, where: ProvenanceWhere): string {
+/** `place` is where the recording was made as the viewer reads it: "this laptop" in the operator's own demo, "the
+ * author's laptop" in the public demo (ADR 0018). */
+export function recordedProvenance(model: string | null | undefined, at: string | null | undefined, where: ProvenanceWhere, place = "this laptop"): string {
   const date = recordedDate(at);
-  return `Recorded from ${modelName(model)} on this laptop${date ? `, ${date}` : ""}; replayed. ${TAIL[where]}`;
+  return `Recorded from ${modelName(model)} on ${place}${date ? `, ${date}` : ""}; replayed. ${TAIL[where]}`;
 }
+
+/** The public demo's chip on an answer to a question with no recording: the deterministic stub, never a model. */
+export const STUB_LABEL_PUBLIC = "Stub model (deterministic template): no recording exists for this question, so no model ran";
 
 /** Shown when the demo has no recording for what was asked: friendly, and never a stub answer. */
 export const UNRECORDED_CHAT =

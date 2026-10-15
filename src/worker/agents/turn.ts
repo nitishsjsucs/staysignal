@@ -11,7 +11,7 @@ import { preRoute } from "../../shared/guard/prerouter";
 import { isRefusal, REFUSAL_MESSAGES, type RefusalCode } from "../../shared/policy/refusals";
 import { getTool, publishedCohorts, runTool, type ToolContext, toolsFor } from "../../shared/tools/registry";
 import { REPAIR_PROMPT, SYSTEM_PROMPT } from "./prompts";
-import { UNRECORDED_CHAT, UNRECORDED_CHAT_NONE } from "../../shared/provenance";
+import { STUB_LABEL_PUBLIC, UNRECORDED_CHAT, UNRECORDED_CHAT_NONE } from "../../shared/provenance";
 import { findRecording, type RecordedStep, recordedQuestions, replayLabel } from "./recorded-provider";
 import { openAiCompatible, type ProviderName, recordedModel, stubModel, LOCAL_URLS } from "./providers";
 import { type AigMetadata, type BudgetPort, neuronsFor, stripThink, TURN_CEILING, type WorkersAiConfig, withNoThink, workersAiModel } from "./workers-ai";
@@ -65,6 +65,11 @@ export interface TurnOptions {
   fetch?: typeof fetch;
   /** Return the model's steps with the turn (dev and localhost only, for npm run demo:record). */
   captureSteps?: boolean;
+  /** The recorded provider and a question with no recording: a short message with the recorded questions (the
+   * operator's demo) or the deterministic stub with its label (the public demo, ADR 0018). */
+  unrecorded?: "message" | "stub";
+  /** Where the recordings were made, as the provenance line names it. */
+  recordedOn?: string;
 }
 
 export interface TurnHooks {
@@ -77,7 +82,7 @@ function modelFor(provider: ProviderName, aliases: AliasMap, question: string, o
   if (provider === "recorded") {
     // a question with no recording never reaches here: runTurn answers it with the unrecorded message first
     const rec = findRecording(question);
-    if (rec) return { model: recordedModel(rec), recorded: true, label: replayLabel(rec) };
+    if (rec) return { model: recordedModel(rec), recorded: true, label: replayLabel(rec, opts.recordedOn) };
   }
   if (provider === "llama" || provider === "mlx") return { model: openAiCompatible(provider, LOCAL_URLS[provider]), recorded: false, label: null };
   return { model: stubModel(aliases), recorded: false, label: provider === "stub" ? "Stub model (deterministic template)" : null };
@@ -104,6 +109,11 @@ export async function runTurn(ctx: ToolContext, provider: ProviderName, question
   }
   // the recorded provider (the demo) replays only what was recorded: a question with no recording gets a friendly
   // message and the recorded questions, never a stub or template answer, and no model or tool runs
+  if (provider === "recorded" && !findRecording(question) && opts.unrecorded === "stub") {
+    // the public demo: the deterministic stub answers, labeled as such; still no model of any kind
+    const out = await runTurn(ctx, "stub", question, history, hooks, { ...opts, unrecorded: undefined });
+    return { ...out, label: STUB_LABEL_PUBLIC, spans: [...spans, ...out.spans.filter((x) => x.name !== "preRoute" && x.name !== "cohortGuard")] };
+  }
   if (provider === "recorded" && !findRecording(question)) {
     const suggestions = recordedQuestions();
     const msg = suggestions.length ? UNRECORDED_CHAT : UNRECORDED_CHAT_NONE;

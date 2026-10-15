@@ -45,6 +45,6 @@ export function recordedQuestions(): string[] {
 }
 
 /** What the chat shows on a replayed turn: the shared provenance line, from the recording's model and date. */
-export function replayLabel(turn: RecordedTurn): string {
-  return recordedProvenance(turn.model, turn.recorded_at, "chat");
+export function replayLabel(turn: RecordedTurn, place?: string): string {
+  return recordedProvenance(turn.model, turn.recorded_at, "chat", place);
 }

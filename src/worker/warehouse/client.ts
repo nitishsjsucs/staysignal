@@ -5,7 +5,7 @@
 import type { MemoryCommit, MemoryFileDoc, MemoryFileInfo } from "../../shared/contracts";
 import type { MemoryHit } from "../../shared/memory/search";
 import type { WarehouseClient } from "../../shared/tools/registry";
-import { workspace } from "../agents/workspace-port";
+import { type WorkspaceRef, workspaceRef } from "../agents/workspace-port";
 import { parseConfig } from "../config";
 import { BigQueryWarehouse } from "./bigquery";
 import { EngineWarehouse } from "./engine-shim";
@@ -21,19 +21,21 @@ export interface MemoryPort {
 let fixtures: FixturesWarehouse | null = null;
 let bigquery: BigQueryWarehouse | null = null; // one per isolate, so its access token is reused
 
-function workspaceMemory(env: Env): MemoryPort {
+/** The memory of a workspace (the shared one, or a visitor's sandbox in the public demo) over RPC. */
+export function memoryPort(ref: WorkspaceRef): MemoryPort {
   return {
-    memoryFiles: async () => (await (await workspace(env)).memoryFilesLocal()) as unknown as MemoryFileInfo[],
-    memoryFile: async (path) => (await (await workspace(env)).memoryFileLocal(path)) as unknown as MemoryFileDoc | null,
-    memoryLog: async () => (await (await workspace(env)).memoryLogLocal()) as unknown as MemoryCommit[],
-    memorySearch: async (q) => (await (await workspace(env)).memorySearchLocal(q)) as unknown as MemoryHit[],
+    memoryFiles: async () => (await (await ref()).memoryFilesLocal()) as unknown as MemoryFileInfo[],
+    memoryFile: async (path) => (await (await ref()).memoryFileLocal(path)) as unknown as MemoryFileDoc | null,
+    memoryLog: async () => (await (await ref()).memoryLogLocal()) as unknown as MemoryCommit[],
+    memorySearch: async (q) => (await (await ref()).memorySearchLocal(q)) as unknown as MemoryHit[],
   };
 }
 
-/** `memory` overrides where the memory lives (the WorkspaceAgent passes its own methods to avoid calling itself). */
+/** `memory` says where the memory lives: the WorkspaceAgent passes its own methods to avoid calling itself, requests
+ * pass their workspace (memoryPort); the default is the shared workspace. */
 export function warehouseFor(env: Env, memory?: MemoryPort): WarehouseClient {
   const cfg = parseConfig(env);
   if (cfg.dataMode === "engine") return new EngineWarehouse(cfg.engineUrl);
   const base: WarehouseClient = cfg.bigquery ? (bigquery ??= new BigQueryWarehouse(cfg.bigquery)) : (fixtures ??= new FixturesWarehouse());
-  return Object.assign(Object.create(base) as WarehouseClient, memory ?? workspaceMemory(env));
+  return Object.assign(Object.create(base) as WarehouseClient, memory ?? memoryPort(workspaceRef(env)));
 }

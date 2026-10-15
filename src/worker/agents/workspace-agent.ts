@@ -1,4 +1,5 @@
-// WorkspaceAgent (SPEC 14.5): one shared instance ("larkspur") holding forecast runs and the published pointer,
+// WorkspaceAgent (SPEC 14.5): one shared instance ("larkspur"), or one per visitor's sandbox ("sbx-<id>") in the public
+// demo (ADR 0018), holding forecast runs and the published pointer,
 // pending approvals, review tasks, the hash-chained action log and approval audit, computed results, engine jobs,
 // incidents and routine runs. Clients never write state; every action checks the principal's scopes and writes the log
 // in the same synchronous block. The Worker calls these methods over Durable Object RPC after authenticating; browser
@@ -29,6 +30,9 @@ import { blobHash, commitHash, short, treeHash } from "../memory/githash";
 import { NoteRejected, writeNote } from "../../shared/memory/write";
 import { type MemoryHit, parseAliases, parseNote, searchMemory } from "../../shared/memory/search";
 import { writeMemoryNote } from "../memory/writer";
+import { CAPS, UNITS } from "../../shared/demo/budget";
+import { type AdmitVerdict, UnitMeter } from "../demo/meter";
+import { guardFrames } from "../demo/frames";
 
 export interface RunBriefState {
   runId: string;
@@ -69,6 +73,7 @@ export interface ActionRow {
 export type ActionOutcome<T = unknown> = { ok: true; value: T; auditHead: WorkspaceState["auditHead"] } | { ok: false; code: string; message: string; auditHead: WorkspaceState["auditHead"] };
 
 const LEASE_MS = 120_000;
+const SANDBOX_PREFIX = "sbx-";
 
 export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
   override initialState: WorkspaceState = {
@@ -83,11 +88,99 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     epochStartMs: 0,
   };
 
+  private meter: UnitMeter | null = null;
+  private expCache: number | null | undefined = undefined;
+
+  constructor(ctx: DurableObjectState, env: Env) {
+    super(ctx, env);
+    // the public demo bounds every WebSocket frame and the frames per minute of each connection (ADR 0018)
+    if ((env as unknown as Record<string, string | undefined>).SS_AUTH_MODE === "demo") guardFrames(this);
+  }
+
   override async onStart(): Promise<void> {
+    if (this.sandboxed) {
+      // a sandbox is seeded only by initSandbox; one woken after its destruction (a late workflow step) seeds nothing,
+      // fails every call, and destroys itself shortly after
+      if (this.sandboxExp() === null) return this.scheduleOrphanCleanup();
+      this.refreshState();
+      return;
+    }
     for (const ddl of WORKSPACE_DDL) this.ctx.storage.sql.exec(ddl);
     const seeded = this.sql<{ n: number }>`SELECT COUNT(*) AS n FROM forecast_runs`[0]?.n ?? 0;
     if (seeded === 0) await this.seed();
     else this.refreshState();
+  }
+
+  // ---------- the public demo's sandbox lifecycle (ADR 0018) ----------
+
+  /** This instance is a visitor's sandbox in the public demo. */
+  get sandboxed(): boolean {
+    return this.name.startsWith(SANDBOX_PREFIX);
+  }
+
+  /** The sandbox's expiry (seconds since the epoch), or null when it was never initialized or has been destroyed. */
+  private sandboxExp(): number | null {
+    if (this.expCache !== undefined) return this.expCache;
+    const hasMeta = this.ctx.storage.sql.exec("SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = 'meta'").toArray().length > 0;
+    const v = hasMeta ? this.meta("sandbox_exp") : null;
+    this.expCache = v === null ? null : Number(v);
+    return this.expCache;
+  }
+
+  private async cancelExpiry(): Promise<void> {
+    for (const s of await this.listSchedules()) if (s.callback === "expireSandbox") await this.cancelSchedule(s.id);
+  }
+
+  private async scheduleOrphanCleanup(): Promise<void> {
+    if ((await this.listSchedules()).some((s) => s.callback === "expireSandbox")) return;
+    await this.schedule(CAPS.orphanCleanupSeconds, "expireSandbox", "orphan", { idempotent: true });
+  }
+
+  /** Starts a sandbox from the committed demo state; idempotent. The alarm at the expiry destroys it. */
+  async initSandbox(expSeconds: number): Promise<{ exp: number }> {
+    if (!this.sandboxed) throw new Error("not a sandbox");
+    const existing = this.sandboxExp();
+    if (existing !== null) return { exp: existing };
+    for (const ddl of WORKSPACE_DDL) this.ctx.storage.sql.exec(ddl);
+    this.setMeta("sandbox_exp", String(expSeconds));
+    this.expCache = expSeconds;
+    await this.seed();
+    // the memory store is imported now rather than on the first read, so no single request pays for it
+    await this.ensureMemory();
+    await this.cancelExpiry();
+    await this.schedule(new Date(expSeconds * 1000), "expireSandbox", "expiry");
+    return { exp: expSeconds };
+  }
+
+  /** Every request of a sandbox is admitted here first: it must be live and within its units (ADR 0018). */
+  admit(units: number): AdmitVerdict {
+    if (!this.sandboxed) return { ok: true, used: 0 };
+    const now = Date.now();
+    const exp = this.sandboxExp();
+    if (exp === null || exp * 1000 <= now) return { ok: false, code: "SANDBOX_EXPIRED", retryAfterSeconds: 0 };
+    this.meter ??= new UnitMeter(Number(this.meta("units_reserved") ?? "0"), (reserved) => this.setMeta("units_reserved", String(reserved)));
+    return this.meter.admit(units, now);
+  }
+
+  /** Reset: the visitor moved to a fresh sandbox, so this one stops admitting and is destroyed in a few seconds. */
+  async retireSandbox(): Promise<void> {
+    if (!this.sandboxed || this.sandboxExp() === null) return;
+    const now = Math.floor(Date.now() / 1000);
+    this.setMeta("sandbox_exp", String(now));
+    this.expCache = now;
+    await this.cancelExpiry();
+    await this.schedule(5, "expireSandbox", "retired");
+  }
+
+  /** The alarm callback: deletes everything this sandbox stored. */
+  async expireSandbox(): Promise<void> {
+    if (!this.sandboxed) return;
+    await this.destroy();
+  }
+
+  /** Bytes this object stores (the budget test reads it). */
+  storedBytes(): number {
+    return this.ctx.storage.sql.databaseSize;
   }
 
   override validateStateChange(_next: WorkspaceState, source: Connection | "server"): void {
@@ -96,7 +189,8 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
 
   override shouldConnectionBeReadonly(_c: Connection, ctx: ConnectionContext): boolean {
     const p = principalFromHeader(ctx.request);
-    return !p || isReadOnly(p);
+    // a sandbox's connections only receive state: every action goes through the admitted HTTP API
+    return !p || isReadOnly(p) || this.sandboxed;
   }
 
   override onConnect(connection: Connection, ctx: ConnectionContext): void {
@@ -857,13 +951,27 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
 
   // ---------- routines ----------
 
-  async startRoutine(p: Principal | null, source: string, period: string): Promise<{ routine_id: string; workflow_instance_id: string }> {
+  async startRoutine(p: Principal | null, source: string, period: string): Promise<{ routine_id: string; workflow_instance_id: string } | { refused: true; code: string; message: string }> {
+    const exp = this.sandboxed ? this.sandboxExp() : null;
+    if (this.sandboxed) {
+      const runs = this.sql<{ n: number }>`SELECT COUNT(*) AS n FROM routine_runs`[0]?.n ?? 0;
+      if (runs >= CAPS.routinesPerSandbox) return { refused: true, code: "ROUTINE_LIMIT", message: "This sandbox has already run the payroll simulation. Reset the sandbox to run it again." };
+      // the request paid for a write; the routine's workflow steps cost the rest of its units
+      const v = this.admit(UNITS.routine - UNITS.write);
+      if (!v.ok) return { refused: true, code: v.code, message: v.code === "RATE_LIMITED" ? "The demo is busy, try again later." : "This sandbox has used its request allowance. Reset it to start a fresh one." };
+    }
     const routineId = this.nextId("RTN");
     const trigger = { kind: "source_arrival", source, period, by: p?.id ?? "runner", arrived_at: DEMO.arrivedAt };
     this.sql`INSERT INTO routine_runs (routine_id, kind, status, trigger_json, steps_json, workflow_instance_id, demo_epoch, created_at, updated_at)
       VALUES (${routineId}, 'source_arrival_refresh', 'running', ${JSON.stringify(trigger)}, '[]', NULL, ${this.state.demoEpoch}, ${this.now()}, ${this.now()})`;
     this.appendAction({ kind: "source.arrived", actor: p?.id ?? "runner", actor_kind: p ? "human" : "routine", routine_run_id: routineId, payload: { ...trigger, label: p ? "simulated arrival (synthetic)" : "arrival" }, reversible: "none" });
-    const instanceId = await this.runWorkflow("ROUTINE_WORKFLOW", { routine_id: routineId, source, period, epoch: this.state.demoEpoch }, { id: `routine-${routineId}-e${this.state.demoEpoch}` });
+    // in a sandbox the instance ID carries the sandbox's name, and the approval wait ends before the sandbox does
+    const approvalTimeoutSeconds = exp !== null ? Math.max(60, exp - Math.floor(Date.now() / 1000) - 120) : null;
+    const instanceId = await this.runWorkflow(
+      "ROUTINE_WORKFLOW",
+      { routine_id: routineId, source, period, epoch: this.state.demoEpoch, ...(approvalTimeoutSeconds ? { approval_timeout_s: approvalTimeoutSeconds } : {}) },
+      { id: this.sandboxed ? `routine-${this.name}-${routineId}-e${this.state.demoEpoch}` : `routine-${routineId}-e${this.state.demoEpoch}` },
+    );
     this.sql`UPDATE routine_runs SET workflow_instance_id = ${instanceId} WHERE routine_id = ${routineId}`;
     this.refreshState();
     return { routine_id: routineId, workflow_instance_id: instanceId };

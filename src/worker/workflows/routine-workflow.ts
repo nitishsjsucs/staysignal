@@ -18,6 +18,8 @@ export interface RoutineParams {
   source: string;
   period: string;
   epoch: number;
+  /** A public-demo sandbox (ADR 0018): the approval wait ends before the sandbox does. */
+  approval_timeout_s?: number;
 }
 
 interface ChecksResult {
@@ -90,7 +92,7 @@ export class RoutineWorkflow extends AgentWorkflow<WorkspaceAgent, RoutineParams
   override async run(event: AgentWorkflowEvent<RoutineParams>, step: AgentWorkflowStep) {
     const p = event.payload;
     const ws = this.agent as unknown as WorkspaceRpc;
-    const ctx: GateCtx = { step, ws, instanceId: event.instanceId, routineId: p.routine_id, epoch: p.epoch };
+    const ctx: GateCtx = { step, ws, instanceId: event.instanceId, routineId: p.routine_id, epoch: p.epoch, ...(p.approval_timeout_s ? { approvalTimeout: `${Math.floor(p.approval_timeout_s)} seconds` } : {}) };
     const live = async (name: string) => {
       const ok = await stepJson(step, `${name}.epoch`, async () => (await ws.epoch()) === p.epoch);
       if (!ok) throw new NonRetryableError(`demo epoch changed; routine ${p.routine_id} stops`);

@@ -28,8 +28,8 @@ export type InterviewSource = "live" | "stub" | "recorded" | "placeholder" | "un
 const ALL = (): RecordedAnswer[] => (recorded as { answers: RecordedAnswer[] }).answers;
 
 /** The recorded questions for a proposal (the interview's chips in demo mode), without the answers. */
-export function recordedInterviews(proposal: string, answers: RecordedAnswer[] = ALL()): { persona_id: string; question: string; provenance: string }[] {
-  return answers.filter((a) => a.proposal === proposal).map((a) => ({ persona_id: a.persona_id, question: a.question, provenance: recordedProvenance(a.model, a.recorded_at, "interview") }));
+export function recordedInterviews(proposal: string, place?: string, answers: RecordedAnswer[] = ALL()): { persona_id: string; question: string; provenance: string }[] {
+  return answers.filter((a) => a.proposal === proposal).map((a) => ({ persona_id: a.persona_id, question: a.question, provenance: recordedProvenance(a.model, a.recorded_at, "interview", place) }));
 }
 
 function norm(s: string): string {
@@ -61,8 +61,8 @@ function textResponse(text: string, source: InterviewSource, model: string | nul
   return new Response(text, { headers });
 }
 
-function recordedResponse(rec: RecordedAnswer): Response {
-  return textResponse(rec.answer, "recorded", `${rec.model}, recorded ${rec.recorded_at}`, recordedProvenance(rec.model, rec.recorded_at, "interview"));
+function recordedResponse(rec: RecordedAnswer, place?: string): Response {
+  return textResponse(rec.answer, "recorded", `${rec.model}, recorded ${rec.recorded_at}`, recordedProvenance(rec.model, rec.recorded_at, "interview", place));
 }
 
 /** The fallback: a recorded answer, else the labeled placeholder. */
@@ -72,9 +72,9 @@ export function fallbackAnswer(req: InterviewRequest): Response {
 }
 
 /** Demo mode: a recorded answer, else a friendly message (the page shows the recorded questions); never a model. */
-export function recordedOnlyAnswer(req: InterviewRequest, answers: RecordedAnswer[] = ALL()): Response {
+export function recordedOnlyAnswer(req: InterviewRequest, answers: RecordedAnswer[] = ALL(), place?: string): Response {
   const rec = findRecordedAnswer(req, answers);
-  return rec ? recordedResponse(rec) : textResponse(UNRECORDED_INTERVIEW, "unrecorded", null);
+  return rec ? recordedResponse(rec, place) : textResponse(place ? UNRECORDED_INTERVIEW.replace("this laptop", place) : UNRECORDED_INTERVIEW, "unrecorded", null);
 }
 
 /** The live answer from the engine, streamed through, or the fallback when it does not start within 12 seconds. */

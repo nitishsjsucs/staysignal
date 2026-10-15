@@ -1,0 +1,101 @@
+// ADR 0018: the public demo's budget arithmetic. The daily bounds recomputed from the committed caps and the measured
+// per-unit costs must stay inside the demo's half of each Workers Free allowance; the ADR's table states the same
+// numbers. The meter's lifetime cap holds across evictions, and the WebSocket guard bounds frames.
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import { budgetTable, CAPS, DEMO_SHARE, FREE_PLAN, MEASURED, UNITS } from "../../src/shared/demo/budget";
+import { UnitMeter } from "../../src/worker/demo/meter";
+import { guardFrames } from "../../src/worker/demo/frames";
+
+describe("the budget arithmetic", () => {
+  it("keeps every daily bound inside the demo's share of the Workers Free allowance", () => {
+    for (const line of budgetTable()) expect(line.bound, line.quantity).toBeLessThanOrEqual(line.budget);
+  });
+
+  it("pins the caps and the table of ADR 0018", () => {
+    expect(DEMO_SHARE).toBe(0.5);
+    expect(FREE_PLAN).toMatchObject({ workerRequestsPerDay: 100_000, doRequestsPerDay: 100_000, doRowsWrittenPerDay: 100_000, workflowConcurrentInstances: 100 });
+    expect(CAPS).toMatchObject({ sandboxLifetimeMs: 4 * 3600_000, newSandboxesPerClientPerHour: 3, newSandboxesPerDay: 15, liveSandboxes: 10, unitsPerSandbox: 600, routinesPerSandbox: 1, maxBodyBytes: 8192, maxQuestionChars: 500, maxReasonChars: 300 });
+    expect(UNITS).toEqual({ read: 1, write: 12, chatTurn: 18, routine: 80 });
+    expect(Object.fromEntries(budgetTable().map((l) => [l.quantity, l.bound]))).toEqual({
+      "Worker requests per day": 9_045,
+      "Durable Object requests per day": 45_030,
+      "SQLite rows written per day": 45_120,
+      "Bytes stored at any time": 10 * MEASURED.bytesPerSandbox,
+      "Concurrent Workflow instances": 10,
+    });
+    const adr = readFileSync("docs/adr/0018-public-demo-mode.md", "utf8");
+    for (const s of ["15 sandboxes x 600 units = 9,000", "15 x 600 x 5 = 45,000", "15 x 2 x (300 + 600 x 2) = 45,000", "10 live sandboxes x 4 MiB = 40 MiB", "a read 1, a write (POST) 12, a chat turn 18, the routine 80; a sandbox has 600 units"]) expect(adr).toContain(s);
+  });
+
+  it("would fail if a cap were raised past the budget", () => {
+    expect(budgetTable({ ...CAPS, newSandboxesPerDay: 30 }).some((l) => l.bound > l.budget)).toBe(true);
+    expect(budgetTable(CAPS, { ...MEASURED, doRequestsPerUnit: 8 }).some((l) => l.bound > l.budget)).toBe(true);
+  });
+});
+
+describe("the unit meter", () => {
+  const caps = { unitsPerSandbox: 600, unitsPerSandboxPerMinute: 240, unitFlushEvery: 25 };
+
+  it("refuses past 240 units a minute and admits again once the minute passes", () => {
+    const m = new UnitMeter(0, () => undefined, caps);
+    for (let i = 0; i < 240; i++) expect(m.admit(1, 1_000 + i).ok).toBe(true);
+    expect(m.admit(1, 2_000)).toMatchObject({ ok: false, code: "RATE_LIMITED" });
+    expect(m.admit(1, 62_000).ok).toBe(true);
+  });
+
+  it("reserves each block of 25 before it is spent, so a reload never undercounts", () => {
+    const writes: number[] = [];
+    let reserved = 0;
+    let m = new UnitMeter(reserved, (r) => {
+      writes.push(r);
+      reserved = r;
+    }, caps);
+    let t = 0;
+    let truth = 0;
+    for (let i = 0; i < 1000; i++) {
+      // evict (reload from the persisted count) every 7 requests, spending one minute between requests
+      if (i % 7 === 0) m = new UnitMeter(reserved, (r) => {
+        writes.push(r);
+        reserved = r;
+      }, caps);
+      const out = m.admit(1, (t += 61_000));
+      if (!out.ok) {
+        expect(out.code).toBe("SANDBOX_SPENT");
+        break;
+      }
+      truth++;
+      expect(reserved).toBeGreaterThanOrEqual(m.spent);
+    }
+    expect(truth).toBeLessThanOrEqual(600);
+    expect(m.admit(1, (t += 61_000))).toMatchObject({ ok: false, code: "SANDBOX_SPENT" });
+    // one write per block reserved, never one per request
+    expect(writes.length).toBeLessThanOrEqual(truth);
+    expect(new UnitMeter(0, () => undefined, caps).admit(601, 0)).toMatchObject({ ok: false, code: "SANDBOX_SPENT" });
+  });
+});
+
+describe("the WebSocket frame guard", () => {
+  function fake() {
+    const seen: string[] = [];
+    const closed: [number, string][] = [];
+    const agent = { onMessage: (_c: unknown, m: string | ArrayBuffer) => void seen.push(String(m)) };
+    guardFrames(agent as never, { maxWsFrameBytes: 100, wsFramesPerMinute: 3 });
+    const conn = { id: "c1", close: (code: number, reason: string) => void closed.push([code, reason]) };
+    return { agent, seen, closed, conn };
+  }
+
+  it("drops frames over the size limit and closes the connection", () => {
+    const f = fake();
+    f.agent.onMessage(f.conn as never, "x".repeat(101));
+    expect(f.seen).toEqual([]);
+    expect(f.closed).toEqual([[1009, "frame too large"]]);
+  });
+
+  it("closes a connection that sends more frames a minute than allowed", () => {
+    const f = fake();
+    for (let i = 0; i < 4; i++) f.agent.onMessage(f.conn as never, `m${i}`);
+    expect(f.seen).toEqual(["m0", "m1", "m2"]);
+    expect(f.closed).toEqual([[4429, "too many messages"]]);
+  });
+});

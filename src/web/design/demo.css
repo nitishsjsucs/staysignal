@@ -1,0 +1,228 @@
+/* The public demo only (ADR 0018): the landing page, the banner above the top bar, the guided tour panel and the chat
+   chips that say whether a question replays a recorded turn or gets the stub. No rule here matches an element outside
+   the public demo, so the other modes render exactly as before. */
+
+.demo-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.demo-top .topbar {
+  position: static;
+}
+
+.demo-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  padding: 6px var(--s6);
+  background: var(--accent-wash);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.demo-banner-text {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.demo-banner-text strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.demo-banner-actions {
+  display: flex;
+  gap: var(--s2);
+  flex-wrap: wrap;
+}
+
+.demo-banner-note {
+  flex-basis: 100%;
+  color: var(--warning-ink);
+}
+
+.tour-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 45;
+  width: min(400px, 100vw);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+}
+
+.tour-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--border);
+}
+
+.tour-sub {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+.tour-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--s3) var(--s4) var(--s6);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.tour-beat {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--s3);
+  background: var(--surface-2);
+}
+
+.tour-beat[data-done="1"] {
+  border-color: color-mix(in srgb, var(--good) 40%, var(--border));
+}
+
+.tour-beat-title {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-weight: 600;
+}
+
+.tour-num {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-wash);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 650;
+  flex: none;
+}
+
+.tour-beat[data-done="1"] .tour-num {
+  background: color-mix(in srgb, var(--good) 14%, var(--surface));
+  color: var(--good-ink);
+}
+
+.tour-line {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  margin: 6px 0 0;
+}
+
+.tour-ask {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin: 6px 0 0;
+  font-style: italic;
+}
+
+.tour-actions {
+  display: flex;
+  gap: var(--s2);
+  flex-wrap: wrap;
+  margin-top: var(--s2);
+}
+
+.demo-landing {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--s6) var(--s4);
+  background: var(--page);
+}
+
+.demo-landing-card {
+  max-width: 560px;
+  width: 100%;
+}
+
+.demo-landing-title {
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--s3);
+}
+
+.demo-landing-text {
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin: 0 0 var(--s4);
+}
+
+.demo-landing-form {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex-wrap: wrap;
+}
+
+.demo-landing-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.demo-landing-note {
+  font-size: 12px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  margin: var(--s4) 0 0;
+}
+
+.suggestions button .chip-kind {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 16px;
+  vertical-align: 1px;
+}
+
+.chip-kind.recorded {
+  background: var(--accent-wash);
+  color: var(--accent);
+}
+
+.chip-kind.stub {
+  background: var(--surface-sunk);
+  color: var(--ink-3);
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 767px) {
+  .demo-banner {
+    padding: 6px var(--s4);
+  }
+
+  .tour-panel {
+    top: auto;
+    bottom: 0;
+    height: 78vh;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-radius: 14px 14px 0 0;
+    z-index: 55;
+  }
+}

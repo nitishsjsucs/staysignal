@@ -1,7 +1,9 @@
 // The app: authenticate (dev role switcher locally, Access in production), connect to the WorkspaceAgent, route pages.
 import { useEffect, useState } from "react";
-import { getJSON, type Me } from "./api";
+import { ApiError, getJSON, type Me } from "./api";
 import { AppShell } from "./components/AppShell";
+import { DemoLanding, DemoMisconfigured } from "./components/DemoLanding";
+import { type DemoSessionInfo, demoSessionInfo, setRecordedPlace } from "./demo";
 import { RoleSwitcher } from "./components/RoleSwitcher";
 import { SyntheticChip } from "./components/ui";
 import { WorkspaceProvider } from "./live";
@@ -23,7 +25,18 @@ import { parseRoute, useLocation } from "./router";
 function useMe(): { me: Me | null; ready: boolean } {
   const [state, setState] = useState<{ me: Me | null; ready: boolean }>({ me: null, ready: false });
   useEffect(() => {
-    const load = () => getJSON<Me>("/api/me").then((me) => setState({ me, ready: true }), () => setState({ me: null, ready: true }));
+    // a busy public demo (429) keeps the visitor signed in and asks again shortly; only a refusal signs them out
+    const load = (): Promise<void> =>
+      getJSON<Me>("/api/me").then(
+        (me) => setState({ me, ready: true }),
+        (e: unknown) => {
+          if (e instanceof ApiError && e.status === 429) {
+            window.setTimeout(() => void load(), 5000);
+            return;
+          }
+          setState({ me: null, ready: true });
+        },
+      );
     load();
     window.addEventListener("ss-principal", load);
     return () => window.removeEventListener("ss-principal", load);
@@ -31,12 +44,26 @@ function useMe(): { me: Me | null; ready: boolean } {
   return state;
 }
 
+/** Signed out: the public demo's landing (ADR 0018) when this deployment is the public demo, else the local sign-in. */
+function useDemoInfo(probe: boolean): DemoSessionInfo | "misconfigured" | null | undefined {
+  const [info, setInfo] = useState<DemoSessionInfo | "misconfigured" | null | undefined>(undefined);
+  useEffect(() => {
+    if (probe) void demoSessionInfo().then(setInfo);
+  }, [probe]);
+  return info;
+}
+
 export function App() {
   const { pathname } = useLocation();
   const route = parseRoute(pathname);
   const { me, ready } = useMe();
+  const demoInfo = useDemoInfo(ready && !me);
+  setRecordedPlace(me?.public_demo?.recorded_on);
   if (!ready) return null;
   if (!me) {
+    if (demoInfo === undefined) return null;
+    if (demoInfo === "misconfigured") return <DemoMisconfigured />;
+    if (demoInfo) return <DemoLanding info={demoInfo} />;
     return (
       <main className="content" style={{ margin: "10vh auto", maxWidth: 520 }}>
         <section className="card">
@@ -51,7 +78,7 @@ export function App() {
     );
   }
   return (
-    <WorkspaceProvider key={me.principal.id}>
+    <WorkspaceProvider key={me.principal.id} coalesceMs={me.public_demo ? 400 : 0}>
       <AppShell route={route} me={me} key={me.principal.id}>
         {route.page === "forecast" ? <ForecastPage me={me} /> : null}
         {route.page === "changes" ? <ChangesPage me={me} /> : null}

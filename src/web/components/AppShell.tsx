@@ -6,6 +6,7 @@ import { useWorkspace } from "../live";
 import { navigate, type Route, setView, useView } from "../router";
 import { applyTheme, effectiveDark, readTheme, type Theme } from "../theme";
 import { BrandMark, IconAsk, IconChanges, IconFlask, IconFlows, IconForecast, IconGovernance, IconLab, IconMemory, IconMoon, IconQuality, IconReviews, IconSun, IconTraces, IconTrust } from "./icons";
+import { DemoBanner } from "./DemoBanner";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { Segmented, SyntheticChip } from "./ui";
 
@@ -69,6 +70,26 @@ export function AppShell({ route, me, children }: { route: Route; me: Me; childr
     e.preventDefault();
     navigate(href + window.location.search);
   };
+  const header = (
+    <header className="topbar">
+      <CohortPicker />
+      <Segmented label="Horizon" value={view.horizon} onChange={(h) => setView({ horizon: h })} options={[{ value: 1, label: "1 month" }, { value: 3, label: "3 months" }, { value: 6, label: "6 months" }]} />
+      <span className="spacer" />
+      <span className="hide-mobile">
+        <SyntheticChip />
+      </span>
+      {live?.published ? <span className="chip hide-mobile" title="Published run and its data cutoff">Run {live.published.runId} · cutoff {live.published.cutoff}</span> : null}
+      <RoleSwitcher me={me} />
+      <button type="button" className="btn btn-sm" onClick={() => setTheme(dark ? "light" : "dark")} aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}>
+        {dark ? <IconSun size={14} /> : <IconMoon size={14} />}
+      </button>
+      {route.page !== "ask" ? (
+        <button type="button" className="btn btn-sm btn-primary hide-mobile" onClick={() => setDock((d) => !d)} aria-expanded={showDock}>
+          <IconAsk size={14} /> {showDock ? "Hide chat" : "Ask"}
+        </button>
+      ) : null}
+    </header>
+  );
   return (
     <div className={`shell${showDock ? " dock-open" : ""}`}>
       <nav className="nav" aria-label="Main">
@@ -94,24 +115,15 @@ export function AppShell({ route, me, children }: { route: Route; me: Me; childr
         </div>
       </nav>
       <div className="main">
-        <header className="topbar">
-          <CohortPicker />
-          <Segmented label="Horizon" value={view.horizon} onChange={(h) => setView({ horizon: h })} options={[{ value: 1, label: "1 month" }, { value: 3, label: "3 months" }, { value: 6, label: "6 months" }]} />
-          <span className="spacer" />
-          <span className="hide-mobile">
-            <SyntheticChip />
-          </span>
-          {live?.published ? <span className="chip hide-mobile" title="Published run and its data cutoff">Run {live.published.runId} · cutoff {live.published.cutoff}</span> : null}
-          <RoleSwitcher me={me} />
-          <button type="button" className="btn btn-sm" onClick={() => setTheme(dark ? "light" : "dark")} aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}>
-            {dark ? <IconSun size={14} /> : <IconMoon size={14} />}
-          </button>
-          {route.page !== "ask" ? (
-            <button type="button" className="btn btn-sm btn-primary hide-mobile" onClick={() => setDock((d) => !d)} aria-expanded={showDock}>
-              <IconAsk size={14} /> {showDock ? "Hide chat" : "Ask"}
-            </button>
-          ) : null}
-        </header>
+        {me.public_demo ? (
+          // the public demo: its banner and the top bar stay together at the top of every page
+          <div className="demo-top">
+            <DemoBanner me={me} />
+            {header}
+          </div>
+        ) : (
+          header
+        )}
         <main className="content">{children}</main>
       </div>
       {showDock ? (

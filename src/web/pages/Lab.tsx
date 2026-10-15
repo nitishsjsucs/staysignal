@@ -7,6 +7,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { modelName } from "../../shared/provenance";
 import type { LabDoc, LabIndex } from "../../shared/contracts";
 import { isRefusal, type Me, type Refusal, useQuery } from "../api";
+import { recordedPlace } from "../demo";
 import { fmtVal, TipRow, Tooltip, useTooltip, useWidth } from "../charts/kit";
 import { ChartCard } from "../components/ChartCard";
 import { IconAlert } from "../components/icons";
@@ -329,7 +330,7 @@ function InterviewCard({ proposal, personas, demo }: { proposal: string; persona
   }
   return (
     <section className="card span-12" data-testid="lab-interview">
-      <div className="card-head"><div><h2 className="card-title">Ask one persona a question</h2><div className="card-sub">{LAB_SUB} {demo ? "In this demo the personas answer the recorded questions below with what Qwen3.6-27B wrote on this laptop; no model runs here." : "Live only on the local machine with the 27B; otherwise a recorded answer or a labeled placeholder."}</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">Ask one persona a question</h2><div className="card-sub">{LAB_SUB} {demo ? `In this demo the personas answer the recorded questions below with what Qwen3.6-27B wrote on ${recordedPlace()}; no model runs here.` : "Live only on the local machine with the 27B; otherwise a recorded answer or a labeled placeholder."}</div></div></div>
       {recorded.length ? (
         <div className="suggestions" style={{ marginBottom: 8 }} data-testid="lab-recorded-questions">
           {recorded.map((r) => (
@@ -374,7 +375,7 @@ export function LabPage(_: { me: Me }) {
     return (
       <>
         {head}
-        <EmptyState>{demo ? "No Scenario Lab session has been recorded from Qwen3.6-27B yet. The demo shows only sessions recorded on this laptop and replayed; none is ready." : "No Lab session has been recorded."}</EmptyState>
+        <EmptyState>{demo ? `No Scenario Lab session has been recorded from Qwen3.6-27B yet. The demo shows only sessions recorded on ${recordedPlace()} and replayed; none is ready.` : "No Lab session has been recorded."}</EmptyState>
       </>
     );
   const id = pick ?? proposals.find((p) => p.id === "promotion-criteria-third-window")?.id ?? proposals[0]!.id;

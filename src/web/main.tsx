@@ -4,6 +4,7 @@ import { App } from "./App";
 import "./design/tokens.css";
 import "./design/motion.css";
 import "./design/app.css";
+import "./design/demo.css";
 import { applyTheme, readTheme } from "./theme";
 
 applyTheme(readTheme());

@@ -122,6 +122,9 @@ interface TurnData {
   trace_id: string;
 }
 
+/** The public demo's examples of questions with no recording: the deterministic stub answers them, labeled. */
+const PUBLIC_STUB_SUGGESTIONS = ["Break down the Engineering forecast by group over the next 3 months.", "Which checks failed on the payroll data?"];
+
 const SUGGESTIONS = [
   "Forecast voluntary departures in Engineering over the next 90 days.",
   "What changed since the previous forecast?",
@@ -133,9 +136,12 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
   const agent = useAgent({ agent: "analyst-agent", basePath: "agents-ws/analyst" });
   const { messages, sendMessage, status, clearHistory } = useAgentChat({ agent, getInitialMessages: null });
   const [input, setInput] = useState("");
-  // demo mode replays recorded answers only, so its chips are exactly the recorded questions
+  // demo mode replays recorded answers only, so its chips are exactly the recorded questions; the public demo adds two
+  // questions the deterministic stub answers, and every chip says which kind it is (ADR 0018)
   const demo = me.demo ?? null;
+  const publicDemo = me.public_demo ?? null;
   const chips = demo ? demo.recorded_questions : SUGGESTIONS;
+  const stubChips = publicDemo ? PUBLIC_STUB_SUGGESTIONS.filter((q) => !chips.includes(q)) : [];
   const seen = useRef(new Set<string>());
   const bodyRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -168,7 +174,11 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
             <p style={{ color: "var(--ink-2)", fontSize: 13, marginBottom: 6 }}>
               Ask about a cohort's forecast, what changed, data quality or a review. Answers come from governed tools; every number links to the result that produced it.
             </p>
-            {demo ? (
+            {publicDemo ? (
+              <p style={{ color: "var(--ink-2)", fontSize: 12, marginBottom: 6 }} data-testid="dock-demo-note">
+                No model runs in this demo. The recorded questions replay turns recorded from Qwen3.6-27B on {publicDemo.recorded_on}; any other question gets a labeled deterministic stub. The tools and numbers compute live from the warehouse.
+              </p>
+            ) : demo ? (
               <p style={{ color: "var(--ink-2)", fontSize: 12, marginBottom: 6 }} data-testid="dock-demo-note">
                 {demo.recorded_questions.length
                   ? "Model text in this demo was recorded from Qwen3.6-27B on this laptop and is replayed; the tools and numbers compute live from the warehouse."
@@ -177,6 +187,13 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
             ) : null}
             {chips.map((s) => (
               <button key={s} type="button" onClick={() => submit(s)}>
+                {publicDemo ? <span className="chip-kind recorded">Recorded turn</span> : null}
+                {s}
+              </button>
+            ))}
+            {stubChips.map((s) => (
+              <button key={s} type="button" onClick={() => submit(s)}>
+                <span className="chip-kind stub">Stub</span>
                 {s}
               </button>
             ))}
@@ -244,6 +261,7 @@ export function Conversation({ me, full = false }: { me: Me; full?: boolean }) {
           id={full ? "ask-full" : "ask-dock"}
           rows={2}
           value={input}
+          maxLength={publicDemo ? publicDemo.limits.question_chars : undefined}
           placeholder={`Ask as ${me.principal.display}`}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {

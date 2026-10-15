@@ -31,15 +31,26 @@ export function invalidate(): void {
   for (const l of listeners) l();
 }
 
+/** The public demo: a request met an ended sandbox, so the app goes back to its start page (ADR 0018). */
+async function sandboxEnded(r: Response): Promise<boolean> {
+  const body = (await r.clone().json().catch(() => null)) as { reason?: string } | null;
+  if (body?.reason !== "sandbox_expired") return false;
+  window.dispatchEvent(new Event("ss-principal"));
+  return true;
+}
+
 export async function getJSON<T>(url: string): Promise<T> {
   const r = await fetch(url, { credentials: "same-origin" });
-  if (r.status === 401) throw new ApiError(401, "Sign in with the role switcher");
+  if (r.status === 401) throw new ApiError(401, (await sandboxEnded(r)) ? "Your sandbox has ended" : "Sign in with the role switcher");
+  if (r.status === 429) throw new ApiError(429, "The demo is busy, try again later.");
   if (!r.ok) throw new ApiError(r.status, `${r.status} ${r.statusText}`);
   return (await r.json()) as T;
 }
 
 export async function postJSON<T>(url: string, body: unknown = {}): Promise<T> {
   const r = await fetch(url, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  if (r.status === 401) await sandboxEnded(r);
+  if (r.status === 429) throw new ApiError(429, "The demo is busy, try again later.");
   if (!r.ok && r.status !== 200) throw new ApiError(r.status, `${r.status} ${r.statusText}`);
   return (await r.json()) as T;
 }
@@ -90,6 +101,8 @@ export interface Me {
   principal: { id: string; role: string; display: string; scopes: string[]; assignedOrgs: string[] };
   /** Demo mode (npm run demo): recorded model output only; the chat offers the recorded questions. */
   demo?: { recorded_questions: string[] } | null;
+  /** The public demo (ADR 0018): the sandbox's expiry, the principals to switch between, the stub's label. */
+  public_demo?: { expires_at: number | null; principals: { id: string; role: string; display: string }[]; recorded_on: string; stub_label: string; limits: { question_chars: number; reason_chars: number } } | null;
 }
 
 export function hasScope(me: Me | null, scope: string): boolean {

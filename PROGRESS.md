@@ -140,6 +140,7 @@ Done on 2026-10-13: both proposals recorded from the 27B with the compact plan (
 Goal: a public link on the operator's Workers Free account where anyone can click through the whole product, with no model call, no real data path, a private sandbox per visitor and bounded cost (ADR 0018). Builders deploy nothing; the operator runs the steps in README, Public demo.
 
 - `docs(adr)`: ADR 0018, public demo mode: the third auth mode and its refusals, the signed session cookie, per-visitor sandboxes keyed by sandbox ID, the routes that are off, the caps and the budget arithmetic against the Workers Free limits.
+- `feat(auth)`: `SS_AUTH_MODE=demo` in `src/worker/config.ts`, accepted only with `SS_PUBLIC_DEMO=1`, a `SS_DEMO_SIGNING_KEY` of at least 32 bytes and the `DEMO_GATE` binding, and refused beside BigQuery, a live model, Workers AI or AI Gateway, runner or MCP tokens and Access (`publicDemoProblems` lists every reason); `SS_PUBLIC_DEMO=1` with another mode is refused. `src/worker/auth/demo-session.ts`: the `ss_demo` cookie (`v1.<payload>.<HMAC-SHA256>`, a key derived by HKDF, constant-time comparison, at most 4 hours, roles from `policy/` only). The caps and the budget constants live in `src/shared/demo/budget.ts`. A new vitest project, `worker-public-demo`.
 
 ## Next
 

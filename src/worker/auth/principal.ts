@@ -5,6 +5,8 @@
 import { localPrincipal, type Principal, principalFor, type Role } from "../../shared/policy/roles";
 import { type AppConfig, isLocalHost } from "../config";
 import { ACCESS_HEADER, AuthError, verifyAccessJwt } from "./access";
+import { agentInstanceName } from "./hmac";
+import { DEMO_COOKIE, readCookie as readDemoCookie, sessionPrincipal, verifySession } from "./demo-session";
 
 export const PRINCIPAL_HEADER = "x-ss-principal";
 export const DEV_COOKIE = "ss_dev";
@@ -20,6 +22,7 @@ function readCookie(request: Request, name: string): string | null {
 
 /** The Access assertion: the header in production; in dev mode on localhost also a bearer token or the dev cookie. */
 export function tokenFrom(request: Request, config: AppConfig): string | null {
+  if (config.authMode === "demo") return null;
   const header = request.headers.get(ACCESS_HEADER);
   if (header) return header;
   if (config.authMode !== "dev" || !isLocalHost(new URL(request.url))) return null;
@@ -47,6 +50,7 @@ export function mcpId(config: AppConfig): string {
 }
 
 export function bindRole(config: AppConfig, id: string): Principal | null {
+  if (config.authMode === "demo") return null;
   if (config.authMode === "dev") {
     const local = localPrincipal(id);
     if (local) return local;
@@ -61,6 +65,12 @@ export function bindRole(config: AppConfig, id: string): Principal | null {
 }
 
 export async function authenticate(request: Request, config: AppConfig): Promise<Principal> {
+  if (config.publicDemo) {
+    // the public demo signs visitors in itself (ADR 0018): no Access header, no dev token, only the session cookie
+    const v = await verifySession(config.publicDemo.signingKey, readDemoCookie(request, DEMO_COOKIE), Math.floor(Date.now() / 1000));
+    if (!v.ok) throw new AuthError(v.reason, `demo session ${v.reason}`);
+    return sessionPrincipal(v.session);
+  }
   const payload = await verifyAccessJwt(tokenFrom(request, config), config);
   const id = principalId(payload);
   const p = bindRole(config, id);
@@ -81,4 +91,15 @@ export function stripPrincipal(request: Request): Request {
   const headers = new Headers(request.headers);
   headers.delete(PRINCIPAL_HEADER);
   return new Request(request, { headers });
+}
+
+/** The WorkspaceAgent instance a principal acts in: the visitor's sandbox in the public demo, else the shared one. */
+export function workspaceName(p: Pick<Principal, "sandbox"> | null | undefined): string {
+  return p?.sandbox ? `sbx-${p.sandbox.id}` : "larkspur";
+}
+
+/** The AnalystAgent instance of a principal: "an_" + HMAC of the principal ID, and of the sandbox in the public demo,
+ * so two visitors acting as the same role never share a conversation. */
+export function analystName(config: AppConfig, p: Pick<Principal, "id" | "sandbox">): Promise<string> {
+  return agentInstanceName(config.hmacKey, p.sandbox ? `${p.sandbox.id}|${p.id}` : p.id);
 }

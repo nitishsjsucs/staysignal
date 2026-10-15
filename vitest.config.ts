@@ -7,6 +7,8 @@ import { generateDevSecrets } from "./scripts/dev-keys.ts";
 export default defineConfig(async () => {
   // Fresh dev keys per test run: only public JWKS ever exist on disk in the repository.
   const secrets = await generateDevSecrets();
+  // a fresh public-demo session key per run (48 random bytes), never written to disk
+  const demoKey = Buffer.from(crypto.getRandomValues(new Uint8Array(48))).toString("base64");
   return {
     test: {
       passWithNoTests: true,
@@ -39,6 +41,17 @@ export default defineConfig(async () => {
             include: ["test/worker-inline/**/*.test.ts"],
             fileParallelism: false,
             testTimeout: 60_000,
+          },
+        },
+        {
+          // the public demo (ADR 0018): signed sessions, a sandbox per visitor, the gate and the caps; no runner token,
+          // no live model. The empty runner token overrides the local .dev.vars, which the plugin also loads.
+          plugins: [agents(), cloudflareTest({ wrangler: { configPath: "./wrangler.jsonc" }, miniflare: { bindings: { ...secrets, SS_RUNNER_TOKEN: "", SS_AUTH_MODE: "demo", SS_PUBLIC_DEMO: "1", SS_DEMO_SIGNING_KEY: demoKey, SS_DATA_MODE: "fixtures", SS_LLM: "stub", SS_DEMO: "0" } } })],
+          test: {
+            name: "worker-public-demo",
+            include: ["test/worker-public-demo/**/*.test.ts"],
+            fileParallelism: false,
+            testTimeout: 90_000,
           },
         },
         {

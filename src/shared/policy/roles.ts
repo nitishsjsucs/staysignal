@@ -12,6 +12,9 @@ export interface Principal {
   assignedOrgs: string[];
   kind: "human" | "agent" | "service";
   display: string;
+  /** The public demo only (ADR 0018): the visitor's sandbox and its expiry (seconds since the epoch). Every piece of
+   * mutable state is keyed by it; it is set by the Worker after verifying the session cookie, never by a client. */
+  sandbox?: { id: string; exp: number };
 }
 
 export const ROLES = rolesJson.roles as Record<Role, { label: string; scopes: Scope[]; notes: string }>;

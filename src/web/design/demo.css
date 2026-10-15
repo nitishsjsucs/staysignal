@@ -33,6 +33,7 @@
 .demo-banner-text strong {
   font-variant-numeric: tabular-nums;
   font-weight: 650;
+  white-space: nowrap;
 }
 
 .demo-banner-actions {

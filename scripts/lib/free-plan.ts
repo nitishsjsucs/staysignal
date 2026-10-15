@@ -40,7 +40,12 @@ export function freePlanProblems(configText: string): string[] {
     if ((m.new_classes ?? []).length > 0) problems.push(`migration ${m.tag}: key-value Durable Object classes need Workers Paid`);
   }
   const vars = c.vars ?? {};
-  if (vars.SS_AUTH_MODE !== "access") problems.push("SS_AUTH_MODE must be access in a deployment (dev tokens are local only)");
+  const demo = vars.SS_AUTH_MODE === "demo";
+  if (vars.SS_AUTH_MODE !== "access" && !demo) problems.push("SS_AUTH_MODE must be access, or demo for the public demo, in a deployment (dev tokens are local only)");
+  if (demo) problems.push(...publicDemoProblems(c));
+  for (const w of c.workflows ?? []) {
+    if (c.name && !w.name.startsWith(`${c.name}-`)) problems.push(`Workflow ${w.name}: Workflow names are account-wide, so each starts with its Worker's name (${c.name}-)`);
+  }
   if (vars.SS_AUTH_MODE === "access" && (!vars.SS_ACCESS_TEAM_DOMAIN || !vars.SS_ACCESS_AUD)) problems.push("SS_ACCESS_TEAM_DOMAIN and SS_ACCESS_AUD are required with Access");
   if (vars.SS_LLM === "llama" || vars.SS_LLM === "mlx") problems.push(`SS_LLM ${vars.SS_LLM} is a local model server`);
   const model = vars.SS_AI_MODEL ?? "";
@@ -60,7 +65,29 @@ export function freePlanProblems(configText: string): string[] {
     if (!secrets.includes("SS_AIG_TOKEN")) problems.push("SS_LLM=workers-ai needs the SS_AIG_TOKEN secret declared in secrets.required");
   }
   for (const key of Object.keys(vars)) {
-    if (/SECRET|TOKEN|PRIVATE|MASTER_KEY|JWK/.test(key)) problems.push(`${key} looks like a secret; set it with wrangler secret, never in vars`);
+    if (/SECRET|TOKEN|PRIVATE|MASTER_KEY|SIGNING_KEY|JWK/.test(key)) problems.push(`${key} looks like a secret; set it with wrangler secret, never in vars`);
   }
   return problems;
+}
+
+/** The public demo's deployment rules (ADR 0018): a public workers.dev link with its own sign-in, the signing key as a
+ * secret, the gate, the committed fixtures with inline jobs, and none of the real data paths. */
+export function publicDemoProblems(c: DeployConfig): string[] {
+  const vars = c.vars ?? {};
+  const secrets = ((c as { secrets?: { required?: string[] } }).secrets?.required ?? []) as string[];
+  const out: string[] = [];
+  if (vars.SS_PUBLIC_DEMO !== "1") out.push("SS_AUTH_MODE=demo needs SS_PUBLIC_DEMO=1");
+  if (!secrets.includes("SS_DEMO_SIGNING_KEY")) out.push("the public demo needs the SS_DEMO_SIGNING_KEY secret declared in secrets.required");
+  if ((c as { workers_dev?: boolean }).workers_dev !== true) out.push("the public demo is served at its workers.dev link (workers_dev: true)");
+  if (vars.SS_DATA_MODE !== "fixtures") out.push("the public demo serves the committed fixtures (SS_DATA_MODE=fixtures)");
+  if (vars.SS_RUNNER !== "inline") out.push("the public demo has no runner (SS_RUNNER=inline)");
+  if (c.ai !== undefined) out.push("the public demo never calls Workers AI (no ai binding)");
+  if (vars.SS_LLM && vars.SS_LLM !== "recorded" && vars.SS_LLM !== "stub") out.push(`the public demo never calls a live model (SS_LLM=${vars.SS_LLM})`);
+  for (const key of Object.keys(vars)) {
+    if (/^SS_(AIG|AI_MODEL|AI_DAILY|GCP|BQ|ACCESS|ROLE_BINDINGS|RUNNER_TOKEN|MCP_TOKEN)/.test(key)) out.push(`the public demo never uses ${key}`);
+  }
+  for (const name of ["SS_AIG_TOKEN", "SS_GCP_SA_KEY", "SS_RUNNER_TOKEN", "SS_ROLE_BINDINGS", "SS_HMAC_MASTER_KEY"]) if (secrets.includes(name)) out.push(`the public demo never needs the secret ${name}`);
+  const gate = c.durable_objects?.bindings?.find((b) => b.name === "DEMO_GATE");
+  if (!gate || gate.class_name !== "DemoGate") out.push("the public demo needs the DEMO_GATE binding to DemoGate");
+  return out;
 }

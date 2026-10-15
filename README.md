@@ -168,6 +168,19 @@ npx mcp-remote https://<worker-host>/mcp --header "CF-Access-Client-Id:${CF_ACCE
 
 The service token's principal is `svc:` plus its common name, bound to a read role through `SS_ROLE_BINDINGS`. Production has not been deployed by the builders.
 
+## Public demo
+
+A public link anyone can click through, with no account: the landing page explains that the company and every number are synthetic and that the chat replays recorded model output, the visitor picks a role, and gets a private sandbox that resets after 4 hours (ADR 0018, [docs/adr/0018-public-demo-mode.md](docs/adr/0018-public-demo-mode.md)). It runs on Workers Free with no Access, no AI binding, no AI Gateway, no BigQuery, no runner and no MCP; the caps and the budget arithmetic are in the ADR. Builders deploy nothing; the repository owner runs these steps from the repository root:
+
+```sh
+npx wrangler whoami                       # signed in to the account that owns the workers.dev subdomain
+npm run deploy -- --demo --dry-run        # renders infra/cloudflare/wrangler.demo.template.jsonc, checks the Free-plan and demo rules, builds, wrangler deploy --dry-run with the 8 MiB check
+openssl rand -base64 48 | npx wrangler secret put SS_DEMO_SIGNING_KEY --name staysignal-demo   # the session key (48 random bytes); creates the Worker if it does not exist yet
+npm run deploy -- --demo --yes            # deploys the Worker staysignal-demo
+```
+
+The demo is then at `https://staysignal-demo.<workers.dev subdomain>.workers.dev`. To end every session at once, set a new key with the same `wrangler secret put` command; to take the demo down, `npx wrangler delete --name staysignal-demo`.
+
 ## Production setup
 
 Builders create, change and deploy nothing in either cloud; the repository owner runs these steps. `npm run doctor` (read-only: versions, `wrangler whoami`, the Workers AI catalog, `gcloud` and `bq` reads) reports which steps are still open, each with its fix. Path A, a fixtures-mode deployment, needs no Google resource; path B is the full BigQuery path and is not built yet.

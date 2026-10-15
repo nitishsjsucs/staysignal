@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { join } from "node:path";
-import { PRODUCTION_TEMPLATE, render, TEMPLATE } from "../../scripts/deploy.ts";
+import { DEMO_TEMPLATE, PRODUCTION_TEMPLATE, render, TEMPLATE } from "../../scripts/deploy.ts";
 import { freePlanProblems } from "../../scripts/lib/free-plan.ts";
 import { parseJsonc, stripJsonc } from "../../scripts/lib/jsonc.ts";
 
@@ -56,6 +56,40 @@ describe("Workers Free rules for deployments", () => {
     expect(problems({ vars: { ...base.vars, SS_GCP_PROJECT_ID: "" } })).toMatch(/SS_GCP_PROJECT_ID/);
     expect(problems({ secrets: { required: ["SS_AIG_TOKEN"] } })).toMatch(/SS_GCP_SA_KEY/);
     expect(problems({ vars: { ...base.vars, SS_RUNNER: "inline" } })).toMatch(/needs the runner/);
+  });
+
+  it("accept the public demo template: its own sign-in, the signing key as a secret, the gate, no real data path (ADR 0018)", () => {
+    for (const dry of [true, false]) {
+      const text = render(dry, "/nonexistent/state.json", DEMO_TEMPLATE);
+      expect(freePlanProblems(text)).toEqual([]);
+    }
+    const c = parseJsonc<{ name: string; workers_dev: boolean; ai?: unknown; vars: Record<string, string>; secrets: { required: string[] }; durable_objects: { bindings: { name: string; class_name: string }[] }; migrations: { tag: string; new_sqlite_classes: string[] }[]; workflows: { name: string }[] }>(render(true, "/nonexistent/state.json", DEMO_TEMPLATE));
+    expect(c.name).toBe("staysignal-demo");
+    expect(c.workers_dev).toBe(true);
+    expect(c.ai).toBeUndefined();
+    expect(c.vars).toEqual({ SS_AUTH_MODE: "demo", SS_PUBLIC_DEMO: "1", SS_DATA_MODE: "fixtures", SS_RUNNER: "inline", SS_LLM: "recorded", SS_DEMO: "1" });
+    expect(c.secrets.required).toEqual(["SS_DEMO_SIGNING_KEY"]);
+    expect(c.durable_objects.bindings.map((b) => b.class_name)).toEqual(["AnalystAgent", "WorkspaceAgent", "DemoGate"]);
+    expect(c.migrations.flatMap((m) => m.new_sqlite_classes)).toEqual(["AnalystAgent", "WorkspaceAgent", "DemoGate"]);
+    expect(c.workflows.map((w) => w.name)).toEqual(["staysignal-demo-routine"]);
+  });
+
+  it("refuse a public demo with Workers AI, BigQuery, Access, tokens, a missing key or gate, or a shared Workflow name", () => {
+    const base = JSON.parse(stripJsonc(render(true, "/nonexistent/state.json", DEMO_TEMPLATE))) as { vars: Record<string, string>; secrets: { required: string[] }; durable_objects: { bindings: unknown[] } } & Record<string, unknown>;
+    const problems = (patch: Record<string, unknown>) => freePlanProblems(JSON.stringify({ ...base, ...patch })).join(" ");
+    expect(problems({ ai: { binding: "AI" } })).toMatch(/never calls Workers AI/);
+    expect(problems({ vars: { ...base.vars, SS_LLM: "workers-ai" } })).toMatch(/never calls a live model/);
+    expect(problems({ vars: { ...base.vars, SS_AIG_GATEWAY_ID: "staysignal" } })).toMatch(/never uses SS_AIG_GATEWAY_ID/);
+    expect(problems({ vars: { ...base.vars, SS_DATA_MODE: "bigquery", SS_GCP_PROJECT_ID: "p" } })).toMatch(/committed fixtures/);
+    expect(problems({ vars: { ...base.vars, SS_ACCESS_AUD: "a" } })).toMatch(/never uses SS_ACCESS_AUD/);
+    expect(problems({ vars: { ...base.vars, SS_RUNNER: "external" } })).toMatch(/no runner/);
+    expect(problems({ vars: { ...base.vars, SS_PUBLIC_DEMO: "0" } })).toMatch(/SS_PUBLIC_DEMO=1/);
+    expect(problems({ vars: { ...base.vars, SS_DEMO_SIGNING_KEY: "x" } })).toMatch(/looks like a secret/);
+    expect(problems({ secrets: { required: [] } })).toMatch(/SS_DEMO_SIGNING_KEY/);
+    expect(problems({ secrets: { required: ["SS_DEMO_SIGNING_KEY", "SS_AIG_TOKEN"] } })).toMatch(/never needs the secret SS_AIG_TOKEN/);
+    expect(problems({ durable_objects: { bindings: [{ name: "ANALYST_AGENT", class_name: "AnalystAgent" }, { name: "WORKSPACE_AGENT", class_name: "WorkspaceAgent" }] } })).toMatch(/DEMO_GATE/);
+    expect(problems({ workers_dev: false })).toMatch(/workers.dev/);
+    expect(problems({ workflows: [{ name: "staysignal-routine", binding: "ROUTINE_WORKFLOW", class_name: "RoutineWorkflow" }] })).toMatch(/account-wide/);
   });
 
   it("render placeholders only in a dry run and keep URLs inside strings", () => {

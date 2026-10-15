@@ -1,0 +1,44 @@
+{
+  // The public demo (ADR 0018): the built app on Workers Free at a public workers.dev link, with no Cloudflare Access.
+  // Visitors sign in at the landing page with one of the seven synthetic principals and get a private sandbox (a
+  // WorkspaceAgent and AnalystAgents keyed by the sandbox, deleted at its expiry) behind a signed session cookie; the
+  // DemoGate Durable Object caps new and live sandboxes. The committed API fixtures are the warehouse, engine jobs
+  // complete inline from the committed job fixtures, and the chat replays recorded Qwen3.6-27B turns or the labeled
+  // stub. No AI binding, no AI Gateway, no BigQuery, no runner, no MCP. Rendered by `npm run deploy -- --demo`; the
+  // rendered file is gitignored. Synthetic data only.
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "staysignal-demo",
+  "main": "../../src/worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/agents/*", "/agents-ws/*", "/internal/*", "/dev/*", "/demo/*", "/mcp"]
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "ANALYST_AGENT", "class_name": "AnalystAgent" },
+      { "name": "WORKSPACE_AGENT", "class_name": "WorkspaceAgent" },
+      { "name": "DEMO_GATE", "class_name": "DemoGate" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["AnalystAgent", "WorkspaceAgent"] },
+    { "tag": "v2", "new_sqlite_classes": ["DemoGate"] }
+  ],
+  // Workflow names are account-wide: this one is the demo's own, apart from the fixtures and production deployments'.
+  "workflows": [{ "name": "staysignal-demo-routine", "binding": "ROUTINE_WORKFLOW", "class_name": "RoutineWorkflow" }],
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  // The one secret; the owner sets it with `npx wrangler secret put SS_DEMO_SIGNING_KEY --name staysignal-demo`.
+  "secrets": { "required": ["SS_DEMO_SIGNING_KEY"] },
+  "vars": {
+    "SS_AUTH_MODE": "demo",
+    "SS_PUBLIC_DEMO": "1",
+    "SS_DATA_MODE": "fixtures",
+    "SS_RUNNER": "inline",
+    "SS_LLM": "recorded",
+    "SS_DEMO": "1"
+  }
+}

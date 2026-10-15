@@ -7,7 +7,9 @@ import { defineConfig } from "vite";
 // SS_WRANGLER_CONFIG points the Cloudflare plugin at a rendered deployment config (scripts/deploy.ts); the default is
 // wrangler.jsonc, the local and test configuration.
 export default defineConfig({
-  plugins: [agents(), react(), cloudflare(process.env.SS_WRANGLER_CONFIG ? { configPath: process.env.SS_WRANGLER_CONFIG } : {})],
+  // The Worker's Vite environment is always "staysignal" (the public demo's Worker is named staysignal-demo), so the
+  // unminified build below and the output in dist/staysignal apply to every deployment config.
+  plugins: [agents(), react(), cloudflare({ viteEnvironment: { name: "staysignal" }, ...(process.env.SS_WRANGLER_CONFIG ? { configPath: process.env.SS_WRANGLER_CONFIG } : {}) })],
   server: { host: "127.0.0.1", port: 5175, strictPort: true },
   environments: {
     // Unminified Worker bundle keeps class names; Agent workflow callbacks route by constructor name.

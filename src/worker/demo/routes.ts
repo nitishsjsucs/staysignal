@@ -8,7 +8,8 @@ import { CAPS, UNITS } from "../../shared/demo/budget";
 import { LOCAL_PRINCIPALS } from "../../shared/policy/roles";
 import { workspace } from "../agents/workspace-port";
 import type { AppEnv } from "../app";
-import { clearSessionCookie, clientKey, DEFAULT_DEMO_PRINCIPAL, DEMO_COOKIE, isDemoPrincipal, issueSession, MAX_SESSION_SECONDS, readCookie, sessionCookie, verifySession } from "../auth/demo-session";
+import { clearSessionCookie, clientKey, clientPrefix, DEFAULT_DEMO_PRINCIPAL, DEMO_COOKIE, demoKeyId, isDemoPrincipal, issueSession, MAX_SESSION_SECONDS, readCookie, sessionCookie, verifySession } from "../auth/demo-session";
+import { cachedRefusal, rememberRefusal, rememberRetired } from "./refusals";
 import { demoGate, type GateVerdict } from "./gate";
 import type { AdmitVerdict } from "./meter";
 import { BUSY_MESSAGE_TEXT } from "./messages";
@@ -102,10 +103,16 @@ export function admitResponse(c: C, v: Exclude<AdmitVerdict, { ok: true }>): Res
   return c.json({ error: "busy", code: v.code, message: BUSY_MESSAGE, retry_after_seconds: v.retryAfterSeconds }, 429);
 }
 
-/** Spends the request's units in the visitor's sandbox; a response when it may not proceed. */
+/** Spends the request's units in the visitor's sandbox; a response when it may not proceed. A sandbox already known to
+ * refuse (spent, ended, rate limited) is refused without a Durable Object request (src/worker/demo/refusals.ts). */
 export async function admitRequest(c: C, units = unitsFor(c.req.method, c.req.path)): Promise<Response | null> {
+  const sandbox = c.var.principal.sandbox;
+  const cached = sandbox ? cachedRefusal(sandbox.id) : null;
+  if (cached) return admitResponse(c, cached);
   const v = await (await c.var.ws()).admit(units);
-  return v.ok ? null : admitResponse(c, v);
+  if (v.ok) return null;
+  if (sandbox) rememberRefusal(sandbox.id, v, sandbox.exp);
+  return admitResponse(c, v);
 }
 
 function busy(c: C, v: Exclude<GateVerdict, { ok: true }>): Response {
@@ -117,8 +124,9 @@ const now = () => Math.floor(Date.now() / 1000);
 
 async function startSandbox(c: C, principal: string): Promise<Response> {
   const key = c.var.config.publicDemo!.signingKey;
-  const client = await clientKey(key, c.req.header("CF-Connecting-IP") ?? "local");
-  const v = await demoGate(c.env).admit(client);
+  // an IPv6 client counts by its /64 (one subscriber's network), so cycling addresses inside it gains nothing
+  const client = await clientKey(key, clientPrefix(c.req.header("CF-Connecting-IP") ?? "local"));
+  const v = await demoGate(c.env).admit(client, Date.now(), undefined, await demoKeyId(key));
   if (!v.ok) return busy(c, v);
   await (await workspace(c.env, { sandbox: { id: v.sandbox, exp: v.exp } })).initSandbox(v.exp);
   const t = now();
@@ -181,6 +189,7 @@ export function demoRoutes(app: Hono<AppEnv>): void {
     if (started.status !== 200) return started;
     await (await workspace(c.env, { sandbox: { id: v.session.sandbox, exp: v.session.exp } })).retireSandbox();
     await demoGate(c.env).release(v.session.sandbox);
+    rememberRetired(v.session.sandbox, v.session.exp);
     return started;
   });
 }

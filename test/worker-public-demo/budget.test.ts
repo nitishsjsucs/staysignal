@@ -5,7 +5,7 @@
 import { env, exports } from "cloudflare:workers";
 import { createExecutionContext, runInDurableObject, waitOnExecutionContext } from "cloudflare:test";
 import { getAgentByName } from "agents";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { CAPS, MEASURED, UNITS } from "../../src/shared/demo/budget";
 import { localPrincipal } from "../../src/shared/policy/roles";
 import { buildApp } from "../../src/worker/app";
@@ -14,7 +14,7 @@ import { analystName } from "../../src/worker/auth/principal";
 import { parseConfig } from "../../src/worker/config";
 import { demoGate } from "../../src/worker/demo/gate";
 import { unitsFor } from "../../src/worker/demo/routes";
-import { DEMO_BASE, P, resetGate } from "../helpers/demo";
+import { DEMO_BASE, P, resetGate, sqlMeter } from "../helpers/demo";
 
 let calls = 0;
 function countingStub<T extends object>(stub: T): T {
@@ -46,28 +46,15 @@ const counted = Object.create(env, {
   DEMO_GATE: { value: countingNamespace(env.DEMO_GATE) },
 }) as Env;
 
-/** Meters every SQL statement an object runs from now on: rowsWritten of each cursor, summed when read. */
-async function meter(stub: DurableObjectStub): Promise<() => number> {
-  const cursors: { rowsWritten: number }[] = [];
-  await runInDurableObject(stub, (_i, state) => {
-    const sql = state.storage.sql as unknown as { exec: (...a: unknown[]) => { rowsWritten: number } };
-    const exec = sql.exec.bind(sql);
-    sql.exec = (...a: unknown[]) => {
-      const c = exec(...a);
-      cursors.push(c);
-      return c;
-    };
-  });
-  return () => cursors.reduce((s, c) => s + c.rowsWritten, 0);
-}
-
 const app = buildApp();
 const key = () => parseConfig(env).publicDemo!.signingKey;
 let cookieFor: (principal: string) => Promise<string>;
 let sandbox = { id: "", exp: 0 };
 let rows: () => number = () => 0;
+let rowsRead: () => number = () => 0;
 let seedRows = 0;
-const perUnit: { path: string; units: number; doCalls: number; rows: number }[] = [];
+let seedRead = 0;
+const perUnit: { path: string; units: number; doCalls: number; rows: number; read: number; ms: number }[] = [];
 /** While the routine runs in the background its writes land between any two requests, so requests made then count
  * their units toward the routine's window instead of their own rows. */
 let routineWindow: { units: number } | null = null;
@@ -79,12 +66,15 @@ async function call(path: string, as: string, body?: unknown): Promise<Response>
   const ctx = createExecutionContext();
   const c0 = calls;
   const r0 = rows();
+  const q0 = rowsRead();
+  const t0 = Date.now();
   const res = await app.fetch(new Request(`${DEMO_BASE}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) }), counted, ctx);
   await waitOnExecutionContext(ctx);
   await res.clone().text();
+  const ms = Date.now() - t0;
   const units = unitsFor(method, new URL(`${DEMO_BASE}${path}`).pathname);
   if (routineWindow) routineWindow.units += units;
-  perUnit.push({ path, units, doCalls: calls - c0, rows: routineWindow ? 0 : rows() - r0 });
+  perUnit.push({ path, units, doCalls: calls - c0, rows: routineWindow ? 0 : rows() - r0, read: routineWindow ? 0 : rowsRead() - q0, ms });
   return res;
 }
 const get = async <T>(path: string, as: string = P.lead): Promise<T> => (await (await call(path, as)).json()) as T;
@@ -105,17 +95,22 @@ beforeAll(async () => {
   if (!v.ok) throw new Error("gate refused");
   sandbox = { id: v.sandbox, exp: v.exp };
   const id = env.WORKSPACE_AGENT.idFromName(`sbx-${sandbox.id}`);
-  rows = await meter(env.WORKSPACE_AGENT.get(id));
+  const m = await sqlMeter(env.WORKSPACE_AGENT.get(id));
+  rows = m.written;
+  rowsRead = m.read;
   const ws = await getAgentByName(env.WORKSPACE_AGENT, `sbx-${sandbox.id}`);
   await ws.initSandbox(sandbox.exp);
   seedRows = rows();
+  seedRead = rowsRead();
   cookieFor = async (principal) => `ss_demo=${await issueSession(key(), { principal, sandbox: sandbox.id, iat: Math.floor(Date.now() / 1000), exp: sandbox.exp })}`;
 });
 
 describe("what one sandbox costs", () => {
   it("seeds within the rows the budget assumes", () => {
+    console.log(`[budget] seed: ${seedRows} rows written, ${seedRead} rows read`);
     expect(seedRows).toBeGreaterThan(0);
     expect(seedRows).toBeLessThanOrEqual(MEASURED.rowsWrittenSeed);
+    expect(seedRead).toBeLessThanOrEqual(MEASURED.rowsReadSeed);
   });
 
   it("stays within the per-unit bounds over the whole guided tour", async () => {
@@ -129,17 +124,21 @@ describe("what one sandbox costs", () => {
     // Data health: the payroll simulation, held, investigated, then the data engineer approves the mapping fix
     expect((await call("/api/quality/checks", P.analyst)).status).toBe(200);
     const r0 = rows();
+    const q0 = rowsRead();
+    const t0 = Date.now();
     routineWindow = { units: 0 };
     const started = await post<{ routine_id: string }>("/api/demo/arrival", {}, P.analyst);
     expect(started.routine_id).toBe("RTN-0001");
     // the arrival paid for a write; starting the routine spent the rest of its units inside the sandbox
     routineWindow.units += UNITS.routine - UNITS.write;
-    perUnit.push({ path: "routine (its workflow steps)", units: UNITS.routine - UNITS.write, doCalls: 0, rows: 0 });
+    perUnit.push({ path: "routine (its workflow steps)", units: UNITS.routine - UNITS.write, doCalls: 0, rows: 0, read: 0, ms: 0 });
     await until(async () => ((await get<{ proposals: { status: string }[] }>("/api/mappings/payroll", P.dataEng)).proposals ?? []).some((p) => p.status === "pending"));
     const mapping = await get<{ proposals: { subject_id: string }[] }>("/api/mappings/payroll", P.dataEng);
     expect((await post<{ ok: boolean }>(`/api/approvals/${mapping.proposals[0]!.subject_id}/approve`, { reason: "ANN means annual" }, P.dataEng)).ok).toBe(true);
     await until(async () => ((await get<{ routines: { status: string }[] }>("/api/routines", P.analyst)).routines[0]?.status ?? "") === "done");
     const routineRows = rows() - r0;
+    const routineRead = rowsRead() - q0;
+    const routineMs = Date.now() - t0;
     const routineUnits = routineWindow.units;
     routineWindow = null;
     for (const path of ["/api/quality/checks", "/api/runs", "/api/routines/RTN-0001", "/api/investigations"]) await call(path, P.analyst);
@@ -159,10 +158,40 @@ describe("what one sandbox costs", () => {
     // messages, the stream buffer and the trace)
     const p = { ...localPrincipal(P.lead)!, sandbox };
     const analystId = env.ANALYST_AGENT.idFromName(await analystName(parseConfig(env), p));
-    const analystRows = await meter(env.ANALYST_AGENT.get(analystId));
-    const upgrade = await exports.default.fetch(new Request(`${DEMO_BASE}/agents-ws/analyst`, { headers: { Upgrade: "websocket", Cookie: await cookieFor(P.lead) } }));
-    const socket = upgrade.webSocket!;
-    socket.accept();
+    const upgradeAnalyst = async () => {
+      const r = await exports.default.fetch(new Request(`${DEMO_BASE}/agents-ws/analyst`, { headers: { Upgrade: "websocket", Cookie: await cookieFor(P.lead) } }));
+      const ws = r.webSocket!;
+      ws.accept();
+      return ws;
+    };
+    // a connection that spends its whole frame allowance, of the harmless kinds the guard lets through (20 frames to a
+    // request), in two minutes' worth (the per-minute cap is 20). The upgrade goes through exports.default, so its
+    // requests are added by hand: the workspace's initialization and admission, the conversation's initialization and
+    // the forwarded upgrade.
+    const u0 = calls;
+    const ut0 = Date.now();
+    const spare = await upgradeAnalyst();
+    // the upgrade's own time; the frames below are processed in a few milliseconds each, and an object idle between
+    // them may hibernate, which Workers Free does not bill
+    const upgradeMs = Date.now() - ut0;
+    const analystMeter = await sqlMeter(env.ANALYST_AGENT.get(analystId));
+    const analystRows = analystMeter.written;
+    const analystRead = analystMeter.read;
+    const f0 = rows() + analystRows();
+    const fr0 = rowsRead() + analystRead();
+    const realNow = Date.now.bind(Date);
+    for (let i = 0; i < CAPS.wsFramesPerConnection; i++) {
+      if (i === CAPS.wsFramesPerMinute) vi.spyOn(Date, "now").mockImplementation(() => realNow() + 61_000);
+      spare.send(JSON.stringify({ type: i % 2 ? "cf_agent_chat_request_cancel" : "cf_agent_stream_resume_ack", id: `x${i}` }));
+      await new Promise((r) => setTimeout(r, 5));
+    }
+    await new Promise((r) => setTimeout(r, 300));
+    vi.restoreAllMocks();
+    spare.close();
+    perUnit.push({ path: "socket: upgrade and its frames", units: UNITS.socket, doCalls: calls - u0 + 4 + Math.ceil(CAPS.wsFramesPerConnection / 20), rows: rows() + analystRows() - f0, read: rowsRead() + analystRead() - fr0, ms: upgradeMs });
+
+    // the dock's connection for the chat turns
+    const socket = await upgradeAnalyst();
     const done = new Map<string, () => void>();
     socket.addEventListener("message", (e) => {
       const m = JSON.parse(String(e.data)) as { type?: string; id?: string; done?: boolean };
@@ -176,13 +205,15 @@ describe("what one sandbox costs", () => {
     for (const [i, q] of turns.entries()) {
       const c0 = calls;
       const w0 = rows() + analystRows();
+      const rd0 = rowsRead() + analystRead();
+      const tt0 = Date.now();
       history.push({ id: `u${i}`, role: "user", parts: [{ type: "text", text: q }] });
       const finished = new Promise<void>((resolve) => done.set(`req${i}`, resolve));
       socket.send(JSON.stringify({ type: "cf_agent_use_chat_request", id: `req${i}`, init: { method: "POST", body: JSON.stringify({ messages: history }) } }));
       await finished;
       await new Promise((r) => setTimeout(r, 200));
       // the frame itself counts one twentieth of a request; count it as one
-      perUnit.push({ path: `chat: ${q}`, units: UNITS.chatTurn, doCalls: calls - c0 + 1, rows: rows() + analystRows() - w0 });
+      perUnit.push({ path: `chat: ${q}`, units: UNITS.chatTurn, doCalls: calls - c0 + 1, rows: rows() + analystRows() - w0, read: rowsRead() + analystRead() - rd0, ms: Date.now() - tt0 });
     }
     socket.close();
     console.log(`[budget] chat turns: ${perUnit.filter((x) => x.path.startsWith("chat:")).map((x) => `${x.rows} rows, ${x.doCalls} DO calls`).join("; ")}`);
@@ -190,11 +221,18 @@ describe("what one sandbox costs", () => {
     const worst = (f: (x: (typeof perUnit)[number]) => number) => perUnit.reduce((m, x) => (f(x) > f(m) ? x : m), perUnit[0]!);
     const doWorst = worst((x) => x.doCalls / x.units);
     const rowWorst = worst((x) => x.rows / x.units);
+    const readWorst = worst((x) => x.read / x.units);
+    const msWorst = worst((x) => x.ms / x.units);
     console.log(`[budget] ${perUnit.length} requests; seed ${seedRows} rows; routine ${routineRows} rows; worst DO calls per unit ${(doWorst.doCalls / doWorst.units).toFixed(2)} (${doWorst.path}); worst rows per unit ${(rowWorst.rows / rowWorst.units).toFixed(2)} (${rowWorst.path})`);
     expect(doWorst.doCalls / doWorst.units, doWorst.path).toBeLessThanOrEqual(MEASURED.doRequestsPerUnit);
     expect(rowWorst.rows / rowWorst.units, rowWorst.path).toBeLessThanOrEqual(MEASURED.rowsWrittenPerUnit);
     console.log(`[budget] the routine window: ${routineRows} rows for ${routineUnits} units`);
     expect(routineRows / routineUnits).toBeLessThanOrEqual(MEASURED.rowsWrittenPerUnit);
+    console.log(`[budget] rows read: worst ${(readWorst.read / readWorst.units).toFixed(1)} per unit (${readWorst.path}), the routine window ${(routineRead / routineUnits).toFixed(1)}; wall-clock: worst ${(msWorst.ms / msWorst.units).toFixed(1)} ms per unit (${msWorst.path}), the routine window ${(routineMs / routineUnits).toFixed(1)}`);
+    expect(readWorst.read / readWorst.units, readWorst.path).toBeLessThanOrEqual(MEASURED.rowsReadPerUnit);
+    expect(routineRead / routineUnits).toBeLessThanOrEqual(MEASURED.rowsReadPerUnit);
+    expect(msWorst.ms / msWorst.units, msWorst.path).toBeLessThanOrEqual(MEASURED.activeMsPerUnit);
+    expect(routineMs / routineUnits).toBeLessThanOrEqual(MEASURED.activeMsPerUnit);
     // the whole tour fits a sandbox's units with room to spare
     const spent = perUnit.reduce((s, x) => s + x.units, 0);
     console.log(`[budget] the tour spent ${spent} of ${CAPS.unitsPerSandbox} units`);

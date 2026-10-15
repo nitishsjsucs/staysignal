@@ -9,6 +9,8 @@ import { AuthError } from "./auth/access";
 import { analystName, authenticate, stripPrincipal, withPrincipal, workspaceName } from "./auth/principal";
 import { type AppConfig, parseConfig } from "./config";
 import { admitJson } from "./demo/admit";
+import { cachedRefusal, rememberRefusal } from "./demo/refusals";
+import { UNITS } from "../shared/demo/budget";
 import { handleMcp, MCP_ROUTE } from "./mcp/server";
 
 export { AnalystAgent } from "./agents/analyst-agent";
@@ -19,6 +21,9 @@ export { DemoGate } from "./demo/gate";
 const app = buildApp();
 
 async function routeAgent(request: Request, env: Env, cfg: AppConfig, kind: "analyst" | "workspace"): Promise<Response> {
+  // the public demo forwards WebSocket upgrades only: the app never reads an agent over HTTP there, and a plain request
+  // would create an object that no connection ever schedules for deletion (ADR 0018)
+  if (cfg.publicDemo && request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return Response.json({ error: "not found" }, { status: 404 });
   let principal;
   try {
     principal = await authenticate(request, cfg);
@@ -26,11 +31,20 @@ async function routeAgent(request: Request, env: Env, cfg: AppConfig, kind: "ana
     return Response.json({ error: "unauthenticated", reason: e instanceof AuthError ? e.reason : "invalid" }, { status: 401 });
   }
   const forwarded = withPrincipal(stripPrincipal(request), principal);
+  const sandbox = cfg.publicDemo ? principal.sandbox : undefined;
+  if (sandbox) {
+    // a sandbox already known to refuse is refused here, with no Durable Object request (ADR 0018)
+    const cached = cachedRefusal(sandbox.id);
+    if (cached) return admitJson(cached);
+  }
   const ws = kind === "workspace" || cfg.publicDemo ? await getAgentByName(env.WORKSPACE_AGENT, workspaceName(principal)) : null;
-  if (cfg.publicDemo && ws) {
-    // an upgrade spends one unit of the visitor's sandbox (ADR 0018)
-    const v = await ws.admit(1);
-    if (!v.ok) return admitJson(v);
+  if (sandbox && ws) {
+    // an upgrade spends the sandbox's units for a connection; its frames are bounded per connection (ADR 0018)
+    const v = await ws.admit(UNITS.socket);
+    if (!v.ok) {
+      rememberRefusal(sandbox.id, v, sandbox.exp);
+      return admitJson(v);
+    }
   }
   if (kind === "workspace" && ws) return ws.fetch(forwarded);
   return (await getAgentByName(env.ANALYST_AGENT, await analystName(cfg, principal))).fetch(forwarded);

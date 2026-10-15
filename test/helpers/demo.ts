@@ -68,3 +68,51 @@ export const P = {
   dataEng: "data-eng@larkspur.example",
   auditor: "audit@larkspur.example",
 } as const;
+
+/** An env whose Durable Object namespaces count every call made on their stubs (each is a Durable Object request on
+ * Workers Free). `calls()` reads the count. */
+export function countingEnv(base: Env = env): { env: Env; calls: () => number } {
+  let n = 0;
+  const stub = <T extends object>(s: T): T =>
+    new Proxy(s, {
+      get(t, prop) {
+        const v = Reflect.get(t, prop) as unknown;
+        if (typeof v === "function" && typeof prop === "string" && prop !== "then") {
+          return (...args: unknown[]) => {
+            n++;
+            return Reflect.apply(v as (...a: unknown[]) => unknown, t, args);
+          };
+        }
+        return v;
+      },
+    });
+  const ns = <T extends DurableObjectNamespace>(x: T): T =>
+    new Proxy(x, {
+      get(t, prop) {
+        const v = Reflect.get(t, prop) as unknown;
+        if (prop === "get") return (id: DurableObjectId, o?: unknown) => stub(t.get(id, o as never));
+        return typeof v === "function" ? (v as (...a: unknown[]) => unknown).bind(t) : v;
+      },
+    });
+  const counted = Object.create(base, {
+    WORKSPACE_AGENT: { value: ns(base.WORKSPACE_AGENT) },
+    ANALYST_AGENT: { value: ns(base.ANALYST_AGENT) },
+    DEMO_GATE: { value: ns(base.DEMO_GATE) },
+  }) as Env;
+  return { env: counted, calls: () => n };
+}
+
+/** Meters every SQL statement an object runs from now on (rows written and read of each cursor, summed when read). */
+export async function sqlMeter(stub: DurableObjectStub): Promise<{ written: () => number; read: () => number }> {
+  const cursors: { rowsWritten: number; rowsRead: number }[] = [];
+  await runInDurableObject(stub, (_i, state) => {
+    const sql = state.storage.sql as unknown as { exec: (...a: unknown[]) => { rowsWritten: number; rowsRead: number } };
+    const exec = sql.exec.bind(sql);
+    sql.exec = (...a: unknown[]) => {
+      const c = exec(...a);
+      cursors.push(c);
+      return c;
+    };
+  });
+  return { written: () => cursors.reduce((s, c) => s + c.rowsWritten, 0), read: () => cursors.reduce((s, c) => s + c.rowsRead, 0) };
+}

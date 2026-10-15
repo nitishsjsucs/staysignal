@@ -93,8 +93,9 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
-    // the public demo bounds every WebSocket frame and the frames per minute of each connection (ADR 0018)
-    if ((env as unknown as Record<string, string | undefined>).SS_AUTH_MODE === "demo") guardFrames(this);
+    // the public demo bounds every WebSocket frame and the frames of each connection (ADR 0018); a sandbox's browser
+    // connections only receive state, so every frame they send (state, RPC, anything) is dropped before the SDK sees it
+    if ((env as unknown as Record<string, string | undefined>).SS_AUTH_MODE === "demo") guardFrames(this, { filter: (_c, message) => (this.sandboxed ? null : message) });
   }
 
   override async onStart(): Promise<void> {
@@ -191,8 +192,15 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
 
   override shouldConnectionBeReadonly(_c: Connection, ctx: ConnectionContext): boolean {
     const p = principalFromHeader(ctx.request);
-    // a sandbox's connections only receive state: every action goes through the admitted HTTP API
+    // a sandbox's connections only receive state: every action goes through the admitted HTTP API (the frame guard
+    // drops their frames, and each callable refuses in a sandbox as well, since read-only blocks only setState)
     return !p || isReadOnly(p) || this.sandboxed;
+  }
+
+  /** A public-demo reason longer than CAPS.maxReasonChars, refused before anything is written (ADR 0018). */
+  private reasonTooLong(reason: string | null | undefined): ActionOutcome<never> | null {
+    if (!this.sandboxed || typeof reason !== "string" || reason.length <= CAPS.maxReasonChars) return null;
+    return { ok: false, code: "REASON_TOO_LONG", message: `Reasons are limited to ${CAPS.maxReasonChars} characters in the public demo.`, auditHead: this.state.auditHead };
   }
 
   override onConnect(connection: Connection, ctx: ConnectionContext): void {
@@ -711,6 +719,8 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
   }
 
   approve(p: Principal, subjectId: string, reason: string | null): ActionOutcome<{ subject_id: string; task_ids?: string[]; action_seq: number }> {
+    const long = this.reasonTooLong(reason);
+    if (long) return long;
     const a = this.getApproval(subjectId);
     if (!a) return { ok: false, code: "NOT_FOUND", message: "No such subject.", auditHead: this.state.auditHead };
     const refusal = approvalRefusal(p, a, this.currentSubjectHash(a));
@@ -757,6 +767,8 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
   }
 
   reject(p: Principal, subjectId: string, reason: string | null): ActionOutcome<{ subject_id: string; action_seq: number }> {
+    const long = this.reasonTooLong(reason);
+    if (long) return long;
     const a = this.getApproval(subjectId);
     if (!a) return { ok: false, code: "NOT_FOUND", message: "No such subject.", auditHead: this.state.auditHead };
     const refusal = approvalRefusal(p, a, this.currentSubjectHash(a));
@@ -780,6 +792,8 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
 
   /** Rollback adds a new action that reverses an earlier one; nothing is deleted (SPEC 14.8). */
   rollback(p: Principal, seq: number, reason: string): ActionOutcome<{ action_seq: number; reverses_seq: number }> {
+    const long = this.reasonTooLong(reason);
+    if (long) return long;
     if (!hasScope(p, "rollback")) return { ok: false, code: "WRONG_ROLE", message: APPROVAL_MESSAGES.WRONG_ROLE, auditHead: this.state.auditHead };
     if (!reason || !reason.trim()) return { ok: false, code: "REASON_REQUIRED", message: "A rollback needs a reason.", auditHead: this.state.auditHead };
     const target = this.sql<ActionRow>`SELECT * FROM action_log WHERE seq = ${seq}`[0];
@@ -1008,7 +1022,10 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
 
   // ---------- callables for browser connections (principal from the verified connect header) ----------
 
+  /** The principal of the calling browser connection. A sandbox's connections never act over RPC: the public demo's
+   * actions go through the admitted HTTP API, which spends the sandbox's units and bounds the reasons. */
   private callerPrincipal(): Principal {
+    if (this.sandboxed) throw new Error("not available in the public demo: actions go through the HTTP API");
     const { connection } = getCurrentAgent();
     const p = (connection?.state as { principal?: Principal } | null | undefined)?.principal;
     if (!p) throw new Error("unauthenticated connection");

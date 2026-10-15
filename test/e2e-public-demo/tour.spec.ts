@@ -26,7 +26,7 @@ function meter(page: Page) {
   });
   page.on("websocket", (ws) => {
     m.sockets++;
-    m.units += UNITS.read;
+    m.units += UNITS.socket;
     ws.on("framesent", (f) => {
       if (typeof f.payload === "string" && f.payload.includes("cf_agent_use_chat_request")) m.turns++;
     });

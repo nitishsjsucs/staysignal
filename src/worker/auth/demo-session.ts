@@ -163,3 +163,50 @@ export async function clientKey(signingKeyB64: string, address: string): Promise
   const mac = new Uint8Array(await crypto.subtle.sign("HMAC", await k, enc.encode(address)));
   return Array.from(mac.slice(0, 8), (b) => b.toString(16).padStart(2, "0")).join("");
 }
+
+/** The part of a client address the gate counts: an IPv6 address by its /64 prefix (one subscriber's network, which
+ * one client can fill with addresses), an IPv4 address (or an IPv4-mapped IPv6 one) whole. Anything unparseable is
+ * counted as given. */
+export function clientPrefix(address: string): string {
+  const a = address.trim().toLowerCase().replace(/%.*$/, "");
+  if (!a.includes(":")) return a;
+  const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(a);
+  if (mapped) return mapped[1]!;
+  const halves = a.split("::");
+  if (halves.length > 2) return a;
+  const part = (s: string | undefined): string[] => (s ? s.split(":") : []);
+  let head = part(halves[0]);
+  let tail = part(halves[1]);
+  // an embedded IPv4 tail ("::1.2.3.4") is two groups
+  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec((halves.length === 2 ? tail : head).at(-1) ?? "");
+  if (v4) {
+    const [b0, b1, b2, b3] = v4.slice(1).map(Number) as [number, number, number, number];
+    const groups = [((b0 << 8) | b1).toString(16), ((b2 << 8) | b3).toString(16)];
+    if (halves.length === 2) tail = [...tail.slice(0, -1), ...groups];
+    else head = [...head.slice(0, -1), ...groups];
+  }
+  const missing = 8 - head.length - tail.length;
+  if (halves.length === 1 ? missing !== 0 : missing < 1) return a;
+  const groups = [...head, ...Array<string>(halves.length === 2 ? missing : 0).fill("0"), ...tail];
+  if (groups.length !== 8 || groups.some((g) => !/^[0-9a-f]{1,4}$/.test(g))) return a;
+  return `${groups
+    .slice(0, 4)
+    .map((g) => parseInt(g, 16).toString(16))
+    .join(":")}::/64`;
+}
+
+const keyIds = new Map<string, Promise<string>>();
+
+/** A fingerprint of the signing key (HKDF with its own info, 16 hex characters). The gate counts live and daily
+ * sandboxes for the current key only, so rotating the key frees the gate at once instead of after 4 hours. */
+export function demoKeyId(signingKeyB64: string): Promise<string> {
+  let k = keyIds.get(signingKeyB64);
+  if (!k) {
+    k = (async () => {
+      const raw = await hkdfSha256(base64ToBytes(signingKeyB64), enc.encode("staysignal/demo-key-id"), enc.encode("ss-demo-kid:v1"), 8);
+      return Array.from(raw, (b) => b.toString(16).padStart(2, "0")).join("");
+    })();
+    keyIds.set(signingKeyB64, k);
+  }
+  return k;
+}

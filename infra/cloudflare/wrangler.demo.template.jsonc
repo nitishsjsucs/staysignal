@@ -30,7 +30,8 @@
   ],
   // Workflow names are account-wide: this one is the demo's own, apart from the fixtures and production deployments'.
   "workflows": [{ "name": "staysignal-demo-routine", "binding": "ROUTINE_WORKFLOW", "class_name": "RoutineWorkflow" }],
-  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  // One invocation in ten is logged: a flood of refused requests would otherwise fill the account's Workers Logs.
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 },
   // The one secret; the owner sets it with `npx wrangler secret put SS_DEMO_SIGNING_KEY --name staysignal-demo`.
   "secrets": { "required": ["SS_DEMO_SIGNING_KEY"] },
   "vars": {

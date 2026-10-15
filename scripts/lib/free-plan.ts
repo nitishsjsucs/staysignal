@@ -70,6 +70,9 @@ export function freePlanProblems(configText: string): string[] {
   return problems;
 }
 
+/** The largest share of the public demo's invocations its Workers Logs may sample. */
+export const MAX_DEMO_LOG_SAMPLING = 0.1;
+
 /** The public demo's deployment rules (ADR 0018): a public workers.dev link with its own sign-in, the signing key as a
  * secret, the gate, the committed fixtures with inline jobs, and none of the real data paths. */
 export function publicDemoProblems(c: DeployConfig): string[] {
@@ -87,6 +90,10 @@ export function publicDemoProblems(c: DeployConfig): string[] {
     if (/^SS_(AIG|AI_MODEL|AI_DAILY|GCP|BQ|ACCESS|ROLE_BINDINGS|RUNNER_TOKEN|MCP_TOKEN)/.test(key)) out.push(`the public demo never uses ${key}`);
   }
   for (const name of ["SS_AIG_TOKEN", "SS_GCP_SA_KEY", "SS_RUNNER_TOKEN", "SS_ROLE_BINDINGS", "SS_HMAC_MASTER_KEY"]) if (secrets.includes(name)) out.push(`the public demo never needs the secret ${name}`);
+  // a public link draws traffic that is mostly refused; logging every invocation would spend the account's Workers
+  // Logs on it (billed beyond the included events if the account were ever on Workers Paid)
+  const sampling = (c as { observability?: { enabled?: boolean; head_sampling_rate?: number } }).observability;
+  if (sampling?.enabled !== false && !((sampling?.head_sampling_rate ?? 1) <= MAX_DEMO_LOG_SAMPLING)) out.push(`the public demo logs at most ${MAX_DEMO_LOG_SAMPLING * 100}% of invocations (observability.head_sampling_rate <= ${MAX_DEMO_LOG_SAMPLING})`);
   const gate = c.durable_objects?.bindings?.find((b) => b.name === "DEMO_GATE");
   if (!gate || gate.class_name !== "DemoGate") out.push("the public demo needs the DEMO_GATE binding to DemoGate");
   return out;

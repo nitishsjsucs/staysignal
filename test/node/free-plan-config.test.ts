@@ -90,6 +90,9 @@ describe("Workers Free rules for deployments", () => {
     expect(problems({ durable_objects: { bindings: [{ name: "ANALYST_AGENT", class_name: "AnalystAgent" }, { name: "WORKSPACE_AGENT", class_name: "WorkspaceAgent" }] } })).toMatch(/DEMO_GATE/);
     expect(problems({ workers_dev: false })).toMatch(/workers.dev/);
     expect(problems({ workflows: [{ name: "staysignal-routine", binding: "ROUTINE_WORKFLOW", class_name: "RoutineWorkflow" }] })).toMatch(/account-wide/);
+    expect(problems({ observability: { enabled: true, head_sampling_rate: 1 } })).toMatch(/head_sampling_rate <= 0.1/);
+    expect(problems({ observability: { enabled: true } })).toMatch(/head_sampling_rate <= 0.1/);
+    expect(problems({ observability: { enabled: false } })).not.toMatch(/head_sampling_rate/);
   });
 
   it("render placeholders only in a dry run and keep URLs inside strings", () => {

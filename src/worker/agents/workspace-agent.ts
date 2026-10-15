@@ -102,6 +102,8 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
       // a sandbox is seeded only by initSandbox; one woken after its destruction (a late workflow step) seeds nothing,
       // fails every call, and destroys itself shortly after
       if (this.sandboxExp() === null) return this.scheduleOrphanCleanup();
+      // a deploy during a sandbox's life may add tables; every statement is idempotent
+      for (const ddl of WORKSPACE_DDL) this.ctx.storage.sql.exec(ddl);
       this.refreshState();
       return;
     }

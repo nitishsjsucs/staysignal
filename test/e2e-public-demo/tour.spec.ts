@@ -111,8 +111,8 @@ test("a visitor clicks through the guided tour in a private sandbox", async ({ p
     await page.getByTestId("demo-start").click();
     await expect(page.getByTestId("demo-banner")).toContainText(/Public demo: synthetic company, recorded model and engine output, your sandbox resets in [34] h \d+ min/);
     await expect(page.getByTestId("demo-source-link")).toHaveAttribute("href", "https://github.com/nitishsjsucs/staysignal");
-    const cookie = (await page.context().cookies()).find((c) => c.name === "ss_demo")!;
-    expect(cookie).toMatchObject({ httpOnly: true, secure: true, sameSite: "Lax" });
+    const cookie = (await page.context().cookies()).find((c) => c.name === "__Host-ss_demo")!;
+    expect(cookie).toMatchObject({ httpOnly: true, secure: true, sameSite: "Strict", path: "/" });
   });
 
   await test.step("another page on the same site can neither frame the demo nor use the visitor's session", async () => {

@@ -1,11 +1,12 @@
 // ADR 0018: the public demo's session cookie. A visitor signs in at /demo/session and gets an HttpOnly, Secure,
-// SameSite=Lax cookie for one sandbox, at most 4 hours; every request verifies it in constant time. Tampering, a
-// wrong key, an expired or over-long session, an unknown principal and attempts to raise a role are refused; dev
-// tokens, Access assertions and spoofed principal headers mean nothing in demo mode.
+// SameSite=Strict cookie named with the __Host- prefix (no Domain, Path=/) for one sandbox, at most 4 hours; every
+// request verifies it in constant time. Tampering, a wrong key, an expired or over-long session, an unknown principal,
+// two session cookies at once and attempts to raise a role are refused; dev tokens, Access assertions and spoofed
+// principal headers mean nothing in demo mode.
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { parseConfig } from "../../src/worker/config";
-import { issueSession, signPayload, verifySession } from "../../src/worker/auth/demo-session";
+import { DEMO_COOKIE, issueSession, signPayload, verifySession } from "../../src/worker/auth/demo-session";
 import { actAs, cookieFrom, demoCall, demoJson, P, resetGate, visit } from "../helpers/demo";
 
 const key = () => parseConfig(env).publicDemo!.signingKey;
@@ -25,15 +26,18 @@ describe("signing in", () => {
     expect((await demoCall("/api/me")).status).toBe(401);
   });
 
-  it("sets an HttpOnly, Secure, SameSite=Lax cookie that lives at most 4 hours", async () => {
+  it("sets an HttpOnly, Secure, SameSite=Strict __Host- cookie that lives at most 4 hours", async () => {
     const r = await demoCall("/demo/session", { body: {} });
     expect(r.status).toBe(200);
     const set = r.headers.get("Set-Cookie")!;
-    expect(set).toMatch(/^ss_demo=v1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+;/);
+    // the __Host- prefix: a browser accepts it only from this host, Secure, with Path=/ and no Domain, so another
+    // Worker on the account's workers.dev subdomain cannot set (toss) a session cookie for the demo
+    expect(set).toMatch(/^__Host-ss_demo=v1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+;/);
     expect(set).toContain("HttpOnly");
     expect(set).toContain("Secure");
-    expect(set).toContain("SameSite=Lax");
-    expect(set).toContain("Path=/");
+    expect(set).toContain("SameSite=Strict");
+    expect(set).toContain("Path=/;");
+    expect(set).not.toMatch(/Domain=/i);
     const age = Number(/Max-Age=(\d+)/.exec(set)![1]);
     expect(age).toBeGreaterThan(4 * 3600 - 5);
     expect(age).toBeLessThanOrEqual(4 * 3600);
@@ -67,29 +71,41 @@ describe("signing in", () => {
 describe("verifying the cookie on every request", () => {
   it("refuses a tampered payload, a tampered MAC and garbage", async () => {
     const v = await visit();
-    const value = v.cookie.slice("ss_demo=".length);
+    const value = v.cookie.slice(`${DEMO_COOKIE}=`.length);
     const [, payload, mac] = value.split(".") as [string, string, string];
     const body = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) as Record<string, unknown>;
     const forged = btoa(JSON.stringify({ ...body, p: P.director })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
     for (const bad of [`v1.${forged}.${mac}`, `v1.${payload}.${mac.slice(0, -2)}AA`, `v2.${payload}.${mac}`, "v1..", "not-a-cookie", `v1.${payload}`]) {
-      const r = await demoCall("/api/me", { cookie: `ss_demo=${bad}` });
+      const r = await demoCall("/api/me", { cookie: `${DEMO_COOKIE}=${bad}` });
       expect(r.status).toBe(401);
       expect(await r.json()).toMatchObject({ reason: "invalid" });
     }
+  });
+
+  it("refuses two session cookies at once, whichever comes first, and the old cookie name", async () => {
+    const a = await visit();
+    const b = await visit();
+    for (const cookie of [`${a.cookie}; ${b.cookie}`, `${b.cookie}; ${a.cookie}`, `${a.cookie}; ${a.cookie}`]) {
+      const r = await demoCall("/api/me", { cookie });
+      expect(r.status).toBe(401);
+      expect(await r.json()).toMatchObject({ reason: "invalid" });
+    }
+    expect((await demoCall("/api/me", { cookie: a.cookie.replace(`${DEMO_COOKIE}=`, "ss_demo=") })).status).toBe(401);
+    expect((await demoCall("/api/me", { cookie: `other=1; ${a.cookie}` })).status).toBe(200);
   });
 
   it("refuses a cookie signed with another key", async () => {
     const other = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
     const t = now();
     const cookie = await issueSession(other, { principal: P.lead, sandbox: "abcdefghijklmnopqrst", iat: t, exp: t + 600 });
-    expect((await demoCall("/api/me", { cookie: `ss_demo=${cookie}` })).status).toBe(401);
+    expect((await demoCall("/api/me", { cookie: `${DEMO_COOKIE}=${cookie}` })).status).toBe(401);
     expect((await verifySession(key(), cookie, t)).ok).toBe(false);
   });
 
   it("refuses an expired session, one issued in the future and one longer than 4 hours", async () => {
     const t = now();
     const expired = await signPayload(key(), { p: P.lead, s: "abcdefghijklmnopqrst", iat: t - 3600, exp: t - 1 });
-    const r = await demoCall("/api/me", { cookie: `ss_demo=${expired}` });
+    const r = await demoCall("/api/me", { cookie: `${DEMO_COOKIE}=${expired}` });
     expect(r.status).toBe(401);
     expect(await r.json()).toMatchObject({ reason: "expired" });
     const future = await signPayload(key(), { p: P.lead, s: "abcdefghijklmnopqrst", iat: t + 3600, exp: t + 7200 });
@@ -103,17 +119,17 @@ describe("verifying the cookie on every request", () => {
     const t = now();
     // a validly signed cookie that names a principal outside the seven, or carries a role and scopes, gains nothing
     const unknown = await signPayload(key(), { p: "root@larkspur.example", s: "abcdefghijklmnopqrst", iat: t, exp: t + 600 });
-    expect((await demoCall("/api/me", { cookie: `ss_demo=${unknown}` })).status).toBe(401);
+    expect((await demoCall("/api/me", { cookie: `${DEMO_COOKIE}=${unknown}` })).status).toBe(401);
     const agent = await signPayload(key(), { p: "agent:staysignal", s: "abcdefghijklmnopqrst", iat: t, exp: t + 600 });
-    expect((await demoCall("/api/me", { cookie: `ss_demo=${agent}` })).status).toBe(401);
+    expect((await demoCall("/api/me", { cookie: `${DEMO_COOKIE}=${agent}` })).status).toBe(401);
     const v = await visit(P.auditor);
     const sandbox = (await demoJson<Me>("/api/me", { cookie: v.cookie })).principal.sandbox;
     const escalated = await signPayload(key(), { p: P.auditor, s: sandbox.id, iat: t, exp: sandbox.exp, role: "pa_lead", scopes: ["review:approve", "rollback"] });
-    const me = await demoJson<Me>("/api/me", { cookie: `ss_demo=${escalated}` });
+    const me = await demoJson<Me>("/api/me", { cookie: `${DEMO_COOKIE}=${escalated}` });
     expect(me.principal.role).toBe("auditor");
     expect(me.principal.scopes).not.toContain("rollback");
     // the auditor cannot roll back or approve whatever the cookie claims
-    const out = await demoJson<{ ok: boolean; code: string }>("/api/actions/1/rollback", { cookie: `ss_demo=${escalated}`, body: { reason: "test" } });
+    const out = await demoJson<{ ok: boolean; code: string }>("/api/actions/1/rollback", { cookie: `${DEMO_COOKIE}=${escalated}`, body: { reason: "test" } });
     expect(out).toMatchObject({ ok: false, code: "WRONG_ROLE" });
   });
 

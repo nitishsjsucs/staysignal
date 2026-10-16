@@ -1,12 +1,15 @@
-// The public demo's session (ADR 0018): a signed cookie `ss_demo` = "v1.<payload>.<mac>". The payload names one of
-// the seven synthetic principals, the visitor's sandbox and the issue and expiry times (seconds); the MAC is
+// The public demo's session (ADR 0018): a signed cookie `__Host-ss_demo` = "v1.<payload>.<mac>". The payload names one
+// of the seven synthetic principals, the visitor's sandbox and the issue and expiry times (seconds); the MAC is
 // HMAC-SHA256 under a key derived by HKDF from SS_DEMO_SIGNING_KEY, compared in constant time on every request.
 // Roles and scopes come from policy/ on the server, never from the cookie, so editing the payload cannot raise a role.
+// The __Host- prefix makes a browser refuse the cookie unless this host sets it, Secure, with Path=/ and no Domain, so
+// another Worker on the account's workers.dev subdomain cannot plant a session (its own sandbox) for the demo; a
+// request that carries two session cookies is refused. SameSite=Strict keeps it off navigations from other sites.
 import { CAPS } from "../../shared/demo/budget";
 import { LOCAL_PRINCIPALS, localPrincipal, type Principal } from "../../shared/policy/roles";
 import { base32LowerNoPad, base64ToBytes, hkdfSha256 } from "./hmac";
 
-export const DEMO_COOKIE = "ss_demo";
+export const DEMO_COOKIE = "__Host-ss_demo";
 export const SANDBOX_ID = /^[a-z2-7]{20}$/;
 export const DEFAULT_DEMO_PRINCIPAL = "pa-lead@larkspur.example";
 /** The longest a session may live, in seconds: the sandbox lifetime. */
@@ -125,26 +128,32 @@ export function sessionPrincipal(s: DemoSession): Principal {
 }
 
 export function sessionCookie(value: string, maxAgeSeconds: number): string {
-  return `${DEMO_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`;
+  return `${DEMO_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`;
 }
 
 export function clearSessionCookie(): string {
-  return `${DEMO_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+  return `${DEMO_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
 }
 
+/** What readCookie returns for a cookie the request carries more than once, or that does not decode: no session has
+ * this value, so it verifies as invalid. A browser keeps one __Host- cookie per name, so two mean someone else set one. */
+export const INVALID_COOKIE = "invalid";
+
+/** The value of the named cookie; null when absent; INVALID_COOKIE when carried more than once or not decodable. */
 export function readCookie(request: Request, name: string): string | null {
   const raw = request.headers.get("Cookie") ?? "";
+  let found: string | null = null;
   for (const part of raw.split(";")) {
     const [k, ...v] = part.trim().split("=");
-    if (k === name) {
-      try {
-        return decodeURIComponent(v.join("="));
-      } catch {
-        return null;
-      }
+    if (k !== name) continue;
+    if (found !== null) return INVALID_COOKIE;
+    try {
+      found = decodeURIComponent(v.join("="));
+    } catch {
+      return INVALID_COOKIE;
     }
   }
-  return null;
+  return found;
 }
 
 const clientKeys = new Map<string, Promise<CryptoKey>>();

@@ -1,7 +1,8 @@
 // Drives the Worker in public demo mode (ADR 0018) through exports.default.fetch with a non-localhost host, the way a
-// visitor's browser does: sign in at /demo/session, then send the ss_demo cookie on every request.
+// visitor's browser does: sign in at /demo/session, then send the session cookie on every request.
 import { env, exports } from "cloudflare:workers";
 import { runInDurableObject } from "cloudflare:test";
+import { DEMO_COOKIE } from "../../src/worker/auth/demo-session";
 import { demoGate } from "../../src/worker/demo/gate";
 
 export const DEMO_BASE = "https://staysignal-demo.example.test";
@@ -23,7 +24,7 @@ export function cookieFrom(r: Response): string | null {
   const set = r.headers.get("Set-Cookie");
   if (!set) return null;
   const first = set.split(";")[0] ?? "";
-  return first.startsWith("ss_demo=") ? first : null;
+  return first.startsWith(`${DEMO_COOKIE}=`) ? first : null;
 }
 
 /** The headers of a browser's WebSocket upgrade (the Origin and the cookie are the caller's). */

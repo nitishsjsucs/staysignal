@@ -9,7 +9,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { CAPS, MEASURED, UNITS } from "../../src/shared/demo/budget";
 import { localPrincipal } from "../../src/shared/policy/roles";
 import { buildApp } from "../../src/worker/app";
-import { issueSession } from "../../src/worker/auth/demo-session";
+import { DEMO_COOKIE, issueSession } from "../../src/worker/auth/demo-session";
 import { analystName } from "../../src/worker/auth/principal";
 import { parseConfig } from "../../src/worker/config";
 import { demoGate } from "../../src/worker/demo/gate";
@@ -102,7 +102,7 @@ beforeAll(async () => {
   await ws.initSandbox(sandbox.exp);
   seedRows = rows();
   seedRead = rowsRead();
-  cookieFor = async (principal) => `ss_demo=${await issueSession(key(), { principal, sandbox: sandbox.id, iat: Math.floor(Date.now() / 1000), exp: sandbox.exp })}`;
+  cookieFor = async (principal) => `${DEMO_COOKIE}=${await issueSession(key(), { principal, sandbox: sandbox.id, iat: Math.floor(Date.now() / 1000), exp: sandbox.exp })}`;
 });
 
 describe("what one sandbox costs", () => {

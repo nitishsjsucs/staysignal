@@ -1,11 +1,11 @@
 // ADR 0018: the public demo cannot be turned against its visitors from another web page. A request another site
 // starts (an Origin that is not this exact origin, or Sec-Fetch-Site cross-site or same-site) is refused before any
 // Durable Object request, WebSocket upgrades included: other Workers on the account's workers.dev subdomain are
-// same-site, so a SameSite cookie alone does not keep their pages out. A malformed upgrade spends nothing.
+// same-site, so a SameSite cookie alone does not keep their pages out. Malformed typed inputs answer 400, never 500.
 import { exports } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import worker from "../../src/worker/index";
-import { countingEnv, DEMO_BASE, P, resetGate, visit, WS_UPGRADE } from "../helpers/demo";
+import { countingEnv, DEMO_BASE, demoCall, demoJson, P, resetGate, visit, WS_UPGRADE } from "../helpers/demo";
 
 const ctx = {} as ExecutionContext;
 const SIBLING = "https://other.nitish-ratakonda.workers.dev";
@@ -66,6 +66,35 @@ describe("requests another site starts", () => {
 });
 
 describe("typed inputs", () => {
+  it("answer 400, never 500", async () => {
+    const v = await visit(P.lead);
+    const bad: [string, Parameters<typeof demoCall>[1]][] = [
+      ["/api/traces?limit=abc", {}],
+      ["/api/traces?limit=-5", {}],
+      ["/api/audit?since=abc", {}],
+      ["/api/actions/abc/rollback", { body: { reason: "a reason" } }],
+      ["/api/actions/1.5/rollback", { body: { reason: "a reason" } }],
+      ["/api/actions/0/rollback", { body: { reason: "a reason" } }],
+      ["/api/actions/1/rollback", { body: { reason: { a: 1 } } }],
+      ["/api/actions/1/rollback", { body: { reason: 5 } }],
+      ["/api/approvals/REV-0001/approve", { body: { reason: ["r".repeat(2000)] } }],
+      ["/api/approvals/REV-0001/reject", { body: { reason: { r: "x" } } }],
+      ["/api/reviews/draft", { body: { cohort: ["Platform Engineering"] } }],
+      ["/api/reviews/draft", { body: { cohort: "Platform Engineering", horizon: "3" } }],
+      ["/demo/role", { raw: "null" }],
+      ["/api/reviews/draft", { raw: "null" }],
+      ["/api/approvals/REV-0001/approve", { raw: "null" }],
+    ];
+    for (const [path, opts] of bad) {
+      const r = await demoCall(path, { cookie: v.cookie, ...opts });
+      expect(r.status, `${path} ${JSON.stringify(opts)}`).toBe(400);
+    }
+    // the same routes still answer well-formed requests
+    expect((await demoCall("/api/traces?limit=5", { cookie: v.cookie })).status).toBe(200);
+    expect((await demoCall("/api/audit?since=0", { cookie: v.cookie })).status).toBe(200);
+    expect(await demoJson("/api/actions/1/rollback", { cookie: v.cookie, body: { reason: "a reason" } })).toMatchObject({ ok: false, code: "NOT_REVERSIBLE" });
+  });
+
   it("forward only a well-formed WebSocket upgrade, refusing the rest before any Durable Object request", async () => {
     const v = await visit(P.lead);
     const counted = countingEnv();

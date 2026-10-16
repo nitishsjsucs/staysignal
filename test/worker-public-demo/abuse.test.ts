@@ -211,6 +211,33 @@ describe("the workspace socket in a sandbox", () => {
   });
 });
 
+describe("reasons that are not text", () => {
+  it("are refused by the route and inside the agent before anything is written, and both audit chains still verify", async () => {
+    const v = await visit(P.lead);
+    const sb = await sandboxOf(v);
+    const d = await demoJson<{ data: { draft_id: string } }>("/api/reviews/draft", { cookie: v.cookie, body: { cohort: "Platform Engineering", horizon: 3 } });
+    const rev = String((await demoJson<{ value: { review_id: string } }>(`/api/reviews/${d.data.draft_id}/submit`, { cookie: v.cookie, body: {} })).value.review_id);
+    const director = await demoCall("/demo/role", { cookie: v.cookie, body: { principal: P.director } });
+    const cookie = director.headers.get("Set-Cookie")!.split(";")[0]!;
+    const ws = workspaceStub(sb);
+    // a one-element array once passed the 300-character cap, was hashed as JSON and stored as text: both chains broke
+    for (const reason of [["r".repeat(2000)], { r: 1 }, 5, true]) {
+      expect((await demoCall(`/api/approvals/${rev}/approve`, { cookie, body: { reason } })).status).toBe(400);
+      expect((await demoCall(`/api/approvals/${rev}/reject`, { cookie, body: { reason } })).status).toBe(400);
+    }
+    const rows = await sqlMeter(ws);
+    const p = { ...localPrincipal(P.director)!, sandbox: sb };
+    const odd = ["x"] as unknown as string;
+    const out = await runInDurableObject(ws, (a: WorkspaceAgent) => [a.approve(p, rev, odd), a.reject(p, rev, odd), a.rollback(p, 2, odd)].map((o) => o.ok || o.code));
+    expect(out).toEqual(["REASON_INVALID", "REASON_INVALID", "REASON_INVALID"]);
+    expect(rows.written()).toBe(0);
+    expect((await demoJson<{ ok: boolean }>("/api/audit/verify", { cookie })).ok).toBe(true);
+    // a reason that is text still decides
+    expect((await demoJson<{ ok: boolean }>(`/api/approvals/${rev}/approve`, { cookie, body: { reason: "evidence checked" } })).ok).toBe(true);
+    expect((await demoJson<{ ok: boolean }>("/api/audit/verify", { cookie })).ok).toBe(true);
+  });
+});
+
 describe("agent paths and known refusals", () => {
   it("answers 404 to a plain request on an agent path, with no Durable Object request", async () => {
     const v = await visit(P.lead);

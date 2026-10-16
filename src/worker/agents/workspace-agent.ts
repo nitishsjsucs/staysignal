@@ -197,8 +197,11 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     return !p || isReadOnly(p) || this.sandboxed;
   }
 
-  /** A public-demo reason longer than CAPS.maxReasonChars, refused before anything is written (ADR 0018). */
-  private reasonTooLong(reason: string | null | undefined): ActionOutcome<never> | null {
+  /** A reason that may not be written, refused before anything is: one that is not text (in every mode; it would be
+   * hashed as JSON but stored as text, so both audit chains would fail to verify from that row on), or in the public
+   * demo one longer than CAPS.maxReasonChars (ADR 0018). */
+  private reasonRefused(reason: unknown): ActionOutcome<never> | null {
+    if (reason !== null && reason !== undefined && typeof reason !== "string") return { ok: false, code: "REASON_INVALID", message: "A reason must be text.", auditHead: this.state.auditHead };
     if (!this.sandboxed || typeof reason !== "string" || reason.length <= CAPS.maxReasonChars) return null;
     return { ok: false, code: "REASON_TOO_LONG", message: `Reasons are limited to ${CAPS.maxReasonChars} characters in the public demo.`, auditHead: this.state.auditHead };
   }
@@ -293,6 +296,7 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
       prev_hash: last?.hash ?? GENESIS_HASH,
       created_at: this.now(),
     };
+    storable(row);
     const hash = chainHash(row.prev_hash, row);
     this.sql`INSERT INTO action_log (seq, action_id, kind, actor, actor_kind, routine_run_id, payload_json, reason, reversible, reverses_seq, prev_hash, hash, created_at)
       VALUES (${row.seq}, ${row.action_id}, ${row.kind}, ${row.actor}, ${row.actor_kind}, ${row.routine_run_id}, ${row.payload_json}, ${row.reason}, ${row.reversible}, ${row.reverses_seq}, ${row.prev_hash}, ${hash}, ${row.created_at})`;
@@ -302,6 +306,7 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
   private appendApprovalAudit(a: { subject_kind: string; subject_id: string; proposer: string; decision: string; refusal_code: string | null; decided_by: string; decided_role: string; reason: string | null; workflow_instance_id: string | null }): number {
     const last = this.sql<{ seq: number; hash: string }>`SELECT seq, hash FROM approval_audit ORDER BY seq DESC LIMIT 1`[0];
     const row = { seq: (last?.seq ?? 0) + 1, ...a, prev_hash: last?.hash ?? GENESIS_HASH, decided_at: this.now() };
+    storable(row);
     const hash = chainHash(row.prev_hash, row);
     this.sql`INSERT INTO approval_audit (seq, workflow_instance_id, subject_kind, subject_id, proposer, decision, refusal_code, decided_by, decided_role, reason, prev_hash, hash, decided_at)
       VALUES (${row.seq}, ${row.workflow_instance_id}, ${row.subject_kind}, ${row.subject_id}, ${row.proposer}, ${row.decision}, ${row.refusal_code}, ${row.decided_by}, ${row.decided_role}, ${row.reason}, ${row.prev_hash}, ${hash}, ${row.decided_at})`;
@@ -719,8 +724,8 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
   }
 
   approve(p: Principal, subjectId: string, reason: string | null): ActionOutcome<{ subject_id: string; task_ids?: string[]; action_seq: number }> {
-    const long = this.reasonTooLong(reason);
-    if (long) return long;
+    const refused = this.reasonRefused(reason);
+    if (refused) return refused;
     const a = this.getApproval(subjectId);
     if (!a) return { ok: false, code: "NOT_FOUND", message: "No such subject.", auditHead: this.state.auditHead };
     const refusal = approvalRefusal(p, a, this.currentSubjectHash(a));
@@ -767,8 +772,8 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
   }
 
   reject(p: Principal, subjectId: string, reason: string | null): ActionOutcome<{ subject_id: string; action_seq: number }> {
-    const long = this.reasonTooLong(reason);
-    if (long) return long;
+    const refused = this.reasonRefused(reason);
+    if (refused) return refused;
     const a = this.getApproval(subjectId);
     if (!a) return { ok: false, code: "NOT_FOUND", message: "No such subject.", auditHead: this.state.auditHead };
     const refusal = approvalRefusal(p, a, this.currentSubjectHash(a));
@@ -792,9 +797,10 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
 
   /** Rollback adds a new action that reverses an earlier one; nothing is deleted (SPEC 14.8). */
   rollback(p: Principal, seq: number, reason: string): ActionOutcome<{ action_seq: number; reverses_seq: number }> {
-    const long = this.reasonTooLong(reason);
-    if (long) return long;
+    const refused = this.reasonRefused(reason);
+    if (refused) return refused;
     if (!hasScope(p, "rollback")) return { ok: false, code: "WRONG_ROLE", message: APPROVAL_MESSAGES.WRONG_ROLE, auditHead: this.state.auditHead };
+    if (!Number.isSafeInteger(seq) || seq < 1) return { ok: false, code: "NOT_FOUND", message: "No such action.", auditHead: this.state.auditHead };
     if (!reason || !reason.trim()) return { ok: false, code: "REASON_REQUIRED", message: "A rollback needs a reason.", auditHead: this.state.auditHead };
     const target = this.sql<ActionRow>`SELECT * FROM action_log WHERE seq = ${seq}`[0];
     if (!target) return { ok: false, code: "NOT_FOUND", message: "No such action.", auditHead: this.state.auditHead };
@@ -1065,6 +1071,14 @@ export class WorkspaceAgent extends Agent<Env, WorkspaceState> {
     const out = this.rollback(p, seq, reason);
     if (out.ok) await this.rememberAction(out.value.action_seq, p.role);
     return out;
+  }
+}
+
+/** An audit row is hashed as canonical JSON and stored in SQLite, which coerces anything else to text; so every column
+ * is text, a safe integer or null, or nothing is written and the chain is never broken by its own row. */
+function storable(row: Record<string, unknown>): void {
+  for (const [k, v] of Object.entries(row)) {
+    if (v !== null && typeof v !== "string" && !(typeof v === "number" && Number.isSafeInteger(v))) throw new Error(`audit column ${k} must be text, an integer or null`);
   }
 }
 

@@ -23,7 +23,7 @@ import { sha256HexSync } from "./store/chain";
 import { memoryPort, warehouseFor } from "./warehouse/client";
 import { CAPS } from "../shared/demo/budget";
 import { STUB_LABEL_PUBLIC } from "../shared/provenance";
-import { admitRequest, demoGuard, demoRoutes, readJsonBody, tooLong } from "./demo/routes";
+import { admitRequest, demoGuard, demoRoutes, readJsonBody, readJsonValue, reasonOk, tooLong } from "./demo/routes";
 import { FixturesWarehouse } from "./warehouse/fixtures";
 
 type Vars = { principal: Principal; config: AppConfig; ws: WorkspaceRef; bodyText?: string };
@@ -118,8 +118,21 @@ async function recordedFor(env: Env, p: Principal): Promise<string[]> {
   );
 }
 
+/** A non-negative integer query value of at most 9 digits; `fallback` when absent, null when malformed. */
+function intQuery(v: string | undefined, fallback: number): number | null {
+  if (v === undefined || v === "") return fallback;
+  return /^\d{1,9}$/.test(v) ? Number(v) : null;
+}
+
+const REASON_TEXT = "a reason must be text";
+
 export function buildApp() {
   const app = new Hono<AppEnv>();
+  // an uncaught error answers a bare JSON refusal: no message, no stack (the log keeps them)
+  app.onError((err, c) => {
+    console.error(`staysignal: ${c.req.method} ${c.req.path}:`, err);
+    return c.json({ error: "internal" }, 500);
+  });
 
   app.use("*", async (c, next) => {
     c.set("config", parseConfig(c.env));
@@ -356,7 +369,9 @@ export function buildApp() {
   app.get("/api/traces", async (c) => {
     const p = c.var.principal;
     if (!hasScope(p, "trace:read:all") && !hasScope(p, "trace:read:own")) return c.json(refuse("NOT_PERMITTED"));
-    const rows = await (await c.var.ws()).listTraces(hasScope(p, "trace:read:all") ? null : p.id, Number(c.req.query("limit") ?? 50));
+    const limit = intQuery(c.req.query("limit"), 50);
+    if (limit === null) return c.json({ error: "limit is a whole number" }, 400);
+    const rows = await (await c.var.ws()).listTraces(hasScope(p, "trace:read:all") ? null : p.id, limit);
     return c.json({ label: "synthetic", traces: rows.map((r) => traceView(p, r)) });
   });
   app.get("/api/traces/:id", async (c) => {
@@ -368,9 +383,10 @@ export function buildApp() {
   });
 
   app.post("/api/reviews/draft", async (c) => {
-    const body = (await readJsonBody(c)) as { cohort?: string; horizon?: number };
+    const body = await readJsonBody(c);
+    if (!body || (body.cohort !== undefined && typeof body.cohort !== "string") || (body.horizon !== undefined && typeof body.horizon !== "number")) return c.json({ error: "a review draft names a cohort (text) and a horizon (a number)" }, 400);
     if (c.var.config.publicDemo && tooLong(body.cohort, CAPS.maxQueryChars)) return c.json({ error: `cohort names are limited to ${CAPS.maxQueryChars} characters` }, 400);
-    return respond(c, "prepare_review", { cohort: body.cohort ?? "Platform Engineering", horizon_months: body.horizon });
+    return respond(c, "prepare_review", { cohort: (body.cohort as string | undefined) ?? "Platform Engineering", horizon_months: body.horizon });
   });
   app.post("/api/reviews/:draftId/submit", async (c) => c.json(await (await c.var.ws()).submitReview(c.var.principal, c.req.param("draftId"))));
   app.get("/api/reviews", async (c) => c.json({ label: "synthetic", reviews: await (await c.var.ws()).listReviews() }));
@@ -381,8 +397,11 @@ export function buildApp() {
     return r ? c.json({ ...r, transitions: await ws.reviewTransitions(r.review_id) }) : c.json({ error: "not found" }, 404);
   });
   app.get("/api/approvals", async (c) => c.json({ label: "synthetic", approvals: await (await c.var.ws()).listApprovals() }));
+  // a reason is text or absent in every mode: anything else would be hashed as JSON but stored as text, and both audit
+  // chains would fail to verify from that row on
   app.post("/api/approvals/:id/approve", async (c) => {
-    const body = (await readJsonBody(c)) as { reason?: string };
+    const body = await readJsonBody(c);
+    if (!body || !reasonOk(body.reason)) return c.json({ error: REASON_TEXT }, 400);
     if (c.var.config.publicDemo && tooLong(body.reason, CAPS.maxReasonChars)) return c.json({ error: `reasons are limited to ${CAPS.maxReasonChars} characters` }, 400);
     const ws = await c.var.ws();
     const out = await ws.approve(c.var.principal, c.req.param("id"), body.reason ?? null);
@@ -393,7 +412,8 @@ export function buildApp() {
     return c.json(out);
   });
   app.post("/api/approvals/:id/reject", async (c) => {
-    const body = (await readJsonBody(c)) as { reason?: string };
+    const body = await readJsonBody(c);
+    if (!body || !reasonOk(body.reason)) return c.json({ error: REASON_TEXT }, 400);
     if (c.var.config.publicDemo && tooLong(body.reason, CAPS.maxReasonChars)) return c.json({ error: `reasons are limited to ${CAPS.maxReasonChars} characters` }, 400);
     const ws = await c.var.ws();
     const out = await ws.reject(c.var.principal, c.req.param("id"), body.reason ?? null);
@@ -404,14 +424,21 @@ export function buildApp() {
     return c.json(out);
   });
   app.post("/api/actions/:seq/rollback", async (c) => {
-    const body = (await readJsonBody(c)) as { reason?: string };
+    const seq = c.req.param("seq");
+    if (!/^[1-9]\d{0,8}$/.test(seq)) return c.json({ error: "an action is named by its sequence number" }, 400);
+    const body = await readJsonBody(c);
+    if (!body || !reasonOk(body.reason)) return c.json({ error: REASON_TEXT }, 400);
     if (c.var.config.publicDemo && tooLong(body.reason, CAPS.maxReasonChars)) return c.json({ error: `reasons are limited to ${CAPS.maxReasonChars} characters` }, 400);
     const ws = await c.var.ws();
-    const out = await ws.rollback(c.var.principal, Number(c.req.param("seq")), body.reason ?? "");
+    const out = await ws.rollback(c.var.principal, Number(seq), body.reason ?? "");
     if (out.ok) await ws.rememberAction(out.value.action_seq, c.var.principal.role);
     return c.json(out);
   });
-  app.get("/api/audit", async (c) => c.json({ label: "synthetic", actions: await (await c.var.ws()).auditLog(Number(c.req.query("since") ?? 0)), approvals: await (await c.var.ws()).approvalAuditLog() }));
+  app.get("/api/audit", async (c) => {
+    const since = intQuery(c.req.query("since"), 0);
+    if (since === null) return c.json({ error: "since is a whole number" }, 400);
+    return c.json({ label: "synthetic", actions: await (await c.var.ws()).auditLog(since), approvals: await (await c.var.ws()).approvalAuditLog() });
+  });
   // the action audit (SPEC 17.7): proxy screens (tenure band, location) for leads and the auditor, the audit-only age
   // screen for the auditor only (audit:attributes); everyone else is refused
   app.get("/api/audit/actions", async (c) => {
@@ -447,7 +474,7 @@ export function buildApp() {
   // seconds, a recorded answer for the same question or a labeled placeholder
   app.post("/api/lab/interview", async (c) => {
     if (!hasScope(c.var.principal, "lab:read")) return c.json(refuse("NOT_PERMITTED", "The Scenario Lab needs lab:read."));
-    const req = parseInterview(await readJsonBody<unknown>(c, null));
+    const req = parseInterview(await readJsonValue(c));
     if ("error" in req) return c.json({ error: req.error }, 400);
     const cfg = c.var.config;
     // demo mode replays recorded answers only: neither the engine nor a model is called
@@ -499,8 +526,8 @@ export function buildApp() {
     return c.json({ error: "unauthenticated" }, 401);
   });
   app.post("/internal/runner/lease", async (c) => {
-    const body = (await readJsonBody(c)) as { owner?: string };
-    return c.json(await (await c.var.ws()).leaseJob(body.owner ?? "runner"));
+    const body = (await readJsonBody(c)) ?? {};
+    return c.json(await (await c.var.ws()).leaseJob(typeof body.owner === "string" ? body.owner : "runner"));
   });
   app.post("/internal/runner/heartbeat", async (c) => {
     const body = (await c.req.json()) as { job_key: string; owner: string };

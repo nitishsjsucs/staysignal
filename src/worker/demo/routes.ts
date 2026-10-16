@@ -47,16 +47,34 @@ export async function readCapped(request: Request, max: number): Promise<string 
   return new TextDecoder().decode(all);
 }
 
-/** The request's JSON body: the bounded text the guard read in demo mode, else the body itself; `fallback` when empty
- * or not JSON. */
-export async function readJsonBody<T = Record<string, unknown>>(c: C, fallback: T = {} as T): Promise<T> {
-  const text = c.var.bodyText ?? (await c.req.text().catch(() => ""));
-  if (!text) return fallback;
+async function bodyText(c: C): Promise<string> {
+  return c.var.bodyText ?? (await c.req.text().catch(() => ""));
+}
+
+/** The request's JSON value: the bounded text the guard read in demo mode, else the body itself; null when empty or
+ * not JSON. */
+export async function readJsonValue(c: C): Promise<unknown> {
+  const text = await bodyText(c);
+  if (!text.trim()) return null;
   try {
-    return JSON.parse(text) as T;
+    return JSON.parse(text) as unknown;
   } catch {
-    return fallback;
+    return null;
   }
+}
+
+/** The request's JSON object body: an empty body is an empty object; anything that is not a JSON object (an array,
+ * null, a number, text that is not JSON) is null, and the route answers 400 instead of reading a field of it. */
+export async function readJsonBody(c: C): Promise<Record<string, unknown> | null> {
+  if (!(await bodyText(c)).trim()) return {};
+  const v = await readJsonValue(c);
+  return v !== null && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+}
+
+/** A reason in a request body: text, or absent (undefined or null). Anything else is refused by the route, and again
+ * by the agent, before it can reach an audit row. */
+export function reasonOk(v: unknown): v is string | null | undefined {
+  return v === undefined || v === null || typeof v === "string";
 }
 
 export function tooLong(v: unknown, max: number): boolean {
@@ -151,7 +169,8 @@ export function demoRoutes(app: Hono<AppEnv>): void {
   app.post("/demo/session", async (c) => {
     const no = off(c);
     if (no) return no;
-    const body = await readJsonBody<{ principal?: unknown }>(c);
+    const body = await readJsonBody(c);
+    if (!body) return c.json({ error: "a JSON object is expected" }, 400);
     const principal = typeof body.principal === "string" ? body.principal : DEFAULT_DEMO_PRINCIPAL;
     if (!isDemoPrincipal(principal)) return c.json({ error: "unknown principal" }, 400);
     const v = await session(c);
@@ -167,8 +186,8 @@ export function demoRoutes(app: Hono<AppEnv>): void {
     if (no) return no;
     const v = await session(c);
     if (!v.ok) return c.json({ error: "unauthenticated", reason: v.reason }, 401);
-    const body = await readJsonBody<{ principal?: unknown }>(c);
-    if (typeof body.principal !== "string" || !isDemoPrincipal(body.principal)) return c.json({ error: "unknown principal" }, 400);
+    const body = await readJsonBody(c);
+    if (!body || typeof body.principal !== "string" || !isDemoPrincipal(body.principal)) return c.json({ error: "unknown principal" }, 400);
     // the role changes, the sandbox and its expiry never do
     const key = c.var.config.publicDemo!.signingKey;
     c.header("Set-Cookie", sessionCookie(await issueSession(key, { ...v.session, principal: body.principal, iat: now() }), v.session.exp - now()));

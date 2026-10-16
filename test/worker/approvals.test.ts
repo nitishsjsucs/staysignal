@@ -3,9 +3,9 @@ import { env } from "cloudflare:workers";
 import { runInDurableObject } from "cloudflare:test";
 import { getAgentByName } from "agents";
 import { describe, expect, it } from "vitest";
-import { agentPrincipal } from "../../src/shared/policy/roles";
+import { agentPrincipal, localPrincipal } from "../../src/shared/policy/roles";
 import type { WorkspaceAgent } from "../../src/worker/agents/workspace-agent";
-import { json, P } from "../helpers/api";
+import { call, json, P } from "../helpers/api";
 
 type Outcome = { ok: boolean; code?: string; value?: Record<string, unknown> };
 
@@ -65,6 +65,28 @@ describe("approvals", () => {
     expect(await ws.publishedRunId()).toBe(before);
     const runs = await json<{ runs: { run_id: string }[] }>("/api/runs", { as: P.lead });
     expect(runs.runs.map((r) => r.run_id)).toEqual(expect.arrayContaining(["R-2026-09-01#1", "R-2026-10-01#1"]));
+  });
+});
+
+describe("reasons that are not text (every mode)", () => {
+  it("are refused by the routes and inside the agent, and the audit chains still verify", async () => {
+    const reviewId = await draftAndSubmit(P.lead);
+    for (const reason of [["a reason"], { a: 1 }, 5, false]) {
+      for (const verb of ["approve", "reject"]) {
+        const r = await call(`/api/approvals/${reviewId}/${verb}`, { as: P.director, body: { reason } });
+        expect(r.status, `${verb} ${JSON.stringify(reason)}`).toBe(400);
+      }
+      expect((await call("/api/actions/2/rollback", { as: P.lead, body: { reason } })).status).toBe(400);
+    }
+    const ws = await getAgentByName(env.WORKSPACE_AGENT, "larkspur");
+    const odd = ["a reason"] as unknown as string;
+    expect(await ws.approve(localPrincipal(P.director)!, reviewId, odd)).toMatchObject({ ok: false, code: "REASON_INVALID" });
+    expect(await ws.reject(localPrincipal(P.director)!, reviewId, odd)).toMatchObject({ ok: false, code: "REASON_INVALID" });
+    expect(await ws.rollback(localPrincipal(P.lead)!, 2, odd)).toMatchObject({ ok: false, code: "REASON_INVALID" });
+    expect(await ws.rollback(localPrincipal(P.lead)!, Number.NaN, "a reason")).toMatchObject({ ok: false, code: "NOT_FOUND" });
+    expect((await json<{ ok: boolean }>("/api/audit/verify", { as: P.auditor })).ok).toBe(true);
+    expect((await json<Outcome>(`/api/approvals/${reviewId}/approve`, { as: P.director, body: { reason: "evidence checked" } })).ok).toBe(true);
+    expect((await json<{ ok: boolean }>("/api/audit/verify", { as: P.auditor })).ok).toBe(true);
   });
 });
 

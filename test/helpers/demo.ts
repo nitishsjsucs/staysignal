@@ -26,6 +26,9 @@ export function cookieFrom(r: Response): string | null {
   return first.startsWith("ss_demo=") ? first : null;
 }
 
+/** The headers of a browser's WebSocket upgrade (the Origin and the cookie are the caller's). */
+export const WS_UPGRADE = { Upgrade: "websocket", Connection: "Upgrade", "Sec-WebSocket-Key": "dGhlIHNhbXBsZSBub25jZQ==", "Sec-WebSocket-Version": "13" } as const;
+
 export async function demoCall(path: string, opts: { cookie?: string | null; method?: string; body?: unknown; headers?: Record<string, string>; client?: string; raw?: string } = {}): Promise<Response> {
   const headers: Record<string, string> = { "CF-Connecting-IP": opts.client ?? "198.51.100.1", ...(opts.headers ?? {}) };
   if (opts.cookie) headers.Cookie = opts.cookie;

@@ -25,7 +25,10 @@ export default defineConfig({
     locale: "en-US",
     trace: "retain-on-failure",
     contextOptions: { reducedMotion: "reduce" },
-    launchOptions: { args: [`--host-resolver-rules=MAP ${DEMO_HOST} 127.0.0.1`] },
+    // Local Network Access checks off: the tour's page on another origin of the same site (fulfilled by the test, so
+    // Chromium places it in the public address space) must reach the Worker on 127.0.0.1 as another Worker's page
+    // would reach the public demo, so that the Worker's own refusal is what the test sees
+    launchOptions: { args: [`--host-resolver-rules=MAP ${DEMO_HOST} 127.0.0.1`, "--disable-features=LocalNetworkAccessChecks"] },
   },
   projects: [{ name: "public-demo", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 }, colorScheme: "light" } }],
 });

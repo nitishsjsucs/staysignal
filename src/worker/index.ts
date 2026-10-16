@@ -9,6 +9,7 @@ import { AuthError } from "./auth/access";
 import { analystName, authenticate, stripPrincipal, withPrincipal, workspaceName } from "./auth/principal";
 import { type AppConfig, parseConfig } from "./config";
 import { admitJson } from "./demo/admit";
+import { CROSS_ORIGIN_MESSAGE, fromAnotherSite } from "./demo/origin";
 import { cachedRefusal, rememberRefusal } from "./demo/refusals";
 import { UNITS } from "../shared/demo/budget";
 import { handleMcp, MCP_ROUTE } from "./mcp/server";
@@ -21,9 +22,16 @@ export { DemoGate } from "./demo/gate";
 const app = buildApp();
 
 async function routeAgent(request: Request, env: Env, cfg: AppConfig, kind: "analyst" | "workspace"): Promise<Response> {
-  // the public demo forwards WebSocket upgrades only: the app never reads an agent over HTTP there, and a plain request
-  // would create an object that no connection ever schedules for deletion (ADR 0018)
-  if (cfg.publicDemo && request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return Response.json({ error: "not found" }, { status: 404 });
+  if (cfg.publicDemo) {
+    // the public demo forwards WebSocket upgrades only: the app never reads an agent over HTTP there, and a plain request
+    // would create an object that no connection ever schedules for deletion (ADR 0018)
+    if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return Response.json({ error: "not found" }, { status: 404 });
+    // a malformed upgrade is refused before it spends the sandbox's units
+    if (!request.headers.get("Sec-WebSocket-Key") || request.headers.get("Sec-WebSocket-Version") !== "13") return Response.json({ error: "not a WebSocket upgrade" }, { status: 400 });
+    // a page on another origin (another Worker on the account's subdomain is the same site, and its pages' upgrades
+    // carry the visitor's cookie) may not open the visitor's sockets: it could ask and read their conversation
+    if (fromAnotherSite(request)) return Response.json({ error: CROSS_ORIGIN_MESSAGE }, { status: 403 });
+  }
   let principal;
   try {
     principal = await authenticate(request, cfg);

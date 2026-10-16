@@ -17,7 +17,7 @@ import { analystName } from "../../src/worker/auth/principal";
 import { parseConfig } from "../../src/worker/config";
 import { demoGate } from "../../src/worker/demo/gate";
 import worker from "../../src/worker/index";
-import { countingEnv, DEMO_BASE, demoCall, demoJson, nextClient, P, resetGate, sqlMeter, type Visitor, visit } from "../helpers/demo";
+import { countingEnv, DEMO_BASE, demoCall, demoJson, nextClient, P, resetGate, sqlMeter, type Visitor, visit, WS_UPGRADE } from "../helpers/demo";
 
 type Me = { principal: { sandbox: { id: string; exp: number } } };
 type Sandbox = { id: string; exp: number };
@@ -60,7 +60,7 @@ async function spendAll(sb: Sandbox): Promise<void> {
 }
 
 async function socket(kind: "analyst" | "workspace", cookie: string) {
-  const r = await exports.default.fetch(new Request(`${DEMO_BASE}/agents-ws/${kind}`, { headers: { Upgrade: "websocket", Cookie: cookie } }));
+  const r = await exports.default.fetch(new Request(`${DEMO_BASE}/agents-ws/${kind}`, { headers: { ...WS_UPGRADE, Cookie: cookie } }));
   expect(r.status).toBe(101);
   const ws = r.webSocket!;
   ws.accept();
@@ -228,7 +228,7 @@ describe("agent paths and known refusals", () => {
     const counted = countingEnv();
     const call = (path: string, headers: Record<string, string> = {}) => worker.fetch(new Request(`${DEMO_BASE}${path}`, { headers: { Cookie: v.cookie, ...headers } }), counted.env, {} as ExecutionContext);
     for (let i = 0; i < 3; i++) expect((await call("/api/me")).status).toBe(401);
-    expect((await call("/agents-ws/analyst", { Upgrade: "websocket" })).status).toBe(401);
+    expect((await call("/agents-ws/analyst", WS_UPGRADE)).status).toBe(401);
     expect(counted.calls()).toBe(0);
 
     const w = await visit(P.lead);
@@ -241,7 +241,7 @@ describe("agent paths and known refusals", () => {
     const after = counted.calls();
     expect(after).toBeGreaterThan(0);
     for (let i = 0; i < 3; i++) expect((await spentCall("/api/forecast")).status).toBe(429);
-    expect((await spentCall("/agents-ws/workspace", { Upgrade: "websocket" })).status).toBe(429);
+    expect((await spentCall("/agents-ws/workspace", WS_UPGRADE)).status).toBe(429);
     expect(counted.calls()).toBe(after);
   });
 });

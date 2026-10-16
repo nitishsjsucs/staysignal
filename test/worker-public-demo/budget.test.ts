@@ -14,7 +14,7 @@ import { analystName } from "../../src/worker/auth/principal";
 import { parseConfig } from "../../src/worker/config";
 import { demoGate } from "../../src/worker/demo/gate";
 import { unitsFor } from "../../src/worker/demo/routes";
-import { DEMO_BASE, P, resetGate, sqlMeter } from "../helpers/demo";
+import { DEMO_BASE, P, resetGate, sqlMeter, WS_UPGRADE } from "../helpers/demo";
 
 let calls = 0;
 function countingStub<T extends object>(stub: T): T {
@@ -159,7 +159,7 @@ describe("what one sandbox costs", () => {
     const p = { ...localPrincipal(P.lead)!, sandbox };
     const analystId = env.ANALYST_AGENT.idFromName(await analystName(parseConfig(env), p));
     const upgradeAnalyst = async () => {
-      const r = await exports.default.fetch(new Request(`${DEMO_BASE}/agents-ws/analyst`, { headers: { Upgrade: "websocket", Cookie: await cookieFor(P.lead) } }));
+      const r = await exports.default.fetch(new Request(`${DEMO_BASE}/agents-ws/analyst`, { headers: { ...WS_UPGRADE, Cookie: await cookieFor(P.lead) } }));
       const ws = r.webSocket!;
       ws.accept();
       return ws;

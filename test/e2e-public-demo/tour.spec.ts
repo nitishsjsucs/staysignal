@@ -1,8 +1,9 @@
 // The public demo's guided tour, clicked through as a visitor would (ADR 0018): the landing page, the banner, every
 // beat of the tour in order (Forecast, What changed, Data health with the payroll simulation, Reviews with the refused
 // self-approval and the rollback, Trust, Research, Scenario Lab, Workforce, Governance, Memory, Traces), recorded and
-// stub chat answers labeled as such, role switches inside one sandbox, a second visitor who sees none of it, and the
-// reset. Every request the page makes is counted against the sandbox's units.
+// stub chat answers labeled as such, role switches inside one sandbox, a second visitor who sees none of it, another
+// page on the same site that can neither frame the demo nor use the visitor's session, and the reset. Every request the
+// page makes is counted against the sandbox's units.
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { CAPS, UNITS } from "../../src/shared/demo/budget";
 
@@ -112,6 +113,44 @@ test("a visitor clicks through the guided tour in a private sandbox", async ({ p
     await expect(page.getByTestId("demo-source-link")).toHaveAttribute("href", "https://github.com/nitishsjsucs/staysignal");
     const cookie = (await page.context().cookies()).find((c) => c.name === "ss_demo")!;
     expect(cookie).toMatchObject({ httpOnly: true, secure: true, sameSite: "Lax" });
+  });
+
+  await test.step("another page on the same site can neither frame the demo nor use the visitor's session", async () => {
+    // like another Worker on the account's workers.dev subdomain: the same site, so the session cookie goes with its
+    // requests, but another origin
+    const demo = new URL(page.url()).origin;
+    const sibling = `https://other.${new URL(demo).hostname}`;
+    const other = await page.context().newPage();
+    await other.route(`${sibling}/**`, (r) => r.fulfill({ contentType: "text/html", body: `<!doctype html><title>other</title><iframe id="f" src="${demo}/"></iframe>` }));
+    await other.goto(`${sibling}/`);
+    const refusals: string[] = [];
+    other.on("console", (msg) => refusals.push(msg.text()));
+    // its page cannot open the visitor's chat socket, which would let it ask and read their conversation
+    const socket = await other.evaluate(
+      (url) =>
+        new Promise<string>((resolve) => {
+          const ws = new WebSocket(url);
+          ws.onopen = () => {
+            ws.close();
+            resolve("open");
+          };
+          ws.onerror = () => resolve("refused");
+          setTimeout(() => resolve("timeout"), 10_000);
+        }),
+      `${demo.replace(/^https:/, "wss:")}/agents-ws/analyst`,
+    );
+    expect(socket).toBe("refused");
+    // by the Worker's origin rule, not by the browser
+    expect(refusals.join("\n")).toContain("Unexpected response code: 403");
+    // and a navigation it starts to the API spends nothing
+    const nav = other.waitForResponse((r) => r.url().endsWith("/api/forecast?cohort=Engineering"));
+    await other.evaluate((url) => {
+      (globalThis as unknown as { location: { href: string } }).location.href = url;
+    }, `${demo}/api/forecast?cohort=Engineering`);
+    expect((await nav).status()).toBe(403);
+    // let the navigation finish before closing the page (closing it mid-navigation can hang the browser)
+    await other.waitForURL(/\/api\/forecast\?cohort=Engineering$/);
+    await other.close();
   });
 
   await test.step("the guided tour lists the eleven beats in order", async () => {

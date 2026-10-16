@@ -1,8 +1,8 @@
 // The public demo's routes and guards (ADR 0018). /demo/session signs a visitor in to a new sandbox (if the gate admits
 // one) with the role they picked; /demo/role switches the role inside the same sandbox; /demo/reset moves the visitor
 // to a fresh sandbox and retires the old one. Every /api request of a sandbox spends units first (admitRequest).
-// demoGuard turns the dev, runner and internal routes off, bounds query values and request bodies, and requires
-// mutating requests to come from this origin. None of this runs outside SS_AUTH_MODE=demo.
+// demoGuard turns the dev, runner and internal routes off, refuses any request another site starts (src/worker/demo/
+// origin.ts), and bounds query values and request bodies. None of this runs outside SS_AUTH_MODE=demo.
 import type { Context, Hono, MiddlewareHandler } from "hono";
 import { CAPS, UNITS } from "../../shared/demo/budget";
 import { LOCAL_PRINCIPALS } from "../../shared/policy/roles";
@@ -13,6 +13,7 @@ import { cachedRefusal, rememberRefusal, rememberRetired } from "./refusals";
 import { demoGate, type GateVerdict } from "./gate";
 import type { AdmitVerdict } from "./meter";
 import { BUSY_MESSAGE_TEXT } from "./messages";
+import { CROSS_ORIGIN_MESSAGE, fromAnotherSite } from "./origin";
 
 type C = Context<AppEnv>;
 
@@ -65,18 +66,12 @@ export function tooLong(v: unknown, max: number): boolean {
 export const demoGuard: MiddlewareHandler<AppEnv> = async (c, next) => {
   if (!c.var.config.publicDemo) return next();
   if (OFF.some((re) => re.test(c.req.path))) return c.json({ error: "not found" }, 404);
+  // reads too: a navigation or an <img> from another page carries the cookie and would spend the sandbox's units
+  if (fromAnotherSite(c.req.raw)) return c.json({ error: CROSS_ORIGIN_MESSAGE }, 403);
   for (const values of Object.values(c.req.queries())) {
     if (values.some((v) => v.length > CAPS.maxQueryChars)) return c.json({ error: `query values are limited to ${CAPS.maxQueryChars} characters` }, 400);
   }
   if (c.req.method !== "GET" && c.req.method !== "HEAD") {
-    const origin = c.req.header("Origin");
-    let sameOrigin = true;
-    try {
-      sameOrigin = !origin || new URL(origin).host === new URL(c.req.url).host;
-    } catch {
-      sameOrigin = false;
-    }
-    if (!sameOrigin) return c.json({ error: "cross-origin request refused" }, 403);
     const text = await readCapped(c.req.raw, CAPS.maxBodyBytes);
     if (text === null) return c.json({ error: `request bodies are limited to ${CAPS.maxBodyBytes / 1024} KiB` }, 413);
     c.set("bodyText", text);

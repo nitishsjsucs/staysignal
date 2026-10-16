@@ -50,8 +50,10 @@ export class AnalystAgent extends AIChatAgent<Env, AnalystState> {
   override initialState: AnalystState = { role: null, provider: "stub", demoMode: false, lastTraceId: null, groundingLast: null };
   override maxPersistedMessages = 200;
 
-  /** Chat requests whose units the frame guard already spent (the public demo), by request ID. */
-  private readonly preAdmitted = new Set<string>();
+  /** Chat requests whose units the frame guard already spent (the public demo): request ID to its question. The turn
+   * takes its question from here: turns run one at a time, so a question sent while another turn runs is stored
+   * before that turn's answer, and the conversation's last message is then the answer, not the question. */
+  private readonly preAdmitted = new Map<string, string>();
   /** The sandbox's last refusal, kept in memory so a spent, ended or busy sandbox costs no further request to learn it. */
   private refused: { verdict: Refused; until: number } | null = null;
 
@@ -96,7 +98,7 @@ export class AnalystAgent extends AIChatAgent<Env, AnalystState> {
       this.replyWithout(connection, id, stop);
       return null;
     }
-    this.preAdmitted.add(id);
+    this.preAdmitted.set(id, question);
     const next = { id: last.id, role: "user", parts: [{ type: "text", text: question }] };
     return JSON.stringify({ type: CHAT_REQUEST, id, init: { method: "POST", body: JSON.stringify({ messages: [...this.messages, next], trigger: "submit-message" }) } });
   }
@@ -220,10 +222,12 @@ export class AnalystAgent extends AIChatAgent<Env, AnalystState> {
 
   override async onChatMessage(_onFinish?: unknown, options?: OnChatMessageOptions) {
     const p = this.principal();
-    // a chat request the public demo's frame guard admitted has already spent its units
-    const paid = Boolean(options?.requestId && this.preAdmitted.delete(options.requestId));
-    const last = this.messages[this.messages.length - 1];
-    const question = last?.parts.map((part) => (part.type === "text" ? part.text : "")).join(" ").trim() ?? "";
+    // a chat request the public demo's frame guard admitted has already spent its units, and carries its question
+    const admitted = options?.requestId ? this.preAdmitted.get(options.requestId) : undefined;
+    if (options?.requestId) this.preAdmitted.delete(options.requestId);
+    const paid = admitted !== undefined;
+    const last = this.messages.findLast((m) => m.role === "user");
+    const question = admitted ?? last?.parts.map((part) => (part.type === "text" ? part.text : "")).join(" ").trim() ?? "";
     const history: ModelMessage[] = [];
     const cfg = parseConfig(this.env);
     const stream = createUIMessageStream({

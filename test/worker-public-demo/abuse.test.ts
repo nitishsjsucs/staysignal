@@ -164,6 +164,23 @@ describe("the chat socket in a sandbox", () => {
     s.ws.close();
   });
 
+  it("answers two questions sent back to back each as asked", async () => {
+    // the second turn runs after the first's answer is stored, so the conversation's last message is that answer, not
+    // the second question: the turn takes its question from its own admitted request
+    const v = await visit(P.lead);
+    const s = await socket("analyst", v.cookie);
+    await settle();
+    const second = "What is the forecast for Sales over 3 months?";
+    s.ws.send(chatRequest("req1", [{ id: "q1", role: "user", parts: [{ type: "text", text: RECORDED }] }]));
+    s.ws.send(chatRequest("req2", [{ id: "q2", role: "user", parts: [{ type: "text", text: second }] }]));
+    await responseDone(s.frames, "req1");
+    await responseDone(s.frames, "req2");
+    await settle();
+    const traces = await demoJson<{ traces: { question: string | null }[] }>("/api/traces", { cookie: v.cookie });
+    expect(traces.traces.map((t) => t.question).sort()).toEqual([RECORDED, second].sort());
+    s.ws.close();
+  });
+
   it("closes a connection that sends more than 20 frames a minute", async () => {
     const v = await visit(P.lead);
     const s = await socket("analyst", v.cookie);

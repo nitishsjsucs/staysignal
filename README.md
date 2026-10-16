@@ -176,7 +176,7 @@ Skill is the reduction in count error against the trailing rate, so above 0 beat
 
 ## How it works
 
-A React app talks to one Cloudflare Worker; a Python engine builds the warehouse and fits the model locally, and the public demo and CI serve fixtures exported from it.
+A React app talks to one Cloudflare Worker, to its two agents over WebSockets and to its API over HTTP; a Python engine builds the warehouse and fits the model locally, and the public demo and CI serve fixtures exported from it.
 
 ```mermaid
 flowchart LR
@@ -199,9 +199,9 @@ flowchart LR
     WH[("dbt on DuckDB")]
     MOD["Competing-risks model"]
   end
-  UI <-->|WebSocket| AA
-  UI <-->|WebSocket| WA
-  UI -->|HTTP| API
+  UI <--> AA
+  UI <--> WA
+  UI --> API
   AA --> REG
   AA --> LLM
   WA --> WF

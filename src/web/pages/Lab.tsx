@@ -6,7 +6,7 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { modelName } from "../../shared/provenance";
 import type { LabDoc, LabIndex } from "../../shared/contracts";
-import { isRefusal, type Me, type Refusal, useQuery } from "../api";
+import { discard, isRefusal, type Me, type Refusal, useQuery } from "../api";
 import { recordedPlace } from "../demo";
 import { fmtVal, TipRow, Tooltip, useTooltip, useWidth } from "../charts/kit";
 import { ChartCard } from "../components/ChartCard";
@@ -272,7 +272,11 @@ function InterviewCard({ proposal, personas, demo }: { proposal: string; persona
   useEffect(() => {
     let alive = true;
     fetch(`/api/lab/interviews/${encodeURIComponent(proposal)}`, { credentials: "same-origin" })
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => {
+        if (r.ok) return r.json();
+        discard(r);
+        return null;
+      })
       .then((j: { recorded?: RecordedQuestion[] } | null) => {
         if (!alive || !j?.recorded) return;
         setRecorded(j.recorded);

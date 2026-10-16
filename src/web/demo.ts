@@ -1,6 +1,6 @@
 // The public demo in the browser (ADR 0018): the session calls, the guided tour's beats, and the wording that changes
 // when the visitor is not on the laptop where the model output was recorded. Nothing here runs outside the public demo.
-import { invalidate } from "./api";
+import { discard, invalidate } from "./api";
 
 export interface DemoPrincipal {
   id: string;
@@ -64,6 +64,7 @@ export type DemoAnswer = { ok: true; expires_at: number } | { ok: false; status:
 export async function demoSessionInfo(): Promise<DemoSessionInfo | "misconfigured" | null> {
   try {
     const r = await fetch("/demo/session", { credentials: "same-origin" });
+    if (!r.ok) discard(r);
     if (r.status === 503) return "misconfigured";
     if (!r.ok) return null;
     const body = (await r.json()) as Partial<DemoSessionInfo>;

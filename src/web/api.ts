@@ -14,6 +14,13 @@ export class ApiError extends Error {
   }
 }
 
+/** Releases a response whose body the app will not read. The Worker's responses are not cached (Cache-Control:
+ * no-store), and a no-store body that nobody reads keeps its request open in the browser until the page goes away, so
+ * a test waiting for the network to go idle never finishes. */
+export function discard(r: Response): void {
+  void r.body?.cancel().catch(() => undefined);
+}
+
 /** The public demo's "busy" answer, with the server's own code and message kept (ADR 0018). A spent sandbox tells the
  * app once, so it can offer a fresh sandbox instead of retrying. */
 async function busyError(r: Response): Promise<ApiError> {
@@ -56,7 +63,10 @@ export async function getJSON<T>(url: string): Promise<T> {
   const r = await fetch(url, { credentials: "same-origin" });
   if (r.status === 401) throw new ApiError(401, (await sandboxEnded(r)) ? "Your sandbox has ended" : "Sign in with the role switcher");
   if (r.status === 429) throw await busyError(r);
-  if (!r.ok) throw new ApiError(r.status, `${r.status} ${r.statusText}`);
+  if (!r.ok) {
+    discard(r);
+    throw new ApiError(r.status, `${r.status} ${r.statusText}`);
+  }
   return (await r.json()) as T;
 }
 
@@ -64,7 +74,10 @@ export async function postJSON<T>(url: string, body: unknown = {}): Promise<T> {
   const r = await fetch(url, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   if (r.status === 401) await sandboxEnded(r);
   if (r.status === 429) throw await busyError(r);
-  if (!r.ok && r.status !== 200) throw new ApiError(r.status, `${r.status} ${r.statusText}`);
+  if (!r.ok && r.status !== 200) {
+    discard(r);
+    throw new ApiError(r.status, `${r.status} ${r.statusText}`);
+  }
   return (await r.json()) as T;
 }
 

@@ -4,7 +4,7 @@
 
 _Synthetic world: these numbers test the pipeline and the uncertainty method, not real-world accuracy._
 
-Every block names the command that wrote its result file, the date it ran and the file itself. This page, the README's [Results at a glance](../README.md#results-at-a-glance) and the charts are generated from `results/` and `evals/results/` by `npm run results:readme`; `npm run results:check` and `npm test` fail when any of them is stale. How to read these numbers, and their limits: the README's limits note and the [model card](model-card.md).
+Every block names the command that wrote its result file, the date it ran and the file itself. This page, the README's [Results at a glance](../README.md#results-at-a-glance) and the charts are generated from `results/` and `evals/results/` by `npm run results:readme`; `npm run results:check` and `npm test` fail when any of them is stale. How to read these numbers, and their limits: the README's [limits](../README.md#limits) and the [model card](model-card.md).
 
 - [Forecast accuracy and calibration](#forecast-accuracy-and-calibration)
 - [Ground-truth recovery](#ground-truth-recovery)

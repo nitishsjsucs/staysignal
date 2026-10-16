@@ -6,6 +6,10 @@ import { join } from "node:path";
 
 export const START = "<!-- results:start -->";
 export const END = "<!-- results:end -->";
+export const PROOF_START = "<!-- proof:start -->";
+export const PROOF_END = "<!-- proof:end -->";
+export const LIMITS_START = "<!-- limits:start -->";
+export const LIMITS_END = "<!-- limits:end -->";
 
 export interface StreamMeasure {
   promptTokens: number | null;
@@ -134,7 +138,7 @@ export interface AgentEvalReport {
     latency_ms_p95: number | null;
     refusal_by_code?: Record<string, { gold: number; refused_with_code: number; precision: number | null; recall: number | null }>;
   };
-  results?: { category: string; ok: boolean }[];
+  results?: { category: string; ok: boolean; subcategory?: string; layer?: string }[];
 }
 
 export interface EffectsReport {
@@ -536,33 +540,93 @@ function span(values: readonly number[], fmt: (v: number) => string): string {
 
 const signedPct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
+/** A command without its runner prefix, for a table cell: "eval dq-faults", "eval:agent --model llama". */
+export function shortCommand(command: string): string {
+  return command.replace(/^uv run (--locked )?--project engine staysignal /, "").replace(/^npm run /, "").replace(" -- ", " ");
+}
+
+/** "`eval dq-faults` · [2026-10-13](results/dq-faults-2026-10-13.json)": the short command and the dated file. */
+export function source(e: Entry, base = ""): string {
+  return `\`${shortCommand(e.report.command)}\` · [${e.report.date}](${base}${e.file})`;
+}
+
+/** A table cell's source: the dated file, then the short command in small type under it. */
+export function sourceCell(e: Entry, base = ""): string {
+  return `[${e.report.date}](${base}${e.file})<br><sub>\`${shortCommand(e.report.command)}\`</sub>`;
+}
+
+/** The pre-registered hypotheses by the handling each one tests (research/PREREGISTRATION.md, "Hypotheses"). */
+export const HYPOTHESIS_NAMES: Record<string, string> = {
+  H1: "maturing late records",
+  H2: "censoring a missing extract",
+  H3a: "shock-aware ranges",
+  H3b: "shock-aware ranges",
+  H4: "deduplication",
+};
+
+const VERDICT_ORDER = ["consistent", "counts against", "descriptive"];
+
+/** "Consistent: shock-aware ranges (H3a, H3b). Count against: ... (H1, H2, H4). Descriptive: H5." */
+export function plainVerdicts(r: ResearchReport): string {
+  const groups = new Map<string, string[]>();
+  for (const [h, v] of Object.entries(r.hypotheses)) groups.set(v.verdict, [...(groups.get(v.verdict) ?? []), h]);
+  const rank = (v: string) => (VERDICT_ORDER.indexOf(v) === -1 ? 99 : VERDICT_ORDER.indexOf(v));
+  return [...groups.entries()]
+    .sort(([a], [b]) => rank(a) - rank(b))
+    .map(([verdict, hs]) => {
+      const word = hs.length > 1 ? verdict.replace(/^counts /, "count ") : verdict;
+      const names = [...new Set(hs.map((h) => HYPOTHESIS_NAMES[h]).filter((x): x is string => Boolean(x)))];
+      const label = `${word[0]!.toUpperCase()}${word.slice(1)}`;
+      return names.length && names.length <= hs.length && hs.every((h) => HYPOTHESIS_NAMES[h]) ? `${label}: ${listing(names)} (${hs.join(", ")}).` : `${label}: ${listing(hs)}.`;
+    })
+    .join(" ");
+}
+
+const levelsOf = (bt: BacktestReport, level: string) =>
+  Object.values(bt.levels)
+    .filter((l) => l.level === level)
+    .sort((a, b) => a.horizon_months - b.horizon_months);
+
+/** "yes", "no" or "about even" against the trailing rate, and the skill range. */
+function beatsTrailing(ls: readonly LevelRow[]): { word: string; range: string } {
+  const skill = ls.map((l) => l.skill_vs_hist);
+  return { word: skill.every((v) => v > 0) ? "yes" : skill.every((v) => v < 0) ? "no" : "about even", range: span(skill, signedPct) };
+}
+
+const originSpan = (bt: BacktestReport) => span(Object.values(bt.levels).map((l) => l.origins), (v) => String(v));
+
+/** The individual-level questions of an agent eval, and how many the pre-router refused with the right code. */
+function individualRefusals(r: AgentEvalReport): { refused: number; n: number } | null {
+  const xs = (r.results ?? []).filter((x) => x.category === "refusal" && x.subcategory === "individual");
+  return xs.length ? { refused: xs.filter((x) => x.ok && x.layer === "prerouter").length, n: xs.length } : null;
+}
+
 /** The README headline: one question per row, answered from the latest recorded run, with its command and date. */
 export function renderHeadline(reports: readonly Entry[]): string {
   const rows: string[] = [];
-  const recorded = (...es: Entry[]) => es.map((e) => `[${e.report.date}](${e.file})`).join(", ");
-  const row = (question: string, result: string, command: string, ...es: Entry[]) => rows.push(`| ${question} | ${result} | ${command} | ${recorded(...es)} |`);
+  const used: Entry[] = [];
+  const row = (question: string, result: string, ...es: Entry[]) => {
+    rows.push(`| ${question} | ${result} | ${es.map((e) => sourceCell(e)).join("<br>")} |`);
+    used.push(...es);
+  };
 
   const dq = latest(reports, "dq-faults");
   if (dq) {
     const xs = Object.entries(dq.report.summary);
     const sum = (f: (x: DqFaultsReport["summary"][string]) => number) => xs.reduce((a, [, x]) => a + f(x), 0);
     const warnOnly = xs.filter(([, x]) => x.detected === x.seeds && x.held === 0).map(([k]) => FAULT_SHORT[k] ?? k);
-    const result = `${sum((x) => x.detected)} of ${sum((x) => x.seeds)} detected, root ranked first in ${sum((x) => x.root_top1)}; ${sum((x) => x.held)} held${warnOnly.length ? ` (${listing(warnOnly)} only warn)` : ""}`;
-    row("Are planted data faults caught before they publish?", result, `\`${dq.report.command}\``, dq);
+    row("Are planted data faults caught before they publish?", `${sum((x) => x.detected)} of ${sum((x) => x.seeds)} detected, root cause ranked first in ${sum((x) => x.root_top1)}; ${sum((x) => x.held)} held${warnOnly.length ? ` (${listing(warnOnly)} only warn)` : ""}`, dq);
   }
 
   const bt = latest(reports, "backtest");
   if (bt) {
-    const at = (level: string) => Object.values(bt.report.levels).filter((l) => l.level === level);
-    const org = at("organization");
-    const company = at("company");
+    const org = levelsOf(bt.report, "organization");
+    const company = levelsOf(bt.report, "company");
     if (org.length && company.length) {
-      const beats = (ls: typeof org, word: string) => {
-        const skill = ls.map((l) => l.skill_vs_hist);
-        return `${skill.every((v) => v > 0) ? "yes" : skill.every((v) => v < 0) ? "no" : "about even"}, ${word}${span(skill, signedPct)}`;
-      };
-      row("Do the 80% ranges hold?", `organizations ${span(org.map((l) => l.coverage80), pct)}, company ${span(company.map((l) => l.coverage80), pct)} of mature windows (nominal 80%)`, `\`${bt.report.command}\``, bt);
-      row("Does it beat the trailing rate?", `company: ${beats(company, "skill ")}; organizations: ${beats(org, "")}`, `\`${bt.report.command}\``, bt);
+      const c = beatsTrailing(company);
+      const o = beatsTrailing(org);
+      row("Do the 80% ranges hold?", `organizations ${span(org.map((l) => l.coverage80), pct)}, company ${span(company.map((l) => l.coverage80), pct)} of mature windows (nominal 80%)`, bt);
+      row("Does it beat the trailing rate?", `over ${originSpan(bt.report)} monthly origins: company ${c.word} (skill ${c.range}); organizations ${o.word} (${o.range})`, bt);
     }
   }
 
@@ -570,18 +634,13 @@ export function renderHeadline(reports: readonly Entry[]): string {
   if (rec) {
     const shock = latest(reports, "recovery-shock");
     const c = rec.report.coverage_95;
-    let result = `${c.inside} of ${c.slopes} slopes inside their 95% intervals (Wald p = ${rec.report.wald.p_value.toFixed(3)})`;
-    let command = `\`${rec.report.command}\``;
-    if (shock) {
-      const s = shock.report.coverage_95;
-      result += `; with team shocks ${s.inside} of ${s.slopes} (p = ${shock.report.wald.p_value.toFixed(3)})`;
-      command += ` and \`${shock.report.command.split(" ").pop() ?? ""}\``;
-    }
-    row("Does the estimator recover a known truth?", result, command, rec, ...(shock ? [shock] : []));
+    let result = `${c.inside} of ${c.slopes} slopes inside their 95% intervals; joint Wald test ${rec.report.passed.wald ? "passed" : "failed"} (p = ${rec.report.wald.p_value.toFixed(3)})`;
+    if (shock) result += `; with team shocks ${shock.report.coverage_95.inside} of ${shock.report.coverage_95.slopes} (p = ${shock.report.wald.p_value.toFixed(3)})`;
+    row("Does the estimator recover a known truth?", result, rec, ...(shock ? [shock] : []));
   }
 
   const research = latest(reports, "research");
-  if (research) row("Which pre-registered hypotheses held?", verdictLine(research.report), `\`${research.report.command}\``, research);
+  if (research) row("Which pre-registered hypotheses held?", plainVerdicts(research.report), research);
 
   const agent = latest(reports, "agent-eval", (r) => r.model !== "stub");
   if (agent) {
@@ -594,11 +653,131 @@ export function renderHeadline(reports: readonly Entry[]): string {
       refusals.length ? `${refusals.filter((x) => x.ok).length} of ${refusals.length} refusals correct` : `refusals ${m.refusal_accuracy === null ? "n/a" : pct(m.refusal_accuracy)}`,
       `routing ${m.routing_accuracy === null ? "n/a" : pct(m.routing_accuracy)}`,
     ];
-    row(`Do the guardrails hold on a small local model (${(MODEL_NAMES[agent.report.model] ?? agent.report.model).replace(/ \(local\)$/, "")})?`, parts.join("; "), `\`${agent.report.command}\``, agent);
+    row(`Do the guardrails hold on a small local model (${(MODEL_NAMES[agent.report.model] ?? agent.report.model).replace(/ \(local\)$/, "")})?`, parts.join("; "), agent);
   }
 
   if (rows.length === 0) return "No recorded results yet.";
-  return [SYNTHETIC_LINE, "", "| Question | Result | Command | Recorded |", "|---|---|---|---|", ...rows].join("\n");
+  const commands = [...new Set(used.map((e) => e.report.command))];
+  return [
+    SYNTHETIC_LINE,
+    "",
+    "| Question | Result | Source |",
+    "|---|---|---|",
+    ...rows,
+    "",
+    "<details>",
+    "<summary>The commands that wrote these files</summary>",
+    "",
+    "```sh",
+    ...commands,
+    "```",
+    "",
+    "</details>",
+  ].join("\n");
+}
+
+/** The hero's proof list: four numbers from the latest runs, each with its short command and dated file. */
+export function renderProof(reports: readonly Entry[]): string {
+  const cells: { value: string; label: string; e: Entry }[] = [];
+  const dq = latest(reports, "dq-faults");
+  if (dq) {
+    const xs = Object.values(dq.report.summary);
+    cells.push({ value: `${xs.reduce((a, x) => a + x.detected, 0)} of ${xs.reduce((a, x) => a + x.seeds, 0)}`, label: "planted data faults caught before publishing", e: dq });
+  }
+  const agent = latest(reports, "agent-eval", (r) => r.model !== "stub");
+  if (agent) {
+    const ind = individualRefusals(agent.report);
+    if (ind) cells.push({ value: `${ind.refused} of ${ind.n}`, label: "individual-level questions refused before any model call", e: agent });
+    const inj = (agent.report.results ?? []).filter((x) => x.category === "injection");
+    if (inj.length) cells.push({ value: `${agent.report.metrics.injection_successes} of ${inj.length}`, label: `prompt injections that got through, on ${(MODEL_NAMES[agent.report.model] ?? agent.report.model).replace(/ \(local\)$/, "")}`, e: agent });
+  }
+  const rec = latest(reports, "recovery");
+  if (rec) cells.push({ value: `${rec.report.coverage_95.inside} of ${rec.report.coverage_95.slopes}`, label: "slopes of a known truth recovered inside their 95% intervals", e: rec });
+  if (!cells.length) return "No recorded results yet.";
+  return ["| Number | Measured on the synthetic world, with the command and the file that recorded it |", "|---:|:---|", ...cells.map((c) => `| **${c.value}** | ${c.label} <sub>${source(c.e)}</sub> |`)].join("\n");
+}
+
+/** What the limits note needs from outside results/: the published model's shock estimate and the generator's value. */
+export interface ModelContext {
+  modelFile: string;
+  sigmaOrg: number;
+  quarters: number;
+  specFile: string;
+  generatorSigmaOrg: number;
+  monteCarloFile: string;
+  parameterDraws: number;
+}
+
+export const SPEC_FILE = "engine/src/staysignal/world/spec.py";
+export const MONTE_CARLO_FILE = "engine/src/staysignal/forecast/montecarlo.py";
+
+/** Reads the latest model artifact under models/, the generator's organization shock and the default parameter draws. */
+export function loadModelContext(root: string): ModelContext | null {
+  let versions: string[] = [];
+  try {
+    versions = readdirSync(join(root, "models")).filter((v) => /^m\d{4}\.\d{2}$/.test(v)).sort();
+  } catch {
+    return null;
+  }
+  const version = versions[versions.length - 1];
+  if (!version) return null;
+  const modelFile = `models/${version}/model.json`;
+  const model = JSON.parse(readFileSync(join(root, modelFile), "utf8")) as { shocks?: { sigma_org?: number; quarters?: number } };
+  const gen = /sigma_org: float = ([\d.]+)/.exec(readFileSync(join(root, SPEC_FILE), "utf8"))?.[1];
+  const draws = /n_theta: int = (\d+)/.exec(readFileSync(join(root, MONTE_CARLO_FILE), "utf8"))?.[1];
+  if (model.shocks?.sigma_org === undefined || model.shocks.quarters === undefined || !gen || !draws) return null;
+  return { modelFile, sigmaOrg: model.shocks.sigma_org, quarters: model.shocks.quarters, specFile: SPEC_FILE, generatorSigmaOrg: Number(gen), monteCarloFile: MONTE_CARLO_FILE, parameterDraws: Number(draws) };
+}
+
+const pct0 = (v: number) => `${Math.round(v * 100)}%`;
+const cite = (label: string, e: Entry) => `[${label}](${e.file}), ${e.report.date}`;
+
+/** The README's limits: the three that matter most in a note, the rest in a fold, every number from its file. */
+export function renderLimits(reports: readonly Entry[], ctx: ModelContext | null): string {
+  const bt = latest(reports, "backtest");
+  const cmp = latest(reports, "model-comparison");
+  const cal = latest(reports, "calibration");
+  const agent = latest(reports, "agent-eval", (r) => r.model !== "stub");
+  const top: string[] = [];
+  const more: string[] = [];
+  if (bt) {
+    const company = levelsOf(bt.report, "company");
+    const org = levelsOf(bt.report, "organization");
+    top.push(`**Company ranges are too narrow.** Company 80% ranges held ${span(company.map((l) => l.coverage80), pct0)} of mature windows, organizations ${span(org.map((l) => l.coverage80), pct0)} (${cite("backtest", bt)}).`);
+    if (ctx) top.push(`**Why: one shared shock, estimated from few windows.** The organization-wide shock is estimated at ${ctx.sigmaOrg.toFixed(2)} from ${ctx.quarters} quarterly windows ([model.json](${ctx.modelFile})) against the generator's ${ctx.generatorSigmaOrg.toFixed(2)} ([spec.py](${ctx.specFile})); reported, not tuned away ([SPEC 9.3](SPEC.md#93-uncertainty-three-layers-by-monte-carlo)).`);
+    const c = beatsTrailing(company);
+    const o = beatsTrailing(org);
+    top.push(`**${c.word === "no" ? "No gain" : c.word === "yes" ? "A gain" : "No clear gain"} over the trailing rate at company level.** Over ${originSpan(bt.report)} monthly origins the company forecast's skill is ${c.range}, and organizations are ${o.word === "about even" ? "about even" : o.word === "yes" ? "ahead" : "behind"} (${o.range}). The oracle's lower error is an unattainable floor: it knows the hidden propensities.`);
+  }
+  if (cmp) {
+    const oe = (keep: (m: string) => boolean) =>
+      Object.values(cmp.report.summary).flatMap((s) => cmp.report.models.filter(keep).map((m) => (s[m] as { observed_over_expected?: number } | undefined)?.observed_over_expected).filter((v): v is number => v !== undefined));
+    const fx2 = (v: number) => v.toFixed(2);
+    const others = cmp.report.models.filter((m) => m !== "oracle");
+    more.push(`**Departures run below forecast late in the window.** On the ${cmp.report.origins.length} quarterly origins of the model comparison, observed over expected is ${span(oe((m) => m !== "oracle"), fx2)} for the model and ${others.length === 3 ? "both baselines" : "the baselines"} while the oracle sits at ${span(oe((m) => m === "oracle"), fx2)} (${cite("comparison", cmp)}): the generator's drift lowers departures in the last quarters, which no model trained on the past can see.`);
+  }
+  if (bt) {
+    const c3 = bt.report.levels["company|3"];
+    if (c3) more.push(`**Few independent windows.** Overlapping monthly windows overstate the evidence (${c3.windows} windows, ${c3.effective_windows} independent at 3 months for the company), so read single coverage figures with that in mind.`);
+  }
+  if (ctx) more.push(`**Monte Carlo noise.** Intervals use ${ctx.parameterDraws} parameter draws per run ([montecarlo.py](${ctx.monteCarloFile})); re-recording after the draws were made portable across platforms moved some coverage rates by about 10 points ([model card](docs/model-card.md#evaluation)), so single coverage figures carry simulation noise too.`);
+  if (cal) more.push(`**Modest individual signal by design.** HR-system features cannot see job search or withdrawal; individual predictions are spread too wide, though the calibration index stays small (ICI ${(cal.report.ici * 100).toFixed(1)} percentage points, ${cite("calibration", cal)}).`);
+  if (agent) {
+    const m = agent.report.metrics;
+    const oos = m.refusal_by_code?.OUT_OF_SCOPE;
+    const name = (MODEL_NAMES[agent.report.model] ?? agent.report.model).replace(/ \(local\)$/, "");
+    if (m.routing_accuracy !== null) more.push(`**The small local model is a weak router.** ${name} routes ${pct(m.routing_accuracy)} of questions correctly${oos && oos.precision !== null ? ` and over-refuses out of scope (precision ${oos.precision.toFixed(2)}; ${cite("agent eval", agent)})` : ` (${cite("agent eval", agent)})`}; the demo replays recorded Qwen3.6-27B turns.`);
+  }
+  if (!top.length && !more.length) return "No recorded results yet.";
+  const words = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"];
+  return [
+    "> [!NOTE]",
+    `> **The ${(words[top.length] ?? String(top.length)).toLowerCase()} limits that matter most**, on the synthetic world:`,
+    ...top.map((l) => `> - ${l}`),
+    ...(more.length
+      ? ["", "<details>", `<summary><b>${words[more.length] ?? more.length} more limits</b></summary>`, "", ...more.map((l) => `- ${l}`), "", "</details>"]
+      : []),
+  ].join("\n");
 }
 
 /** "H3a and H3b consistent; H1, H2 and H4 count against; H5 descriptive", in the order the verdicts first appear. */
@@ -654,7 +833,7 @@ export function renderResultsPage(reports: readonly Entry[]): string {
   const { current, earlier } = partitionCurrent(reports);
   const kinds = new Set(reports.map((e) => e.report.kind));
   out.push(
-    "Every block names the command that wrote its result file, the date it ran and the file itself. This page, the README's [Results at a glance](../README.md#results-at-a-glance) and the charts are generated from `results/` and `evals/results/` by `npm run results:readme`; `npm run results:check` and `npm test` fail when any of them is stale. How to read these numbers, and their limits: the README's limits note and the [model card](model-card.md).",
+    "Every block names the command that wrote its result file, the date it ran and the file itself. This page, the README's [Results at a glance](../README.md#results-at-a-glance) and the charts are generated from `results/` and `evals/results/` by `npm run results:readme`; `npm run results:check` and `npm test` fail when any of them is stale. How to read these numbers, and their limits: the README's [limits](../README.md#limits) and the [model card](model-card.md).",
     "",
   );
   const sections = PAGE_SECTIONS.filter((s) => s.kinds.some((k) => kinds.has(k)));
@@ -677,9 +856,17 @@ export function renderResultsPage(reports: readonly Entry[]): string {
   return out.join("\n");
 }
 
-export function replaceSection(readme: string, body: string): string {
-  const a = readme.indexOf(START);
-  const b = readme.indexOf(END);
-  if (a === -1 || b === -1 || b < a) throw new Error("README results markers not found");
-  return `${readme.slice(0, a + START.length)}\n${body}\n${readme.slice(b)}`;
+/** Replaces what lies between one pair of markers (the results headline by default). */
+export function replaceSection(readme: string, body: string, start = START, end = END): string {
+  const a = readme.indexOf(start);
+  const b = readme.indexOf(end);
+  if (a === -1 || b === -1 || b < a) throw new Error(`README markers ${start} and ${end} not found`);
+  return `${readme.slice(0, a + start.length)}\n${body}\n${readme.slice(b)}`;
+}
+
+/** The README with every generated section current: the proof strip, the results headline and the limits. */
+export function renderReadme(readme: string, reports: readonly Entry[], ctx: ModelContext | null): string {
+  let out = replaceSection(readme, renderProof(reports), PROOF_START, PROOF_END);
+  out = replaceSection(out, renderHeadline(reports));
+  return replaceSection(out, renderLimits(reports, ctx), LIMITS_START, LIMITS_END);
 }

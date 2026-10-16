@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="472" viewBox="0 0 1000 472" role="img" aria-labelledby="review-states-dark-title review-states-dark-desc">
+<title id="review-states-dark-title">Approving a review</title>
+<desc id="review-states-dark-desc">Every transition, refusals included, is a new entry in the hash-chained action log; nothing is edited or deleted. Code: src/worker/agents/workspace-agent.ts (approve, reject, rollback)</desc>
+<style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
+<rect x="0.5" y="0.5" width="999" height="471" rx="10" fill="#1a1a19" stroke="#2c2c2a"/>
+<text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#ffffff">Approving a review</text>
+<text x="28.0" y="75.0" font-size="15" fill="#c3c2b7">Every transition, refusals included, is a new entry in the hash-chained action log; nothing is edited or deleted.</text>
+<defs><marker id="review-states-dark-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#a3a29a"/></marker><marker id="review-states-dark-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#3987e5"/></marker></defs>
+<circle cx="44.0" cy="211.0" r="9" fill="#ffffff"/>
+<rect x="80.0" y="181.0" width="170.0" height="60.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="165.0" y="206.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Draft</text>
+<text x="165.0" y="226.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">the chat prepares it</text>
+<rect x="346.0" y="181.0" width="150.0" height="60.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="421.0" y="206.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Submitted</text>
+<text x="421.0" y="226.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">by a lead</text>
+<rect x="612.0" y="181.0" width="150.0" height="60.0" rx="8" fill="rgba(57, 135, 229, 0.14)" stroke="#3987e5" stroke-width="2"/>
+<text x="687.0" y="206.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Approved</text>
+<text x="687.0" y="226.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">creates owned tasks</text>
+<rect x="834.0" y="181.0" width="138.0" height="60.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="903.0" y="206.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Rolled back</text>
+<text x="903.0" y="226.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">with a reason</text>
+<rect x="346.0" y="327.0" width="150.0" height="56.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="421.0" y="360.3" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Rejected</text>
+<path d="M53.0 211.0L80.0 211.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#review-states-dark-arrow)"/>
+<path d="M250.0 211.0L346.0 211.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#review-states-dark-arrow)"/>
+<rect x="270.3" y="188.0" width="55.5" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="298.0" y="201.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">submits</text>
+<path d="M496.0 211.0L612.0 211.0" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" marker-end="url(#review-states-dark-accent)"/>
+<rect x="519.3" y="172.0" width="69.5" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="554.0" y="185.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">a different</text>
+<rect x="508.9" y="188.0" width="90.3" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="554.0" y="201.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">lead approves</text>
+<path d="M762.0 211.0L834.0 211.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#review-states-dark-arrow)"/>
+<rect x="765.0" y="188.0" width="66.0" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="798.0" y="201.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">rolls back</text>
+<path d="M903.0 181.0L903.0 139.0L687.0 139.0L687.0 181.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#review-states-dark-arrow)"/>
+<rect x="681.1" y="110.0" width="227.8" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="795.0" y="123.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">rolls back the rollback, with a reason</text>
+<path d="M421.0 241.0L421.0 327.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#review-states-dark-arrow)"/>
+<rect x="424.0" y="275.0" width="57.3" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="428.0" y="288.4" font-size="12.5" fill="#c3c2b7">rejected</text>
+<rect x="612.0" y="299.0" width="360" height="84" rx="8" fill="#141413" stroke="#f08c8c" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="628.0" y="327.4" font-size="12.5" fill="#ffffff">If the lead who submitted it tries to approve it, the</text>
+<text x="628.0" y="345.4" font-size="12.5" fill="#ffffff">attempt is refused with SELF_APPROVAL and logged;</text>
+<text x="628.0" y="363.4" font-size="12.5" fill="#ffffff">the review stays submitted.</text>
+<path d="M612.0 341.0L548.0 341.0L548.0 223.0L498.0 223.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#review-states-dark-arrow)"/>
+<line x1="28.0" y1="429.0" x2="972.0" y2="429.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="28.0" y="450.0" font-size="12.5" fill="#a3a29a">Code: src/worker/agents/workspace-agent.ts (approve, reject, rollback)</text>
+</svg>

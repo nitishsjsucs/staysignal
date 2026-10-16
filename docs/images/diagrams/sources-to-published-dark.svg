@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="816" viewBox="0 0 1000 816" role="img" aria-labelledby="sources-to-published-dark-title sources-to-published-dark-desc">
+<title id="sources-to-published-dark-title">From sources to a published forecast</title>
+<desc id="sources-to-published-dark-desc">Each source lands once; the checks and the candidate run meet at the publication gate, which has three outcomes. Code: engine/src/staysignal (ingest, features, model, quality), warehouse/ (dbt) and src/worker/workflows/routine-workflow.ts</desc>
+<style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
+<rect x="0.5" y="0.5" width="999" height="815" rx="10" fill="#1a1a19" stroke="#2c2c2a"/>
+<text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#ffffff">From sources to a published forecast</text>
+<text x="28.0" y="75.0" font-size="15" fill="#c3c2b7">Each source lands once; the checks and the candidate run meet at the publication gate, which has three outcomes.</text>
+<defs><marker id="sources-to-published-dark-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#a3a29a"/></marker><marker id="sources-to-published-dark-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#3987e5"/></marker></defs>
+<rect x="88.0" y="95.0" width="210.0" height="64.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="193.0" y="122.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Sources</text>
+<text x="193.0" y="142.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">HRIS, payroll, ATS, org</text>
+<path d="M350.0 102.0A105.0 7 0 0 1 560.0 102.0V152.0A105.0 7 0 0 1 350.0 152.0Z" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<path d="M350.0 102.0A105.0 7 0 0 0 560.0 102.0" fill="none" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="455.0" y="126.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Landing</text>
+<text x="455.0" y="146.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">content-addressed, read-only</text>
+<rect x="612.0" y="95.0" width="240.0" height="64.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="732.0" y="122.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">dbt staging</text>
+<text x="732.0" y="142.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">versioned mappings, as of a cutoff</text>
+<path d="M298.0 127.0L350.0 127.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<path d="M560.0 127.0L612.0 127.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<rect x="340.0" y="219.0" width="200.0" height="60.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="440.0" y="244.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Checks</text>
+<text x="440.0" y="264.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">every source, every run</text>
+<rect x="612.0" y="219.0" width="240.0" height="60.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="732.0" y="244.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Point-in-time features</text>
+<text x="732.0" y="264.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">as known at the cutoff</text>
+<rect x="612.0" y="319.0" width="240.0" height="60.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="732.0" y="344.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Competing-risks model</text>
+<text x="732.0" y="364.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">80% and 95% ranges</text>
+<rect x="612.0" y="419.0" width="240.0" height="60.0" rx="8" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="732.0" y="454.3" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Candidate run</text>
+<path d="M688.0 159.0L688.0 189.0L440.0 189.0L440.0 219.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<path d="M732.0 159.0L732.0 219.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<path d="M732.0 279.0L732.0 319.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<path d="M732.0 379.0L732.0 419.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<path d="M584.0 509.0L682.0 559.0L584.0 609.0L486.0 559.0Z" stroke-linejoin="round" fill="#1a1a19" stroke="#a3a29a" stroke-width="1.25"/>
+<text x="584.0" y="554.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Publication</text>
+<text x="584.0" y="573.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">gate</text>
+<path d="M440.0 279.0L440.0 559.0L486.0 559.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<path d="M732.0 479.0L732.0 559.0L682.0 559.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<rect x="238.0" y="685.0" width="220.0" height="64.0" rx="8" fill="rgba(57, 135, 229, 0.14)" stroke="#3987e5" stroke-width="2"/>
+<text x="348.0" y="712.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Published</text>
+<text x="348.0" y="732.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">a new version beside the old one</text>
+<rect x="474.0" y="685.0" width="220.0" height="64.0" rx="8" fill="#1a1a19" stroke="#f08c8c" stroke-width="2"/>
+<text x="584.0" y="712.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Held for review</text>
+<text x="584.0" y="732.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">the published forecast stays</text>
+<rect x="710.0" y="685.0" width="220.0" height="64.0" rx="8" fill="#1a1a19" stroke="#fab219" stroke-width="2"/>
+<text x="820.0" y="712.8" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Waits for approval</text>
+<text x="820.0" y="732.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">a person decides</text>
+<path d="M584.0 609.0L584.0 643.0L348.0 643.0L348.0 685.0" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-accent)"/>
+<rect x="373.2" y="634.0" width="185.5" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="466.0" y="647.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">checks pass, within tolerance</text>
+<path d="M584.0 643.0L584.0 685.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<rect x="587.0" y="656.0" width="83.8" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="591.0" y="669.4" font-size="12.5" fill="#c3c2b7">a check fails</text>
+<path d="M584.0 643.0L820.0 643.0L820.0 685.0" fill="none" stroke="#a3a29a" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#sources-to-published-dark-arrow)"/>
+<rect x="630.6" y="634.0" width="154.8" height="18.0" rx="4" fill="#1a1a19"/>
+<text x="708.0" y="647.4" font-size="12.5" text-anchor="middle" fill="#c3c2b7">change beyond tolerance</text>
+<line x1="28.0" y1="773.0" x2="972.0" y2="773.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="28.0" y="794.0" font-size="12.5" fill="#a3a29a">Code: engine/src/staysignal (ingest, features, model, quality), warehouse/ (dbt) and src/worker/workflows/routine-workflow.ts</text>
+</svg>

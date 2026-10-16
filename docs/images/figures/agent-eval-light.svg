@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="560" height="453" viewBox="0 0 560 453" role="img" aria-labelledby="agent-eval-light-title agent-eval-light-desc">
 <title id="agent-eval-light-title">Agent eval on a small local model</title>
-<desc id="agent-eval-light-desc">200 synthetic questions to Qwen3-1.7B on this laptop, through the same turn as the chat dock; latency p50 6.3 s. The public demo replays recorded Qwen3.6-27B turns instead. Synthetic data (fictional Larkspur Systems) · npm run eval:agent -- --model llama · 2026-10-13 · evals/results/agent-llama-2026-10-13.json</desc>
+<desc id="agent-eval-light-desc">200 synthetic questions to Qwen3-1.7B run locally on the author's laptop, through the same turn as the chat dock; latency p50 6.3 s. The public demo replays recorded Qwen3.6-27B turns instead. Synthetic data (fictional Larkspur Systems) · npm run eval:agent -- --model llama · 2026-10-13 · evals/results/agent-llama-2026-10-13.json</desc>
 <style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
 <rect x="0.5" y="0.5" width="559" height="452" rx="10" fill="#fcfcfb" stroke="#e6e5df"/>
 <text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#0b0b0b">Agent eval on a small local model</text>
-<text x="28.0" y="75.0" font-size="15" fill="#52514e">200 synthetic questions to Qwen3-1.7B on this laptop, through the</text>
-<text x="28.0" y="96.0" font-size="15" fill="#52514e">same turn as the chat dock; latency p50 6.3 s. The public demo</text>
-<text x="28.0" y="117.0" font-size="15" fill="#52514e">replays recorded Qwen3.6-27B turns instead.</text>
+<text x="28.0" y="75.0" font-size="15" fill="#52514e">200 synthetic questions to Qwen3-1.7B run locally on the author's</text>
+<text x="28.0" y="96.0" font-size="15" fill="#52514e">laptop, through the same turn as the chat dock; latency p50 6.3 s. The</text>
+<text x="28.0" y="117.0" font-size="15" fill="#52514e">public demo replays recorded Qwen3.6-27B turns instead.</text>
 <text x="28.0" y="157.9" font-size="14" fill="#52514e">Routing</text>
 <path d="M214.0 145.0H422.0Q426.0 145.0 426.0 149.0V157.0Q426.0 161.0 422.0 161.0H214.0Z" fill="rgba(42, 120, 214, 0.1)"/>
 <path d="M214.0 145.0H319.5Q323.5 145.0 323.5 149.0V157.0Q323.5 161.0 319.5 161.0H214.0Z" fill="#2a78d6"/>

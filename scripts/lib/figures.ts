@@ -23,6 +23,8 @@ export interface Theme {
   other: string;
   accent: string;
   accentInk: string;
+  critical: string;
+  warning: string;
 }
 
 /** The design token behind each palette slot; a test checks every value against tokens.css in both modes. */
@@ -41,21 +43,23 @@ export const TOKEN_OF: Record<Exclude<keyof Theme, "mode">, string> = {
   other: "--series-other",
   accent: "--accent",
   accentInk: "--accent-ink",
+  critical: "--critical-ink",
+  warning: "--warning-ink",
 };
 
 export const THEMES: readonly Theme[] = [
-  { mode: "light", surface: "#fcfcfb", sunk: "#f3f2ee", border: "#e6e5df", ink: "#0b0b0b", ink2: "#52514e", ink3: "#6d6c67", grid: "#e1e0d9", axis: "#c3c2b7", vol: "#2a78d6", band80: "rgba(42, 120, 214, 0.2)", band95: "rgba(42, 120, 214, 0.1)", other: "#898781", accent: "#1c5cab", accentInk: "#ffffff" },
-  { mode: "dark", surface: "#1a1a19", sunk: "#141413", border: "#2c2c2a", ink: "#ffffff", ink2: "#c3c2b7", ink3: "#a3a29a", grid: "#2c2c2a", axis: "#383835", vol: "#3987e5", band80: "rgba(57, 135, 229, 0.28)", band95: "rgba(57, 135, 229, 0.14)", other: "#898781", accent: "#86b6ef", accentInk: "#0b0b0b" },
+  { mode: "light", surface: "#fcfcfb", sunk: "#f3f2ee", border: "#e6e5df", ink: "#0b0b0b", ink2: "#52514e", ink3: "#6d6c67", grid: "#e1e0d9", axis: "#c3c2b7", vol: "#2a78d6", band80: "rgba(42, 120, 214, 0.2)", band95: "rgba(42, 120, 214, 0.1)", other: "#898781", accent: "#1c5cab", accentInk: "#ffffff", critical: "#a62a2a", warning: "#8a5a00" },
+  { mode: "dark", surface: "#1a1a19", sunk: "#141413", border: "#2c2c2a", ink: "#ffffff", ink2: "#c3c2b7", ink3: "#a3a29a", grid: "#2c2c2a", axis: "#383835", vol: "#3987e5", band80: "rgba(57, 135, 229, 0.28)", band95: "rgba(57, 135, 229, 0.14)", other: "#898781", accent: "#86b6ef", accentInk: "#0b0b0b", critical: "#f08c8c", warning: "#fab219" },
 ];
 
 /** Equivalence bounds registered before any run (research/PREREGISTRATION.md, "Equivalence bounds"). */
 const OE_BOUNDS: [number, number] = [0.95, 1.05];
 const COV80_BOUNDS: [number, number] = [0.75, 0.85];
 
-const FULL = 1000;
+export const FULL = 1000;
 const HALF = 560;
-const PAD = 28;
-const FONT = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
+export const PAD = 28;
+export const FONT = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const SYNTHETIC = "Synthetic data (fictional Larkspur Systems)";
 
@@ -67,7 +71,7 @@ export function fx(v: number, d = 1): string {
 
 const pct = (v: number, d = 1) => `${fx(v * 100, d)}%`;
 
-function esc(s: string): string {
+export function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
@@ -99,25 +103,25 @@ export function wrap(s: string, max: number, size: number, weight = 400): string
   return lines;
 }
 
-interface TextOpts {
+export interface TextOpts {
   size?: number;
   weight?: number;
   fill: string;
   anchor?: "start" | "middle" | "end";
 }
 
-function text(x: number, y: number, s: string, o: TextOpts): string {
+export function text(x: number, y: number, s: string, o: TextOpts): string {
   const size = o.size ?? 14;
   return `<text x="${fx(x)}" y="${fx(y)}" font-size="${size}"${o.weight ? ` font-weight="${o.weight}"` : ""}${o.anchor && o.anchor !== "start" ? ` text-anchor="${o.anchor}"` : ""} fill="${o.fill}">${esc(s)}</text>`;
 }
 
 /** Text vertically centered on y. */
-const centered = (x: number, y: number, s: string, o: TextOpts) => text(x, y + (o.size ?? 14) * 0.35, s, o);
+export const centered = (x: number, y: number, s: string, o: TextOpts) => text(x, y + (o.size ?? 14) * 0.35, s, o);
 
-const line = (x1: number, y1: number, x2: number, y2: number, stroke: string, width = 1, dash?: string) =>
+export const line = (x1: number, y1: number, x2: number, y2: number, stroke: string, width = 1, dash?: string) =>
   `<line x1="${fx(x1)}" y1="${fx(y1)}" x2="${fx(x2)}" y2="${fx(y2)}" stroke="${stroke}" stroke-width="${width}"${dash ? ` stroke-dasharray="${dash}"` : ""}/>`;
 
-const rect = (x: number, y: number, w: number, h: number, fill: string, rx = 0) => `<rect x="${fx(x)}" y="${fx(y)}" width="${fx(w)}" height="${fx(h)}"${rx ? ` rx="${rx}"` : ""} fill="${fill}"/>`;
+export const rect = (x: number, y: number, w: number, h: number, fill: string, rx = 0) => `<rect x="${fx(x)}" y="${fx(y)}" width="${fx(w)}" height="${fx(h)}"${rx ? ` rx="${rx}"` : ""} fill="${fill}"/>`;
 
 /** A filled dot with a surface ring, or a hollow one. */
 function dot(x: number, y: number, r: number, color: string, th: Theme, hollow = false): string {
@@ -135,9 +139,9 @@ function hbar(x0: number, y: number, w: number, h: number, fill: string, r = 4):
   return `<path d="M${fx(x0)} ${fx(y)}H${fx(x0 + w - rr)}Q${fx(x0 + w)} ${fx(y)} ${fx(x0 + w)} ${fx(y + rr)}V${fx(y + h - rr)}Q${fx(x0 + w)} ${fx(y + h)} ${fx(x0 + w - rr)} ${fx(y + h)}H${fx(x0)}Z" fill="${fill}"/>`;
 }
 
-type Glyph = "band95" | "band80" | "line" | "dash" | "dot" | "ring" | "shade";
+export type Glyph = "band95" | "band80" | "line" | "dash" | "dot" | "ring" | "shade";
 
-interface LegendItem {
+export interface LegendItem {
   glyph: Glyph;
   color?: string;
   label: string;
@@ -162,14 +166,14 @@ function glyph(g: Glyph, x: number, cy: number, th: Theme, color = th.vol): stri
   }
 }
 
-interface Geom {
+export interface Geom {
   x0: number;
   x1: number;
   y0: number;
   y1: number;
 }
 
-interface Chart {
+export interface Chart {
   name: string;
   width: number;
   title: string;
@@ -185,7 +189,7 @@ function footerLine(command: string, dates: string, files: string, extra = ""): 
 }
 
 /** Lays out the card: title, subtitle, legend, the chart's body and the synthetic-data footer. */
-function card(c: Chart, th: Theme): string {
+export function card(c: Chart, th: Theme): string {
   const inner = c.width - 2 * PAD;
   const parts: string[] = [];
   let y = PAD;
@@ -353,7 +357,7 @@ function coverage(e: { file: string; report: BacktestReport }): Chart | null {
 const MODEL_LABEL: Record<string, string> = { "dtcr-mnl": "StaySignal model", hist: "Trailing rate", oracle: "Oracle (knows the hidden truth)" };
 
 /** F3: count error of the model against the trailing rate and the oracle, by level and horizon. */
-function modelVsTrailing(e: { file: string; report: ModelComparisonReport }): Chart | null {
+function modelVsTrailing(e: { file: string; report: ModelComparisonReport }, bt: { file: string; report: BacktestReport } | null): Chart | null {
   const models = ["dtcr-mnl", "hist", "oracle"].filter((m) => e.report.models.includes(m));
   if (!models.includes("dtcr-mnl") || !models.includes("hist")) return null;
   const mae = (s: ModelComparisonReport["summary"][string], m: string) => (s[m] as { mae: number } | undefined)?.mae;
@@ -365,11 +369,14 @@ function modelVsTrailing(e: { file: string; report: ModelComparisonReport }): Ch
     const cells = panels.find((p) => p.level === level)?.cells ?? [];
     return `${cells.filter((s) => (mae(s, "dtcr-mnl") ?? Infinity) < (mae(s, "hist") ?? -Infinity)).length} of ${cells.length}`;
   };
+  const companyWindows = Math.max(...(panels[0]?.cells ?? []).map((s) => s.windows));
+  const monthly = bt ? Object.values(bt.report.levels).map((l) => l.origins) : [];
+  const headline = monthly.length ? ` The monthly backtest (${Math.min(...monthly)} to ${Math.max(...monthly)} origins) is the headline answer.` : "";
   return {
     name: "model-vs-trailing",
     width: HALF,
     title: "Count error against the trailing rate",
-    subtitle: `Mean absolute error on the same ${e.report.origins.length} quarterly origins for every model; lower is better. The model is below the trailing rate at ${beats("company")} horizons for the company and ${beats("organization")} for organizations.`,
+    subtitle: `Mean absolute error on the same ${e.report.origins.length} quarterly origins for every model, ${companyWindows} windows per company cell; lower is better. The model is below the trailing rate at ${beats("company")} horizons for the company and ${beats("organization")} for organizations, too few windows to establish a difference.${headline}`,
     legend: models.map((m) => ({ glyph: m === "oracle" ? "ring" : "dot", color: m === "dtcr-mnl" ? "vol" : m === "hist" ? "other" : "ink", label: MODEL_LABEL[m] ?? m }) as LegendItem),
     footer: footerLine(e.report.command, e.report.date, e.file),
     bodyHeight: 250,
@@ -387,16 +394,17 @@ function modelVsTrailing(e: { file: string; report: ModelComparisonReport }): Ch
         out.push(text(px, g.y0 + 12, p.label, { fill: th.ink, weight: 600 }), text(px, g.y0 + 32, "MAE (departures)", { fill: th.ink3 }));
         const top = Math.max(...p.cells.flatMap((s) => models.map((m) => mae(s, m) ?? 0)));
         const y = scaleLinear().domain([0, top]).nice().range([y1, y0]);
-        const x = scalePoint<number>().domain(p.cells.map((s) => s.horizon_months)).range([x0, x1]).padding(0.6);
+        // horizons on a linear time axis, so the line from 3 to 6 months is drawn half again as long as 1 to 3
+        const x = scaleLinear().domain([0, Math.max(...p.cells.map((s) => s.horizon_months)) + 0.75]).range([x0, x1]);
         for (const t of y.ticks(4)) out.push(line(x0, y(t), x1, y(t), th.grid), text(x0 - 8, y(t) + 5, String(t), { fill: th.ink3, anchor: "end" }));
         out.push(line(x0, y1, x1, y1, th.axis));
-        const dx = (m: string) => (models.indexOf(m) - (models.length - 1) / 2) * 12;
+        const dx = (m: string) => (models.indexOf(m) - (models.length - 1) / 2) * 7;
         for (const m of models) {
-          const pts = p.cells.map((s) => [(x(s.horizon_months) ?? 0) + dx(m), y(mae(s, m) ?? 0)] as [number, number]);
+          const pts = p.cells.map((s) => [x(s.horizon_months) + dx(m), y(mae(s, m) ?? 0)] as [number, number]);
           out.push(`<path d="${path(pts)}" fill="none" stroke="${color(m)}" stroke-width="1.5" stroke-opacity="0.45"/>`);
           for (const [px2, py] of pts) out.push(dot(px2, py, m === "oracle" ? 4.5 : 5, color(m), th, m === "oracle"));
         }
-        for (const s of p.cells) out.push(text(x(s.horizon_months) ?? 0, y1 + 22, String(s.horizon_months), { fill: th.ink3, anchor: "middle" }));
+        for (const s of p.cells) out.push(text(x(s.horizon_months), y1 + 22, String(s.horizon_months), { fill: th.ink3, anchor: "middle" }));
         out.push(text((x0 + x1) / 2, y1 + 42, "Horizon (months)", { fill: th.ink3, anchor: "middle" }));
       });
       return out.join("\n");
@@ -418,12 +426,21 @@ function dqFaults(runs: { file: string; report: DqFaultsReport }[]): Chart | nul
   const held = xs.reduce((a, [, v]) => a + v.held, 0);
   const warnOnly = xs.filter(([, v]) => v.detected === v.seeds && v.held === 0).map(([k]) => FAULT_SHORT[k] ?? k);
   const seeds = Math.max(...xs.map(([, v]) => v.seeds));
+  // what changed between the runs, and the checks that first fired on that fault in the later one
+  const changes = earlier
+    ? xs.flatMap(([k, v]) => {
+        const b = earlier.report.summary[k];
+        if (!b || b.detected === v.detected) return [];
+        const added = v.checks.filter((c) => !b.checks.includes(c));
+        return [`${(FAULT_SHORT[k] ?? k)} ${b.detected} to ${v.detected} of ${v.seeds}${added.length ? ` (${listing(added)})` : ""}`];
+      })
+    : [];
   const rowH = 34;
   return {
     name: "dq-faults",
     width: HALF,
     title: "Planted data faults caught before publishing",
-    subtitle: `Each fault planted in ${seeds} copies of the small world. Latest run: ${detected} of ${total} detected and ${held} held${warnOnly.length ? `; ${listing(warnOnly)} only warn` : ""}.`,
+    subtitle: `Each fault planted in ${seeds} copies of the small world. Latest run: ${detected} of ${total} detected and ${held} held${warnOnly.length ? `; ${listing(warnOnly)} only warn` : ""}.${changes.length ? ` Since ${earlier?.report.date}: ${listing(changes)}.` : ""}`,
     legend: [...(earlier ? [{ glyph: "ring" as const, color: "other", label: `${earlier.report.date}: ${suiteOf(earlier.report)}` }] : []), { glyph: "dot", label: `${later.report.date}: ${suiteOf(later.report)}` }],
     footer: footerLine(later.report.command, earlier ? `${earlier.report.date} and ${later.report.date}` : later.report.date, earlier ? `${earlier.file}, ${later.file}` : later.file),
     bodyHeight: 24 + xs.length * rowH + 30,
@@ -440,7 +457,7 @@ function dqFaults(runs: { file: string; report: DqFaultsReport }[]): Chart | nul
         const my = y0 + i * rowH + rowH / 2;
         out.push(centered(g.x0, my, FAULT_LABEL[k] ?? k, { fill: th.ink2 }));
         const before = earlier?.report.summary[k];
-        if (before && before.detected !== v.detected) out.push(line(x(before.detected), my, x(v.detected), my, th.axis, 3));
+        if (before && before.detected !== v.detected) out.push(line(x(before.detected), my, x(v.detected), my, th.ink3, 2));
         if (before) out.push(dot(x(before.detected), my, 5, th.other, th, true));
         out.push(dot(x(v.detected), my, 5.5, th.vol, th));
         out.push(centered(g.x1, my, `${v.held} of ${v.seeds}`, { fill: th.ink2, anchor: "end" }));
@@ -457,7 +474,7 @@ const EVAL_ROWS: readonly [string, string][] = [
   ["injection", "Injections resisted"],
   ["multi_turn", "Multi-turn"],
 ];
-const EVAL_MODEL: Record<string, string> = { llama: "Qwen3-1.7B on this laptop", mlx: "Qwen3.6-27B on this laptop", stub: "the scripted stub" };
+const EVAL_MODEL: Record<string, string> = { llama: "Qwen3-1.7B run locally on the author's laptop", mlx: "Qwen3.6-27B run locally on the author's laptop", stub: "the scripted stub" };
 
 /** F5: the latest agent eval of a real model, by category. */
 function agentEval(e: { file: string; report: AgentEvalReport }): Chart | null {
@@ -642,8 +659,17 @@ function recovery(rec: { file: string; report: RecoveryReport }, shock: { file: 
           out.push(line(x0, sy(t), x0 + side, sy(t), th.grid), text(x0 - 10, sy(t) + 5, fx(t, Number.isInteger(t) ? 0 : 1), { fill: th.ink3, anchor: "end" }));
         }
         out.push(line(sx(domain[0]), sy(domain[0]), sx(domain[1]), sy(domain[1]), th.ink3, 1.5));
-        for (const s of p.slopes) out.push(line(sx(s.truth), sy(s.estimate - 1.96 * s.se), sx(s.truth), sy(s.estimate + 1.96 * s.se), s.inside_95 ? th.vol : th.ink, 1.5));
-        for (const s of p.slopes) out.push(dot(sx(s.truth), sy(s.estimate), s.inside_95 ? 4.5 : 5, s.inside_95 ? th.vol : th.ink, th, !s.inside_95));
+        // the slopes outside their intervals last, larger and named, so they stand out of the cluster
+        const ordered = [...p.slopes.filter((s) => s.inside_95), ...p.slopes.filter((s) => !s.inside_95)];
+        for (const s of ordered) out.push(line(sx(s.truth), sy(s.estimate - 1.96 * s.se), sx(s.truth), sy(s.estimate + 1.96 * s.se), s.inside_95 ? th.vol : th.ink, s.inside_95 ? 1.5 : 2));
+        for (const s of ordered) out.push(dot(sx(s.truth), sy(s.estimate), s.inside_95 ? 4.5 : 6.5, s.inside_95 ? th.vol : th.ink, th, !s.inside_95));
+        p.slopes
+          .filter((s) => !s.inside_95)
+          .forEach((s, k) => {
+            const lx = sx(s.truth) + 12;
+            const ly = sy(s.estimate) + 4 + k * 18;
+            out.push(`<line x1="${fx(sx(s.truth) + 6)}" y1="${fx(sy(s.estimate))}" x2="${fx(lx + 2)}" y2="${fx(ly - 4)}" stroke="${th.ink}" stroke-width="1"/>`, text(lx + 6, ly, `${s.cause}: ${s.column}`, { size: 13, fill: th.ink }));
+          });
         out.push(text(x0 + side / 2, yb + 42, p.axis, { fill: th.ink3, anchor: "middle" }), text(px, g.y0 + 34, "Estimated slope", { fill: th.ink3 }));
       });
       return out.join("\n");
@@ -728,7 +754,7 @@ export function demoButton(th: Theme): string {
 }
 
 /** Resolves a legend color name ("other", "ink", ...) to the theme's value. */
-function resolveLegend(c: Chart, th: Theme): Chart {
+export function resolveLegend(c: Chart, th: Theme): Chart {
   return { ...c, legend: c.legend.map((l) => ({ ...l, color: l.color ? ((th as unknown as Record<string, string>)[l.color] ?? l.color) : th.vol })) };
 }
 
@@ -745,7 +771,7 @@ function chartsFor(reports: readonly Entry[]): Chart[] {
     "backtest-company-3m": () => (bt ? backtestCompany(bt) : null),
     coverage: () => (bt ? coverage(bt) : null),
     reliability: () => (cal ? reliability(cal) : null),
-    "model-vs-trailing": () => (cmp ? modelVsTrailing(cmp) : null),
+    "model-vs-trailing": () => (cmp ? modelVsTrailing(cmp, bt) : null),
     recovery: () => (rec ? recovery(rec, latest(reports, "recovery-shock")) : null),
     research: () => (res ? research(res) : null),
     "dq-faults": () => dqFaults(runsOf(reports, "dq-faults")),

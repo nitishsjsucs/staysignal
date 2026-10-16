@@ -1,5 +1,8 @@
 # StaySignal v1 Specification
 
+> [!NOTE]
+> This is the design as written on 2026-10-12, before any code; it is kept as the record of what was planned and why. What is built, and how far, is in [docs/STATUS.md](docs/STATUS.md) and the [README](README.md).
+
 Status: architect draft, 2026-10-12, revised the same day after review round 1 (three independent reviews; section 29 logs every finding and how it was resolved). No code exists yet. Builders read this file first, then `PROGRESS.md` (created in M0) for what is done, the demo date and the active schedule variant (section 24). Every version and platform fact marked "verified" was checked on 2026-10-11 or 2026-10-12 (section 27).
 
 StaySignal forecasts voluntary departures for a team or organization, shows why the forecast deserves trust, and turns it into an accountable People Partner review. The statistical model computes probabilities, the warehouse computes metrics, server-side rules control access and actions, and LLM agents only route questions, orchestrate tools and explain computed results.

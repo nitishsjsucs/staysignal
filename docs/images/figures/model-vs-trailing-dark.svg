@@ -1,78 +1,80 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="560" height="538" viewBox="0 0 560 538" role="img" aria-labelledby="model-vs-trailing-dark-title model-vs-trailing-dark-desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="580" viewBox="0 0 560 580" role="img" aria-labelledby="model-vs-trailing-dark-title model-vs-trailing-dark-desc">
 <title id="model-vs-trailing-dark-title">Count error against the trailing rate</title>
-<desc id="model-vs-trailing-dark-desc">Mean absolute error on the same 6 quarterly origins for every model; lower is better. The model is below the trailing rate at 1 of 3 horizons for the company and 2 of 3 for organizations. Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal eval backtest --futures 2000 · 2026-10-12 · results/model-comparison-2026-10-12.json</desc>
+<desc id="model-vs-trailing-dark-desc">Mean absolute error on the same 6 quarterly origins for every model, 6 windows per company cell; lower is better. The model is below the trailing rate at 1 of 3 horizons for the company and 2 of 3 for organizations, too few windows to establish a difference. The monthly backtest (16 to 21 origins) is the headline answer. Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal eval backtest --futures 2000 · 2026-10-12 · results/model-comparison-2026-10-12.json</desc>
 <style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
-<rect x="0.5" y="0.5" width="559" height="537" rx="10" fill="#1a1a19" stroke="#2c2c2a"/>
+<rect x="0.5" y="0.5" width="559" height="579" rx="10" fill="#1a1a19" stroke="#2c2c2a"/>
 <text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#ffffff">Count error against the trailing rate</text>
-<text x="28.0" y="75.0" font-size="15" fill="#c3c2b7">Mean absolute error on the same 6 quarterly origins for every model;</text>
-<text x="28.0" y="96.0" font-size="15" fill="#c3c2b7">lower is better. The model is below the trailing rate at 1 of 3 horizons</text>
-<text x="28.0" y="117.0" font-size="15" fill="#c3c2b7">for the company and 2 of 3 for organizations.</text>
-<circle cx="37.0" cy="141.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<text x="52.0" y="145.9" font-size="14" fill="#c3c2b7">StaySignal model</text>
-<circle cx="197.8" cy="141.0" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
-<text x="212.8" y="145.9" font-size="14" fill="#c3c2b7">Trailing rate</text>
-<circle cx="37.0" cy="165.0" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
-<text x="52.0" y="169.9" font-size="14" fill="#c3c2b7">Oracle (knows the hidden truth)</text>
-<text x="28.0" y="205.0" font-size="14" font-weight="600" fill="#ffffff">Company</text>
-<text x="28.0" y="225.0" font-size="14" fill="#a3a29a">MAE (departures)</text>
-<line x1="68.0" y1="399.0" x2="266.0" y2="399.0" stroke="#2c2c2a" stroke-width="1"/>
-<text x="60.0" y="404.0" font-size="14" text-anchor="end" fill="#a3a29a">0</text>
-<line x1="68.0" y1="365.7" x2="266.0" y2="365.7" stroke="#2c2c2a" stroke-width="1"/>
-<text x="60.0" y="370.7" font-size="14" text-anchor="end" fill="#a3a29a">5</text>
-<line x1="68.0" y1="332.3" x2="266.0" y2="332.3" stroke="#2c2c2a" stroke-width="1"/>
-<text x="60.0" y="337.3" font-size="14" text-anchor="end" fill="#a3a29a">10</text>
-<line x1="68.0" y1="299.0" x2="266.0" y2="299.0" stroke="#2c2c2a" stroke-width="1"/>
-<text x="60.0" y="304.0" font-size="14" text-anchor="end" fill="#a3a29a">15</text>
-<line x1="68.0" y1="265.7" x2="266.0" y2="265.7" stroke="#2c2c2a" stroke-width="1"/>
-<text x="60.0" y="270.7" font-size="14" text-anchor="end" fill="#a3a29a">20</text>
-<line x1="68.0" y1="399.0" x2="266.0" y2="399.0" stroke="#383835" stroke-width="1"/>
-<path d="M93.1 366.9L155.0 310.9L216.9 244.5" fill="none" stroke="#3987e5" stroke-width="1.5" stroke-opacity="0.45"/>
-<circle cx="93.1" cy="366.9" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="155.0" cy="310.9" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="216.9" cy="244.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<path d="M105.1 363.5L167.0 323.1L228.9 256.6" fill="none" stroke="#898781" stroke-width="1.5" stroke-opacity="0.45"/>
-<circle cx="105.1" cy="363.5" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="167.0" cy="323.1" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="228.9" cy="256.6" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
-<path d="M117.1 377.6L179.0 360.6L240.9 361.5" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.45"/>
-<circle cx="117.1" cy="377.6" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
-<circle cx="179.0" cy="360.6" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
-<circle cx="240.9" cy="361.5" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
-<text x="105.1" y="421.0" font-size="14" text-anchor="middle" fill="#a3a29a">1</text>
-<text x="167.0" y="421.0" font-size="14" text-anchor="middle" fill="#a3a29a">3</text>
-<text x="228.9" y="421.0" font-size="14" text-anchor="middle" fill="#a3a29a">6</text>
-<text x="167.0" y="441.0" font-size="14" text-anchor="middle" fill="#a3a29a">Horizon (months)</text>
-<text x="294.0" y="205.0" font-size="14" font-weight="600" fill="#ffffff">Organizations</text>
-<text x="294.0" y="225.0" font-size="14" fill="#a3a29a">MAE (departures)</text>
-<line x1="334.0" y1="399.0" x2="532.0" y2="399.0" stroke="#2c2c2a" stroke-width="1"/>
-<text x="326.0" y="404.0" font-size="14" text-anchor="end" fill="#a3a29a">0</text>
-<line x1="334.0" y1="363.4" x2="532.0" y2="363.4" stroke="#2c2c2a" stroke-width="1"/>
-<text x="326.0" y="368.4" font-size="14" text-anchor="end" fill="#a3a29a">1</text>
-<line x1="334.0" y1="327.9" x2="532.0" y2="327.9" stroke="#2c2c2a" stroke-width="1"/>
-<text x="326.0" y="332.9" font-size="14" text-anchor="end" fill="#a3a29a">2</text>
-<line x1="334.0" y1="292.3" x2="532.0" y2="292.3" stroke="#2c2c2a" stroke-width="1"/>
-<text x="326.0" y="297.3" font-size="14" text-anchor="end" fill="#a3a29a">3</text>
-<line x1="334.0" y1="256.8" x2="532.0" y2="256.8" stroke="#2c2c2a" stroke-width="1"/>
-<text x="326.0" y="261.8" font-size="14" text-anchor="end" fill="#a3a29a">4</text>
-<line x1="334.0" y1="399.0" x2="532.0" y2="399.0" stroke="#383835" stroke-width="1"/>
-<path d="M359.1 360.5L421.0 309.2L482.9 251.1" fill="none" stroke="#3987e5" stroke-width="1.5" stroke-opacity="0.45"/>
-<circle cx="359.1" cy="360.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="421.0" cy="309.2" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="482.9" cy="251.1" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<path d="M371.1 360.4L433.0 311.6L494.9 243.3" fill="none" stroke="#898781" stroke-width="1.5" stroke-opacity="0.45"/>
-<circle cx="371.1" cy="360.4" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="433.0" cy="311.6" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="494.9" cy="243.3" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
-<path d="M383.1 362.7L445.0 334.0L506.9 299.4" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.45"/>
-<circle cx="383.1" cy="362.7" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
-<circle cx="445.0" cy="334.0" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
-<circle cx="506.9" cy="299.4" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
-<text x="371.1" y="421.0" font-size="14" text-anchor="middle" fill="#a3a29a">1</text>
-<text x="433.0" y="421.0" font-size="14" text-anchor="middle" fill="#a3a29a">3</text>
-<text x="494.9" y="421.0" font-size="14" text-anchor="middle" fill="#a3a29a">6</text>
-<text x="433.0" y="441.0" font-size="14" text-anchor="middle" fill="#a3a29a">Horizon (months)</text>
-<line x1="28.0" y1="461.0" x2="532.0" y2="461.0" stroke="#2c2c2a" stroke-width="1"/>
-<text x="28.0" y="482.0" font-size="12.5" fill="#a3a29a">Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal</text>
-<text x="28.0" y="499.0" font-size="12.5" fill="#a3a29a">eval backtest --futures 2000 · 2026-10-12 ·</text>
-<text x="28.0" y="516.0" font-size="12.5" fill="#a3a29a">results/model-comparison-2026-10-12.json</text>
+<text x="28.0" y="75.0" font-size="15" fill="#c3c2b7">Mean absolute error on the same 6 quarterly origins for every model, 6</text>
+<text x="28.0" y="96.0" font-size="15" fill="#c3c2b7">windows per company cell; lower is better. The model is below the</text>
+<text x="28.0" y="117.0" font-size="15" fill="#c3c2b7">trailing rate at 1 of 3 horizons for the company and 2 of 3 for</text>
+<text x="28.0" y="138.0" font-size="15" fill="#c3c2b7">organizations, too few windows to establish a difference. The monthly</text>
+<text x="28.0" y="159.0" font-size="15" fill="#c3c2b7">backtest (16 to 21 origins) is the headline answer.</text>
+<circle cx="37.0" cy="183.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<text x="52.0" y="187.9" font-size="14" fill="#c3c2b7">StaySignal model</text>
+<circle cx="197.8" cy="183.0" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
+<text x="212.8" y="187.9" font-size="14" fill="#c3c2b7">Trailing rate</text>
+<circle cx="37.0" cy="207.0" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<text x="52.0" y="211.9" font-size="14" fill="#c3c2b7">Oracle (knows the hidden truth)</text>
+<text x="28.0" y="247.0" font-size="14" font-weight="600" fill="#ffffff">Company</text>
+<text x="28.0" y="267.0" font-size="14" fill="#a3a29a">MAE (departures)</text>
+<line x1="68.0" y1="441.0" x2="266.0" y2="441.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="60.0" y="446.0" font-size="14" text-anchor="end" fill="#a3a29a">0</text>
+<line x1="68.0" y1="407.7" x2="266.0" y2="407.7" stroke="#2c2c2a" stroke-width="1"/>
+<text x="60.0" y="412.7" font-size="14" text-anchor="end" fill="#a3a29a">5</text>
+<line x1="68.0" y1="374.3" x2="266.0" y2="374.3" stroke="#2c2c2a" stroke-width="1"/>
+<text x="60.0" y="379.3" font-size="14" text-anchor="end" fill="#a3a29a">10</text>
+<line x1="68.0" y1="341.0" x2="266.0" y2="341.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="60.0" y="346.0" font-size="14" text-anchor="end" fill="#a3a29a">15</text>
+<line x1="68.0" y1="307.7" x2="266.0" y2="307.7" stroke="#2c2c2a" stroke-width="1"/>
+<text x="60.0" y="312.7" font-size="14" text-anchor="end" fill="#a3a29a">20</text>
+<line x1="68.0" y1="441.0" x2="266.0" y2="441.0" stroke="#383835" stroke-width="1"/>
+<path d="M90.3 408.9L149.0 352.9L237.0 286.5" fill="none" stroke="#3987e5" stroke-width="1.5" stroke-opacity="0.45"/>
+<circle cx="90.3" cy="408.9" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="149.0" cy="352.9" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="237.0" cy="286.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<path d="M97.3 405.5L156.0 365.1L244.0 298.6" fill="none" stroke="#898781" stroke-width="1.5" stroke-opacity="0.45"/>
+<circle cx="97.3" cy="405.5" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="156.0" cy="365.1" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="244.0" cy="298.6" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
+<path d="M104.3 419.6L163.0 402.6L251.0 403.5" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.45"/>
+<circle cx="104.3" cy="419.6" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<circle cx="163.0" cy="402.6" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<circle cx="251.0" cy="403.5" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<text x="97.3" y="463.0" font-size="14" text-anchor="middle" fill="#a3a29a">1</text>
+<text x="156.0" y="463.0" font-size="14" text-anchor="middle" fill="#a3a29a">3</text>
+<text x="244.0" y="463.0" font-size="14" text-anchor="middle" fill="#a3a29a">6</text>
+<text x="167.0" y="483.0" font-size="14" text-anchor="middle" fill="#a3a29a">Horizon (months)</text>
+<text x="294.0" y="247.0" font-size="14" font-weight="600" fill="#ffffff">Organizations</text>
+<text x="294.0" y="267.0" font-size="14" fill="#a3a29a">MAE (departures)</text>
+<line x1="334.0" y1="441.0" x2="532.0" y2="441.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="326.0" y="446.0" font-size="14" text-anchor="end" fill="#a3a29a">0</text>
+<line x1="334.0" y1="405.4" x2="532.0" y2="405.4" stroke="#2c2c2a" stroke-width="1"/>
+<text x="326.0" y="410.4" font-size="14" text-anchor="end" fill="#a3a29a">1</text>
+<line x1="334.0" y1="369.9" x2="532.0" y2="369.9" stroke="#2c2c2a" stroke-width="1"/>
+<text x="326.0" y="374.9" font-size="14" text-anchor="end" fill="#a3a29a">2</text>
+<line x1="334.0" y1="334.3" x2="532.0" y2="334.3" stroke="#2c2c2a" stroke-width="1"/>
+<text x="326.0" y="339.3" font-size="14" text-anchor="end" fill="#a3a29a">3</text>
+<line x1="334.0" y1="298.8" x2="532.0" y2="298.8" stroke="#2c2c2a" stroke-width="1"/>
+<text x="326.0" y="303.8" font-size="14" text-anchor="end" fill="#a3a29a">4</text>
+<line x1="334.0" y1="441.0" x2="532.0" y2="441.0" stroke="#383835" stroke-width="1"/>
+<path d="M356.3 402.5L415.0 351.2L503.0 293.1" fill="none" stroke="#3987e5" stroke-width="1.5" stroke-opacity="0.45"/>
+<circle cx="356.3" cy="402.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="415.0" cy="351.2" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="503.0" cy="293.1" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<path d="M363.3 402.4L422.0 353.6L510.0 285.3" fill="none" stroke="#898781" stroke-width="1.5" stroke-opacity="0.45"/>
+<circle cx="363.3" cy="402.4" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="422.0" cy="353.6" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="510.0" cy="285.3" r="5" fill="#898781" stroke="#1a1a19" stroke-width="2"/>
+<path d="M370.3 404.7L429.0 376.0L517.0 341.4" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.45"/>
+<circle cx="370.3" cy="404.7" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<circle cx="429.0" cy="376.0" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<circle cx="517.0" cy="341.4" r="4.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<text x="363.3" y="463.0" font-size="14" text-anchor="middle" fill="#a3a29a">1</text>
+<text x="422.0" y="463.0" font-size="14" text-anchor="middle" fill="#a3a29a">3</text>
+<text x="510.0" y="463.0" font-size="14" text-anchor="middle" fill="#a3a29a">6</text>
+<text x="433.0" y="483.0" font-size="14" text-anchor="middle" fill="#a3a29a">Horizon (months)</text>
+<line x1="28.0" y1="503.0" x2="532.0" y2="503.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="28.0" y="524.0" font-size="12.5" fill="#a3a29a">Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal</text>
+<text x="28.0" y="541.0" font-size="12.5" fill="#a3a29a">eval backtest --futures 2000 · 2026-10-12 ·</text>
+<text x="28.0" y="558.0" font-size="12.5" fill="#a3a29a">results/model-comparison-2026-10-12.json</text>
 </svg>

@@ -1,53 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="560" height="491" viewBox="0 0 560 491" role="img" aria-labelledby="dq-faults-light-title dq-faults-light-desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="533" viewBox="0 0 560 533" role="img" aria-labelledby="dq-faults-light-title dq-faults-light-desc">
 <title id="dq-faults-light-title">Planted data faults caught before publishing</title>
-<desc id="dq-faults-light-desc">Each fault planted in 5 copies of the small world. Latest run: 25 of 25 detected and 20 held; duplicates only warn. Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal eval dq-faults · 2026-10-12 and 2026-10-13 · results/dq-faults-2026-10-12.json, results/dq-faults-2026-10-13.json</desc>
+<desc id="dq-faults-light-desc">Each fault planted in 5 copies of the small world. Latest run: 25 of 25 detected and 20 held; duplicates only warn. Since 2026-10-12: late terminations 1 to 5 of 5 (F04) and broken manager references 0 to 5 of 5 (R04). Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal eval dq-faults · 2026-10-12 and 2026-10-13 · results/dq-faults-2026-10-12.json, results/dq-faults-2026-10-13.json</desc>
 <style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
-<rect x="0.5" y="0.5" width="559" height="490" rx="10" fill="#fcfcfb" stroke="#e6e5df"/>
+<rect x="0.5" y="0.5" width="559" height="532" rx="10" fill="#fcfcfb" stroke="#e6e5df"/>
 <text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#0b0b0b">Planted data faults caught before publishing</text>
 <text x="28.0" y="75.0" font-size="15" fill="#52514e">Each fault planted in 5 copies of the small world. Latest run: 25 of 25</text>
-<text x="28.0" y="96.0" font-size="15" fill="#52514e">detected and 20 held; duplicates only warn.</text>
-<circle cx="37.0" cy="120.0" r="4.5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
-<text x="52.0" y="124.9" font-size="14" fill="#52514e">2026-10-12: phase-1 checks</text>
-<circle cx="37.0" cy="144.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<text x="52.0" y="148.9" font-size="14" fill="#52514e">2026-10-13: phase 1 and built phase-2 checks</text>
-<text x="212.0" y="182.0" font-size="14" fill="#6d6c67">Detected, of 5</text>
-<text x="532.0" y="182.0" font-size="14" text-anchor="end" fill="#6d6c67">Held</text>
-<line x1="212.0" y1="196.0" x2="212.0" y2="366.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="212.0" y="388.0" font-size="14" text-anchor="middle" fill="#6d6c67">0</text>
-<line x1="257.6" y1="196.0" x2="257.6" y2="366.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="257.6" y="388.0" font-size="14" text-anchor="middle" fill="#6d6c67">1</text>
-<line x1="303.2" y1="196.0" x2="303.2" y2="366.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="303.2" y="388.0" font-size="14" text-anchor="middle" fill="#6d6c67">2</text>
-<line x1="348.8" y1="196.0" x2="348.8" y2="366.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="348.8" y="388.0" font-size="14" text-anchor="middle" fill="#6d6c67">3</text>
-<line x1="394.4" y1="196.0" x2="394.4" y2="366.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="394.4" y="388.0" font-size="14" text-anchor="middle" fill="#6d6c67">4</text>
-<line x1="440.0" y1="196.0" x2="440.0" y2="366.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="440.0" y="388.0" font-size="14" text-anchor="middle" fill="#6d6c67">5</text>
-<text x="28.0" y="217.9" font-size="14" fill="#52514e">Pay-basis code</text>
-<circle cx="440.0" cy="213.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
-<circle cx="440.0" cy="213.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<text x="532.0" y="217.9" font-size="14" text-anchor="end" fill="#52514e">5 of 5</text>
-<text x="28.0" y="251.9" font-size="14" fill="#52514e">Duplicate HRIS records</text>
-<circle cx="440.0" cy="247.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
-<circle cx="440.0" cy="247.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<text x="532.0" y="251.9" font-size="14" text-anchor="end" fill="#52514e">0 of 5</text>
-<text x="28.0" y="285.9" font-size="14" fill="#52514e">Late terminations</text>
-<line x1="257.6" y1="281.0" x2="440.0" y2="281.0" stroke="#c3c2b7" stroke-width="3"/>
-<circle cx="257.6" cy="281.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
-<circle cx="440.0" cy="281.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<text x="532.0" y="285.9" font-size="14" text-anchor="end" fill="#52514e">5 of 5</text>
-<text x="28.0" y="319.9" font-size="14" fill="#52514e">Missing payroll extract</text>
-<circle cx="440.0" cy="315.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
-<circle cx="440.0" cy="315.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<text x="532.0" y="319.9" font-size="14" text-anchor="end" fill="#52514e">5 of 5</text>
-<text x="28.0" y="353.9" font-size="14" fill="#52514e">Broken manager refs</text>
-<line x1="212.0" y1="349.0" x2="440.0" y2="349.0" stroke="#c3c2b7" stroke-width="3"/>
-<circle cx="212.0" cy="349.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
-<circle cx="440.0" cy="349.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<text x="532.0" y="353.9" font-size="14" text-anchor="end" fill="#52514e">5 of 5</text>
-<line x1="28.0" y1="414.0" x2="532.0" y2="414.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="28.0" y="435.0" font-size="12.5" fill="#6d6c67">Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal</text>
-<text x="28.0" y="452.0" font-size="12.5" fill="#6d6c67">eval dq-faults · 2026-10-12 and 2026-10-13 · results/dq-faults-2026-10-12.json,</text>
-<text x="28.0" y="469.0" font-size="12.5" fill="#6d6c67">results/dq-faults-2026-10-13.json</text>
+<text x="28.0" y="96.0" font-size="15" fill="#52514e">detected and 20 held; duplicates only warn. Since 2026-10-12: late</text>
+<text x="28.0" y="117.0" font-size="15" fill="#52514e">terminations 1 to 5 of 5 (F04) and broken manager references 0 to 5 of</text>
+<text x="28.0" y="138.0" font-size="15" fill="#52514e">5 (R04).</text>
+<circle cx="37.0" cy="162.0" r="4.5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
+<text x="52.0" y="166.9" font-size="14" fill="#52514e">2026-10-12: phase-1 checks</text>
+<circle cx="37.0" cy="186.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="52.0" y="190.9" font-size="14" fill="#52514e">2026-10-13: phase 1 and built phase-2 checks</text>
+<text x="212.0" y="224.0" font-size="14" fill="#6d6c67">Detected, of 5</text>
+<text x="532.0" y="224.0" font-size="14" text-anchor="end" fill="#6d6c67">Held</text>
+<line x1="212.0" y1="238.0" x2="212.0" y2="408.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="212.0" y="430.0" font-size="14" text-anchor="middle" fill="#6d6c67">0</text>
+<line x1="257.6" y1="238.0" x2="257.6" y2="408.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="257.6" y="430.0" font-size="14" text-anchor="middle" fill="#6d6c67">1</text>
+<line x1="303.2" y1="238.0" x2="303.2" y2="408.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="303.2" y="430.0" font-size="14" text-anchor="middle" fill="#6d6c67">2</text>
+<line x1="348.8" y1="238.0" x2="348.8" y2="408.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="348.8" y="430.0" font-size="14" text-anchor="middle" fill="#6d6c67">3</text>
+<line x1="394.4" y1="238.0" x2="394.4" y2="408.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="394.4" y="430.0" font-size="14" text-anchor="middle" fill="#6d6c67">4</text>
+<line x1="440.0" y1="238.0" x2="440.0" y2="408.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="440.0" y="430.0" font-size="14" text-anchor="middle" fill="#6d6c67">5</text>
+<text x="28.0" y="259.9" font-size="14" fill="#52514e">Pay-basis code</text>
+<circle cx="440.0" cy="255.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
+<circle cx="440.0" cy="255.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="259.9" font-size="14" text-anchor="end" fill="#52514e">5 of 5</text>
+<text x="28.0" y="293.9" font-size="14" fill="#52514e">Duplicate HRIS records</text>
+<circle cx="440.0" cy="289.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
+<circle cx="440.0" cy="289.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="293.9" font-size="14" text-anchor="end" fill="#52514e">0 of 5</text>
+<text x="28.0" y="327.9" font-size="14" fill="#52514e">Late terminations</text>
+<line x1="257.6" y1="323.0" x2="440.0" y2="323.0" stroke="#6d6c67" stroke-width="2"/>
+<circle cx="257.6" cy="323.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
+<circle cx="440.0" cy="323.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="327.9" font-size="14" text-anchor="end" fill="#52514e">5 of 5</text>
+<text x="28.0" y="361.9" font-size="14" fill="#52514e">Missing payroll extract</text>
+<circle cx="440.0" cy="357.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
+<circle cx="440.0" cy="357.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="361.9" font-size="14" text-anchor="end" fill="#52514e">5 of 5</text>
+<text x="28.0" y="395.9" font-size="14" fill="#52514e">Broken manager refs</text>
+<line x1="212.0" y1="391.0" x2="440.0" y2="391.0" stroke="#6d6c67" stroke-width="2"/>
+<circle cx="212.0" cy="391.0" r="5" fill="#fcfcfb" stroke="#898781" stroke-width="2"/>
+<circle cx="440.0" cy="391.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="395.9" font-size="14" text-anchor="end" fill="#52514e">5 of 5</text>
+<line x1="28.0" y1="456.0" x2="532.0" y2="456.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="28.0" y="477.0" font-size="12.5" fill="#6d6c67">Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal</text>
+<text x="28.0" y="494.0" font-size="12.5" fill="#6d6c67">eval dq-faults · 2026-10-12 and 2026-10-13 · results/dq-faults-2026-10-12.json,</text>
+<text x="28.0" y="511.0" font-size="12.5" fill="#6d6c67">results/dq-faults-2026-10-13.json</text>
 </svg>

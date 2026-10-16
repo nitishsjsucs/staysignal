@@ -64,13 +64,13 @@
 <line x1="166.6" y1="435.3" x2="166.6" y2="429.3" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="156.5" y1="442.7" x2="156.5" y2="438.9" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="146.5" y1="451.7" x2="146.5" y2="447.4" stroke="#3987e5" stroke-width="1.5"/>
-<line x1="138.9" y1="457.2" x2="138.9" y2="448.9" stroke="#ffffff" stroke-width="1.5"/>
 <line x1="136.4" y1="463.8" x2="136.4" y2="452.1" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="176.7" y1="426.2" x2="176.7" y2="418.9" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="156.5" y1="443.3" x2="156.5" y2="432.6" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="181.7" y1="440.8" x2="181.7" y2="389.9" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="161.6" y1="438.9" x2="161.6" y2="431.7" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="169.1" y1="428.9" x2="169.1" y2="427.6" stroke="#3987e5" stroke-width="1.5"/>
+<line x1="138.9" y1="457.2" x2="138.9" y2="448.9" stroke="#ffffff" stroke-width="2"/>
 <circle cx="156.5" cy="441.7" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="164.1" cy="432.5" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="164.1" cy="433.9" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
@@ -98,13 +98,15 @@
 <circle cx="166.6" cy="432.3" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="156.5" cy="440.8" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="146.5" cy="449.6" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="138.9" cy="453.0" r="5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
 <circle cx="136.4" cy="457.9" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="176.7" cy="422.5" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="156.5" cy="437.9" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="181.7" cy="415.3" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="161.6" cy="435.3" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="169.1" cy="428.3" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="138.9" cy="453.0" r="6.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<line x1="144.9" y1="453.0" x2="152.9" y2="453.0" stroke="#ffffff" stroke-width="1"/>
+<text x="156.9" y="457.0" font-size="13" fill="#ffffff">vol: level_manager</text>
 <text x="227.0" y="563.0" font-size="14" text-anchor="middle" fill="#a3a29a">True slope</text>
 <text x="28.0" y="203.0" font-size="14" fill="#a3a29a">Estimated slope</text>
 <text x="524.0" y="181.0" font-size="14" font-weight="600" fill="#ffffff">Team shocks, sigma 0.45: 32 of 34 inside, p = 0.386</text>
@@ -138,13 +140,11 @@
 <line x1="659.6" y1="434.9" x2="659.6" y2="428.5" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="639.5" y1="458.2" x2="639.5" y2="450.2" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="633.0" y1="466.4" x2="633.0" y2="457.9" stroke="#3987e5" stroke-width="1.5"/>
-<line x1="655.4" y1="444.9" x2="655.4" y2="438.2" stroke="#ffffff" stroke-width="1.5"/>
 <line x1="667.5" y1="430.0" x2="667.5" y2="423.4" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="658.3" y1="438.4" x2="658.3" y2="433.1" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="627.8" y1="465.8" x2="627.8" y2="458.7" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="656.9" y1="440.1" x2="656.9" y2="433.5" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="662.9" y1="433.0" x2="662.9" y2="426.6" stroke="#3987e5" stroke-width="1.5"/>
-<line x1="655.6" y1="445.3" x2="655.6" y2="438.0" stroke="#ffffff" stroke-width="1.5"/>
 <line x1="660.5" y1="435.7" x2="660.5" y2="429.6" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="845.3" y1="254.5" x2="845.3" y2="223.5" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="594.5" y1="517.6" x2="594.5" y2="480.3" stroke="#3987e5" stroke-width="1.5"/>
@@ -167,18 +167,18 @@
 <line x1="675.5" y1="456.8" x2="675.5" y2="393.1" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="656.4" y1="440.4" x2="656.4" y2="432.3" stroke="#3987e5" stroke-width="1.5"/>
 <line x1="665.3" y1="428.4" x2="665.3" y2="426.9" stroke="#3987e5" stroke-width="1.5"/>
+<line x1="655.4" y1="444.9" x2="655.4" y2="438.2" stroke="#ffffff" stroke-width="2"/>
+<line x1="655.6" y1="445.3" x2="655.6" y2="438.0" stroke="#ffffff" stroke-width="2"/>
 <circle cx="652.0" cy="444.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="660.3" cy="430.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="659.6" cy="431.7" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="639.5" cy="454.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="633.0" cy="462.1" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="655.4" cy="441.6" r="5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
 <circle cx="667.5" cy="426.7" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="658.3" cy="435.7" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="627.8" cy="462.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="656.9" cy="436.8" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="662.9" cy="429.8" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="655.6" cy="441.6" r="5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
 <circle cx="660.5" cy="432.6" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="845.3" cy="239.0" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="594.5" cy="498.9" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
@@ -201,6 +201,12 @@
 <circle cx="675.5" cy="424.9" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="656.4" cy="436.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="665.3" cy="427.6" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="655.4" cy="441.6" r="6.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<circle cx="655.6" cy="441.6" r="6.5" fill="#1a1a19" stroke="#ffffff" stroke-width="2"/>
+<line x1="661.4" y1="441.6" x2="669.4" y2="441.6" stroke="#ffffff" stroke-width="1"/>
+<text x="673.4" y="445.6" font-size="13" fill="#ffffff">vol: tenure_lt12</text>
+<line x1="661.6" y1="441.6" x2="669.6" y2="459.6" stroke="#ffffff" stroke-width="1"/>
+<text x="673.6" y="463.6" font-size="13" fill="#ffffff">vol: first_promotion_gt36</text>
 <text x="723.0" y="563.0" font-size="14" text-anchor="middle" fill="#a3a29a">Marginal target slope</text>
 <text x="524.0" y="203.0" font-size="14" fill="#a3a29a">Estimated slope</text>
 <line x1="28.0" y1="583.0" x2="972.0" y2="583.0" stroke="#2c2c2a" stroke-width="1"/>

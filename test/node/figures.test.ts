@@ -1,8 +1,10 @@
-// The README's charts (scripts/lib/figures.ts): committed exactly as rendered from the committed results, colored only
-// with the app's design tokens, labeled for screen readers, synthetic and sourced, and free of the characters and
-// screens the hygiene rules keep out.
-import { readFileSync } from "node:fs";
+// The README's charts (scripts/lib/figures.ts) and diagrams (scripts/lib/diagrams.ts): committed exactly as rendered
+// from the committed results and code, colored only with the app's design tokens, labeled for screen readers, the
+// charts synthetic and sourced, the diagrams naming the code they describe, and free of the characters and screens the
+// hygiene rules keep out.
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { DIAGRAM_DIR, DIAGRAMS } from "../../scripts/lib/diagrams.ts";
 import { fx, THEMES, TOKEN_OF, textWidth, wrap } from "../../scripts/lib/figures.ts";
 import { FIGURES, latest, loadReports } from "../../scripts/lib/results.ts";
 import { renderFigureFiles, staleFigures } from "../../scripts/render-figures.ts";
@@ -80,6 +82,20 @@ describe("README figures", () => {
     const research = files.get("docs/images/figures/research-light.svg")!;
     const r = latest(reports, "research")!.report;
     expect(research).toContain(`${r.seeds.length} seeds, ${r.origins.length} quarterly origins`);
+  });
+
+  it("draws every diagram in both modes, labeled, naming code that exists", () => {
+    for (const d of DIAGRAMS) {
+      for (const mode of ["light", "dark"]) {
+        const svg = files.get(`${DIAGRAM_DIR}/${d.name}-${mode}.svg`);
+        expect(svg, d.name).toBeDefined();
+        expect(svg).toMatch(/<desc id="[^"]+">Code: |<desc id="[^"]+">[^<]+ Code: /);
+        expect(svg).toContain(`marker-end="url(#${d.name}-${mode}-`);
+      }
+      const paths = [...d.footer.matchAll(/((?:src|scripts|engine|warehouse)\/[\w./-]+)/g)].map((m) => m[1]!.replace(/[.,]$/, ""));
+      expect(paths.length, d.name).toBeGreaterThan(0);
+      for (const p of paths) expect(existsSync(p), `${d.name}: ${p}`).toBe(true);
+    }
   });
 
   it("formats numbers without negative zero and wraps text inside its width", () => {

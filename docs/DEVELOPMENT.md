@@ -111,13 +111,13 @@ git add test/e2e/__screenshots__ && git commit                                # 
 ## README media and results
 
 ```sh
-npm run docs:screenshots   # docs/screenshots/*.png: the public demo served locally, each beat of the guided tour clicked in Chromium
-npm run docs:tour          # docs/images/tour.gif and tour-poster.png, from six of those screenshots (needs ffmpeg)
-npm run docs:figures       # docs/images/figures/*.svg and the brand mark, light and dark, from results/ and evals/results/
-npm run results:readme     # the README headline, docs/RESULTS.md and the figures, from the same files
+npm run docs:screenshots   # docs/screenshots/*.png and detail/*.png: the public demo served locally, each tour beat clicked in Chromium
+npm run docs:tour          # docs/images/tour.gif and tour-poster.png, from seven of those screenshots (needs ffmpeg)
+npm run docs:figures       # docs/images/figures/*.svg from results/ and evals/results/, docs/images/diagrams/*.svg and the brand mark
+npm run results:readme     # the README's generated sections, docs/RESULTS.md and the figures, from the same files
 ```
 
-Every chart, the headline table and docs/RESULTS.md are generated from the committed result files, never edited by hand; `npm test` compares each with a fresh render, so a stale one fails CI.
+Every chart, the README's proof strip, headline table and limits, and docs/RESULTS.md are generated from the committed result files, never edited by hand; the four diagrams are drawn by `scripts/lib/diagrams.ts`. `npm test` compares each with a fresh render, so a stale one fails CI.
 
 ## MCP locally
 

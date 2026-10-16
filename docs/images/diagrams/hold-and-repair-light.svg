@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1097" viewBox="0 0 1000 1097" role="img" aria-labelledby="hold-and-repair-light-title hold-and-repair-light-desc">
+<title id="hold-and-repair-light-title">Holding and repairing a bad payroll file</title>
+<desc id="hold-and-repair-light-desc">The routine behind the public demo's data-health beat. In the public demo the engine's job results were recorded from the engine; the workflow, its gates, the approval and the audit run live in each visitor's sandbox. Code: src/worker/workflows/routine-workflow.ts and gates.ts, src/worker/agents/investigation</desc>
+<style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
+<rect x="0.5" y="0.5" width="999" height="1096" rx="10" fill="#fcfcfb" stroke="#e6e5df"/>
+<text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#0b0b0b">Holding and repairing a bad payroll file</text>
+<text x="28.0" y="75.0" font-size="15" fill="#52514e">The routine behind the public demo's data-health beat. In the public demo the engine's job results were recorded from the engine;</text>
+<text x="28.0" y="96.0" font-size="15" fill="#52514e">the workflow, its gates, the approval and the audit run live in each visitor's sandbox.</text>
+<line x1="28.0" y1="120.0" x2="46.0" y2="120.0" stroke="#6d6c67" stroke-width="2"/>
+<text x="52.0" y="124.9" font-size="14" fill="#52514e">Request</text>
+<line x1="126.3" y1="120.0" x2="144.3" y2="120.0" stroke="#6d6c67" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="150.3" y="124.9" font-size="14" fill="#52514e">Result</text>
+<line x1="213.2" y1="120.0" x2="231.2" y2="120.0" stroke="#2a78d6" stroke-width="2"/>
+<text x="237.2" y="124.9" font-size="14" fill="#52514e">A person's approval</text>
+<defs><marker id="hold-and-repair-light-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#6d6c67"/></marker><marker id="hold-and-repair-light-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#2a78d6"/></marker></defs>
+<line x1="103.0" y1="200.0" x2="103.0" y2="1030.0" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="4 4"/>
+<rect x="28.0" y="148.0" width="150.0" height="52.0" rx="8" fill="#fcfcfb" stroke="#6d6c67" stroke-width="1.25"/>
+<text x="103.0" y="179.3" font-size="15" font-weight="600" text-anchor="middle" fill="#0b0b0b">Payroll extract</text>
+<line x1="293.0" y1="200.0" x2="293.0" y2="1030.0" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="4 4"/>
+<rect x="218.0" y="148.0" width="150.0" height="52.0" rx="8" fill="#fcfcfb" stroke="#6d6c67" stroke-width="1.25"/>
+<text x="293.0" y="179.3" font-size="15" font-weight="600" text-anchor="middle" fill="#0b0b0b">RoutineWorkflow</text>
+<line x1="548.0" y1="200.0" x2="548.0" y2="1030.0" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="4 4"/>
+<rect x="473.0" y="148.0" width="150.0" height="52.0" rx="8" fill="#fcfcfb" stroke="#6d6c67" stroke-width="1.25"/>
+<text x="548.0" y="179.3" font-size="15" font-weight="600" text-anchor="middle" fill="#0b0b0b">Engine jobs</text>
+<line x1="728.0" y1="200.0" x2="728.0" y2="1030.0" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="4 4"/>
+<rect x="653.0" y="148.0" width="150.0" height="52.0" rx="8" fill="#fcfcfb" stroke="#6d6c67" stroke-width="1.25"/>
+<text x="728.0" y="169.8" font-size="15" font-weight="600" text-anchor="middle" fill="#0b0b0b">Specialist</text>
+<text x="728.0" y="188.8" font-size="15" font-weight="600" text-anchor="middle" fill="#0b0b0b">agents</text>
+<line x1="897.0" y1="200.0" x2="897.0" y2="1030.0" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="4 4"/>
+<rect x="822.0" y="148.0" width="150.0" height="52.0" rx="8" fill="rgba(42, 120, 214, 0.1)" stroke="#2a78d6" stroke-width="2"/>
+<text x="897.0" y="169.8" font-size="15" font-weight="600" text-anchor="middle" fill="#0b0b0b">Data Engineer</text>
+<text x="897.0" y="189.4" font-size="12.5" text-anchor="middle" fill="#52514e">a person</text>
+<path d="M103.0 264.0L291.0 264.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="138.5" y="223.0" width="119.0" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="198.0" y="236.4" font-size="12.5" text-anchor="middle" fill="#52514e">arrives with a new</text>
+<rect x="149.4" y="239.0" width="97.3" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="198.0" y="252.4" font-size="12.5" text-anchor="middle" fill="#52514e">pay-basis code</text>
+<circle cx="117.0" cy="264.0" r="9" fill="#2a78d6"/>
+<text x="117.0" y="267.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">1</text>
+<path d="M293.0 330.0L546.0 330.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="306.1" y="289.0" width="228.8" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="302.4" font-size="12.5" text-anchor="middle" fill="#52514e">ingest, run checks, score a candidate</text>
+<rect x="407.1" y="305.0" width="26.8" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="318.4" font-size="12.5" text-anchor="middle" fill="#52514e">run</text>
+<circle cx="307.0" cy="330.0" r="9" fill="#2a78d6"/>
+<text x="307.0" y="333.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">2</text>
+<path d="M548.0 380.0L295.0 380.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="371.6" y="355.0" width="97.8" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="368.4" font-size="12.5" text-anchor="middle" fill="#52514e">pay checks fail</text>
+<circle cx="534.0" cy="380.0" r="9" fill="#2a78d6"/>
+<text x="534.0" y="383.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">3</text>
+<path d="M293.0 439.0L329.0 439.0L329.0 453.0L297.0 453.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="333.0" y="406.0" width="253.8" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="337.0" y="419.4" font-size="12.5" fill="#52514e">gate holds the run; the published forecast</text>
+<rect x="333.0" y="422.0" width="94.3" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="337.0" y="435.4" font-size="12.5" fill="#52514e">does not move</text>
+<circle cx="293.0" cy="446.0" r="9" fill="#2a78d6"/>
+<text x="293.0" y="449.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">4</text>
+<path d="M293.0 510.0L726.0 510.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="376.1" y="485.0" width="268.8" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="510.5" y="498.4" font-size="12.5" text-anchor="middle" fill="#52514e">data-quality, model and composition reports</text>
+<circle cx="307.0" cy="510.0" r="9" fill="#2a78d6"/>
+<text x="307.0" y="513.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">5</text>
+<path d="M728.0 560.0L295.0 560.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="432.0" y="535.0" width="157.0" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="510.5" y="548.4" font-size="12.5" text-anchor="middle" fill="#52514e">one merged investigation</text>
+<circle cx="714.0" cy="560.0" r="9" fill="#2a78d6"/>
+<text x="714.0" y="563.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">6</text>
+<path d="M293.0 626.0L546.0 626.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="324.5" y="585.0" width="192.0" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="598.4" font-size="12.5" text-anchor="middle" fill="#52514e">propose a mapping fix from the</text>
+<rect x="390.1" y="601.0" width="60.8" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="614.4" font-size="12.5" text-anchor="middle" fill="#52514e">evidence</text>
+<circle cx="307.0" cy="626.0" r="9" fill="#2a78d6"/>
+<text x="307.0" y="629.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">7</text>
+<path d="M548.0 676.0L295.0 676.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="323.4" y="651.0" width="194.3" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="664.4" font-size="12.5" text-anchor="middle" fill="#52514e">deterministic mapping proposal</text>
+<circle cx="534.0" cy="676.0" r="9" fill="#2a78d6"/>
+<text x="534.0" y="679.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">8</text>
+<path d="M897.0 726.0L295.0 726.0" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-accent)"/>
+<rect x="489.6" y="701.0" width="210.8" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="595.0" y="714.4" font-size="12.5" text-anchor="middle" fill="#0b0b0b">approves the fix (an agent cannot)</text>
+<circle cx="883.0" cy="726.0" r="9" fill="#2a78d6"/>
+<text x="883.0" y="729.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">9</text>
+<path d="M293.0 792.0L546.0 792.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="323.9" y="751.0" width="193.3" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="764.4" font-size="12.5" text-anchor="middle" fill="#52514e">rebuild under the new mapping,</text>
+<rect x="361.6" y="767.0" width="117.8" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="780.4" font-size="12.5" text-anchor="middle" fill="#52514e">re-check, compare</text>
+<circle cx="307.0" cy="792.0" r="9" fill="#2a78d6"/>
+<text x="307.0" y="795.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">10</text>
+<path d="M548.0 842.0L295.0 842.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="304.9" y="817.0" width="231.3" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="830.4" font-size="12.5" text-anchor="middle" fill="#52514e">checks pass, change within tolerance</text>
+<circle cx="534.0" cy="842.0" r="9" fill="#2a78d6"/>
+<text x="534.0" y="845.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">11</text>
+<path d="M293.0 885.0L329.0 885.0L329.0 899.0L297.0 899.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="333.0" y="868.0" width="248.5" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="337.0" y="881.4" font-size="12.5" fill="#52514e">publish a new version beside the old one</text>
+<circle cx="293.0" cy="892.0" r="9" fill="#2a78d6"/>
+<text x="293.0" y="895.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">12</text>
+<path d="M293.0 956.0L546.0 956.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="334.3" y="931.0" width="172.5" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="944.4" font-size="12.5" text-anchor="middle" fill="#52514e">replay in a fresh warehouse</text>
+<circle cx="307.0" cy="956.0" r="9" fill="#2a78d6"/>
+<text x="307.0" y="959.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">13</text>
+<path d="M548.0 1006.0L295.0 1006.0" fill="none" stroke="#6d6c67" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#hold-and-repair-light-arrow)"/>
+<rect x="327.4" y="981.0" width="186.3" height="18.0" rx="4" fill="#fcfcfb"/>
+<text x="420.5" y="994.4" font-size="12.5" text-anchor="middle" fill="#52514e">identical business-result hash</text>
+<circle cx="534.0" cy="1006.0" r="9" fill="#2a78d6"/>
+<text x="534.0" y="1009.9" font-size="11" font-weight="600" text-anchor="middle" fill="#fcfcfb">14</text>
+<line x1="28.0" y1="1054.0" x2="972.0" y2="1054.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="28.0" y="1075.0" font-size="12.5" fill="#6d6c67">Code: src/worker/workflows/routine-workflow.ts and gates.ts, src/worker/agents/investigation</text>
+</svg>

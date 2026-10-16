@@ -2,9 +2,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadReports, RESULTS_PAGE } from "../../scripts/results-to-readme.ts";
-import { type ActionAuditReport, type AgentEvalReport, type BacktestReport, END, type Entry, latest, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type DqFaultsReport, partitionCurrent, type RecoveryReport, type ResearchReport, renderActionAudit, renderBacktest, renderChallenger, renderDqFaults, renderHeadline, renderModelComparison, renderOracleCoverage, renderRecovery, renderResearch, renderResultsPage, replaceSection, START } from "../../scripts/lib/results.ts";
+import { type ActionAuditReport, type AgentEvalReport, type BacktestReport, END, type Entry, LIMITS_END, LIMITS_START, latest, loadModelContext, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type DqFaultsReport, partitionCurrent, plainVerdicts, PROOF_END, PROOF_START, type RecoveryReport, type ResearchReport, renderActionAudit, renderBacktest, renderChallenger, renderDqFaults, renderHeadline, renderLimits, renderModelComparison, renderOracleCoverage, renderProof, renderReadme, renderRecovery, renderResearch, renderResultsPage, replaceSection, shortCommand, START } from "../../scripts/lib/results.ts";
 
-const between = (md: string) => md.slice(md.indexOf(START) + START.length + 1, md.indexOf(END) - 1);
+const between = (md: string, start = START, end = END) => md.slice(md.indexOf(start) + start.length + 1, md.indexOf(end) - 1);
 
 function dq(date: string, detected: number): Entry {
   const report: DqFaultsReport = { kind: "dq-faults", command: "uv run --project engine staysignal eval dq-faults", date, seeds: [1, 2, 3, 4, 5], summary: { pay_basis: { seeds: 5, detected: 5, held: 5, checks: ["C01"], root_top1: 5, root_found: 5, mean_abs_impact: 0.1, max_abs_impact: 0.2 }, duplicates: { seeds: 5, detected, held: 0, checks: ["U01"], root_top1: detected, root_found: detected, mean_abs_impact: 0, max_abs_impact: 0 } } };
@@ -23,9 +23,45 @@ describe("README Results generation", () => {
     expect(renderResultsPage([])).toContain("No recorded results yet.");
   });
 
-  it("keeps the README headline in sync with the committed results", () => {
+  it("keeps the README's generated sections in sync with the committed results", () => {
     const readme = readFileSync("README.md", "utf8");
-    expect(between(readme)).toBe(renderHeadline(loadReports(process.cwd())));
+    const reports = loadReports(process.cwd());
+    const ctx = loadModelContext(process.cwd());
+    expect(ctx).not.toBeNull();
+    expect(between(readme)).toBe(renderHeadline(reports));
+    expect(between(readme, PROOF_START, PROOF_END)).toBe(renderProof(reports));
+    expect(between(readme, LIMITS_START, LIMITS_END)).toBe(renderLimits(reports, ctx));
+    expect(renderReadme(readme, reports, ctx)).toBe(readme);
+  });
+
+  it("states the limits from the files: the comparison's observed over expected, the backtest's coverage and skill", () => {
+    const reports = loadReports(process.cwd());
+    const md = renderLimits(reports, loadModelContext(process.cwd()));
+    const cmp = latest(reports, "model-comparison")!.report;
+    const oe = (keep: (m: string) => boolean) => Object.values(cmp.summary).flatMap((s) => cmp.models.filter(keep).map((m) => (s[m] as { observed_over_expected: number }).observed_over_expected));
+    const range = (xs: number[]) => `${Math.min(...xs).toFixed(2)} to ${Math.max(...xs).toFixed(2)}`;
+    expect(md).toContain(`observed over expected is ${range(oe((m) => m !== "oracle"))} for the model and both baselines while the oracle sits at ${range(oe((m) => m === "oracle"))}`);
+    expect(md).toContain("[comparison](results/model-comparison-");
+    expect(md.split("\n").filter((l) => l.startsWith("> - ")).length).toBe(3);
+    expect(md).toMatch(/<summary><b>\w+ more limits<\/b><\/summary>/);
+    expect(md).toContain("**Monte Carlo noise.**");
+    expect(md).not.toMatch(/[\u2013\u2014\u2212]/);
+  });
+
+  it("writes the proof list from the latest runs, each number with its short command and dated file", () => {
+    const md = renderProof(loadReports(process.cwd()));
+    const rows = md.split("\n").slice(2);
+    expect(rows.length).toBe(4);
+    for (const r of rows) expect(r).toMatch(/^\| \*\*\d+ of \d+\*\* \| .+ <sub>`[^`]+` · \[\d{4}-\d{2}-\d{2}\]\((results|evals\/results)\/[^)]+\.json\)<\/sub> \|$/);
+    expect(md).toContain("individual-level questions refused before any model call");
+    expect(md.split("\n")[0]).toContain("synthetic world");
+  });
+
+  it("shortens commands for a table cell and names the hypotheses by what they test", () => {
+    expect(shortCommand("uv run --project engine staysignal eval dq-faults")).toBe("eval dq-faults");
+    expect(shortCommand("npm run eval:agent -- --model llama")).toBe("eval:agent --model llama");
+    const r = { hypotheses: { H1: { verdict: "counts against" }, H3a: { verdict: "consistent" }, H3b: { verdict: "consistent" }, H5: { verdict: "descriptive" } } } as unknown as ResearchReport;
+    expect(plainVerdicts(r)).toBe("Consistent: shock-aware ranges (H3a, H3b). Counts against: maturing late records (H1). Descriptive: H5.");
   });
 
   it("keeps docs/RESULTS.md in sync with the committed results", () => {
@@ -35,7 +71,7 @@ describe("README Results generation", () => {
   it("takes only the latest run of a kind for the headline, and keeps the earlier one on the page", () => {
     const reports = [dq("2026-10-12", 1), dq("2026-10-13", 5)];
     const md = renderHeadline(reports);
-    expect(md).toContain("10 of 10 detected, root ranked first in 10; 5 held (duplicates only warn)");
+    expect(md).toContain("10 of 10 detected, root cause ranked first in 10; 5 held (duplicates only warn)");
     expect(md).toContain("[2026-10-13](results/dq-faults-2026-10-13.json)");
     expect(md).not.toContain("2026-10-12");
     expect(latest(reports, "dq-faults")?.report.date).toBe("2026-10-13");
@@ -48,7 +84,8 @@ describe("README Results generation", () => {
     const agent = (model: string, date: string): Entry => ({ file: `evals/results/agent-${model}-${date}.json`, report: { kind: "agent-eval", command: `npm run eval:agent -- --model ${model}`, date, model, items: 2, metrics: { routing_accuracy: 0.5, grounding_pass_rate: 0.5, refusal_accuracy: 1, injection_successes: 0, multi_turn_accuracy: 0.4, latency_ms_p50: 6300, latency_ms_p95: 17000 }, results: [{ category: "injection", ok: true }, { category: "refusal", ok: true }] } satisfies AgentEvalReport });
     const reports = [agent("stub", "2026-10-14"), agent("llama", "2026-10-13")];
     expect(partitionCurrent(reports).earlier).toEqual([]);
-    expect(renderHeadline(reports)).toContain("0 of 1 injections succeeded; 1 of 1 refusals correct; routing 50.0% | `npm run eval:agent -- --model llama` |");
+    expect(renderHeadline(reports)).toContain("0 of 1 injections succeeded; 1 of 1 refusals correct; routing 50.0% | [2026-10-13](evals/results/agent-llama-2026-10-13.json)<br><sub>`eval:agent --model llama`</sub> |");
+    expect(renderHeadline(reports)).toContain("\nnpm run eval:agent -- --model llama\n");
   });
 
   it("writes a headline that reads at a glance: sourced, short, synthetic and dash-free", () => {
@@ -57,12 +94,19 @@ describe("README Results generation", () => {
     const rows = md.split("\n").filter((l) => l.startsWith("| ") && !l.startsWith("| Question"));
     expect(rows.length).toBeGreaterThan(0);
     expect(rows.length).toBeLessThanOrEqual(8);
+    const plain = (c: string) => c.replace(/\]\([^)]*\)/g, "]").replace(/[`[\]]/g, "");
     for (const r of rows) {
       const cells = r.split(" | ").map((c) => c.replace(/^\| |\|$/g, "").trim());
-      expect(cells[2]).toMatch(/^`[^`]+`/);
-      expect(cells[3]).toMatch(/^\[\d{4}-\d{2}-\d{2}\]\((results|evals\/results)\/[^)]+\.json\)/);
-      for (const c of cells) expect(c.replace(/\]\([^)]*\)/g, "]").replace(/[`[\]]/g, "").length).toBeLessThanOrEqual(100);
+      expect(cells.length).toBe(3);
+      for (const src of cells[2]!.split(/<br>(?=\[)/)) expect(src).toMatch(/^\[\d{4}-\d{2}-\d{2}\]\((results|evals\/results)\/[^)]+\.json\)<br><sub>`[^`]+`<\/sub>$/);
+      expect(plain(cells[0]!).length).toBeLessThanOrEqual(70);
+      expect(plain(cells[1]!).length).toBeLessThanOrEqual(160);
     }
+    // every full command, once, below the table
+    const commands = md.slice(md.indexOf("```sh") + 6, md.lastIndexOf("```")).trim().split("\n");
+    expect(new Set(commands).size).toBe(commands.length);
+    for (const c of commands) expect(c.length).toBeLessThanOrEqual(80);
+    for (const r of rows) for (const m of r.matchAll(/<sub>`([^`]+)`<\/sub>/g)) expect(commands.some((c) => shortCommand(c) === m[1])).toBe(true);
     for (const l of md.split("\n")) expect(l.length).toBeLessThanOrEqual(400);
     expect(md).not.toMatch(/[\u2013\u2014\u2212]/);
     expect(md).not.toContain("40 or over");

@@ -1,22 +1,25 @@
 // npm run docs:figures [-- --check]: the charts of the README and docs/RESULTS.md (docs/images/figures/*.svg, light and
-// dark, and the brand mark), drawn from the committed result files by scripts/lib/figures.ts. npm run results:readme
-// writes them too, and npm test compares the committed files with a fresh render.
+// dark, and the brand mark), drawn from the committed result files by scripts/lib/figures.ts, and the README's diagrams
+// (docs/images/diagrams/*.svg) drawn by scripts/lib/diagrams.ts. npm run results:readme writes them too, and npm test
+// compares the committed files with a fresh render.
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { DIAGRAM_DIR, renderDiagrams } from "./lib/diagrams.ts";
 import { renderFigures } from "./lib/figures.ts";
 import { FIGURE_DIR, loadReports } from "./lib/results.ts";
 
 /** The figure files a fresh render would write, keyed by path from the repository root. */
 export function renderFigureFiles(root: string): Map<string, string> {
-  return renderFigures(loadReports(root));
+  return new Map([...renderFigures(loadReports(root)), ...renderDiagrams()]);
 }
+
+const DIRS = [FIGURE_DIR, DIAGRAM_DIR];
 
 /** Paths whose committed content differs from a fresh render, are missing, or are left over from an earlier render. */
 export function staleFigures(root: string, files: Map<string, string> = renderFigureFiles(root)): string[] {
   const stale = [...files].filter(([p, content]) => !existsSync(join(root, p)) || readFileSync(join(root, p), "utf8") !== content).map(([p]) => p);
-  const dir = join(root, FIGURE_DIR);
-  const extra = existsSync(dir) ? readdirSync(dir).map((n) => `${FIGURE_DIR}/${n}`).filter((p) => p.endsWith(".svg") && !files.has(p)) : [];
+  const extra = DIRS.flatMap((d) => (existsSync(join(root, d)) ? readdirSync(join(root, d)).map((n) => `${d}/${n}`) : [])).filter((p) => p.endsWith(".svg") && !files.has(p));
   return [...stale, ...extra].sort();
 }
 
@@ -25,8 +28,7 @@ export function writeFigures(root: string, files: Map<string, string> = renderFi
     mkdirSync(dirname(join(root, p)), { recursive: true });
     writeFileSync(join(root, p), content);
   }
-  const dir = join(root, FIGURE_DIR);
-  for (const n of readdirSync(dir)) if (n.endsWith(".svg") && !files.has(`${FIGURE_DIR}/${n}`)) rmSync(join(dir, n));
+  for (const d of DIRS) for (const n of readdirSync(join(root, d))) if (n.endsWith(".svg") && !files.has(`${d}/${n}`)) rmSync(join(root, d, n));
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

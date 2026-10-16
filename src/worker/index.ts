@@ -2,7 +2,8 @@
 // Durable Object and Workflow classes. Agent connections are routed server-side: the Worker authenticates, picks the instance from the verified
 // principal (AnalystAgent "an_" + HMAC of the principal ID; the shared WorkspaceAgent "larkspur", or the visitor's
 // sandbox "sbx-<id>" in the public demo) and forwards the request with the principal in an internal header that
-// clients cannot set. A configuration that fails its rules (src/worker/config.ts) answers 503 to every request.
+// clients cannot set. A configuration that fails its rules (src/worker/config.ts) answers 503 to every request. Every
+// response the Worker makes carries the security headers below; the static assets get theirs from public/_headers.
 import { getAgentByName } from "agents";
 import { buildApp } from "./app";
 import { AuthError } from "./auth/access";
@@ -20,6 +21,24 @@ export { RoutineWorkflow } from "./workflows/routine-workflow";
 export { DemoGate } from "./demo/gate";
 
 const app = buildApp();
+
+/** No MIME sniffing, no referrer, never framed, nothing that renders, never cached. */
+const RESPONSE_HEADERS: [string, string][] = [
+  ["X-Content-Type-Options", "nosniff"],
+  ["Referrer-Policy", "no-referrer"],
+  ["X-Frame-Options", "DENY"],
+  ["Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'"],
+];
+
+/** The response with the security headers; a WebSocket upgrade (101) passes as it is. Early refusals (a 404 for a path
+ * that is off, a 403, a 413) get them too, since they are added here rather than by each route. */
+function hardened(r: Response): Response {
+  if (r.status === 101) return r;
+  const out = new Response(r.body, r);
+  for (const [k, v] of RESPONSE_HEADERS) out.headers.set(k, v);
+  if (!out.headers.has("Cache-Control")) out.headers.set("Cache-Control", "no-store");
+  return out;
+}
 
 async function routeAgent(request: Request, env: Env, cfg: AppConfig, kind: "analyst" | "workspace"): Promise<Response> {
   if (cfg.publicDemo) {
@@ -58,20 +77,24 @@ async function routeAgent(request: Request, env: Env, cfg: AppConfig, kind: "ana
   return (await getAgentByName(env.ANALYST_AGENT, await analystName(cfg, principal))).fetch(forwarded);
 }
 
+async function route(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  let cfg: AppConfig;
+  try {
+    cfg = parseConfig(env);
+  } catch (e) {
+    console.error(`staysignal: refusing to start: ${e instanceof Error ? e.message : String(e)}`);
+    return Response.json({ error: "misconfigured", message: "This StaySignal deployment is not configured correctly." }, { status: 503 });
+  }
+  const url = new URL(request.url);
+  if (url.pathname === "/agents-ws/analyst" || url.pathname.startsWith("/agents-ws/analyst/")) return routeAgent(request, env, cfg, "analyst");
+  if (url.pathname === "/agents-ws/workspace" || url.pathname.startsWith("/agents-ws/workspace/")) return routeAgent(request, env, cfg, "workspace");
+  if (url.pathname.startsWith("/agents/")) return new Response("Agents are routed through /agents-ws/* only", { status: 404 });
+  if (url.pathname === MCP_ROUTE) return cfg.publicDemo ? Response.json({ error: "not found" }, { status: 404 }) : handleMcp(request, env, ctx);
+  return app.fetch(stripPrincipal(request), env, ctx);
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    let cfg: AppConfig;
-    try {
-      cfg = parseConfig(env);
-    } catch (e) {
-      console.error(`staysignal: refusing to start: ${e instanceof Error ? e.message : String(e)}`);
-      return Response.json({ error: "misconfigured", message: "This StaySignal deployment is not configured correctly." }, { status: 503 });
-    }
-    const url = new URL(request.url);
-    if (url.pathname === "/agents-ws/analyst" || url.pathname.startsWith("/agents-ws/analyst/")) return routeAgent(request, env, cfg, "analyst");
-    if (url.pathname === "/agents-ws/workspace" || url.pathname.startsWith("/agents-ws/workspace/")) return routeAgent(request, env, cfg, "workspace");
-    if (url.pathname.startsWith("/agents/")) return new Response("Agents are routed through /agents-ws/* only", { status: 404 });
-    if (url.pathname === MCP_ROUTE) return cfg.publicDemo ? Response.json({ error: "not found" }, { status: 404 }) : handleMcp(request, env, ctx);
-    return app.fetch(stripPrincipal(request), env, ctx);
+    return hardened(await route(request, env, ctx));
   },
 } satisfies ExportedHandler<Env>;

@@ -1,0 +1,10 @@
+# Security headers for the static assets (the HTML shell, scripts, styles and fonts), applied by Workers static
+# assets in every deployment; the Worker's own responses get theirs in src/worker/index.ts (ADR 0018). The bundle has
+# no inline script or style element, no eval and no data: or blob: URL; React sets styles through the CSSOM, which a
+# style-src policy does not block. 'self' in connect-src matches this host's wss: socket in Chromium, Firefox and
+# WebKit (since 2022, WebKit bug 235873). No page may frame the app.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer

@@ -98,7 +98,10 @@ test("a visitor clicks through the guided tour in a private sandbox", async ({ p
   page.on("dialog", (d) => void d.accept());
 
   await test.step("the landing page explains the demo in two sentences and signs the visitor in", async () => {
-    await page.goto("/");
+    const shell = (await page.goto("/"))!.headers();
+    expect(shell["content-security-policy"]).toContain("frame-ancestors 'none'");
+    expect(shell["x-frame-options"]).toBe("DENY");
+    expect(shell["x-content-type-options"]).toBe("nosniff");
     const text = page.getByTestId("demo-explainer");
     for (const s of ["Larkspur Systems, a fictional company", "every number you will see are synthetic", "recorded from Qwen3.6-27B", "labeled deterministic stub", "private sandbox that resets after 4 hours"]) await expect(text).toContainText(s);
     expect((await text.innerText()).split(/(?<=\.)\s+/).filter(Boolean)).toHaveLength(2);
@@ -125,6 +128,8 @@ test("a visitor clicks through the guided tour in a private sandbox", async ({ p
     await other.goto(`${sibling}/`);
     const refusals: string[] = [];
     other.on("console", (msg) => refusals.push(msg.text()));
+    // the frame is refused (frame-ancestors 'none'), so nothing in it can be clicked
+    await expect.poll(() => other.frames().find((f) => f.parentFrame())?.url() ?? "").toMatch(/^chrome-error:/);
     // its page cannot open the visitor's chat socket, which would let it ask and read their conversation
     const socket = await other.evaluate(
       (url) =>

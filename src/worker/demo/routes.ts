@@ -81,6 +81,7 @@ export function tooLong(v: unknown, max: number): boolean {
   return typeof v === "string" && v.length > max;
 }
 
+// the security headers of every response (nosniff, no referrer, no framing, no caching) are set in src/worker/index.ts
 export const demoGuard: MiddlewareHandler<AppEnv> = async (c, next) => {
   if (!c.var.config.publicDemo) return next();
   if (OFF.some((re) => re.test(c.req.path))) return c.json({ error: "not found" }, 404);
@@ -94,10 +95,7 @@ export const demoGuard: MiddlewareHandler<AppEnv> = async (c, next) => {
     if (text === null) return c.json({ error: `request bodies are limited to ${CAPS.maxBodyBytes / 1024} KiB` }, 413);
     c.set("bodyText", text);
   }
-  await next();
-  c.header("X-Content-Type-Options", "nosniff");
-  c.header("Cache-Control", "no-store");
-  c.header("Referrer-Policy", "no-referrer");
+  return next();
 };
 
 /** Units a request spends: reads 1, writes 12 (src/shared/demo/budget.ts). The payroll simulation is a write here;

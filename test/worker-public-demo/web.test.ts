@@ -1,9 +1,11 @@
 // ADR 0018: the public demo cannot be turned against its visitors from another web page. A request another site
 // starts (an Origin that is not this exact origin, or Sec-Fetch-Site cross-site or same-site) is refused before any
 // Durable Object request, WebSocket upgrades included: other Workers on the account's workers.dev subdomain are
-// same-site, so a SameSite cookie alone does not keep their pages out. Malformed typed inputs answer 400, never 500.
-import { exports } from "cloudflare:workers";
+// same-site, so a SameSite cookie alone does not keep their pages out. Every response the Worker makes carries
+// nosniff, no referrer, frame denial and no caching, and malformed typed inputs answer 400, never 500.
+import { env, exports } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
+import { buildApp } from "../../src/worker/app";
 import worker from "../../src/worker/index";
 import { countingEnv, DEMO_BASE, demoCall, demoJson, P, resetGate, visit, WS_UPGRADE } from "../helpers/demo";
 
@@ -62,6 +64,46 @@ describe("requests another site starts", () => {
     expect((await call("/api/me", { "Sec-Fetch-Site": "none", "Sec-Fetch-Mode": "navigate" })).status).toBe(200);
     expect((await call("/api/me", {})).status).toBe(200);
     expect((await call("/demo/role", { Origin: DEMO_BASE, "Sec-Fetch-Site": "same-origin" }, "POST")).status).toBe(200);
+  });
+});
+
+describe("responses the Worker makes", () => {
+  it("carry nosniff, no referrer, frame denial and no caching, early refusals included", async () => {
+    const v = await visit();
+    const cases: [string, Response][] = [
+      ["/dev/login", await demoCall("/dev/login?principal=pa-lead@larkspur.example")],
+      ["/mcp", await demoCall("/mcp")],
+      ["/agents/x", await demoCall("/agents/x")],
+      ["/agents-ws/analyst without an upgrade", await demoCall("/agents-ws/analyst", { cookie: v.cookie })],
+      ["/agents-ws/analyst without a cookie", await demoCall("/agents-ws/analyst", { headers: WS_UPGRADE })],
+      ["a long query value", await demoCall(`/api/forecast?cohort=${"x".repeat(300)}`, { cookie: v.cookie })],
+      ["a cross-origin write", await demoCall("/demo/role", { cookie: v.cookie, body: { principal: P.director }, headers: { Origin: "https://evil.example" } })],
+      ["a body over 8 KiB", await demoCall("/api/reviews/draft", { cookie: v.cookie, raw: JSON.stringify({ cohort: "x".repeat(9000) }) })],
+      ["/api/me without a cookie", await demoCall("/api/me")],
+      ["/api/me", await demoCall("/api/me", { cookie: v.cookie })],
+      ["/api/health", await demoCall("/api/health")],
+      ["GET /demo/session", await demoCall("/demo/session")],
+    ];
+    for (const [label, r] of cases) {
+      expect(r.headers.get("X-Content-Type-Options"), label).toBe("nosniff");
+      expect(r.headers.get("Referrer-Policy"), label).toBe("no-referrer");
+      expect(r.headers.get("X-Frame-Options"), label).toBe("DENY");
+      expect(r.headers.get("Content-Security-Policy"), label).toContain("frame-ancestors 'none'");
+      expect(r.headers.get("Cache-Control"), label).toBe("no-store");
+    }
+  });
+
+  it("answers an unexpected error with a bare JSON refusal", async () => {
+    const v = await visit();
+    const app = buildApp();
+    app.get("/api/boom", () => {
+      throw new Error("an internal detail");
+    });
+    const r = await app.fetch(new Request(`${DEMO_BASE}/api/boom`, { headers: { Cookie: v.cookie } }), env, ctx);
+    expect(r.status).toBe(500);
+    const text = await r.text();
+    expect(JSON.parse(text)).toEqual({ error: "internal" });
+    expect(text).not.toContain("detail");
   });
 });
 

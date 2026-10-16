@@ -10,6 +10,7 @@ import { chromium } from "@playwright/test";
 
 export const FRAMES: readonly { shot: string; title: string; caption: string }[] = [
   { shot: "03-forecast", title: "Forecast", caption: "Expected voluntary departures with 80% and 95% ranges, beside the trailing-rate status quo" },
+  { shot: "16-individual-refused", title: "The boundary", caption: "Asking which engineers are most likely to leave is refused before any model call" },
   { shot: "04-what-changed", title: "What changed", caption: "An exact Shapley split of the change since the previous run" },
   { shot: "05-data-health-held", title: "A bad payroll file", caption: "Checks fail upstream of the forecast features, and the candidate run is held" },
   { shot: "06-data-health-repaired", title: "Repair and replay", caption: "An approved mapping fix publishes; a fresh-warehouse replay gives the same hash" },

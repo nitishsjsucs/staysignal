@@ -25,7 +25,7 @@
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AnalystAgent", "WorkspaceAgent"] }],
   "workflows": [{ "name": "staysignal-routine", "binding": "ROUTINE_WORKFLOW", "class_name": "RoutineWorkflow" }],
   "observability": { "enabled": true, "head_sampling_rate": 1 },
-  // Secret names only; the owner sets the values with `npx wrangler secret put` (README, Production setup, step 4).
+  // Secret names only; the owner sets the values with `npx wrangler secret put` (Production setup step 4, docs/runbooks/prod-setup.md).
   "secrets": { "required": ["SS_HMAC_MASTER_KEY", "SS_ROLE_BINDINGS", "SS_AIG_TOKEN"] },
   "vars": {
     "SS_AUTH_MODE": "access",

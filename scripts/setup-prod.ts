@@ -1,7 +1,7 @@
 // npm run setup:prod -- --phase A|B (SPEC 23.2): prints the production setup plan for the owner, step by step, from
 // the committed grant plan and read-only probes (the doctor's allowlist: lists and describes only). A step whose
 // result already exists is shown as done; phase B is blocked while billing is disabled. This script changes nothing,
-// locally or in either cloud: the owner runs the printed commands (README, Production setup).
+// locally or in either cloud: the owner runs the printed commands (Production setup, docs/runbooks/prod-setup.md).
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -71,7 +71,7 @@ function main(): void {
   const steps = phase === "A" ? planA(o) : planB(grants, o);
   console.log(`setup:prod phase ${phase}: ${steps.filter((s) => s.status === "done").length} of ${steps.length} steps done; nothing below was run`);
   for (const l of format(steps)) console.log(l);
-  if (phase === "B" && !o.billingEnabled) console.log("\nPhase B is blocked until billing is enabled on the project (README, Production setup).");
+  if (phase === "B" && !o.billingEnabled) console.log("\nPhase B is blocked until billing is enabled on the project (Production setup, docs/runbooks/prod-setup.md).");
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main();

@@ -164,7 +164,7 @@ export function cloudflareChecks(exec: Exec, root: string): Check[] {
   }
   const state = join(root, ".prod", "state.json");
   const st = existsSync(state) ? (JSON.parse(readFileSync(state, "utf8")) as { access?: { aud?: string; team_domain?: string } }) : null;
-  add(st?.access?.aud && st.access.team_domain ? { name: "Access application recorded (.prod/state.json)", status: "PASS" } : { name: "Access application recorded (.prod/state.json)", status: "MISSING", fix: "README Production setup steps 1 and 2: the one-time PIN login method, then the Access application recorded in .prod/state.json" });
+  add(st?.access?.aud && st.access.team_domain ? { name: "Access application recorded (.prod/state.json)", status: "PASS" } : { name: "Access application recorded (.prod/state.json)", status: "MISSING", fix: "Production setup steps 1 and 2 (docs/runbooks/prod-setup.md): the one-time PIN login method, then the Access application recorded in .prod/state.json" });
   add({ name: "one-time PIN login, AI Gateway, R2 bucket, service tokens", status: "SKIP", detail: "need the account API token; checked once npm run setup:secrets copies it", fix: "npm run setup:secrets (not built yet; SPEC 23.2 step 5)" });
   return out;
 }
@@ -187,7 +187,7 @@ export function gcpChecks(exec: Exec): Check[] {
   add({ name: "Google Cloud project", status: "PASS", detail: "set (not printed)" });
   const billing = exec(["gcloud", "billing", "projects", "describe", project, "--format=json"]);
   const enabled = billing.ok ? billingEnabled(billing.out) : null;
-  add(enabled ? { name: "billing enabled", status: "PASS" } : { name: "billing enabled", status: enabled === false ? "FAIL" : "WARN", detail: enabled === false ? "billing is disabled; BigQuery runs as a sandbox that rejects DML and expires tables" : "could not read billing", fix: "README Production setup step 5: reopen the closed billing account or link an open one (path B only; path A needs no Google resource)" });
+  add(enabled ? { name: "billing enabled", status: "PASS" } : { name: "billing enabled", status: enabled === false ? "FAIL" : "WARN", detail: enabled === false ? "billing is disabled; BigQuery runs as a sandbox that rejects DML and expires tables" : "could not read billing", fix: "Production setup step 6 (docs/runbooks/prod-setup.md): reopen the closed billing account or link an open one (path B only; path A needs no Google resource)" });
   const apis = exec(["gcloud", "services", "list", "--enabled", "--project", project, "--format=value(config.name)"]);
   add(apis.ok && apis.out.includes("bigquery.googleapis.com") ? { name: "BigQuery API enabled", status: "PASS" } : { name: "BigQuery API enabled", status: "MISSING", fix: "npm run setup:prod -- --phase B (not built yet)" });
   const ls = exec(["bq", "ls", "--project_id", project, "--format=json"]);
@@ -205,7 +205,7 @@ export function gcpChecks(exec: Exec): Check[] {
 export function secretChecks(root: string): Check[] {
   const keys = envKeys(join(root, ".secrets", "staysignal.env"));
   return REQUIRED_SECRETS.map((k) =>
-    keys.has(k) ? { group: "secrets" as const, name: k, status: "PASS" as const } : { group: "secrets" as const, name: k, status: "MISSING" as const, fix: "README Production setup step 3 (Worker secrets); npm run setup:secrets will copy them into .secrets/staysignal.env (not built yet)" },
+    keys.has(k) ? { group: "secrets" as const, name: k, status: "PASS" as const } : { group: "secrets" as const, name: k, status: "MISSING" as const, fix: "Production setup step 4 (Worker secrets, docs/runbooks/prod-setup.md); npm run setup:secrets will copy them into .secrets/staysignal.env (not built yet)" },
   );
 }
 

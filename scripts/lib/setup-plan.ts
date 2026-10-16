@@ -58,7 +58,7 @@ export function planB(g: GrantPlan, o: Observed): Step[] {
   const p = o.projectId ?? "<PROJECT_ID>";
   const gate: Step["status"] = o.billingEnabled ? "todo" : "blocked";
   const steps: Step[] = [
-    { phase: "B", id: "billing", what: "billing enabled on the shared project, with a $5 budget filtered to app=staysignal", how: "Google Cloud console: Billing (README Production setup, path B)", status: o.billingEnabled ? "done" : "todo" },
+    { phase: "B", id: "billing", what: "billing enabled on the shared project, with a $5 budget filtered to app=staysignal", how: "Google Cloud console: Billing (Production setup step 6, path B, docs/runbooks/prod-setup.md)", status: o.billingEnabled ? "done" : "todo" },
     { phase: "B", id: "apis", what: `APIs ${APIS.join(", ")}`, how: `gcloud services enable ${APIS.join(" ")} --project ${p}`, status: gate },
   ];
   for (const sa of g.service_accounts) {

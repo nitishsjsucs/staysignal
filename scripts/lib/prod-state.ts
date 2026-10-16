@@ -15,10 +15,10 @@ export function placeholderValues(state: ProdState | null, dryRun: boolean): Rec
   if (dryRun) return { __SS_ACCESS_TEAM_DOMAIN__: "https://example-team.cloudflareaccess.com", __SS_ACCESS_AUD__: "dry-run-audience", __SS_AIG_ACCOUNT_ID__: "dry-run-account", __SS_AIG_GATEWAY_ID__: "staysignal", __SS_GCP_PROJECT_ID__: "dry-run-project" };
   const team = state?.access?.team_domain;
   const aud = state?.access?.aud;
-  if (!team || !aud) throw new Error(".prod/state.json needs access.team_domain and access.aud (README Production setup, step 2)");
+  if (!team || !aud) throw new Error(".prod/state.json needs access.team_domain and access.aud (Production setup step 2, docs/runbooks/prod-setup.md)");
   const account = state?.account_id;
   const gateway = state?.ai_gateway?.id;
-  if (!account || !gateway) throw new Error(".prod/state.json needs account_id and ai_gateway.id (README Production setup, step 3)");
+  if (!account || !gateway) throw new Error(".prod/state.json needs account_id and ai_gateway.id (Production setup step 3, docs/runbooks/prod-setup.md)");
   // the GCP project is needed only by the production template; a fixtures render never contains its placeholder
   return { __SS_ACCESS_TEAM_DOMAIN__: team, __SS_ACCESS_AUD__: aud, __SS_AIG_ACCOUNT_ID__: account, __SS_AIG_GATEWAY_ID__: gateway, __SS_GCP_PROJECT_ID__: state?.gcp?.project_id ?? "__SS_GCP_PROJECT_ID__" };
 }

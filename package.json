@@ -42,6 +42,7 @@
     "demo:reset": "node scripts/demo.ts reset",
     "demo:record": "node scripts/demo-record.ts",
     "docs:screenshots": "node scripts/readme-screenshots.ts",
+    "docs:tour": "node scripts/readme-tour.ts",
     "docs:figures": "node scripts/render-figures.ts",
     "stop": "node scripts/stop.ts",
     "research:run": "uv run --project engine staysignal research run",

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="561" viewBox="0 0 560 561" role="img" aria-labelledby="action-audit-light-title action-audit-light-desc">
+<title id="action-audit-light-title">Action audit: impact ratio by proxy screen</title>
+<desc id="action-audit-light-desc">Each group's selection rate for an approved review over the highest group's, across 12 seeded synthetic reviews. A flag is a reason to look, not a finding; groups under 10 people are not screened. Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal audit actions · 2026-10-12 · results/action-audit-2026-10-12.json</desc>
+<style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
+<rect x="0.5" y="0.5" width="559" height="560" rx="10" fill="#fcfcfb" stroke="#e6e5df"/>
+<text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#0b0b0b">Action audit: impact ratio by proxy screen</text>
+<text x="28.0" y="75.0" font-size="15" fill="#52514e">Each group's selection rate for an approved review over the highest</text>
+<text x="28.0" y="96.0" font-size="15" fill="#52514e">group's, across 12 seeded synthetic reviews. A flag is a reason to</text>
+<text x="28.0" y="117.0" font-size="15" fill="#52514e">look, not a finding; groups under 10 people are not screened.</text>
+<circle cx="37.0" cy="141.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="52.0" y="145.9" font-size="14" fill="#52514e">Impact ratio</text>
+<line x1="153.2" y1="141.0" x2="171.2" y2="141.0" stroke="#6d6c67" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="177.2" y="145.9" font-size="14" fill="#52514e">Four-fifths rule of thumb (0.8)</text>
+<line x1="160.0" y1="169.0" x2="160.0" y2="453.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="160.0" y="475.0" font-size="14" text-anchor="middle" fill="#6d6c67">0.0</text>
+<line x1="216.0" y1="169.0" x2="216.0" y2="453.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="216.0" y="475.0" font-size="14" text-anchor="middle" fill="#6d6c67">0.2</text>
+<line x1="272.0" y1="169.0" x2="272.0" y2="453.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="272.0" y="475.0" font-size="14" text-anchor="middle" fill="#6d6c67">0.4</text>
+<line x1="328.0" y1="169.0" x2="328.0" y2="453.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="328.0" y="475.0" font-size="14" text-anchor="middle" fill="#6d6c67">0.6</text>
+<line x1="384.0" y1="169.0" x2="384.0" y2="453.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="384.0" y="475.0" font-size="14" text-anchor="middle" fill="#6d6c67">0.8</text>
+<line x1="440.0" y1="169.0" x2="440.0" y2="453.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="440.0" y="475.0" font-size="14" text-anchor="middle" fill="#6d6c67">1.0</text>
+<line x1="384.0" y1="169.0" x2="384.0" y2="453.0" stroke="#6d6c67" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="28.0" y="188.9" font-size="14" font-weight="600" fill="#0b0b0b">Tenure band</text>
+<text x="40.0" y="217.9" font-size="14" fill="#52514e">under 1 year</text>
+<circle cx="440.0" cy="213.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="217.9" font-size="14" text-anchor="end" fill="#52514e">1.00</text>
+<text x="40.0" y="245.9" font-size="14" fill="#52514e">1 to 3 years</text>
+<circle cx="410.8" cy="241.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="245.9" font-size="14" text-anchor="end" fill="#52514e">0.90</text>
+<text x="40.0" y="273.9" font-size="14" fill="#52514e">3 to 5 years</text>
+<circle cx="417.5" cy="269.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="273.9" font-size="14" text-anchor="end" fill="#52514e">0.92</text>
+<text x="40.0" y="301.9" font-size="14" fill="#52514e">5 years or more</text>
+<circle cx="415.7" cy="297.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="301.9" font-size="14" text-anchor="end" fill="#52514e">0.91</text>
+<text x="28.0" y="330.9" font-size="14" font-weight="600" fill="#0b0b0b">Location</text>
+<text x="40.0" y="359.9" font-size="14" fill="#52514e">Raleigh</text>
+<circle cx="440.0" cy="355.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="359.9" font-size="14" text-anchor="end" fill="#52514e">1.00</text>
+<text x="40.0" y="387.9" font-size="14" fill="#52514e">Pittsburgh</text>
+<circle cx="408.1" cy="383.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="387.9" font-size="14" text-anchor="end" fill="#52514e">0.89</text>
+<text x="40.0" y="415.9" font-size="14" fill="#52514e">Vancouver</text>
+<circle cx="365.0" cy="411.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="415.9" font-size="14" text-anchor="end" fill="#52514e">0.73, below</text>
+<text x="40.0" y="443.9" font-size="14" fill="#52514e">Manchester</text>
+<circle cx="436.1" cy="439.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="443.9" font-size="14" text-anchor="end" fill="#52514e">0.99</text>
+<line x1="28.0" y1="501.0" x2="532.0" y2="501.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="28.0" y="522.0" font-size="12.5" fill="#6d6c67">Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal</text>
+<text x="28.0" y="539.0" font-size="12.5" fill="#6d6c67">audit actions · 2026-10-12 · results/action-audit-2026-10-12.json</text>
+</svg>

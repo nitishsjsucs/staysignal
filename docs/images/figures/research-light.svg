@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="554" viewBox="0 0 1000 554" role="img" aria-labelledby="research-light-title research-light-desc">
+<title id="research-light-title">Pre-registered study: what breaks calibration, and what fixes it</title>
+<desc id="research-light-desc">20 seeds, 8 quarterly origins, 3-month horizon; dots are seed means with seed-bootstrap 90% intervals, decided against bounds registered before any run. H3a and H3b consistent; H1, H2 and H4 count against; H5 descriptive. Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal research run --seeds 1-20 · 2026-10-13 · results/research-2026-10-13.json · pre-registered in research/PREREGISTRATION.md</desc>
+<style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
+<rect x="0.5" y="0.5" width="999" height="553" rx="10" fill="#fcfcfb" stroke="#e6e5df"/>
+<text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#0b0b0b">Pre-registered study: what breaks calibration, and what fixes it</text>
+<text x="28.0" y="75.0" font-size="15" fill="#52514e">20 seeds, 8 quarterly origins, 3-month horizon; dots are seed means with seed-bootstrap 90% intervals, decided against bounds</text>
+<text x="28.0" y="96.0" font-size="15" fill="#52514e">registered before any run. H3a and H3b consistent; H1, H2 and H4 count against; H5 descriptive.</text>
+<circle cx="37.0" cy="120.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="52.0" y="124.9" font-size="14" fill="#52514e">The handling the hypothesis expects to fix it</text>
+<circle cx="377.0" cy="120.0" r="5" fill="#898781" stroke="#fcfcfb" stroke-width="2"/>
+<text x="392.0" y="124.9" font-size="14" fill="#52514e">The naive handling</text>
+<rect x="536.8" y="114.0" width="16.0" height="12.0" rx="2" fill="#e1e0d9"/>
+<text x="560.8" y="124.9" font-size="14" fill="#52514e">Equivalence bounds</text>
+<text x="28.0" y="160.0" font-size="14" font-weight="600" fill="#0b0b0b">Data fixes: observed over expected (1 is right)</text>
+<text x="28.0" y="182.0" font-size="14" fill="#6d6c67">Shaded: equivalence bounds 0.95 to 1.05</text>
+<rect x="279.7" y="200.0" width="176.7" height="246.0" fill="#e1e0d9"/>
+<line x1="191.3" y1="200.0" x2="191.3" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="191.3" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">0.90</text>
+<line x1="279.7" y1="200.0" x2="279.7" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="279.7" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">0.95</text>
+<line x1="368.0" y1="200.0" x2="368.0" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="368.0" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">1.00</text>
+<line x1="456.3" y1="200.0" x2="456.3" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="456.3" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">1.05</text>
+<line x1="368.0" y1="196.0" x2="368.0" y2="446.0" stroke="#6d6c67" stroke-width="1"/>
+<text x="28.0" y="221.9" font-size="14" font-weight="600" fill="#0b0b0b">H1 late corrections, share 0.30: counts against</text>
+<text x="40.0" y="247.9" font-size="14" fill="#52514e">naive</text>
+<line x1="293.4" y1="243.0" x2="400.3" y2="243.0" stroke="#898781" stroke-width="2"/>
+<circle cx="348.6" cy="243.0" r="5" fill="#898781" stroke="#fcfcfb" stroke-width="2"/>
+<text x="40.0" y="273.9" font-size="14" fill="#52514e">matured</text>
+<line x1="228.3" y1="269.0" x2="330.5" y2="269.0" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="281.3" cy="269.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="28.0" y="303.9" font-size="14" font-weight="600" fill="#0b0b0b">H2 missing termination extract: counts against</text>
+<text x="40.0" y="329.9" font-size="14" fill="#52514e">as no events</text>
+<line x1="352.6" y1="325.0" x2="471.0" y2="325.0" stroke="#898781" stroke-width="2"/>
+<circle cx="413.4" cy="325.0" r="5" fill="#898781" stroke="#fcfcfb" stroke-width="2"/>
+<text x="40.0" y="355.9" font-size="14" fill="#52514e">as censored</text>
+<line x1="251.8" y1="351.0" x2="359.3" y2="351.0" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="306.3" cy="351.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="28.0" y="385.9" font-size="14" font-weight="600" fill="#0b0b0b">H4 duplicates, share 0.05: counts against</text>
+<text x="40.0" y="411.9" font-size="14" fill="#52514e">not deduplicated</text>
+<line x1="169.4" y1="407.0" x2="268.2" y2="407.0" stroke="#898781" stroke-width="2"/>
+<circle cx="220.7" cy="407.0" r="5" fill="#898781" stroke="#fcfcfb" stroke-width="2"/>
+<text x="40.0" y="437.9" font-size="14" fill="#52514e">deduplicated</text>
+<line x1="239.9" y1="433.0" x2="342.7" y2="433.0" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="293.6" cy="433.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="520.0" y="160.0" font-size="14" font-weight="600" fill="#0b0b0b">H3a shared team shocks: consistent</text>
+<text x="520.0" y="182.0" font-size="14" fill="#6d6c67">80% range held. Shaded: 75% to 85%</text>
+<rect x="716.1" y="200.0" width="227.1" height="246.0" fill="#e1e0d9"/>
+<line x1="648.0" y1="200.0" x2="648.0" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="648.0" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">72%</text>
+<line x1="693.4" y1="200.0" x2="693.4" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="693.4" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">74%</text>
+<line x1="738.9" y1="200.0" x2="738.9" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="738.9" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">76%</text>
+<line x1="784.3" y1="200.0" x2="784.3" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="784.3" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">78%</text>
+<line x1="829.7" y1="200.0" x2="829.7" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="829.7" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">80%</text>
+<line x1="875.1" y1="200.0" x2="875.1" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="875.1" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">82%</text>
+<line x1="920.6" y1="200.0" x2="920.6" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="920.6" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">84%</text>
+<line x1="966.0" y1="200.0" x2="966.0" y2="446.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="966.0" y="468.0" font-size="14" text-anchor="middle" fill="#6d6c67">86%</text>
+<line x1="829.7" y1="196.0" x2="829.7" y2="446.0" stroke="#6d6c67" stroke-width="1"/>
+<text x="520.0" y="221.9" font-size="14" font-weight="600" fill="#0b0b0b">Team shocks, sigma 0</text>
+<text x="532.0" y="247.9" font-size="14" fill="#52514e">independence</text>
+<line x1="909.2" y1="243.0" x2="964.6" y2="243.0" stroke="#898781" stroke-width="2"/>
+<circle cx="936.2" cy="243.0" r="5" fill="#898781" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="273.9" font-size="14" fill="#52514e">shock-aware</text>
+<line x1="887.9" y1="269.0" x2="951.9" y2="269.0" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="919.2" cy="269.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="520.0" y="303.9" font-size="14" font-weight="600" fill="#0b0b0b">Team shocks, sigma 0.25</text>
+<text x="532.0" y="329.9" font-size="14" fill="#52514e">independence</text>
+<line x1="855.2" y1="325.0" x2="931.9" y2="325.0" stroke="#898781" stroke-width="2"/>
+<circle cx="892.2" cy="325.0" r="5" fill="#898781" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="355.9" font-size="14" fill="#52514e">shock-aware</text>
+<line x1="886.5" y1="351.0" x2="953.3" y2="351.0" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="919.2" cy="351.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="520.0" y="385.9" font-size="14" font-weight="600" fill="#0b0b0b">Team shocks, sigma 0.5</text>
+<text x="532.0" y="411.9" font-size="14" fill="#52514e">independence</text>
+<line x1="652.3" y1="407.0" x2="751.8" y2="407.0" stroke="#898781" stroke-width="2"/>
+<circle cx="700.5" cy="407.0" r="5" fill="#898781" stroke="#fcfcfb" stroke-width="2"/>
+<text x="532.0" y="437.9" font-size="14" fill="#52514e">shock-aware</text>
+<line x1="726.1" y1="433.0" x2="822.7" y2="433.0" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="772.9" cy="433.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<line x1="28.0" y1="494.0" x2="972.0" y2="494.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="28.0" y="515.0" font-size="12.5" fill="#6d6c67">Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal research run --seeds 1-20 · 2026-10-13 · results/research-2026-10-13.json ·</text>
+<text x="28.0" y="532.0" font-size="12.5" fill="#6d6c67">pre-registered in research/PREREGISTRATION.md</text>
+</svg>

@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="529" viewBox="0 0 1000 529" role="img" aria-labelledby="backtest-company-3m-light-title backtest-company-3m-light-desc">
+<title id="backtest-company-3m-light-title">Company, 3-month windows: forecast ranges against what happened</title>
+<desc id="backtest-company-3m-light-desc">The 80% range held in 11 of 19 mature windows (6 independent) and the 95% range in 16. Model and data as known at each monthly origin, Oct 2024 to Sep 2026. Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal eval backtest · 2026-10-12 · results/backtest-2026-10-12.json</desc>
+<style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
+<rect x="0.5" y="0.5" width="999" height="528" rx="10" fill="#fcfcfb" stroke="#e6e5df"/>
+<text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#0b0b0b">Company, 3-month windows: forecast ranges against what happened</text>
+<text x="28.0" y="75.0" font-size="15" fill="#52514e">The 80% range held in 11 of 19 mature windows (6 independent) and the 95% range in 16. Model and data as known at each monthly</text>
+<text x="28.0" y="96.0" font-size="15" fill="#52514e">origin, Oct 2024 to Sep 2026.</text>
+<rect x="28.0" y="114.0" width="16.0" height="12.0" rx="2" fill="rgba(42, 120, 214, 0.1)"/>
+<text x="52.0" y="124.9" font-size="14" fill="#52514e">95% range</text>
+<rect x="141.4" y="114.0" width="16.0" height="12.0" rx="2" fill="rgba(42, 120, 214, 0.2)"/>
+<text x="165.4" y="124.9" font-size="14" fill="#52514e">80% range</text>
+<line x1="254.9" y1="120.0" x2="272.9" y2="120.0" stroke="#2a78d6" stroke-width="2"/>
+<text x="278.9" y="124.9" font-size="14" fill="#52514e">Forecast (expected)</text>
+<line x1="433.6" y1="120.0" x2="451.6" y2="120.0" stroke="#898781" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="457.6" y="124.9" font-size="14" fill="#52514e">Trailing-rate status quo</text>
+<circle cx="643.4" cy="120.0" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<text x="658.4" y="124.9" font-size="14" fill="#52514e">Observed</text>
+<circle cx="749.5" cy="120.0" r="4.5" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="2"/>
+<text x="764.5" y="124.9" font-size="14" fill="#52514e">Observed, provisional</text>
+<text x="28.0" y="160.0" font-size="14" fill="#6d6c67">Voluntary departures in the 3 months after each origin</text>
+<rect x="781.3" y="174.0" width="186.7" height="264.0" fill="#f3f2ee"/>
+<text x="962.0" y="192.0" font-size="14" text-anchor="end" fill="#6d6c67">not yet mature</text>
+<line x1="72.0" y1="438.0" x2="968.0" y2="438.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="62.0" y="443.0" font-size="14" text-anchor="end" fill="#6d6c67">0</text>
+<line x1="72.0" y1="400.3" x2="968.0" y2="400.3" stroke="#e1e0d9" stroke-width="1"/>
+<text x="62.0" y="405.3" font-size="14" text-anchor="end" fill="#6d6c67">20</text>
+<line x1="72.0" y1="362.6" x2="968.0" y2="362.6" stroke="#e1e0d9" stroke-width="1"/>
+<text x="62.0" y="367.6" font-size="14" text-anchor="end" fill="#6d6c67">40</text>
+<line x1="72.0" y1="324.9" x2="968.0" y2="324.9" stroke="#e1e0d9" stroke-width="1"/>
+<text x="62.0" y="329.9" font-size="14" text-anchor="end" fill="#6d6c67">60</text>
+<line x1="72.0" y1="287.1" x2="968.0" y2="287.1" stroke="#e1e0d9" stroke-width="1"/>
+<text x="62.0" y="292.1" font-size="14" text-anchor="end" fill="#6d6c67">80</text>
+<line x1="72.0" y1="249.4" x2="968.0" y2="249.4" stroke="#e1e0d9" stroke-width="1"/>
+<text x="62.0" y="254.4" font-size="14" text-anchor="end" fill="#6d6c67">100</text>
+<line x1="72.0" y1="211.7" x2="968.0" y2="211.7" stroke="#e1e0d9" stroke-width="1"/>
+<text x="62.0" y="216.7" font-size="14" text-anchor="end" fill="#6d6c67">120</text>
+<line x1="72.0" y1="174.0" x2="968.0" y2="174.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="62.0" y="179.0" font-size="14" text-anchor="end" fill="#6d6c67">140</text>
+<line x1="72.0" y1="438.0" x2="968.0" y2="438.0" stroke="#c3c2b7" stroke-width="1"/>
+<rect x="83.7" y="304.1" width="14.0" height="75.4" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="83.7" y="315.4" width="14.0" height="47.1" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="121.0" y="332.4" width="14.0" height="62.2" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="121.0" y="347.5" width="14.0" height="39.6" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="158.3" y="285.3" width="14.0" height="75.4" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="158.3" y="302.2" width="14.0" height="49.0" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="195.7" y="224.9" width="14.0" height="101.8" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="195.7" y="243.8" width="14.0" height="66.0" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="233.0" y="185.3" width="14.0" height="132.0" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="233.0" y="217.4" width="14.0" height="84.9" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="270.3" y="198.5" width="14.0" height="98.1" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="270.3" y="215.5" width="14.0" height="67.9" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="307.7" y="223.0" width="14.0" height="96.2" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="307.7" y="241.9" width="14.0" height="62.2" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="345.0" y="260.7" width="14.0" height="73.5" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="345.0" y="270.2" width="14.0" height="52.8" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="382.3" y="240.0" width="14.0" height="105.6" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="382.3" y="257.0" width="14.0" height="71.7" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="419.7" y="249.4" width="14.0" height="90.5" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="419.7" y="268.3" width="14.0" height="62.2" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="457.0" y="264.5" width="14.0" height="90.5" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="457.0" y="279.6" width="14.0" height="60.3" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="494.3" y="294.7" width="14.0" height="75.4" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="494.3" y="306.0" width="14.0" height="50.9" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="531.7" y="300.3" width="14.0" height="71.7" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="531.7" y="317.3" width="14.0" height="45.3" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="569.0" y="296.6" width="14.0" height="77.3" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="569.0" y="319.2" width="14.0" height="47.1" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="606.3" y="287.1" width="14.0" height="73.5" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="606.3" y="304.1" width="14.0" height="45.3" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="643.7" y="255.1" width="14.0" height="86.7" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="643.7" y="270.2" width="14.0" height="56.6" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="681.0" y="223.0" width="14.0" height="96.2" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="681.0" y="245.7" width="14.0" height="62.2" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="718.3" y="253.2" width="14.0" height="84.9" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="718.3" y="268.3" width="14.0" height="54.7" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="755.7" y="266.4" width="14.0" height="79.2" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="755.7" y="283.4" width="14.0" height="49.0" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="793.0" y="289.0" width="14.0" height="67.9" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="793.0" y="302.2" width="14.0" height="45.3" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="830.3" y="287.1" width="14.0" height="73.5" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="830.3" y="302.2" width="14.0" height="47.1" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="867.7" y="277.7" width="14.0" height="83.0" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="867.7" y="292.8" width="14.0" height="58.5" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="905.0" y="294.7" width="14.0" height="71.7" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="905.0" y="311.7" width="14.0" height="47.1" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<rect x="942.3" y="311.7" width="14.0" height="60.3" rx="3" fill="rgba(42, 120, 214, 0.1)"/>
+<rect x="942.3" y="323.0" width="14.0" height="41.5" rx="3" fill="rgba(42, 120, 214, 0.2)"/>
+<path d="M90.7 307.9L128.0 307.5L165.3 303.8L202.7 296.7L240.0 296.2L277.3 292.4L314.7 299.5L352.0 303.0L389.3 305.2L426.7 308.5L464.0 310.1L501.3 313.1L538.7 319.5L576.0 319.8L613.3 318.9L650.7 319.6L688.0 320.8L725.3 327.2L762.7 328.5L800.0 326.7L837.3 323.3L874.7 323.2L912.0 325.8L949.3 326.7" fill="none" stroke="#898781" stroke-width="2" stroke-dasharray="5 3"/>
+<path d="M90.7 362.7L128.0 367.9L165.3 334.2L202.7 294.9L240.0 267.7L277.3 267.4L314.7 280.6L352.0 299.1L389.3 301.7L426.7 303.9L464.0 314.2L501.3 335.2L538.7 346.5L576.0 348.2L613.3 323.7L650.7 300.3L688.0 289.6L725.3 298.1L762.7 309.6L800.0 323.4L837.3 326.1L874.7 326.4L912.0 333.1L949.3 342.9" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="90.7" cy="362.7" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="128.0" cy="367.9" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="165.3" cy="334.2" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="202.7" cy="294.9" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="240.0" cy="267.7" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="277.3" cy="267.4" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="314.7" cy="280.6" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="352.0" cy="299.1" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="389.3" cy="301.7" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="426.7" cy="303.9" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="464.0" cy="314.2" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="501.3" cy="335.2" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="538.7" cy="346.5" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="576.0" cy="348.2" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="613.3" cy="323.7" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="650.7" cy="300.3" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="688.0" cy="289.6" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="725.3" cy="298.1" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="762.7" cy="309.6" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="800.0" cy="323.4" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="837.3" cy="326.1" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="874.7" cy="326.4" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="912.0" cy="333.1" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="949.3" cy="342.9" r="3.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="90.7" cy="336.2" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="128.0" cy="336.2" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="165.3" cy="306.0" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="202.7" cy="294.7" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="240.0" cy="294.7" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="277.3" cy="336.2" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="314.7" cy="332.4" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="352.0" cy="334.3" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="389.3" cy="332.4" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="426.7" cy="351.3" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="464.0" cy="349.4" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="501.3" cy="343.7" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="538.7" cy="341.8" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="576.0" cy="343.7" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="613.3" cy="332.4" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="650.7" cy="319.2" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="688.0" cy="309.8" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="725.3" cy="309.8" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="762.7" cy="309.8" r="5" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="800.0" cy="321.1" r="4.5" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="2"/>
+<circle cx="837.3" cy="332.4" r="4.5" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="2"/>
+<circle cx="874.7" cy="349.4" r="4.5" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="2"/>
+<text x="90.7" y="460.0" font-size="14" text-anchor="middle" fill="#6d6c67">Oct 2024</text>
+<text x="202.7" y="460.0" font-size="14" text-anchor="middle" fill="#6d6c67">Jan 2025</text>
+<text x="314.7" y="460.0" font-size="14" text-anchor="middle" fill="#6d6c67">Apr 2025</text>
+<text x="426.7" y="460.0" font-size="14" text-anchor="middle" fill="#6d6c67">Jul 2025</text>
+<text x="538.7" y="460.0" font-size="14" text-anchor="middle" fill="#6d6c67">Oct 2025</text>
+<text x="650.7" y="460.0" font-size="14" text-anchor="middle" fill="#6d6c67">Jan 2026</text>
+<text x="762.7" y="460.0" font-size="14" text-anchor="middle" fill="#6d6c67">Apr 2026</text>
+<text x="874.7" y="460.0" font-size="14" text-anchor="middle" fill="#6d6c67">Jul 2026</text>
+<line x1="28.0" y1="486.0" x2="972.0" y2="486.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="28.0" y="507.0" font-size="12.5" fill="#6d6c67">Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal eval backtest · 2026-10-12 · results/backtest-2026-10-12.json</text>
+</svg>

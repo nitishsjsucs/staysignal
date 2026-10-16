@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="587" viewBox="0 0 560 587" role="img" aria-labelledby="reliability-light-title reliability-light-desc">
+<title id="reliability-light-title">Calibration of individual 3-month predictions</title>
+<desc id="reliability-light-desc">Predicted against observed by decile, with team-cluster bootstrap 80% intervals. ICI 0.7 percentage points over 36,035 person-windows; only deciles are ever stored. Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal eval backtest · 2026-10-12 · results/calibration-2026-10-12.json</desc>
+<style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;font-variant-numeric:tabular-nums}</style>
+<rect x="0.5" y="0.5" width="559" height="586" rx="10" fill="#fcfcfb" stroke="#e6e5df"/>
+<text x="28.0" y="48.0" font-size="20" font-weight="600" fill="#0b0b0b">Calibration of individual 3-month predictions</text>
+<text x="28.0" y="75.0" font-size="15" fill="#52514e">Predicted against observed by decile, with team-cluster bootstrap</text>
+<text x="28.0" y="96.0" font-size="15" fill="#52514e">80% intervals. ICI 0.7 percentage points over 36,035 person-windows;</text>
+<text x="28.0" y="117.0" font-size="15" fill="#52514e">only deciles are ever stored.</text>
+<line x1="28.0" y1="141.0" x2="46.0" y2="141.0" stroke="#6d6c67" stroke-width="2"/>
+<text x="52.0" y="145.9" font-size="14" fill="#52514e">Perfect calibration</text>
+<text x="28.0" y="179.0" font-size="14" fill="#6d6c67">Observed share who left</text>
+<line x1="92.0" y1="193.0" x2="92.0" y2="465.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="92.0" y="487.0" font-size="14" text-anchor="middle" fill="#6d6c67">0%</text>
+<line x1="92.0" y1="465.0" x2="364.0" y2="465.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="82.0" y="470.0" font-size="14" text-anchor="end" fill="#6d6c67">0%</text>
+<line x1="160.0" y1="193.0" x2="160.0" y2="465.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="160.0" y="487.0" font-size="14" text-anchor="middle" fill="#6d6c67">2%</text>
+<line x1="92.0" y1="397.0" x2="364.0" y2="397.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="82.0" y="402.0" font-size="14" text-anchor="end" fill="#6d6c67">2%</text>
+<line x1="228.0" y1="193.0" x2="228.0" y2="465.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="228.0" y="487.0" font-size="14" text-anchor="middle" fill="#6d6c67">4%</text>
+<line x1="92.0" y1="329.0" x2="364.0" y2="329.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="82.0" y="334.0" font-size="14" text-anchor="end" fill="#6d6c67">4%</text>
+<line x1="296.0" y1="193.0" x2="296.0" y2="465.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="296.0" y="487.0" font-size="14" text-anchor="middle" fill="#6d6c67">6%</text>
+<line x1="92.0" y1="261.0" x2="364.0" y2="261.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="82.0" y="266.0" font-size="14" text-anchor="end" fill="#6d6c67">6%</text>
+<line x1="364.0" y1="193.0" x2="364.0" y2="465.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="364.0" y="487.0" font-size="14" text-anchor="middle" fill="#6d6c67">8%</text>
+<line x1="92.0" y1="193.0" x2="364.0" y2="193.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="82.0" y="198.0" font-size="14" text-anchor="end" fill="#6d6c67">8%</text>
+<line x1="92.0" y1="465.0" x2="364.0" y2="193.0" stroke="#6d6c67" stroke-width="1.5"/>
+<line x1="127.7" y1="407.9" x2="127.7" y2="380.0" stroke="#2a78d6" stroke-width="2"/>
+<line x1="149.3" y1="401.4" x2="149.3" y2="374.7" stroke="#2a78d6" stroke-width="2"/>
+<line x1="163.3" y1="397.0" x2="163.3" y2="367.5" stroke="#2a78d6" stroke-width="2"/>
+<line x1="176.0" y1="406.0" x2="176.0" y2="382.2" stroke="#2a78d6" stroke-width="2"/>
+<line x1="189.0" y1="396.1" x2="189.0" y2="370.2" stroke="#2a78d6" stroke-width="2"/>
+<line x1="203.7" y1="380.6" x2="203.7" y2="356.7" stroke="#2a78d6" stroke-width="2"/>
+<line x1="220.3" y1="349.9" x2="220.3" y2="315.9" stroke="#2a78d6" stroke-width="2"/>
+<line x1="242.1" y1="356.0" x2="242.1" y2="321.1" stroke="#2a78d6" stroke-width="2"/>
+<line x1="274.9" y1="349.5" x2="274.9" y2="319.0" stroke="#2a78d6" stroke-width="2"/>
+<line x1="362.6" y1="304.2" x2="362.6" y2="247.2" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="127.7" cy="393.3" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="149.3" cy="388.6" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="163.3" cy="382.9" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="176.0" cy="394.2" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="189.0" cy="383.8" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="203.7" cy="368.8" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="220.3" cy="333.8" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="242.1" cy="337.6" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="274.9" cy="334.8" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="362.6" cy="277.3" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="228.0" y="507.0" font-size="14" text-anchor="middle" fill="#6d6c67">Predicted 3-month probability (decile mean)</text>
+<line x1="28.0" y1="527.0" x2="532.0" y2="527.0" stroke="#e1e0d9" stroke-width="1"/>
+<text x="28.0" y="548.0" font-size="12.5" fill="#6d6c67">Synthetic data (fictional Larkspur Systems) · uv run --project engine staysignal</text>
+<text x="28.0" y="565.0" font-size="12.5" fill="#6d6c67">eval backtest · 2026-10-12 · results/calibration-2026-10-12.json</text>
+</svg>

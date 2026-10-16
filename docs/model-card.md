@@ -21,7 +21,7 @@ Synthetic HRIS records (bitemporal, with planted duplicates, late terminations, 
 
 ## Evaluation
 
-The recorded numbers are in the README Results section and `results/` (`backtest-*.json`, `calibration-*.json`, `model-comparison-*.json`, `challenger-*.json`, `recovery-*.json`, `oracle-coverage-*.json`), and on the Trust page.
+The recorded numbers are in [RESULTS.md](RESULTS.md) (generated), the README's Results at a glance and `results/` (`backtest-*.json`, `calibration-*.json`, `model-comparison-*.json`, `challenger-*.json`, `recovery-*.json`, `oracle-coverage-*.json`), and on the Trust page.
 
 In short, from the 2026-10-12 recordings:
 

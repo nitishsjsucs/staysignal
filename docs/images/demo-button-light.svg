@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="321" height="56" viewBox="0 0 321 56" role="img" aria-labelledby="demo-button-light-title">
+<title id="demo-button-light-title">Open the live demo, no account needed</title>
+<style>text{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif}</style>
+<rect width="321" height="56" rx="10" fill="#1c5cab"/>
+<path d="M26 19L40 28L26 37Z" fill="#ffffff"/>
+<text x="56.0" y="26.0" font-size="18" font-weight="650" fill="#ffffff">Open the live demo</text>
+<text x="56.0" y="44.0" font-size="13" fill="#ffffff">No account needed, synthetic company</text>
+</svg>

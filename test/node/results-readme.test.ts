@@ -1,7 +1,15 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { loadReports } from "../../scripts/results-to-readme.ts";
-import { type ActionAuditReport, type BacktestReport, END, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type DqFaultsReport, type RecoveryReport, type ResearchReport, renderActionAudit, renderChallenger, renderDqFaults, renderResearch, renderBacktest, renderModelComparison, renderOracleCoverage, renderRecovery, renderResults, replaceSection, START } from "../../scripts/lib/results.ts";
+import { loadReports, RESULTS_PAGE } from "../../scripts/results-to-readme.ts";
+import { type ActionAuditReport, type AgentEvalReport, type BacktestReport, END, type Entry, latest, type ModelComparisonReport, type OracleCoverageReport, type ChallengerReport, type DqFaultsReport, partitionCurrent, type RecoveryReport, type ResearchReport, renderActionAudit, renderBacktest, renderChallenger, renderDqFaults, renderHeadline, renderModelComparison, renderOracleCoverage, renderRecovery, renderResearch, renderResultsPage, replaceSection, START } from "../../scripts/lib/results.ts";
+
+const between = (md: string) => md.slice(md.indexOf(START) + START.length + 1, md.indexOf(END) - 1);
+
+function dq(date: string, detected: number): Entry {
+  const report: DqFaultsReport = { kind: "dq-faults", command: "uv run --project engine staysignal eval dq-faults", date, seeds: [1, 2, 3, 4, 5], summary: { pay_basis: { seeds: 5, detected: 5, held: 5, checks: ["C01"], root_top1: 5, root_found: 5, mean_abs_impact: 0.1, max_abs_impact: 0.2 }, duplicates: { seeds: 5, detected, held: 0, checks: ["U01"], root_top1: detected, root_found: detected, mean_abs_impact: 0, max_abs_impact: 0 } } };
+  return { file: `results/dq-faults-${date}.json`, report };
+}
 
 describe("README Results generation", () => {
   it("replaces only the marked section", () => {
@@ -11,12 +19,61 @@ describe("README Results generation", () => {
   });
 
   it("says so when nothing is recorded", () => {
-    expect(renderResults([])).toBe("No recorded results yet.");
+    expect(renderHeadline([])).toBe("No recorded results yet.");
+    expect(renderResultsPage([])).toContain("No recorded results yet.");
   });
 
-  it("keeps the committed README in sync with the committed results", () => {
+  it("keeps the README headline in sync with the committed results", () => {
     const readme = readFileSync("README.md", "utf8");
-    expect(replaceSection(readme, renderResults(loadReports(process.cwd())))).toBe(readme);
+    expect(between(readme)).toBe(renderHeadline(loadReports(process.cwd())));
+  });
+
+  it("keeps docs/RESULTS.md in sync with the committed results", () => {
+    expect(readFileSync(RESULTS_PAGE, "utf8")).toBe(renderResultsPage(loadReports(process.cwd())));
+  });
+
+  it("takes only the latest run of a kind for the headline, and keeps the earlier one on the page", () => {
+    const reports = [dq("2026-10-12", 1), dq("2026-10-13", 5)];
+    const md = renderHeadline(reports);
+    expect(md).toContain("10 of 10 detected, root ranked first in 10; 5 held (duplicates only warn)");
+    expect(md).toContain("[2026-10-13](results/dq-faults-2026-10-13.json)");
+    expect(md).not.toContain("2026-10-12");
+    expect(latest(reports, "dq-faults")?.report.date).toBe("2026-10-13");
+    expect(partitionCurrent(reports).earlier.map((e) => e.file)).toEqual(["results/dq-faults-2026-10-12.json"]);
+    const page = renderResultsPage(reports);
+    expect(page.indexOf("## Earlier runs")).toBeLessThan(page.indexOf("results/dq-faults-2026-10-12.json"));
+  });
+
+  it("keeps an agent eval per model current, and never heads with the stub", () => {
+    const agent = (model: string, date: string): Entry => ({ file: `evals/results/agent-${model}-${date}.json`, report: { kind: "agent-eval", command: `npm run eval:agent -- --model ${model}`, date, model, items: 2, metrics: { routing_accuracy: 0.5, grounding_pass_rate: 0.5, refusal_accuracy: 1, injection_successes: 0, multi_turn_accuracy: 0.4, latency_ms_p50: 6300, latency_ms_p95: 17000 }, results: [{ category: "injection", ok: true }, { category: "refusal", ok: true }] } satisfies AgentEvalReport });
+    const reports = [agent("stub", "2026-10-14"), agent("llama", "2026-10-13")];
+    expect(partitionCurrent(reports).earlier).toEqual([]);
+    expect(renderHeadline(reports)).toContain("0 of 1 injections succeeded; 1 of 1 refusals correct; routing 50.0% | `npm run eval:agent -- --model llama` |");
+  });
+
+  it("writes a headline that reads at a glance: sourced, short, synthetic and dash-free", () => {
+    const md = renderHeadline(loadReports(process.cwd()));
+    expect(md.split("\n")[0]).toContain("Synthetic world");
+    const rows = md.split("\n").filter((l) => l.startsWith("| ") && !l.startsWith("| Question"));
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.length).toBeLessThanOrEqual(8);
+    for (const r of rows) {
+      const cells = r.split(" | ").map((c) => c.replace(/^\| |\|$/g, "").trim());
+      expect(cells[2]).toMatch(/^`[^`]+`/);
+      expect(cells[3]).toMatch(/^\[\d{4}-\d{2}-\d{2}\]\((results|evals\/results)\/[^)]+\.json\)/);
+      for (const c of cells) expect(c.replace(/\]\([^)]*\)/g, "]").replace(/[`[\]]/g, "").length).toBeLessThanOrEqual(100);
+    }
+    for (const l of md.split("\n")) expect(l.length).toBeLessThanOrEqual(400);
+    expect(md).not.toMatch(/[\u2013\u2014\u2212]/);
+    expect(md).not.toContain("40 or over");
+  });
+
+  it("links every file on docs/RESULTS.md relative to docs/", () => {
+    const page = readFileSync(RESULTS_PAGE, "utf8");
+    const targets = [...page.matchAll(/\]\(([^)#\s]+)(#[^)]*)?\)/g), ...page.matchAll(/(?:src|srcset)="([^"]+)"/g)].map((m) => m[1]!).filter((t) => !/^https?:/.test(t));
+    expect(targets.length).toBeGreaterThan(10);
+    for (const t of targets) expect(existsSync(join(dirname(RESULTS_PAGE), t)), t).toBe(true);
+    expect(page).not.toMatch(/[\u2013\u2014\u2212]/);
   });
 
   it("renders the fault benchmark per fault", () => {
